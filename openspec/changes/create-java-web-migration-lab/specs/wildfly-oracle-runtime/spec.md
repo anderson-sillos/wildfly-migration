@@ -92,8 +92,19 @@ O runtime SHALL oferecer operações documentadas para preparar, iniciar, verifi
 - **WHEN** o usuário executa a limpeza
 - **THEN** apenas containers, redes, volumes e arquivos temporários identificados como pertencentes ao laboratório são removidos
 
+### Requirement: Maven versionado por fase
+O laboratório SHALL usar Maven 3.8.9 no baseline Java 7 e durante `CP-2A` e `CP-2B`, SHALL registrar sua origem e checksum e SHALL atualizar para Maven 3.9.16 somente no `CP-2C`.
+
+#### Scenario: Build legado reproduzível
+- **WHEN** um checkpoint da fase 1 é construído
+- **THEN** Maven 3.8.9 executa com Java 7u80 e a versão efetiva corresponde ao manifesto aprovado
+
+#### Scenario: Maven do ambiente modernizado
+- **WHEN** o `CP-2C` é validado
+- **THEN** Maven 3.9.16 executa com Java 8 ou superior e Maven 3.8.9 deixa de ser a ferramenta ativa do build
+
 ### Requirement: Documentação e diagnóstico do ambiente
-O primeiro checkpoint parcial SHALL documentar a instalação ou o fornecimento de Git, ferramenta de acesso ao GitHub, runtime de containers, Java 7/8/17/21/25, Maven 3.9.16, WildFly 9/26/41 e acesso ao Oracle 19c, SHALL identificar quais distribuições são open source ou restritas e SHALL fornecer um diagnóstico `doctor` que valide somente os pré-requisitos exigidos pelo checkpoint selecionado.
+O primeiro checkpoint parcial SHALL documentar a instalação ou o fornecimento de Git, ferramenta de acesso ao GitHub, runtime de containers, Java 7/8/17/21/25, Maven 3.9.16, WildFly 9/26/41 e acesso ao Oracle 19c. No `CP-1B`, a documentação e o diagnóstico SHALL incorporar Maven 3.8.9 como ferramenta EOL do legado. Em todos os checkpoints, a documentação SHALL identificar quais distribuições são open source, proprietárias, restritas ou EOL e o diagnóstico `doctor` SHALL validar somente os pré-requisitos exigidos pelo checkpoint selecionado.
 
 #### Scenario: Preparação a partir de checkout limpo
 - **WHEN** uma pessoa segue a documentação em um checkout limpo e executa o diagnóstico para o checkpoint atual

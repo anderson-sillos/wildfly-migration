@@ -6,7 +6,7 @@ Uma única árvore de código da aplicação será criada no estado legado e mod
 
 A progressão terá exatamente três fases públicas: baseline legado; modernização máxima com baixo impacto em Java 8/WildFly 26.1.3/EE 8 `javax`; e destino final em Java 25/WildFly 41/Jakarta EE 11. A fase final conterá gates técnicos em Java 17 e Java 21 para isolar riscos, mas somente o fim de cada fase pública receberá uma tag Git.
 
-Maven 3.9.16 será a ferramenta de build suportada depois da saída do Java 7; Maven 4 permanecerá fora do caminho de produção enquanto não houver versão GA. O ambiente legado é deliberadamente inseguro e obsoleto e só poderá ser executado localmente.
+Maven 3.8.9 será fixado como a última versão disponível capaz de executar com Java 7 e será usado somente no caminho legado isolado. Ele permanecerá durante `CP-2A` e `CP-2B` para que a troca de JVM e servidor não seja misturada com a troca da ferramenta de build. Maven 3.9.16 será adotado explicitamente no `CP-2C`; Maven 4 permanecerá fora do caminho de produção enquanto não houver versão GA. O ambiente legado é deliberadamente inseguro e obsoleto e só poderá ser executado localmente.
 
 Não existem JARs versionados manualmente em `WEB-INF/lib`. Mesmo assim, o conteúdo do WAR de cada fase deverá ser auditado, pois dependências Maven sem escopo `provided` são copiadas para esse diretório durante o empacotamento.
 
@@ -70,7 +70,7 @@ Cada encerramento de checkpoint deverá:
 
 As tags `migration/01-legacy-baseline`, `migration/02-java8-wildfly26` e `migration/03-final` continuarão reservadas ao encerramento das fases públicas. Checkpoints parciais e gates internos serão localizados pelos commits de entrega, sem criar novas fases ou tags públicas.
 
-O primeiro checkpoint, `CP-1A`, será concluído antes da criação da aplicação. Ele configurará o repositório GitHub, branch principal, proteção e verificações, convenções de branch/PR/commit, arquivos de contribuição e a documentação inicial. Essa documentação relacionará Git, ferramenta de acesso ao GitHub, runtime de containers, Java 7/8/17/21/25, Maven 3.9.16, WildFly 9/26/41 e acesso ao Oracle 19c; explicará o que pode ser instalado automaticamente, o que deve ser fornecido pelo usuário e como configurar valores sem versionar segredos ou binários proprietários.
+O primeiro checkpoint, `CP-1A`, será concluído antes da criação da aplicação. Ele configurará o repositório GitHub, branch principal, proteção e verificações, convenções de branch/PR/commit, arquivos de contribuição e a documentação inicial. Essa documentação relacionará Git, ferramenta de acesso ao GitHub, runtime de containers, Java 7/8/17/21/25, Maven 3.9.16, WildFly 9/26/41 e acesso ao Oracle 19c; explicará o que pode ser instalado automaticamente, o que deve ser fornecido pelo usuário e como configurar valores sem versionar segredos ou binários proprietários. A decisão posterior de fixar Maven 3.8.9 para o legado será incorporada à documentação e ao diagnóstico no `CP-1B`, sem reabrir o checkpoint já entregue.
 
 Um comando de diagnóstico, referido como `doctor`, validará ferramentas, versões, checksums, variáveis e conectividade disponíveis para o checkpoint selecionado. O checkpoint só será entregue quando um checkout limpo seguir a documentação e alcançar sua validação mínima, admitindo resultados explicitamente “não executados” apenas quando o próprio checkpoint ainda não exige Oracle ou um runtime proprietário.
 
@@ -111,7 +111,7 @@ Alternativa considerada: compartilhar classes de teste unitário entre os módul
 
 Primeiro a aplicação legada será executada com Java 8 no WildFly 9. Depois, sem alterar o namespace, a configuração será migrada para WildFly 26.1.3 em Java 8. Essa ordem separa falhas introduzidas pela JVM das introduzidas pelo servidor.
 
-O build será alinhado ao Jakarta EE 8, cujas APIs ainda usam pacotes `javax.*`, e as APIs do contêiner continuarão em `provided`. Maven será atualizado para 3.9.16 somente depois que o build não depender mais de uma JVM Java 7.
+O build continuará usando Maven 3.8.9 ao trocar para Java 8 e ao entrar no WildFly 26, isolando essas mudanças de plataforma. No `CP-2C`, ele será alinhado ao Jakarta EE 8, cujas APIs ainda usam pacotes `javax.*`, as APIs do contêiner continuarão em `provided` e Maven será atualizado para 3.9.16 depois que o build não depender mais de uma JVM Java 7.
 
 Somente ajustes necessários a compilação, configuração do WildFly, datasource, segurança, classloader e implantação serão feitos nessa fase. As bibliotecas legadas permanecerão inicialmente inalteradas para que o checkpoint isole a troca de plataforma.
 
@@ -183,6 +183,7 @@ Os runtimes WildFly 9 e WildFly 26 ficarão ligados apenas a loopback ou rede in
 - [Commits intermediários podem ficar temporariamente quebrados] → Exigir que cada uma das três tags públicas e cada gate interno sejam verdes; falhas naturais não serão apresentadas como checkpoints.
 - [Muitos checkpoints podem criar sobrecarga de revisão e CI] → Limitar cada entrega a até quatro tarefas de implementação, reutilizar um template único de PR e automatizar validação, evidências e convenção de commit.
 - [O ambiente legado não pode ser reproduzido integralmente nos runners hospedados do GitHub] → Separar verificações portáveis de CI da validação local documentada, exigir evidência do `doctor` e nunca enviar JDK 7, WildFly ou credenciais como artefatos públicos.
+- [Maven 3.8.9 está em fim de vida apesar de ser a última versão disponível compatível com Java 7] → Fixar origem e checksum, restringi-lo ao caminho legado isolado e substituí-lo por Maven 3.9.16 no `CP-2C`.
 - [O TLD histórico pode ser aceito de forma diferente por contêineres] → Testar o descritor original antes da normalização e registrar o comportamento observado.
 - [Remover Reflections altera o mecanismo de extensibilidade] → Preservar o conjunto e a ordem dos validadores por contrato e documentar como adicionar novos validadores.
 - [Logging gerenciado pelo servidor reduz portabilidade do formato de configuração] → Usar APIs padrão no código e encapsular a configuração específica do WildFly na área de runtime.
