@@ -2,11 +2,11 @@
 
 ### Checkpoint CP-1A — Repositório GitHub e ambiente
 
-- [ ] 1.1 Definir proprietário, nome, visibilidade e branch principal, inicializar o repositório Git, criar o repositório GitHub e configurar o remote sem versionar credenciais.
-- [ ] 1.2 Configurar branches `checkpoint/*`, pull requests, squash merge, verificações obrigatórias e proteção do branch principal compatível com as permissões disponíveis, além de templates de PR e contribuição.
-- [ ] 1.3 Documentar instalação ou fornecimento de Git, ferramenta de acesso ao GitHub, runtime de containers, Java 7/8/17/21/25, Maven 3.9.16, WildFly 9/26/41 e acesso ao Oracle 19c, distinguindo distribuições open source, proprietárias e não redistribuíveis.
-- [ ] 1.4 Criar configuração segura de exemplo, ignores e o diagnóstico `doctor` para versões, checksums, variáveis, portas e pré-requisitos exigidos pelo checkpoint selecionado.
-- [ ] 1.5 Encerrar `CP-1A`: validar um clone limpo seguindo somente a documentação, registrar evidências e rollback, abrir o PR e integrá-lo pelo commit `checkpoint(CP-1A): bootstrap repository and environment`.
+- [x] 1.1 Definir proprietário, nome, visibilidade e branch principal, inicializar o repositório Git, criar o repositório GitHub e configurar o remote sem versionar credenciais.
+- [x] 1.2 Configurar branches `checkpoint/*`, pull requests, squash merge, verificações obrigatórias e proteção do branch principal compatível com as permissões disponíveis, além de templates de PR e contribuição.
+- [x] 1.3 Documentar instalação ou fornecimento de Git, ferramenta de acesso ao GitHub, runtime de containers, Java 7/8/17/21/25, Maven 3.9.16, WildFly 9/26/41 e acesso ao Oracle 19c, distinguindo distribuições open source, proprietárias e não redistribuíveis.
+- [x] 1.4 Criar configuração segura de exemplo, ignores e o diagnóstico `doctor` para versões, checksums, variáveis, portas e pré-requisitos exigidos pelo checkpoint selecionado.
+- [x] 1.5 Encerrar `CP-1A`: validar um clone limpo seguindo somente a documentação, registrar evidências e rollback, abrir o PR e integrá-lo pelo commit `checkpoint(CP-1A): bootstrap repository and environment`.
 
 ### Checkpoint CP-1B — Estrutura e runtime legado
 

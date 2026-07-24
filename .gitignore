@@ -1,0 +1,41 @@
+# Build output
+target/
+*.class
+*.war
+*.ear
+*.jar
+
+# Downloaded runtimes and proprietary artifacts
+.runtime/
+.artifacts/
+downloads/
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rpm
+*.deb
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.wallet
+
+# IDE and operating-system files
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*~

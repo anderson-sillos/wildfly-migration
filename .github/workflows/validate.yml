@@ -1,0 +1,24 @@
+name: repository-baseline
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  repository-baseline:
+    name: repository-baseline
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate shell syntax
+        run: bash -n scripts/doctor.sh
+
+      - name: Validate repository baseline
+        run: ./scripts/doctor.sh CP-1A --ci
