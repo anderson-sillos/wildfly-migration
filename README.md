@@ -11,7 +11,8 @@ Os checkpoints **CP-1A — Repositório GitHub e ambiente**, **CP-1B — Estrutu
 e runtime legado** e **CP-1C — WAR e dependências legadas** estão concluídos.
 A árvore única `app/` gera um WAR Java 7 auditável com as dependências
 históricas, enquanto runtimes, driver Oracle e credenciais permanecem externos.
-O próximo incremento é o **CP-1D — Fluxo web e persistência**.
+O próximo incremento é o **CP-1D — Fundação portátil H2 e qualificação
+Oracle**.
 
 ## Fases públicas
 
@@ -54,6 +55,24 @@ Para validar e construir o CP-1C:
 ./scripts/build-cp-1c.sh --env .env
 ```
 
+No CP-1D, escolha o perfil sem misturar seus pré-requisitos:
+
+```bash
+./scripts/doctor.sh CP-1D --profile ci-h2 --env .env --ci
+./scripts/build-cp-1d.sh --profile ci-h2 --env .env
+./scripts/validate-cp-1d-h2.sh \
+  --java-home /caminho/do/zulu7 \
+  --h2-jar /caminho/do/h2-1.4.200.jar
+./scripts/smoke-wildfly9-datasource.sh --profile ci-h2 --env .env
+
+./scripts/doctor.sh CP-1D --profile oracle --env .env
+./scripts/build-cp-1d.sh --profile oracle --env .env
+./scripts/smoke-wildfly9-datasource.sh --profile oracle --env .env
+```
+
+`ci-h2` nunca produz qualificação Oracle; `oracle` depende do ambiente
+autorizado na rede interna.
+
 Antes de contribuir, consulte [o fluxo GitHub](docs/github-workflow.md),
 [os checkpoints](docs/checkpoints.md), [CONTRIBUTING.md](CONTRIBUTING.md) e
 [SECURITY.md](SECURITY.md).
@@ -65,13 +84,19 @@ O fornecimento do Java 7/Maven 3.8.9/WildFly 9 está em
 [runtime legado](runtime/legacy/README.md), e o domínio mínimo está em
 [modelo legado](docs/legacy-domain-model.md).
 
+A distinção entre Oracle JDK 7u80/Oracle 19c e Zulu OpenJDK 7u352/H2 está em
+[seleção do runtime portátil](docs/cp-1d-runtime-selection.md).
+As diferenças de schema e semântica estão na
+[matriz H2/Oracle](docs/h2-oracle-differences.md).
+
 A [preparação completa do ambiente](docs/environment-setup.md) contém a matriz
 de componentes por checkpoint e os endereços oficiais das fases futuras.
 
 ## Regras de segurança
 
-- Java 7u80, drivers Oracle, credenciais, wallets e arquivos de runtime não são
-  versionados nem publicados como artefatos.
+- Oracle JDK 7u80, drivers Oracle, credenciais, wallets e arquivos de runtime
+  não são versionados nem publicados como artefatos; o Zulu Java 7 e o H2
+  portáteis também são baixados externamente e validados por checksum.
 - WildFly 9 e todo o ambiente legado ficam restritos a loopback ou rede interna.
 - O destino final usa uma distribuição OpenJDK e o WildFly comunitário open
   source; Oracle JDK e JBoss EAP não são dependências do destino.

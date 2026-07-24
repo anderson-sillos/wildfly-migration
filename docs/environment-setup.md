@@ -11,13 +11,15 @@ em máquina descartável, container ou VM isolada e sem bind em interface públi
 | Git | 2.28+ | Pacote do sistema | Open source |
 | GitHub CLI (`gh`) | Versão suportada atual | Pacote oficial | Open source |
 | Docker Engine/Compose ou equivalente | Versão estável suportada | Pacote oficial | Engine open source; confira os termos do produto escolhido |
-| Java 7 | Oracle JDK 7u80 | Download manual externo | Proprietário, obsoleto e não redistribuível pelo projeto |
+| Java 7 histórico | Oracle JDK 7u80 | Download manual externo | Proprietário, EOL e não redistribuível pelo projeto |
+| Java 7 portátil | Zulu 7.56.0.11 CA / OpenJDK 7u352 | Arquivo oficial Azul | OpenJDK, redistribuível, EOL e exclusivo de `portable-ci` |
 | Java 8/17/21/25 | Eclipse Temurin/OpenJDK | Pacote ou arquivo oficial | OpenJDK, open source |
 | Maven legado | 3.8.9 | Arquivo histórico oficial Apache | Open source e EOL; última versão disponível compatível com Java 7 |
 | Maven moderno | 3.9.16 | Arquivo oficial Apache | Open source; requer JDK 8+ para executar |
 | WildFly | 9.0.2, 26.1.3 e 41.0.0.Final | Arquivo da comunidade | WildFly comunitário open source |
 | Oracle Database | 19c EE já disponível | Serviço externo | Proprietário; acesso e licença são responsabilidade do usuário |
 | Drivers Oracle | `ojdbc7` legado e driver aprovado por gate | Fornecimento externo | Não versionar nem redistribuir |
+| Banco portátil | H2 1.4.200 | Maven Central; módulo de runtime | Open source, EOL e exclusivo de `portable-ci` |
 
 Fontes oficiais:
 
@@ -28,10 +30,14 @@ Fontes oficiais:
 - Eclipse Temurin: <https://adoptium.net/installation>
 - licença OpenJDK: <https://openjdk.org/legal/>
 - Oracle JDK 7u80: <https://www.oracle.com/java/technologies/javase/javase7-archive-downloads.html>
+- Azul Metadata API: <https://api.azul.com/metadata/v1/zulu/packages/f436b3cb-0115-4814-b7fa-e180747bd68f>
+- termos do Azul Zulu: <https://www.azul.com/products/core/openjdk-terms-of-use/>
 - Maven 3.9.16: <https://maven.apache.org/download.cgi>
 - Maven 3.8.9: <https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/>
 - WildFly comunitário: <https://www.wildfly.org/downloads/>
 - Oracle Database 19c: <https://www.oracle.com/database/technologies/oracle-database-software-downloads.html>
+- H2 1.4.200: <https://github.com/h2database/h2database/releases/tag/version-1.4.200>
+- licença H2: <https://h2database.com/html/license.html>
 
 Sempre releia os termos do fornecedor. O repositório registra proveniência e
 checksums, mas não concede licença para redistribuir software proprietário.
@@ -45,10 +51,12 @@ combinação abaixo; o `doctor` marca os componentes futuros como `NÃO EXIGIDO`
 | --- | --- | --- |
 | CP-1A e seguintes | Git 2.28+ e GitHub CLI | Pacotes oficiais da distribuição e do GitHub |
 | CP-1B e seguintes | Docker Engine com Compose, ou runtime explicitamente suportado | Repositório oficial para o sistema operacional |
-| CP-1B a CP-1F | Oracle JDK 7u80 Linux x64 | Download manual autenticado; arquivo `jdk-7u80-linux-x64.tar.gz` |
+| CP-1B e CP-1C; perfil `oracle` a partir do CP-1D | Oracle JDK 7u80 Linux x64 | Reprodução exata; download manual autenticado; arquivo `jdk-7u80-linux-x64.tar.gz` |
+| Perfil `ci-h2` a partir do CP-1D | Zulu 7.56.0.11 CA / OpenJDK 7u352 | Trilha portátil; arquivo `zulu7.56.0.11-ca-jdk7.0.352-linux_x64.tar.gz` |
 | CP-1B a CP-2B | Apache Maven 3.8.9 | Arquivo histórico oficial `apache-maven-3.8.9-bin.tar.gz` |
-| CP-1B, CP-1F e CP-2A | WildFly 9.0.2.Final | Distribuição Full/Web `wildfly-9.0.2.Final.tar.gz` |
-| CP-1C a CP-1F | Truststore JKS atualizado | Pacote de certificados do sistema; não substituir por conexão insegura |
+| CP-1B a CP-1G e CP-2A | WildFly 9.0.2.Final | Distribuição Full/Web `wildfly-9.0.2.Final.tar.gz` |
+| CP-1C a CP-1G no Oracle JDK | Truststore JKS atualizado | Pacote de certificados do sistema; não substituir por conexão insegura |
+| Perfil `ci-h2` a partir do CP-1D | H2 1.4.200 | JAR oficial como módulo do WildFly, nunca como dependência do WAR |
 | CP-1D e seguintes enquanto legado | Driver `ojdbc7` aprovado | Fornecido externamente; não versionar |
 | CP-1D e checkpoints com persistência | Acesso ao Oracle Database 19c existente | URL, usuário e senha ou wallet fornecidos pelo DBA |
 | CP-2A e CP-2B | Eclipse Temurin/OpenJDK 8 | A versão exata será fixada ao iniciar o CP-2A |
@@ -219,6 +227,26 @@ ele não modifica o JDK proprietário. A tentativa, os erros exatos, a correçã
 o rollback estão em
 [`CP-1C-legacy-build-https.md`](../migration/steps/CP-1C-legacy-build-https.md).
 
+### Zulu OpenJDK 7 para `portable-ci`
+
+O CI não redistribui nem executa o Oracle JDK. O perfil `ci-h2` usa exatamente
+Zulu `7.56.0.11-ca`, OpenJDK `1.7.0_352-b01`, Linux x64:
+
+```text
+https://cdn.azul.com/zulu/bin/zulu7.56.0.11-ca-jdk7.0.352-linux_x64.tar.gz
+SHA-256: 8a7387c1ed151474301b6553c6046f865dc6c1e1890bcf106acc2780c55727c8
+```
+
+Essa é uma distribuição Community Availability open source, sob GPLv2 com
+Classpath Exception. A linha Java 7 e essa build gratuita estão EOL; use-as
+somente no runner efêmero do laboratório. A aprovação com OpenJDK 7u352 não
+substitui a reprodução histórica em Oracle JDK 7u80.
+
+A decisão, a comparação das candidatas e os smokes executados estão em
+[seleção do runtime portátil](cp-1d-runtime-selection.md). O manifesto
+específico é
+[`portable-runtime-manifest.tsv`](../runtime/legacy/portable-runtime-manifest.tsv).
+
 ### OpenJDK 8, 17, 21 e 25
 
 Use uma distribuição baseada em OpenJDK, preferencialmente Eclipse Temurin, via
@@ -304,6 +332,19 @@ WildFly 41 expõe apenas as portas necessárias aos testes.
 
 ## 7. Oracle Database 19c
 
+Antes do perfil Oracle, o CP-1D usa H2 1.4.200 em memória somente para feedback
+portátil. O H2 será provisionado como módulo do WildFly, não abrirá console ou
+listener de rede e não poderá aparecer em `WEB-INF/lib`:
+
+```text
+https://repo.maven.apache.org/maven2/com/h2database/h2/1.4.200/h2-1.4.200.jar
+SHA-256: 3ad9ac4b6aae9cd9d3ac1c447465e1ed06019b851b893dd6a8d76ddb6d85bca6
+```
+
+H2 1.4.200 está EOL e sua compatibilidade Oracle é parcial. O resultado é
+sempre `portable-ci`; somente a execução abaixo no Oracle 19c pode produzir
+`oracle-qualified`.
+
 O laboratório usa o Oracle Database 19c EE existente. Não cria nem publica uma
 imagem do banco. Solicite ao DBA:
 
@@ -331,7 +372,42 @@ cp .env.example .env
 ./scripts/doctor.sh CP-1A --env .env
 ```
 
-Exemplos futuros:
+A partir do CP-1D, selecione explicitamente uma das duas trilhas:
+
+| Perfil | Exige | Não exige | Resultado possível |
+| --- | --- | --- | --- |
+| `ci-h2` | Zulu Java 7 portátil, Maven 3.8.9, WildFly 9 e H2 fixados | Oracle JDK, truststore externo, `ojdbc7` e qualquer segredo Oracle | `portable-ci` |
+| `oracle` | Oracle JDK 7u80, truststore, Maven 3.8.9, WildFly 9, `ojdbc7`, URL, usuário e senha | Zulu Java 7 e H2 | `oracle-qualified`, depois da suíte interna |
+
+O argumento `--profile` prevalece sobre `MIGRATION_DB_PROFILE` do `.env`.
+O modo `--ci` é não interativo e recusa o perfil `oracle`, impedindo que o
+workflow hospedado dependa de rota ou credenciais internas:
+
+```bash
+./scripts/doctor.sh CP-1D --profile ci-h2 --env .env --ci
+./scripts/build-cp-1d.sh --profile ci-h2 --env .env
+./scripts/validate-cp-1d-h2.sh \
+  --java-home /caminho/do/zulu7 \
+  --h2-jar /caminho/do/h2-1.4.200.jar
+./scripts/smoke-wildfly9-datasource.sh --profile ci-h2 --env .env
+
+./scripts/doctor.sh CP-1D --profile oracle --env .env
+./scripts/build-cp-1d.sh --profile oracle --env .env
+./scripts/smoke-wildfly9-datasource.sh --profile oracle --env .env
+```
+
+O GitHub Actions executa apenas os quatro comandos da trilha `ci-h2`. A
+execução Oracle deve ocorrer em um host autorizado na rede interna e com
+`OJDBC7_JAR`, `OJDBC7_SHA256`, `ORACLE_DB_URL`, `ORACLE_DB_USER` e
+`ORACLE_DB_PASSWORD` definidos no `.env` ignorado. Não copie esses valores para
+o workflow, para logs ou para o repositório.
+
+O primeiro comando não valida nem exige `ORACLE_DB_*` ou `OJDBC7_*`. O segundo
+não valida nem exige `JAVA7_PORTABLE_*` ou `H2_*`. Senhas e URLs nunca são
+impressas; o diagnóstico informa somente presença, validade estrutural e
+resultado da conectividade quando esse teste estiver disponível.
+
+Outros exemplos:
 
 ```bash
 ./scripts/doctor.sh CP-1B --env .env

@@ -29,5 +29,10 @@ O wrapper exige Maven 3.8.9 executando no Java 7u80, mantém o acesso ao Maven
 Central sob TLS validado e audita o WAR. As dependências e transitivas aprovadas
 estão em [`docs/legacy-dependencies.md`](../docs/legacy-dependencies.md).
 
+No CP-1D, o perfil Maven `ci-h2` permite a mesma compilação Java 7 no Zulu
+7u352. O `doctor` continua responsável por fixar a distribuição e a build
+exatas; o perfil `oracle` e a execução sem perfil preservam a exigência
+Oracle JDK 7u80.
+
 Nenhum JAR manual, driver Oracle, runtime ou arquivo gerado em `target/` deve
 ser versionado.

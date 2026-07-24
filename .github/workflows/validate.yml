@@ -24,6 +24,12 @@ jobs:
           bash -n scripts/audit-legacy-war.sh
           bash -n scripts/build-cp-1c.sh
           bash -n scripts/validate-cp-1c.sh
+          bash -n scripts/validate-cp-1d-selection.sh
+          bash -n scripts/validate-cp-1d-profiles.sh
+          bash -n scripts/validate-cp-1d-h2.sh
+          bash -n scripts/validate-cp-1d-datasources.sh
+          bash -n scripts/build-cp-1d.sh
+          bash -n scripts/smoke-wildfly9-datasource.sh
 
       - name: Validate repository baseline
         run: ./scripts/doctor.sh CP-1A --ci
@@ -33,3 +39,87 @@ jobs:
 
       - name: Validate CP-1C static resources
         run: ./scripts/validate-cp-1c.sh
+
+      - name: Validate CP-1D runtime selection
+        run: ./scripts/validate-cp-1d-selection.sh
+
+      - name: Validate CP-1D profiles and guards
+        run: ./scripts/validate-cp-1d-profiles.sh
+
+      - name: Validate CP-1D H2 scripts statically
+        run: ./scripts/validate-cp-1d-h2.sh
+
+      - name: Validate CP-1D datasource profiles
+        run: ./scripts/validate-cp-1d-datasources.sh
+
+  portable-ci:
+    name: portable-ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download and verify fixed portable runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          runtime_root="$RUNNER_TEMP/wildfly-migration-cp1d"
+          archives="$runtime_root/archives"
+          tools="$runtime_root/tools"
+          install -d -m 0755 "$archives" "$tools"
+
+          curl -fsSLo "$archives/zulu7.56.0.11-ca-jdk7.0.352-linux_x64.tar.gz" \
+            https://cdn.azul.com/zulu/bin/zulu7.56.0.11-ca-jdk7.0.352-linux_x64.tar.gz
+          curl -fsSLo "$archives/apache-maven-3.8.9-bin.tar.gz" \
+            https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz
+          curl -fsSLo "$archives/wildfly-9.0.2.Final.tar.gz" \
+            https://download.jboss.org/wildfly/9.0.2.Final/wildfly-9.0.2.Final.tar.gz
+          curl -fsSLo "$archives/h2-1.4.200.jar" \
+            https://repo.maven.apache.org/maven2/com/h2database/h2/1.4.200/h2-1.4.200.jar
+
+          cd "$archives"
+          sha256sum --check <<'CHECKSUMS'
+          8a7387c1ed151474301b6553c6046f865dc6c1e1890bcf106acc2780c55727c8  zulu7.56.0.11-ca-jdk7.0.352-linux_x64.tar.gz
+          3e4c68cdd70f96635e713f36c8fc3ea3182035245d3da2156576710ca0fe4b0c  apache-maven-3.8.9-bin.tar.gz
+          74689569d6e04402abb7d94921c558940725d8065dce21a2d7194fa354249bb6  wildfly-9.0.2.Final.tar.gz
+          3ad9ac4b6aae9cd9d3ac1c447465e1ed06019b851b893dd6a8d76ddb6d85bca6  h2-1.4.200.jar
+          CHECKSUMS
+
+          tar -xzf zulu7.56.0.11-ca-jdk7.0.352-linux_x64.tar.gz -C "$tools"
+          tar -xzf apache-maven-3.8.9-bin.tar.gz -C "$tools"
+          tar -xzf wildfly-9.0.2.Final.tar.gz -C "$tools"
+
+          {
+            echo "MIGRATION_CHECKPOINT=CP-1D"
+            echo "MIGRATION_DB_PROFILE=ci-h2"
+            echo "LAB_BIND_ADDRESS=127.0.0.1"
+            echo "WILDFLY_HTTP_PORT=18080"
+            echo "WILDFLY_MANAGEMENT_PORT=19990"
+            echo "JAVA7_PORTABLE_HOME=$tools/zulu7.56.0.11-ca-jdk7.0.352-linux_x64"
+            echo "JAVA7_PORTABLE_ARCHIVE=$archives/zulu7.56.0.11-ca-jdk7.0.352-linux_x64.tar.gz"
+            echo "JAVA7_PORTABLE_ARCHIVE_SHA256=8a7387c1ed151474301b6553c6046f865dc6c1e1890bcf106acc2780c55727c8"
+            echo "MAVEN_HOME=$tools/apache-maven-3.8.9"
+            echo "MAVEN_ARCHIVE=$archives/apache-maven-3.8.9-bin.tar.gz"
+            echo "MAVEN_ARCHIVE_SHA256=3e4c68cdd70f96635e713f36c8fc3ea3182035245d3da2156576710ca0fe4b0c"
+            echo "WILDFLY9_HOME=$tools/wildfly-9.0.2.Final"
+            echo "WILDFLY9_ARCHIVE=$archives/wildfly-9.0.2.Final.tar.gz"
+            echo "WILDFLY9_ARCHIVE_SHA256=74689569d6e04402abb7d94921c558940725d8065dce21a2d7194fa354249bb6"
+            echo "H2_JAR=$archives/h2-1.4.200.jar"
+            echo "H2_SHA256=3ad9ac4b6aae9cd9d3ac1c447465e1ed06019b851b893dd6a8d76ddb6d85bca6"
+          } >> "$GITHUB_ENV"
+
+      - name: Run portable doctor
+        run: ./scripts/doctor.sh CP-1D --profile ci-h2 --ci
+
+      - name: Build and audit portable WAR
+        run: ./scripts/build-cp-1d.sh --profile ci-h2
+
+      - name: Execute H2 schema lifecycle
+        run: |
+          ./scripts/validate-cp-1d-h2.sh \
+            --java-home "$JAVA7_PORTABLE_HOME" \
+            --h2-jar "$H2_JAR"
+
+      - name: Smoke WildFly 9 H2 datasource
+        run: ./scripts/smoke-wildfly9-datasource.sh --profile ci-h2

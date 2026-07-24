@@ -1,0 +1,6 @@
+-- Destructive, idempotent cleanup for the in-memory portable-ci database.
+
+DROP TABLE IF EXISTS LAB_ANEXO;
+DROP TABLE IF EXISTS LAB_PEDIDO;
+DROP SEQUENCE IF EXISTS LAB_ANEXO_SEQ;
+DROP SEQUENCE IF EXISTS LAB_PEDIDO_SEQ;
