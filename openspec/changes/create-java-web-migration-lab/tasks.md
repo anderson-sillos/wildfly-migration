@@ -24,29 +24,37 @@
 - [x] 1.14 Implementar a auditoria inicial da árvore Maven, escopos, conteúdo previsto de `WEB-INF/lib` e ausência de JARs manuais.
 - [x] 1.15 Encerrar `CP-1C`: compilar e empacotar o WAR mínimo quando os binários exigidos estiverem disponíveis, validar a auditoria, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-1C): build legacy war skeleton`.
 
-### Checkpoint CP-1D — Fluxo web e persistência
+### Checkpoint CP-1D — Fundação CI H2 e qualificação Oracle
 
-- [ ] 1.16 Implementar domínio, scripts H2 equivalentes, mappers XML, aliases, type handlers e transações MyBatis por datasource JNDI, mantendo SQL comum e isolando por `databaseIdProvider` somente as diferenças H2/Oracle inevitáveis.
-- [ ] 1.17 Implementar Servlets de pedidos, filtro de encoding e correlação, listener de inicialização e preferência em `HttpSession`.
-- [ ] 1.18 Implementar JSPs/JSTL com layout Tiles e o TLD 2.0 com handler baseado em `javax.servlet.jsp.tagext`.
-- [ ] 1.19 Aprovar e fixar uma distribuição Java 7 redistribuível e uma versão H2 compatível para o CI e configurar no WildFly 9 os perfis `ci-h2` e `oracle` sob `java:/jdbc/MigrationDS`, com smoke tests para inicialização, listagem, criação, consulta e sessão.
-- [ ] 1.20 Encerrar `CP-1D`: executar build, implantação e smoke tests `portable-ci` no CI hospedado e `oracle-qualified` na rede interna, registrar commit, checksum do WAR, evidências sanitizadas e rollback e integrar o PR pelo commit `checkpoint(CP-1D): deliver legacy web flow`.
+- [ ] 1.16 Revisar o impacto do H2 sobre as entregas `1.3`, `1.4`, `1.9` e `1.14`, selecionar e fixar uma distribuição Java 7 redistribuível e uma versão H2 compatível e atualizar documentação e manifestos com versão, origem, licença, checksum, condição EOL e distinção para a reprodução exata com Oracle JDK 7u80.
+- [ ] 1.17 Estender `.env.example`, ignores, `doctor` e auditoria do WAR para os perfis `ci-h2` e `oracle`, exigindo somente os pré-requisitos do perfil selecionado e rejeitando H2, `ojdbc` ou segredos dentro do WAR ou do controle de versão.
+- [ ] 1.18 Criar scripts H2 próprios de schema, massa e limpeza semanticamente equivalentes aos scripts Oracle canônicos, automatizar sua validação estática e registrar diferenças de tipos, constraints, sequences, timestamps e LOBs.
+- [ ] 1.19 Configurar no WildFly 9 os perfis `ci-h2` e `oracle` sob `java:/jdbc/MigrationDS`, impedir console/listener H2, testar os dois datasources e preparar o workflow portátil sem expor a rede interna.
+- [ ] 1.20 Encerrar `CP-1D`: executar `doctor`, auditorias, scripts e smoke de datasource `portable-ci` no CI hospedado e `oracle-qualified` na rede interna, registrar evidências sanitizadas e rollback e integrar o PR pelo commit `checkpoint(CP-1D): establish portable persistence foundation`.
 
-### Checkpoint CP-1E — Integrações e contratos
+### Checkpoint CP-1E — Fluxo web e persistência
 
-- [ ] 1.21 Implementar upload por Commons FileUpload 1.2.2 com limites e metadados comparáveis.
-- [ ] 1.22 Implementar importação XML por XMLBeans 2.3.0 e dom4j 1.6.1, incluindo validação por XSD.
-- [ ] 1.23 Usar Reflections para descoberta de validadores e Log4j 1 para os logs do fluxo legado.
-- [ ] 1.24 Implementar a suíte HTTP externa para listagem, criação, consulta, sessão, upload e importação XML sem importar classes do WAR e reutilizar os mesmos casos nos perfis H2 e Oracle.
-- [ ] 1.25 Encerrar `CP-1E`: executar contratos e cenários negativos em H2 no CI e Oracle na rede interna, registrar resultados separados, evidências sanitizadas e rollback e integrar o PR pelo commit `checkpoint(CP-1E): add legacy integrations and contracts`.
+- [ ] 1.21 Implementar domínio, mappers XML, aliases, type handlers e transações MyBatis por datasource JNDI, mantendo SQL comum e isolando por `databaseIdProvider` somente as diferenças H2/Oracle inevitáveis.
+- [ ] 1.22 Implementar Servlets de pedidos, filtro de encoding e correlação, listener de inicialização e preferência em `HttpSession`.
+- [ ] 1.23 Implementar JSPs/JSTL com layout Tiles e o TLD 2.0 com handler baseado em `javax.servlet.jsp.tagext`.
+- [ ] 1.24 Criar smoke tests para inicialização, listagem, criação, consulta e sessão nos perfis H2 e Oracle.
+- [ ] 1.25 Encerrar `CP-1E`: executar build, implantação e smoke tests `portable-ci` no CI hospedado e `oracle-qualified` na rede interna, registrar commit, checksum do WAR, evidências sanitizadas e rollback e integrar o PR pelo commit `checkpoint(CP-1E): deliver legacy web flow`.
 
-### Checkpoint CP-1F — Baseline completo
+### Checkpoint CP-1F — Integrações e contratos
 
-- [ ] 1.26 Congelar resultados normalizados dos contratos comuns, o estado persistido Oracle de referência e as diferenças H2 documentadas que servirão de comparação para as fases seguintes.
-- [ ] 1.27 Gerar manifesto com árvore Maven, versões, origem e licença dos componentes, conteúdo de `WEB-INF/lib` e checksum do WAR.
-- [ ] 1.28 Implantar o WAR no WildFly 9.0.2 isolado e aprovar `portable-ci`, `oracle-qualified`, contratos, persistência, auditorias, segredos e portas.
-- [ ] 1.29 Documentar preparação, execução, verificação, limpeza e rollback do baseline a partir de checkout limpo.
-- [ ] 1.30 Encerrar `CP-1F`: validar todas as evidências H2 e Oracle da fase, integrar o PR pelo commit `checkpoint(CP-1F): complete legacy baseline` e criar a tag `migration/01-legacy-baseline`.
+- [ ] 1.26 Implementar upload por Commons FileUpload 1.2.2 com limites e metadados comparáveis.
+- [ ] 1.27 Implementar importação XML por XMLBeans 2.3.0 e dom4j 1.6.1, incluindo validação por XSD.
+- [ ] 1.28 Usar Reflections para descoberta de validadores e Log4j 1 para os logs do fluxo legado.
+- [ ] 1.29 Implementar a suíte HTTP externa para listagem, criação, consulta, sessão, upload e importação XML sem importar classes do WAR e reutilizar os mesmos casos nos perfis H2 e Oracle.
+- [ ] 1.30 Encerrar `CP-1F`: executar contratos e cenários negativos em H2 no CI e Oracle na rede interna, registrar resultados separados, evidências sanitizadas e rollback e integrar o PR pelo commit `checkpoint(CP-1F): add legacy integrations and contracts`.
+
+### Checkpoint CP-1G — Baseline completo
+
+- [ ] 1.31 Congelar resultados normalizados dos contratos comuns, o estado persistido Oracle de referência e as diferenças H2 documentadas que servirão de comparação para as fases seguintes.
+- [ ] 1.32 Gerar manifesto com árvore Maven, versões, origem e licença dos componentes e da infraestrutura de teste, conteúdo de `WEB-INF/lib` e checksum do WAR.
+- [ ] 1.33 Implantar o WAR no WildFly 9.0.2 isolado e aprovar `portable-ci`, `oracle-qualified`, contratos, persistência, auditorias, segredos e portas.
+- [ ] 1.34 Documentar preparação, execução, verificação, limpeza e rollback do baseline a partir de checkout limpo.
+- [ ] 1.35 Encerrar `CP-1G`: validar todas as evidências H2 e Oracle da fase, integrar o PR pelo commit `checkpoint(CP-1G): complete legacy baseline` e criar a tag `migration/01-legacy-baseline`.
 
 ## 2. Modernização máxima com baixo impacto
 

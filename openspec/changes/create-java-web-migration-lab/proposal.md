@@ -9,6 +9,7 @@ A migração direta de uma aplicação Java 7/WildFly 9 para Java 25/WildFly 41 
 - Dividir cada fase e gate em checkpoints parciais com no máximo quatro tarefas de implementação, uma validação mínima explícita e uma entrega própria no GitHub.
 - Iniciar o trabalho por um checkpoint de bootstrap que configure o repositório Git/GitHub, o fluxo de branches e pull requests, as verificações obrigatórias e a documentação de instalação e configuração do ambiente.
 - Executar, a partir do `CP-1D`, em cada pull request aplicável uma trilha portátil de CI com H2 em memória e modo de compatibilidade Oracle, usando o mesmo datasource JNDI e os mesmos contratos HTTP da aplicação, sem apresentar esse resultado como qualificação Oracle.
+- Reconciliar no `CP-1D`, antes do fluxo web, os deltas introduzidos pelo H2 sobre documentação do ambiente, diagnóstico, scripts de banco e auditoria do WAR já entregues em `CP-1A` a `CP-1C`, preservando o histórico e sem atribuir H2 retroativamente aos checkpoints concluídos.
 - Executar separadamente a qualificação oficial contra Oracle Database 19c a partir de um ambiente autorizado na rede interna, vinculando a evidência sanitizada ao commit e ao WAR testados.
 - Exigir que cada checkpoint parcial seja reproduzível a partir de um checkout limpo, produza evidências proporcionais ao que já existe e seja integrado ao branch principal por um commit de entrega identificável.
 - Organizar a migração em exatamente três fases públicas:

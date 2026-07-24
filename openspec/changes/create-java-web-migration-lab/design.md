@@ -73,6 +73,8 @@ Cada encerramento de checkpoint deverá:
 
 As tags `migration/01-legacy-baseline`, `migration/02-java8-wildfly26` e `migration/03-final` continuarão reservadas ao encerramento das fases públicas. Checkpoints parciais e gates internos serão localizados pelos commits de entrega, sem criar novas fases ou tags públicas.
 
+Quando uma decisão posterior ampliar um requisito já coberto por checkpoint integrado, o checkmark histórico não será removido nem seu texto será reescrito para sugerir que o trabalho novo já existia. Os deltas serão auditados e entregues no primeiro checkpoint pendente que antecede o código dependente. A adoção do H2 afeta documentação do ambiente (`1.3`), diagnóstico/configuração (`1.4`), scripts de banco (`1.9`) e auditoria do WAR (`1.14`); por isso, o novo `CP-1D` reconciliará esses quatro pontos antes da implementação do fluxo web.
+
 O primeiro checkpoint, `CP-1A`, será concluído antes da criação da aplicação. Ele configurará o repositório GitHub, branch principal, proteção e verificações, convenções de branch/PR/commit, arquivos de contribuição e a documentação inicial. Essa documentação relacionará Git, ferramenta de acesso ao GitHub, runtime de containers, Java 7/8/17/21/25, Maven 3.9.16, WildFly 9/26/41 e acesso ao Oracle 19c; explicará o que pode ser instalado automaticamente, o que deve ser fornecido pelo usuário e como configurar valores sem versionar segredos ou binários proprietários. A decisão posterior de fixar Maven 3.8.9 para o legado será incorporada à documentação e ao diagnóstico no `CP-1B`, sem reabrir o checkpoint já entregue.
 
 Um comando de diagnóstico, referido como `doctor`, validará ferramentas, versões, checksums, variáveis e conectividade disponíveis para o checkpoint selecionado. O checkpoint só será entregue quando um checkout limpo seguir a documentação e alcançar sua validação mínima. A trilha H2 aplicável deverá passar no CI hospedado; resultados Oracle poderão aparecer como “não executados” durante o desenvolvimento quando o ambiente interno estiver indisponível, mas checkpoints que qualificam persistência e as três tags públicas não serão encerrados sem a evidência `oracle-qualified` correspondente.
@@ -81,7 +83,7 @@ Os checkpoints planejados são:
 
 | Fase | Checkpoints parciais |
 |---|---|
-| 1 | `CP-1A` repositório e ambiente; `CP-1B` estrutura e runtime legado; `CP-1C` WAR e dependências; `CP-1D` fluxo web/persistência; `CP-1E` integrações e contratos; `CP-1F` baseline completo |
+| 1 | `CP-1A` repositório e ambiente; `CP-1B` estrutura e runtime legado; `CP-1C` WAR e dependências; `CP-1D` fundação H2/Oracle; `CP-1E` fluxo web/persistência; `CP-1F` integrações e contratos; `CP-1G` baseline completo |
 | 2 | `CP-2A` Java 8/WildFly 9; `CP-2B` WildFly 26; `CP-2C` EE 8, Maven e datasource; `CP-2D` fechamento da ponte |
 | 3 | `CP-3A` Java 17; `CP-3B` dependências centrais; `CP-3C` XML e Oracle JDBC; `CP-3D` gate Java 17; `CP-3E` entrada no WildFly 41; `CP-3F` namespace e descritores; `CP-3G` substituições web; `CP-3H` Oracle e auditoria; `CP-3I` gate Java 21; `CP-3J` Java 25; `CP-3K` destino final |
 
@@ -216,7 +218,7 @@ Os runtimes WildFly 9 e WildFly 26 ficarão ligados apenas a loopback ou rede in
 
 ## Migration Plan
 
-1. **Baseline legado:** concluir `CP-1A` a `CP-1F`, começando pelo repositório e ambiente, construir a aplicação em `app/`, executar no Java 7/WildFly 9, congelar contratos, WAR, manifesto e tag `migration/01-legacy-baseline`.
+1. **Baseline legado:** concluir `CP-1A` a `CP-1G`, começando pelo repositório e ambiente, reconciliar a fundação H2/Oracle antes do fluxo web, construir a aplicação em `app/`, executar no Java 7/WildFly 9, congelar contratos, WAR, manifesto e tag `migration/01-legacy-baseline`.
 2. **Modernização máxima com baixo impacto:** concluir `CP-2A` a `CP-2D`, executar primeiro no Java 8/WildFly 9, migrar para WildFly 26.1.3 ainda em `javax`, aprovar os contratos e criar `migration/02-java8-wildfly26`.
 3. **Destino final:** concluir `CP-3A` a `CP-3K`, executar o gate Java 17/WildFly 26 e modernizar dependências; executar o gate Java 21/WildFly 41 e migrar para Jakarta EE 11; trocar somente a JVM para Java 25; validar Oracle, contratos e auditorias; e criar `migration/03-final`.
 
