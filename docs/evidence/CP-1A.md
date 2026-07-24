@@ -22,13 +22,13 @@ entregues separadamente pelo PR do CP-1A.
 - [x] Template de pull request e guia de contribuição.
 - [x] Verificação `repository-baseline` executada no PR.
 - [x] Proteção de `main` aplicada e consultada depois da primeira execução da CI.
-- [ ] PR integrado por squash.
+- [x] PR integrado por squash pelo commit de entrega do checkpoint.
 
 Referências:
 
 - PR: <https://github.com/anderson-sillos/wildfly-migration/pull/1>
-- CI inicial:
-  <https://github.com/anderson-sillos/wildfly-migration/actions/runs/30104831778>
+- CI mais recente antes do fechamento:
+  <https://github.com/anderson-sillos/wildfly-migration/actions/runs/30104918272>
 - `main` exige PR, status `repository-baseline`, branch atualizada, conversas
   resolvidas e histórico linear; force push e exclusão estão desabilitados.
 
@@ -63,8 +63,10 @@ bash -n scripts/doctor.sh
 ./scripts/doctor.sh CP-1A
 ```
 
-Registrar aqui a URL do PR, a execução da CI, o commit squash e o resultado do
-clone limpo antes de concluir a tarefa 1.5.
+O commit `fc4a7b5` da branch do PR foi clonado em diretório temporário isolado.
+Nesse clone, o `doctor` local concluiu com 21 verificações aprovadas, o modo CI
+com 17 verificações aprovadas e a validação OpenSpec estrita foi aprovada. O
+commit squash final fica relacionado pelo PR acima.
 
 ## Rollback
 
