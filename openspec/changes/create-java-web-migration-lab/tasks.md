@@ -24,29 +24,37 @@
 - [x] 1.14 Implementar a auditoria inicial da árvore Maven, escopos, conteúdo previsto de `WEB-INF/lib` e ausência de JARs manuais.
 - [x] 1.15 Encerrar `CP-1C`: compilar e empacotar o WAR mínimo quando os binários exigidos estiverem disponíveis, validar a auditoria, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-1C): build legacy war skeleton`.
 
-### Checkpoint CP-1D — Fluxo web e persistência
+### Checkpoint CP-1D — Fundação CI H2 e qualificação Oracle
 
-- [ ] 1.16 Implementar domínio, mappers XML, aliases, type handlers e transações MyBatis por datasource JNDI.
-- [ ] 1.17 Implementar Servlets de pedidos, filtro de encoding e correlação, listener de inicialização e preferência em `HttpSession`.
-- [ ] 1.18 Implementar JSPs/JSTL com layout Tiles e o TLD 2.0 com handler baseado em `javax.servlet.jsp.tagext`.
-- [ ] 1.19 Configurar o datasource Oracle no WildFly 9 e criar smoke tests para inicialização, listagem, criação, consulta e sessão.
-- [ ] 1.20 Encerrar `CP-1D`: executar build, implantação e smoke tests aplicáveis, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-1D): deliver legacy web flow`.
+- [ ] 1.16 Revisar o impacto do H2 sobre as entregas `1.3`, `1.4`, `1.9` e `1.14`, selecionar e fixar uma distribuição Java 7 redistribuível e uma versão H2 compatível e atualizar documentação e manifestos com versão, origem, licença, checksum, condição EOL e distinção para a reprodução exata com Oracle JDK 7u80.
+- [ ] 1.17 Estender `.env.example`, ignores, `doctor` e auditoria do WAR para os perfis `ci-h2` e `oracle`, exigindo somente os pré-requisitos do perfil selecionado e rejeitando H2, `ojdbc` ou segredos dentro do WAR ou do controle de versão.
+- [ ] 1.18 Criar scripts H2 próprios de schema, massa e limpeza semanticamente equivalentes aos scripts Oracle canônicos, automatizar sua validação estática e registrar diferenças de tipos, constraints, sequences, timestamps e LOBs.
+- [ ] 1.19 Configurar no WildFly 9 os perfis `ci-h2` e `oracle` sob `java:/jdbc/MigrationDS`, impedir console/listener H2, testar os dois datasources e preparar o workflow portátil sem expor a rede interna.
+- [ ] 1.20 Encerrar `CP-1D`: executar `doctor`, auditorias, scripts e smoke de datasource `portable-ci` no CI hospedado e `oracle-qualified` na rede interna, registrar evidências sanitizadas e rollback e integrar o PR pelo commit `checkpoint(CP-1D): establish portable persistence foundation`.
 
-### Checkpoint CP-1E — Integrações e contratos
+### Checkpoint CP-1E — Fluxo web e persistência
 
-- [ ] 1.21 Implementar upload por Commons FileUpload 1.2.2 com limites e metadados comparáveis.
-- [ ] 1.22 Implementar importação XML por XMLBeans 2.3.0 e dom4j 1.6.1, incluindo validação por XSD.
-- [ ] 1.23 Usar Reflections para descoberta de validadores e Log4j 1 para os logs do fluxo legado.
-- [ ] 1.24 Implementar a suíte HTTP externa para listagem, criação, consulta, sessão, upload e importação XML sem importar classes do WAR.
-- [ ] 1.25 Encerrar `CP-1E`: executar contratos disponíveis e cenários negativos, registrar resultados, evidências e rollback e integrar o PR pelo commit `checkpoint(CP-1E): add legacy integrations and contracts`.
+- [ ] 1.21 Implementar domínio, mappers XML, aliases, type handlers e transações MyBatis por datasource JNDI, mantendo SQL comum e isolando por `databaseIdProvider` somente as diferenças H2/Oracle inevitáveis.
+- [ ] 1.22 Implementar Servlets de pedidos, filtro de encoding e correlação, listener de inicialização e preferência em `HttpSession`.
+- [ ] 1.23 Implementar JSPs/JSTL com layout Tiles e o TLD 2.0 com handler baseado em `javax.servlet.jsp.tagext`.
+- [ ] 1.24 Criar smoke tests para inicialização, listagem, criação, consulta e sessão nos perfis H2 e Oracle.
+- [ ] 1.25 Encerrar `CP-1E`: executar build, implantação e smoke tests `portable-ci` no CI hospedado e `oracle-qualified` na rede interna, registrar commit, checksum do WAR, evidências sanitizadas e rollback e integrar o PR pelo commit `checkpoint(CP-1E): deliver legacy web flow`.
 
-### Checkpoint CP-1F — Baseline completo
+### Checkpoint CP-1F — Integrações e contratos
 
-- [ ] 1.26 Congelar resultados normalizados dos contratos e o estado persistido que servirão de referência para as fases seguintes.
-- [ ] 1.27 Gerar manifesto com árvore Maven, versões, origem e licença dos componentes, conteúdo de `WEB-INF/lib` e checksum do WAR.
-- [ ] 1.28 Implantar o WAR no WildFly 9.0.2 isolado e aprovar contratos, persistência, auditorias, segredos e portas.
-- [ ] 1.29 Documentar preparação, execução, verificação, limpeza e rollback do baseline a partir de checkout limpo.
-- [ ] 1.30 Encerrar `CP-1F`: validar todas as evidências da fase, integrar o PR pelo commit `checkpoint(CP-1F): complete legacy baseline` e criar a tag `migration/01-legacy-baseline`.
+- [ ] 1.26 Implementar upload por Commons FileUpload 1.2.2 com limites e metadados comparáveis.
+- [ ] 1.27 Implementar importação XML por XMLBeans 2.3.0 e dom4j 1.6.1, incluindo validação por XSD.
+- [ ] 1.28 Usar Reflections para descoberta de validadores e Log4j 1 para os logs do fluxo legado.
+- [ ] 1.29 Implementar a suíte HTTP externa para listagem, criação, consulta, sessão, upload e importação XML sem importar classes do WAR e reutilizar os mesmos casos nos perfis H2 e Oracle.
+- [ ] 1.30 Encerrar `CP-1F`: executar contratos e cenários negativos em H2 no CI e Oracle na rede interna, registrar resultados separados, evidências sanitizadas e rollback e integrar o PR pelo commit `checkpoint(CP-1F): add legacy integrations and contracts`.
+
+### Checkpoint CP-1G — Baseline completo
+
+- [ ] 1.31 Congelar resultados normalizados dos contratos comuns, o estado persistido Oracle de referência e as diferenças H2 documentadas que servirão de comparação para as fases seguintes.
+- [ ] 1.32 Gerar manifesto com árvore Maven, versões, origem e licença dos componentes e da infraestrutura de teste, conteúdo de `WEB-INF/lib` e checksum do WAR.
+- [ ] 1.33 Implantar o WAR no WildFly 9.0.2 isolado e aprovar `portable-ci`, `oracle-qualified`, contratos, persistência, auditorias, segredos e portas.
+- [ ] 1.34 Documentar preparação, execução, verificação, limpeza e rollback do baseline a partir de checkout limpo.
+- [ ] 1.35 Encerrar `CP-1G`: validar todas as evidências H2 e Oracle da fase, integrar o PR pelo commit `checkpoint(CP-1G): complete legacy baseline` e criar a tag `migration/01-legacy-baseline`.
 
 ## 2. Modernização máxima com baixo impacto
 
@@ -55,7 +63,7 @@
 - [ ] 2.1 Materializar `migration/01-legacy-baseline` e tentar executar a aplicação com Java 8 no WildFly 9 antes de qualquer correção.
 - [ ] 2.2 Capturar incompatibilidades causadas pela mudança Java 7 para Java 8 com sintoma, causa e evidência.
 - [ ] 2.3 Ajustar somente o necessário para compilar e executar com Java 8 no WildFly 9, mantendo dependências e namespace `javax`.
-- [ ] 2.4 Executar contratos, persistência e auditoria do WAR e documentar o rollback para o baseline.
+- [ ] 2.4 Executar contratos, persistência H2/Oracle e auditoria do WAR e documentar o rollback para o baseline.
 - [ ] 2.5 Encerrar `CP-2A`: validar Java 8/WildFly 9, registrar evidências e integrar o PR pelo commit `checkpoint(CP-2A): run legacy application on Java 8`.
 
 ### Checkpoint CP-2B — Migração para WildFly 26
@@ -63,24 +71,24 @@
 - [ ] 2.6 Tentar implantar no WildFly 26.1.3 com Java 8 o mesmo WAR aprovado em `CP-2A` antes de alterar configuração ou código.
 - [ ] 2.7 Capturar incompatibilidades de configuração, datasource, segurança, logging e classloader entre WildFly 9 e 26.1.3.
 - [ ] 2.8 Provisionar WildFly 26.1.3/Java 8 e migrar sua configuração sem alterar o namespace `javax.*`.
-- [ ] 2.9 Configurar datasource, driver e verificações de saúde no WildFly 26 sem alterar o schema funcional do laboratório.
+- [ ] 2.9 Configurar no WildFly 26 os perfis H2 e Oracle, seus drivers, o mesmo JNDI e verificações de saúde sem alterar o contrato funcional do schema.
 - [ ] 2.10 Encerrar `CP-2B`: validar implantação e smoke tests no WildFly 26, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-2B): migrate runtime to WildFly 26`.
 
 ### Checkpoint CP-2C — EE 8, Maven e datasource
 
 - [ ] 2.11 Alinhar as APIs do build a Jakarta EE 8 com pacotes `javax.*` e escopo `provided`, rejeitando APIs do contêiner em `WEB-INF/lib`.
 - [ ] 2.12 Atualizar a ferramenta de build de Maven 3.8.9 para Maven 3.9.16 e documentar a diferença entre a versão do Maven e `<modelVersion>4.0.0</modelVersion>`.
-- [ ] 2.13 Validar o datasource Oracle, transações MyBatis, timestamps e LOBs com o driver aprovado para Java 8.
-- [ ] 2.14 Atualizar `doctor`, CI e auditoria do WAR para a combinação Java 8/WildFly 26/EE 8.
-- [ ] 2.15 Encerrar `CP-2C`: executar build, contratos aplicáveis, Oracle e auditorias, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-2C): align build with EE 8`.
+- [ ] 2.13 Validar a paridade portátil em H2 e qualificar no Oracle o datasource, as transações MyBatis, timestamps e LOBs com o driver aprovado para Java 8.
+- [ ] 2.14 Atualizar `doctor`, CI H2, qualificação Oracle e auditoria do WAR para a combinação Java 8/WildFly 26/EE 8.
+- [ ] 2.15 Encerrar `CP-2C`: executar build, contratos H2 e Oracle e auditorias, registrar evidências separadas e rollback e integrar o PR pelo commit `checkpoint(CP-2C): align build with EE 8`.
 
 ### Checkpoint CP-2D — Fechamento da ponte
 
-- [ ] 2.16 Executar a suíte completa de contratos e comparar respostas e estado persistido com a fase 1.
+- [ ] 2.16 Executar a suíte completa em H2 e Oracle e comparar respostas, estado persistido oficial e limitações portáteis com a fase 1.
 - [ ] 2.17 Gerar o manifesto da fase 2 com versões, dependências, WAR, runtime, checksums e limitações conhecidas.
 - [ ] 2.18 Documentar um roteiro equivalente para aplicação real, incluindo janela de transição, implantação blue/green, verificações e rollback.
 - [ ] 2.19 Reproduzir a fase 2 a partir de checkout limpo usando somente documentação e configuração externa segura.
-- [ ] 2.20 Encerrar `CP-2D`: aprovar as evidências, integrar o PR pelo commit `checkpoint(CP-2D): complete low-impact modernization` e criar a tag `migration/02-java8-wildfly26`.
+- [ ] 2.20 Encerrar `CP-2D`: aprovar as evidências `portable-ci` e `oracle-qualified`, integrar o PR pelo commit `checkpoint(CP-2D): complete low-impact modernization` e criar a tag `migration/02-java8-wildfly26`.
 
 ## 3. Destino final com gates técnicos internos
 
@@ -89,12 +97,12 @@
 - [ ] 3.1 Materializar `migration/02-java8-wildfly26` e tentar executar a aplicação com Java 17 no WildFly 26.1.3 antes de atualizar bibliotecas.
 - [ ] 3.2 Capturar e corrigir somente incompatibilidades necessárias ao Java 17 e reexecutar os contratos antes de modernizar dependências.
 - [ ] 3.3 Produzir a matriz de cada dependência legada com versão candidata, suporte a Java 17, compatibilidade EE 8/`javax`, transitivas, impacto e decisão.
-- [ ] 3.4 Atualizar runtime, documentação e `doctor` para a combinação Java 17/WildFly 26.
-- [ ] 3.5 Encerrar `CP-3A`: validar inicialização, contratos e auditoria no Java 17, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-3A): establish Java 17 runtime`.
+- [ ] 3.4 Atualizar runtime, versão H2 de teste, documentação e `doctor` para a combinação Java 17/WildFly 26, preservando o perfil Oracle separado.
+- [ ] 3.5 Encerrar `CP-3A`: validar inicialização, contratos H2/Oracle e auditoria no Java 17, registrar evidências separadas e rollback e integrar o PR pelo commit `checkpoint(CP-3A): establish Java 17 runtime`.
 
 ### Checkpoint CP-3B — Dependências centrais
 
-- [ ] 3.6 Atualizar MyBatis para 3.5.19 e validar mappers, aliases, type handlers, reflexão e limites transacionais.
+- [ ] 3.6 Atualizar MyBatis para 3.5.19 e validar em H2 e Oracle os mappers, aliases, type handlers, reflexão e limites transacionais.
 - [ ] 3.7 Remover `log4j:log4j` e adotar logging mantido, usando ponte temporária da API 1.2 somente onde necessário no gate Java 17.
 - [ ] 3.8 Atualizar Commons FileUpload para a última linha 1.x aprovada compatível com `javax` e preservar provisoriamente o contrato de upload.
 - [ ] 3.9 Atualizar Reflections para 0.10.2 e validar descoberta, conjunto e ordem dos validadores no classloader do WildFly 26.
@@ -105,22 +113,22 @@
 - [ ] 3.11 Atualizar XMLBeans para 5.3.0, regenerar os tipos a partir do XSD e validar serialização, namespaces e schema.
 - [ ] 3.12 Atualizar dom4j para 2.2.0 e configurar parsing seguro sem alterar documentos legítimos.
 - [ ] 3.13 Remover `xml-apis` e Geronimo StAX e comprovar o uso das APIs do módulo `java.xml`.
-- [ ] 3.14 Trocar `ojdbc7` por um driver mantido compatível com Java 17 e Oracle 19c e testar transações, timestamps e LOBs.
-- [ ] 3.15 Encerrar `CP-3C`: executar testes XML e Oracle, auditar dependências, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-3C): modernize XML and JDBC`.
+- [ ] 3.14 Trocar `ojdbc7` por um driver mantido compatível com Java 17 e Oracle 19c, preservar o perfil H2 portátil e testar transações, timestamps e LOBs nos dois perfis com qualificação oficial no Oracle.
+- [ ] 3.15 Encerrar `CP-3C`: executar testes XML, H2 e Oracle, auditar dependências, registrar evidências separadas e rollback e integrar o PR pelo commit `checkpoint(CP-3C): modernize XML and JDBC`.
 
 ### Checkpoint CP-3D — Gate Java 17
 
 - [ ] 3.16 Manter Tiles e handlers TLD em `javax` somente como exceções temporárias documentadas, sem atualizar para outra versão descontinuada.
-- [ ] 3.17 Executar contratos e auditoria completos no Java 17/WildFly 26 e comparar com o baseline.
+- [ ] 3.17 Executar contratos H2 e Oracle e auditoria completos no Java 17/WildFly 26 e comparar com o baseline.
 - [ ] 3.18 Gerar manifesto do gate com dependências atualizadas, exceções adiadas, checksum do WAR e resultados.
 - [ ] 3.19 Documentar reprodução e rollback do gate para `migration/02-java8-wildfly26`.
-- [ ] 3.20 Encerrar `CP-3D`: aprovar o gate Java 17 sem criar fase ou tag pública e integrar o PR pelo commit `checkpoint(CP-3D): approve Java 17 gate`.
+- [ ] 3.20 Encerrar `CP-3D`: aprovar evidências `portable-ci` e `oracle-qualified` do gate Java 17 sem criar fase ou tag pública e integrar o PR pelo commit `checkpoint(CP-3D): approve Java 17 gate`.
 
 ### Checkpoint CP-3E — Entrada no WildFly 41
 
 - [ ] 3.21 Tentar implantar o WAR aprovado em `CP-3D` sem transformação no WildFly 41.0.0.Final com OpenJDK 21 antes de corrigir código ou descritores.
 - [ ] 3.22 Capturar incompatibilidades de Java, servidor, namespace, datasource, segurança, logging, JSP/TLD e classloader.
-- [ ] 3.23 Provisionar OpenJDK 21 e WildFly 41 comunitário open source com origem, licença, versão e checksum registrados.
+- [ ] 3.23 Provisionar OpenJDK 21, WildFly 41 comunitário e uma versão H2 de teste compatível, todos com origem, licença, versão e checksum registrados.
 - [ ] 3.24 Substituir as APIs EE 8 por `jakarta.platform:jakarta.jakartaee-web-api:11.0.0` em `provided`.
 - [ ] 3.25 Encerrar `CP-3E`: validar o runtime, o diagnóstico e o primeiro build Jakarta, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-3E): enter WildFly 41 and Jakarta EE 11`.
 
@@ -129,7 +137,7 @@
 - [ ] 3.26 Migrar Servlets, filtros, listeners, sessão, tag handlers e EL de `javax.*` para `jakarta.*`, preservando `javax.sql`, `javax.naming` e `javax.xml`.
 - [ ] 3.27 Atualizar `web.xml`, JSPs, JSTL e demais descritores para Jakarta EE 11 e URIs `jakarta.tags.*`.
 - [ ] 3.28 Implantar primeiro o TLD histórico, capturar o comportamento e concluir o handler em `jakarta.servlet.jsp.tagext`.
-- [ ] 3.29 Compilar, implantar e executar contratos de listagem, criação, consulta e sessão no Java 21/WildFly 41.
+- [ ] 3.29 Compilar, implantar e executar contratos H2 e Oracle de listagem, criação, consulta e sessão no Java 21/WildFly 41.
 - [ ] 3.30 Encerrar `CP-3F`: validar ausência dos namespaces EE `javax` proibidos, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-3F): migrate Jakarta namespaces`.
 
 ### Checkpoint CP-3G — Substituições web
@@ -143,31 +151,31 @@
 ### Checkpoint CP-3H — Oracle e auditoria final
 
 - [ ] 3.36 Fixar MyBatis 3.5.19, XMLBeans 5.3.0 e dom4j 2.2.0 e reexecutar geração e testes XML seguros.
-- [ ] 3.37 Provisionar `com.oracle.database.jdbc:ojdbc17:23.26.2.0.0` no WildFly e publicar `java:/jdbc/MigrationDS` sem empacotar o driver no WAR.
+- [ ] 3.37 Provisionar `com.oracle.database.jdbc:ojdbc17:23.26.2.0.0` no WildFly, preservar o perfil H2 em memória e publicar `java:/jdbc/MigrationDS` nos dois perfis sem empacotar drivers no WAR.
 - [ ] 3.38 Executar a suíte Oracle 19c e registrar versão completa, Release Update, driver, JVM e WildFly observados.
 - [ ] 3.39 Implementar a auditoria que rejeite APIs do contêiner, Log4j 1/ponte, Tiles, Commons FileUpload 1, Reflections, `xml-apis`, Geronimo StAX e `ojdbc7`.
-- [ ] 3.40 Encerrar `CP-3H`: validar Oracle, XML, dependências e WAR, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-3H): finalize Oracle and packaging`.
+- [ ] 3.40 Encerrar `CP-3H`: validar H2, Oracle, XML, dependências e WAR, registrar evidências separadas e rollback e integrar o PR pelo commit `checkpoint(CP-3H): finalize Oracle and packaging`.
 
 ### Checkpoint CP-3I — Gate Java 21
 
-- [ ] 3.41 Testar rollback, sequence, paginação, timestamps/timezone, CLOB e BLOB com `ojdbc17`.
-- [ ] 3.42 Executar contratos completos no Java 21/WildFly 41 e comparar respostas e estado persistido com o baseline.
+- [ ] 3.41 Testar no H2 a semântica portátil e qualificar no Oracle rollback, sequence, paginação, timestamps/timezone, CLOB e BLOB com `ojdbc17`.
+- [ ] 3.42 Executar contratos completos H2 e Oracle no Java 21/WildFly 41 e comparar respostas, estado persistido e limitações com o baseline.
 - [ ] 3.43 Gerar manifesto do gate Java 21 com runtime, licenças, checksums, WAR, dependências e evidências.
 - [ ] 3.44 Documentar reprodução, implantação equivalente em produção e rollback para o gate Java 17.
-- [ ] 3.45 Encerrar `CP-3I`: aprovar o gate Java 21 sem criar tag pública e integrar o PR pelo commit `checkpoint(CP-3I): approve Java 21 Jakarta gate`.
+- [ ] 3.45 Encerrar `CP-3I`: aprovar evidências `portable-ci` e `oracle-qualified` do gate Java 21 sem criar tag pública e integrar o PR pelo commit `checkpoint(CP-3I): approve Java 21 Jakarta gate`.
 
 ### Checkpoint CP-3J — OpenJDK 25
 
-- [ ] 3.46 Verificar atualizações open source disponíveis, selecionar e fixar a distribuição OpenJDK 25 e o WildFly 41 comunitário aprovados, registrando origem, licença e checksums e rejeitando Oracle JDK ou JBoss EAP.
+- [ ] 3.46 Verificar atualizações open source disponíveis, selecionar e fixar a distribuição OpenJDK 25, o WildFly 41 comunitário e o H2 de teste aprovados, registrando origem, licença e checksums e rejeitando Oracle JDK ou JBoss EAP.
 - [ ] 3.47 Alterar somente a JVM do WildFly 41 de OpenJDK 21 para OpenJDK 25.
 - [ ] 3.48 Capturar diferenças exclusivas do JDK 25 e aplicar o menor conjunto de correções sem alterar o contrato funcional.
-- [ ] 3.49 Executar a matriz no OpenJDK 25 e a qualificação adicional no OpenJDK 21, incluindo contratos, Oracle, empacotamento, segredos, portas e proveniência open source.
-- [ ] 3.50 Encerrar `CP-3J`: validar o destino OpenJDK/WildFly comunitário, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-3J): qualify OpenJDK 25`.
+- [ ] 3.49 Executar as trilhas H2 e Oracle no OpenJDK 25 e a qualificação adicional no OpenJDK 21, incluindo contratos, empacotamento, segredos, portas e proveniência open source.
+- [ ] 3.50 Encerrar `CP-3J`: validar o destino OpenJDK/WildFly comunitário com evidências `portable-ci` e `oracle-qualified`, registrar rollback e integrar o PR pelo commit `checkpoint(CP-3J): qualify OpenJDK 25`.
 
 ### Checkpoint CP-3K — Destino final
 
 - [ ] 3.51 Completar o catálogo de incompatibilidades com falhas naturais e fixtures opt-in somente onde a reprodução natural não for determinística.
-- [ ] 3.52 Gerar relatório consolidado com as três fases, checkpoints parciais, gates, versões, evidências, exceções resolvidas e limitações.
-- [ ] 3.53 Reproduzir o destino final a partir de checkout limpo usando documentação, `doctor`, OpenJDK, WildFly comunitário e configuração Oracle externa.
+- [ ] 3.52 Gerar relatório consolidado com as três fases, checkpoints parciais, gates, versões, estados `portable-ci` e `oracle-qualified`, exceções resolvidas e limitações.
+- [ ] 3.53 Reproduzir o destino final a partir de checkout limpo usando documentação, `doctor`, OpenJDK, WildFly comunitário, H2 em memória e configuração Oracle externa.
 - [ ] 3.54 Auditar histórico Git, rastreabilidade de PRs e commits, segredos, licenças, checksums, dependências, WAR e instruções de rollback.
-- [ ] 3.55 Encerrar `CP-3K`: aprovar todas as evidências, integrar o PR pelo commit `checkpoint(CP-3K): complete final destination` e criar a tag `migration/03-final`.
+- [ ] 3.55 Encerrar `CP-3K`: aprovar todas as evidências H2 e Oracle, integrar o PR pelo commit `checkpoint(CP-3K): complete final destination` e criar a tag `migration/03-final`.

@@ -37,6 +37,14 @@ O checkpoint final SHALL preservar o contrato funcional observável congelado em
 - **WHEN** uma resposta moderna diverge de uma regra de negócio congelada no baseline
 - **THEN** a suíte falha e apresenta a diferença entre os dois ambientes
 
+#### Scenario: Contrato portátil no CI
+- **WHEN** o checkpoint moderno é validado em um pull request sem acesso ao Oracle interno
+- **THEN** os contratos são executados com H2 em memória e produzem resultado `portable-ci` sem declarar compatibilidade Oracle
+
+#### Scenario: Contrato oficial no Oracle
+- **WHEN** o checkpoint moderno é qualificado para encerramento da fase
+- **THEN** os mesmos contratos e os cenários específicos de banco são executados contra Oracle 19c e produzem resultado `oracle-qualified`
+
 ### Requirement: APIs Jakarta e pacotes Java SE
 Na fase 3, durante o gate Java 21/WildFly 41, o código MUST migrar os pacotes EE `javax.*` para `jakarta.*` em Servlet, Pages, tag handlers, JSTL e EL, e MUST preservar pacotes `javax.*` pertencentes ao Java SE, incluindo `javax.sql`, `javax.naming` e `javax.xml`.
 
@@ -126,7 +134,7 @@ Na fase 3, a aplicação SHALL remover qualquer ponte temporária introduzida no
 O laboratório SHALL preservar o estado aprovado da fase 3 como `migration/03-final`, relacionando-o aos dois checkpoints públicos anteriores e às evidências dos gates internos da mesma árvore de código.
 
 #### Scenario: Conclusão do destino final
-- **WHEN** build, implantação, contratos, auditorias, segurança e integração Oracle 19c são aprovados
+- **WHEN** build, implantação, contratos H2 e Oracle, auditorias, segurança e integração Oracle 19c são aprovados
 - **THEN** a tag `migration/03-final` identifica o código, o runtime e as evidências finais
 
 #### Scenario: Rastreabilidade da evolução

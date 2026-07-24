@@ -146,6 +146,29 @@ A suíte de compatibilidade SHALL testar o checkpoint ativo por HTTP e pelo esta
 - **WHEN** uma das aplicações não responde à verificação inicial
 - **THEN** a suíte encerra com diagnóstico do ambiente ausente antes de executar os casos funcionais
 
+### Requirement: Dupla qualificação de persistência
+O laboratório SHALL executar em cada pull request aplicável uma trilha `portable-ci` com H2 em memória e SHALL executar uma trilha `oracle-qualified` contra Oracle Database 19c em ambiente autorizado na rede interna antes de encerrar checkpoints que qualificam persistência ou qualquer uma das três fases públicas.
+
+#### Scenario: CI hospedado sem acesso ao Oracle
+- **WHEN** um pull request é executado em runner hospedado sem rota ou credenciais para o Oracle interno
+- **THEN** o perfil H2 executa os mesmos contratos HTTP e de estado portável sob `java:/jdbc/MigrationDS`, e o relatório conclui `portable-ci` sem declarar qualificação Oracle
+
+#### Scenario: Paridade dos perfis
+- **WHEN** a mesma revisão é testada nos perfis H2 e Oracle
+- **THEN** ambos executam o mesmo conjunto de casos funcionais e as divergências específicas de fornecedor são identificadas separadamente
+
+#### Scenario: Evidência vinculada ao artefato
+- **WHEN** qualquer trilha de persistência conclui
+- **THEN** o relatório registra perfil, commit, checksum do WAR, runtime e cenários executados sem registrar credencial, wallet, URL completa ou endereço interno
+
+#### Scenario: Oracle indisponível no fechamento
+- **WHEN** a trilha H2 passa, mas a evidência Oracle obrigatória do checkpoint ou da fase não está disponível
+- **THEN** o CI portátil permanece aprovado, porém o checkpoint não recebe estado `oracle-qualified` e a fase não é encerrada
+
+#### Scenario: Banco auxiliar não substitui o oficial
+- **WHEN** H2 aceita um SQL ou comportamento que diverge do Oracle 19c
+- **THEN** a divergência é registrada como limitação ou falha de paridade e o resultado H2 não prevalece sobre a suíte Oracle
+
 ### Requirement: Auditoria de dependências e empacotamento
 O laboratório SHALL verificar a árvore Maven e o conteúdo do WAR em cada checkpoint para distinguir dependências declaradas, transitivas, fornecidas pelo servidor e empacotadas.
 
@@ -169,12 +192,12 @@ A documentação SHALL organizar as correções nas três fases públicas, gates
 - **THEN** o usuário consegue localizar o cenário do laboratório pela fase, exceção ou biblioteca envolvida
 
 ### Requirement: Relatório de conclusão
-O laboratório SHALL gerar um relatório consolidado com versões, ambientes executados, cenários aprovados, cenários não executados e limitações conhecidas.
+O laboratório SHALL gerar um relatório consolidado com versões, ambientes executados, estados separados `portable-ci` e `oracle-qualified`, cenários aprovados, cenários não executados e limitações conhecidas.
 
 #### Scenario: Suíte Oracle não executada
 - **WHEN** credenciais Oracle 19c não são fornecidas
 - **THEN** o relatório marca explicitamente a integração Oracle como não validada, sem tratá-la como aprovada
 
 #### Scenario: Migração completamente validada
-- **WHEN** builds, contratos, auditorias, segurança e integração Oracle são aprovados
+- **WHEN** builds, contratos H2 e Oracle, auditorias, segurança e integração Oracle são aprovados
 - **THEN** o relatório declara a baseline moderna validada e relaciona todas as evidências
