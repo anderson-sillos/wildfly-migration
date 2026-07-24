@@ -80,23 +80,23 @@ awk -F '\t' '
 ' "$REPOSITORY_ROOT/runtime/legacy/runtime-manifest.tsv"
 
 if [[ "$RELEASE_MODE" == true ]] &&
-   rg -q 'PENDING_|TO_BE_DEFINED|CHANGE_ME' \
+   grep -Eq 'PENDING_|TO_BE_DEFINED|CHANGE_ME' \
      "$REPOSITORY_ROOT/runtime/legacy/runtime-manifest.tsv"; then
   printf 'FALHA: manifesto legado ainda contém valor pendente\n' >&2
   exit 1
 fi
 
 for sql_file in 001_schema.sql rollback.sql; do
-  if ! rg -q '(^|[[:space:]])/$' \
+  if ! grep -Eq '(^|[[:space:]])/$' \
       "$REPOSITORY_ROOT/app/src/main/resources/db/oracle/$sql_file"; then
     printf 'FALHA: terminador SQL*Plus ausente em %s\n' "$sql_file" >&2
     exit 1
   fi
 done
 
-if ! rg -q '^MERGE INTO LAB_PEDIDO ' \
+if ! grep -Eq '^MERGE INTO LAB_PEDIDO ' \
     "$REPOSITORY_ROOT/app/src/main/resources/db/oracle/002_seed.sql" ||
-   ! rg -q '^COMMIT;$' \
+   ! grep -Eq '^COMMIT;$' \
     "$REPOSITORY_ROOT/app/src/main/resources/db/oracle/002_seed.sql"; then
   printf 'FALHA: script de massa idempotente está incompleto\n' >&2
   exit 1
