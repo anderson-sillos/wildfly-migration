@@ -7,9 +7,10 @@ cada entrega validável e reversível.
 
 Repositório GitHub: <https://github.com/anderson-sillos/wildfly-migration>
 
-O trabalho está no checkpoint **CP-1A — Repositório GitHub e ambiente**. A árvore
-da aplicação ainda não existe por decisão de projeto: primeiro são estabelecidos
-o repositório, as verificações, a documentação e o diagnóstico do ambiente.
+O checkpoint **CP-1A — Repositório GitHub e ambiente** está concluído. O próximo
+incremento é o **CP-1B — Estrutura e runtime legado**. A árvore da aplicação
+ainda não existe por decisão de projeto: o primeiro checkpoint estabeleceu o
+repositório, as verificações, a documentação e o diagnóstico do ambiente.
 
 ## Fases públicas
 
@@ -22,7 +23,7 @@ o repositório, as verificações, a documentação e o diagnóstico do ambiente
 Java 17/WildFly 26 e Java 21/WildFly 41 são gates técnicos internos da fase 3,
 não fases adicionais.
 
-## Começo rápido do CP-1A
+## Validar o bootstrap do CP-1A
 
 1. Leia [a preparação do ambiente](docs/environment-setup.md).
 2. Configure sua identidade Git e autentique a GitHub CLI.
@@ -52,3 +53,19 @@ Antes de contribuir, consulte [o fluxo GitHub](docs/github-workflow.md),
 
 O planejamento executável está em
 `openspec/changes/create-java-web-migration-lab/`.
+
+## Licença
+
+O código e a documentação originais deste projeto são licenciados sob a
+**GNU Affero General Public License v3.0 somente** (`AGPL-3.0-only`), salvo
+indicação explícita em contrário. Consulte [LICENSE](LICENSE).
+
+Em resumo, versões modificadas disponibilizadas por rede também devem oferecer
+aos usuários acesso ao código-fonte correspondente nos termos da AGPL. Este
+resumo não substitui o texto integral da licença.
+
+Copyright (C) 2026 Anderson Martins.
+
+Dependências, distribuições, ferramentas e demais materiais de terceiros mantêm
+suas próprias licenças. A licença deste projeto não relicencia OpenJDK, WildFly,
+OpenSpec nem as bibliotecas usadas pelo laboratório.
