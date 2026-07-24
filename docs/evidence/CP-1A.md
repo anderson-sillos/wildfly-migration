@@ -20,9 +20,17 @@ entregues separadamente pelo PR do CP-1A.
 - [x] Somente squash merge habilitado.
 - [x] Exclusão automática da branch depois do merge.
 - [x] Template de pull request e guia de contribuição.
-- [ ] Verificação `repository-baseline` executada no PR.
-- [ ] Proteção de `main` aplicada e consultada depois da primeira execução da CI.
+- [x] Verificação `repository-baseline` executada no PR.
+- [x] Proteção de `main` aplicada e consultada depois da primeira execução da CI.
 - [ ] PR integrado por squash.
+
+Referências:
+
+- PR: <https://github.com/anderson-sillos/wildfly-migration/pull/1>
+- CI inicial:
+  <https://github.com/anderson-sillos/wildfly-migration/actions/runs/30104831778>
+- `main` exige PR, status `repository-baseline`, branch atualizada, conversas
+  resolvidas e histórico linear; force push e exclusão estão desabilitados.
 
 ## Validações locais
 
