@@ -55,3 +55,9 @@ Não adicione:
 
 Se um segredo for incluído, interrompa a publicação, revogue ou rotacione o
 valor e siga [SECURITY.md](SECURITY.md).
+
+## Licença das contribuições
+
+Ao enviar uma contribuição, você concorda que ela seja licenciada sob a
+`AGPL-3.0-only`, salvo acordo escrito ou indicação explícita em contrário.
+Não inclua código ou conteúdo de terceiros incompatível com essa licença.
