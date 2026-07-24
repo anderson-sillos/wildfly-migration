@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pedido [
+  <!ENTITY a "1234567890">
+  <!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;">
+  <!ENTITY c "&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;">
+  <!ENTITY d "&c;&c;&c;&c;&c;&c;&c;&c;&c;&c;">
+]>
+<pedido xmlns="urn:wildfly-migration:pedido:1">
+  <numero>XML-ENTITY-0001</numero>
+  <clienteNome>&d;</clienteNome>
+  <valorTotal>1.00</valorTotal>
+  <status>NOVO</status>
+</pedido>

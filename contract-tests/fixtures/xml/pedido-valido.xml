@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pedido xmlns="urn:wildfly-migration:pedido:1">
+  <numero>XML-0001</numero>
+  <clienteNome>Cliente XML</clienteNome>
+  <descricao>Pedido válido usado pelo contrato de importação.</descricao>
+  <valorTotal>349.90</valorTotal>
+  <status>NOVO</status>
+</pedido>

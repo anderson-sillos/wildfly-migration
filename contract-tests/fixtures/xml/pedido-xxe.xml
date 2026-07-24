@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pedido [
+  <!ENTITY arquivoLocal SYSTEM "file:///etc/hostname">
+]>
+<pedido xmlns="urn:wildfly-migration:pedido:1">
+  <numero>XML-XXE-0001</numero>
+  <clienteNome>&arquivoLocal;</clienteNome>
+  <descricao>Este documento deve ser rejeitado antes da validação por XSD.</descricao>
+  <valorTotal>1.00</valorTotal>
+  <status>NOVO</status>
+</pedido>
