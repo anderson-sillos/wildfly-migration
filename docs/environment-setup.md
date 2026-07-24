@@ -48,7 +48,8 @@ combinação abaixo; o `doctor` marca os componentes futuros como `NÃO EXIGIDO`
 | CP-1B a CP-1F | Oracle JDK 7u80 Linux x64 | Download manual autenticado; arquivo `jdk-7u80-linux-x64.tar.gz` |
 | CP-1B a CP-2B | Apache Maven 3.8.9 | Arquivo histórico oficial `apache-maven-3.8.9-bin.tar.gz` |
 | CP-1B, CP-1F e CP-2A | WildFly 9.0.2.Final | Distribuição Full/Web `wildfly-9.0.2.Final.tar.gz` |
-| CP-1C e seguintes enquanto legado | Driver `ojdbc7` aprovado | Fornecido externamente; não versionar |
+| CP-1C a CP-1F | Truststore JKS atualizado | Pacote de certificados do sistema; não substituir por conexão insegura |
+| CP-1D e seguintes enquanto legado | Driver `ojdbc7` aprovado | Fornecido externamente; não versionar |
 | CP-1D e checkpoints com persistência | Acesso ao Oracle Database 19c existente | URL, usuário e senha ou wallet fornecidos pelo DBA |
 | CP-2A e CP-2B | Eclipse Temurin/OpenJDK 8 | A versão exata será fixada ao iniciar o CP-2A |
 | CP-2B a CP-3D | WildFly 26.1.3.Final | Distribuição EE 8 `wildfly-26.1.3.Final.tar.gz` |
@@ -173,6 +174,7 @@ extraia fora do checkout e configure:
 JAVA7_HOME=/opt/migration-lab/tools/jdk1.7.0_80
 JAVA7_ARCHIVE=/opt/migration-lab/archives/jdk-7u80-linux-x64.tar.gz
 JAVA7_ARCHIVE_SHA256=bad9a731639655118740bee119139c1ed019737ec802a630dd7ad7aab4309623
+JAVA7_TRUSTSTORE=/etc/ssl/certs/java/cacerts
 ```
 
 Ele será usado somente para executar o baseline isolado. A Oracle não publica o
@@ -191,6 +193,31 @@ https://download.oracle.com/otn/java/jdk/7u80-b15/jdk-7u80-linux-x64.tar.gz
 Esse endereço exige aceite da licença e login Oracle. Faça a autenticação no
 navegador e nunca compartilhe login, senha, cookie ou URL temporária de sessão
 com o projeto.
+
+#### HTTPS atual a partir do Java 7
+
+O primeiro build do CP-1C reproduziu dois problemas distintos: o protocolo TLS
+1.2 não era selecionado e, depois de habilitá-lo, o truststore de 2015 falhou
+com `PKIX path building failed`. Não desabilite a validação HTTPS.
+
+No Ubuntu/Debian, instale ou atualize o pacote de certificados Java e confirme
+que o próprio Java 7 consegue ler o JKS:
+
+```bash
+sudo apt update
+sudo apt install ca-certificates-java
+/opt/migration-lab/tools/jdk1.7.0_80/bin/keytool \
+  -list \
+  -keystore /etc/ssl/certs/java/cacerts \
+  -storepass changeit
+```
+
+Configure `JAVA7_TRUSTSTORE` com esse caminho. Em outra distribuição, informe
+um truststore JKS atualizado e confiável, fornecido pelo sistema operacional.
+O wrapper habilita TLS 1.2 e aponta somente o processo Maven para esse arquivo;
+ele não modifica o JDK proprietário. A tentativa, os erros exatos, a correção e
+o rollback estão em
+[`CP-1C-legacy-build-https.md`](../migration/steps/CP-1C-legacy-build-https.md).
 
 ### OpenJDK 8, 17, 21 e 25
 
@@ -225,6 +252,19 @@ MAVEN_ARCHIVE_SHA256=3e4c68cdd70f96635e713f36c8fc3ea3182035245d3da2156576710ca0f
 
 O `doctor` executa essa instalação explicitamente com `JAVA7_HOME` e rejeita
 outra versão do Maven ou da JVM.
+
+Para construir e auditar o WAR do CP-1C:
+
+```bash
+./scripts/doctor.sh CP-1C --env .env
+./scripts/validate-cp-1c.sh
+./scripts/build-cp-1c.sh --env .env
+```
+
+O último comando gera `app/target/wildfly-migration.war`, registra a árvore de
+dependências em `app/target/dependency-tree.txt` e rejeita divergências de
+`WEB-INF/lib`, APIs do contêiner, `ojdbc7`, JARs manuais ou bytecode diferente
+de Java 7.
 
 ### Maven 3.9.16 a partir do CP-2C
 

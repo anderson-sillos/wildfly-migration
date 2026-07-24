@@ -82,7 +82,7 @@ load_env_file() {
 
     case "$key" in
       MIGRATION_CHECKPOINT|LAB_BIND_ADDRESS|WILDFLY_HTTP_PORT|WILDFLY_MANAGEMENT_PORT|\
-      JAVA7_HOME|JAVA7_ARCHIVE|JAVA7_ARCHIVE_SHA256|\
+      JAVA7_HOME|JAVA7_ARCHIVE|JAVA7_ARCHIVE_SHA256|JAVA7_TRUSTSTORE|\
       JAVA8_HOME|JAVA8_ARCHIVE|JAVA8_ARCHIVE_SHA256|\
       JAVA17_HOME|JAVA17_ARCHIVE|JAVA17_ARCHIVE_SHA256|\
       JAVA21_HOME|JAVA21_ARCHIVE|JAVA21_ARCHIVE_SHA256|\
@@ -91,7 +91,8 @@ load_env_file() {
       WILDFLY9_HOME|WILDFLY9_ARCHIVE|WILDFLY9_ARCHIVE_SHA256|\
       WILDFLY26_HOME|WILDFLY26_ARCHIVE|WILDFLY26_ARCHIVE_SHA256|\
       WILDFLY41_HOME|WILDFLY41_ARCHIVE|WILDFLY41_ARCHIVE_SHA256|\
-      ORACLE_DB_URL|ORACLE_DB_USER|ORACLE_DB_PASSWORD|ORACLE_DB_WALLET)
+      ORACLE_DB_URL|ORACLE_DB_USER|ORACLE_DB_PASSWORD|ORACLE_DB_WALLET|\
+      OJDBC7_JAR|OJDBC7_SHA256)
         ;;
       *)
         fail "variável não permitida na linha $line_number de $file: $key"
@@ -169,6 +170,16 @@ check_required_files() {
     "runtime/legacy/runtime-manifest.tsv"
     "scripts/doctor.sh"
   )
+
+  if rank_at_least CP-1C; then
+    required+=(
+      "app/pom.xml"
+      "runtime/legacy/war-libraries.txt"
+      "scripts/audit-legacy-war.sh"
+      "scripts/build-cp-1c.sh"
+      "scripts/validate-cp-1c.sh"
+    )
+  fi
 
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
@@ -514,6 +525,60 @@ check_legacy_maven() {
     MAVEN_ARCHIVE MAVEN_ARCHIVE_SHA256
 }
 
+check_java7_truststore() {
+  local truststore="${JAVA7_TRUSTSTORE:-}"
+  local java_home="${JAVA7_HOME:-}"
+
+  if [[ -z "$truststore" ]]; then
+    fail "Java 7: JAVA7_TRUSTSTORE não definido"
+    return
+  fi
+  if [[ ! -f "$truststore" ]]; then
+    fail "Java 7: truststore atualizado não encontrado"
+    return
+  fi
+  if [[ ! -x "$java_home/bin/keytool" ]]; then
+    fail "Java 7: keytool ausente no JDK configurado"
+    return
+  fi
+  if "$java_home/bin/keytool" -list -keystore "$truststore" \
+      -storepass changeit >/dev/null 2>&1; then
+    pass "Java 7: truststore JKS atualizado legível"
+  else
+    fail "Java 7: truststore não é legível pelo keytool legado"
+  fi
+}
+
+check_ojdbc7() {
+  local driver="${OJDBC7_JAR:-}"
+  local expected="${OJDBC7_SHA256:-}"
+  local actual=""
+
+  if [[ -z "$driver" ]]; then
+    fail "Oracle JDBC: OJDBC7_JAR não definido"
+    return
+  fi
+  if [[ ! -f "$driver" ]]; then
+    fail "Oracle JDBC: arquivo externo não encontrado"
+    return
+  fi
+  if [[ "$(basename "$driver")" != "ojdbc7.jar" ]]; then
+    fail "Oracle JDBC: o arquivo externo deve se chamar ojdbc7.jar"
+    return
+  fi
+  if [[ ! "$expected" =~ ^[[:xdigit:]]{64}$ ]]; then
+    fail "Oracle JDBC: OJDBC7_SHA256 deve conter 64 caracteres"
+    return
+  fi
+
+  actual="$(sha256sum "$driver" | awk '{print $1}')"
+  if [[ "${actual,,}" == "${expected,,}" ]]; then
+    pass "Oracle JDBC: ojdbc7 externo aprovado por SHA-256"
+  else
+    fail "Oracle JDBC: checksum do ojdbc7 diverge"
+  fi
+}
+
 check_modern_maven() {
   local maven_command="mvn"
   local output=""
@@ -654,10 +719,18 @@ else
   skip "Maven 3.8.9 com Java 7 (exigido de CP-1B a CP-2B)"
 fi
 
+if [[ "$CI_MODE" != true ]] && rank_at_least CP-1C &&
+   ! rank_at_least CP-2A; then
+  check_java7_truststore
+else
+  skip "truststore atualizado para downloads no Java 7 (exigido de CP-1C a CP-1F)"
+fi
+
 if [[ "$CI_MODE" != true ]] && rank_at_least CP-1D; then
   check_oracle_variables
+  check_ojdbc7
 else
-  skip "variáveis Oracle 19c (entram no CP-1D)"
+  skip "variáveis Oracle 19c e ojdbc7 externo (entram no CP-1D)"
 fi
 
 if [[ "$CI_MODE" != true ]] && rank_at_least CP-2A; then

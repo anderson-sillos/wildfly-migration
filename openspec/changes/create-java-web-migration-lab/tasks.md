@@ -18,11 +18,11 @@
 
 ### Checkpoint CP-1C — WAR e dependências legadas
 
-- [ ] 1.11 Configurar com Maven 3.8.9 o WAR para Java 7 com `javax.servlet:servlet-api:2.4`, `javax.servlet:jsp-api:2.0` e `javax.servlet.jsp.jstl:jstl-api:1.2` em `provided`.
-- [ ] 1.12 Declarar MyBatis 3.4.5, Log4j 1.2.14, Commons FileUpload 1.2.2, Reflections 0.9.10, Tiles 2.1.4, XMLBeans 2.3.0, dom4j 1.6.1, `xml-apis` 1.3.02 e Geronimo StAX 1.0.
-- [ ] 1.13 Configurar o fornecimento externo do `ojdbc7` para o laboratório, sem versionar o binário, e relacioná-lo ao datasource JNDI legado.
-- [ ] 1.14 Implementar a auditoria inicial da árvore Maven, escopos, conteúdo previsto de `WEB-INF/lib` e ausência de JARs manuais.
-- [ ] 1.15 Encerrar `CP-1C`: compilar e empacotar o WAR mínimo quando os binários exigidos estiverem disponíveis, validar a auditoria, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-1C): build legacy war skeleton`.
+- [x] 1.11 Configurar com Maven 3.8.9 o WAR para Java 7 com `javax.servlet:servlet-api:2.4`, `javax.servlet:jsp-api:2.0` e `javax.servlet.jsp.jstl:jstl-api:1.2` em `provided`.
+- [x] 1.12 Declarar MyBatis 3.4.5, Log4j 1.2.14, Commons FileUpload 1.2.2, Reflections 0.9.10, Tiles 2.1.4, XMLBeans 2.3.0, dom4j 1.6.1, `xml-apis` 1.3.02 e Geronimo StAX 1.0.
+- [x] 1.13 Configurar o fornecimento externo do `ojdbc7` para o laboratório, sem versionar o binário, e relacioná-lo ao datasource JNDI legado.
+- [x] 1.14 Implementar a auditoria inicial da árvore Maven, escopos, conteúdo previsto de `WEB-INF/lib` e ausência de JARs manuais.
+- [x] 1.15 Encerrar `CP-1C`: compilar e empacotar o WAR mínimo quando os binários exigidos estiverem disponíveis, validar a auditoria, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-1C): build legacy war skeleton`.
 
 ### Checkpoint CP-1D — Fluxo web e persistência
 
