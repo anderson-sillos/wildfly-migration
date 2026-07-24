@@ -13,6 +13,9 @@ A migração direta de uma aplicação Java 7/WildFly 9 para Java 25/WildFly 41 
   1. baseline legado em Java 7u80 e WildFly 9.0.2;
   2. modernização máxima com baixo impacto em Java 8 e WildFly 26.1.3, mantendo EE 8 e `javax.*`;
   3. destino final em Java 25, WildFly 41 e Jakarta EE 11.
+- Fixar Maven 3.8.9 como ferramenta do build legado por ser a última versão
+  disponível compatível com Java 7, mantendo-a até a atualização explícita para
+  Maven 3.9.16 no `CP-2C`.
 - Adicionar fluxos funcionais de pedidos, sessão, filtros, listener, upload, acesso a dados via MyBatis/JNDI, páginas JSP, tag library customizada e processamento XML.
 - Congelar o comportamento funcional no baseline e executar o mesmo contrato após cada fase.
 - Executar a fase 3 por três gates técnicos internos e sequenciais, sem apresentá-los como fases públicas ou destinos independentes de produção:
@@ -48,7 +51,7 @@ Nenhuma. O projeto ainda não possui especificações de capacidades existentes.
 - Documentação inicial de instalação dos JDKs, Maven, WildFly, Git, ferramentas auxiliares e acesso ao Oracle, acompanhada de configuração segura e diagnóstico executável do ambiente.
 - Três checkpoints Git verdes: `migration/01-legacy-baseline`, `migration/02-java8-wildfly26` e `migration/03-final`.
 - Checkpoints parciais identificados por `CP-<fase><letra>`, preservados por commits de entrega no branch principal sem criar fases ou tags públicas adicionais.
-- Configurações para Java 7, Java 8, Java 17, Java 21 e Java 25; Java 17 e Java 21 são gates internos da fase final, e Maven 3.9.16 passa a ser usado depois da saída do Java 7.
+- Configurações para Java 7, Java 8, Java 17, Java 21 e Java 25; Java 17 e Java 21 são gates internos da fase final, Maven 3.8.9 executa o build legado e Maven 3.9.16 passa a ser usado no `CP-2C`, depois da saída do Java 7.
 - WildFly 9.0.2 no baseline, WildFly 26.1.3 como ponte EE 8/`javax` e WildFly 41.0.0.Final como destino.
 - OpenJDK 25 e WildFly comunitário no destino, sem dependência de Oracle JDK, JBoss EAP ou outra distribuição proprietária do runtime.
 - Jakarta EE Web Profile 11 no escopo `provided` somente na fase final, substituindo as APIs Servlet, JSP e JSTL antigas.

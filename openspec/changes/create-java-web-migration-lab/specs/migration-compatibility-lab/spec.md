@@ -53,7 +53,7 @@ O projeto SHALL configurar o repositório GitHub antes da criação da aplicaç�
 - **THEN** nenhuma tag de fase é criada, exceto quando o mesmo commit também encerra uma das três fases públicas
 
 ### Requirement: Fase 2 de modernização máxima com baixo impacto
-O laboratório SHALL migrar primeiro o baseline para Java 8 mantendo WildFly 9 e, depois, para WildFly 26.1.3 mantendo Java 8, EE 8, pacotes `javax.*` e as bibliotecas legadas inicialmente inalteradas.
+O laboratório SHALL migrar primeiro o baseline para Java 8 mantendo WildFly 9 e, depois, para WildFly 26.1.3 mantendo Java 8, EE 8, pacotes `javax.*`, Maven 3.8.9 e as bibliotecas legadas inicialmente inalteradas; somente no `CP-2C` SHALL atualizar a ferramenta de build para Maven 3.9.16.
 
 #### Scenario: Isolamento da atualização da JVM
 - **WHEN** a aplicação é executada pela primeira vez com Java 8
@@ -62,6 +62,10 @@ O laboratório SHALL migrar primeiro o baseline para Java 8 mantendo WildFly 9 e
 #### Scenario: Isolamento da atualização do servidor
 - **WHEN** a aplicação é implantada no WildFly 26.1.3
 - **THEN** ela ainda usa Java 8 e `javax.*`, permitindo diagnosticar separadamente configuração, datasource, segurança e classloader
+
+#### Scenario: Atualização isolada do Maven
+- **WHEN** Java 8 e WildFly 26.1.3 já estão aprovados
+- **THEN** o `CP-2C` atualiza Maven 3.8.9 para Maven 3.9.16 sem misturar essa alteração com a troca da JVM ou do servidor
 
 #### Scenario: Conclusão da fase 2
 - **WHEN** os contratos e a auditoria do WAR são aprovados no Java 8/WildFly 26.1.3

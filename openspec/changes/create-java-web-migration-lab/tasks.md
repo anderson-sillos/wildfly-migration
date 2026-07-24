@@ -12,13 +12,13 @@
 
 - [ ] 1.6 Criar a única árvore Maven `app/` e as áreas `contract-tests/`, `runtime/`, `migration/steps/` e `docs/`, preservando uma única linha evolutiva.
 - [ ] 1.7 Definir a forma isolada de fornecer Java 7u80 e WildFly 9.0.2 sem versionar binários proprietários e fixar checksums e origem.
-- [ ] 1.8 Adicionar verificações executáveis para Java, Maven e WildFly que falhem rapidamente e registrem as versões efetivamente usadas.
+- [ ] 1.8 Fixar Maven 3.8.9 como ferramenta do build legado e adicionar verificações executáveis para Java 7u80, Maven 3.8.9 e WildFly 9.0.2 que falhem rapidamente e registrem versões, origem e checksums efetivamente usados.
 - [ ] 1.9 Definir o modelo mínimo de pedido, anexo e preferência de sessão, scripts SQL idempotentes para Oracle 19c, XSD e exemplos XML válidos e maliciosos.
 - [ ] 1.10 Encerrar `CP-1B`: validar estrutura, documentação, `doctor`, checksums e scripts estáticos, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-1B): scaffold legacy runtime`.
 
 ### Checkpoint CP-1C — WAR e dependências legadas
 
-- [ ] 1.11 Configurar o WAR para Java 7 com `javax.servlet:servlet-api:2.4`, `javax.servlet:jsp-api:2.0` e `javax.servlet.jsp.jstl:jstl-api:1.2` em `provided`.
+- [ ] 1.11 Configurar com Maven 3.8.9 o WAR para Java 7 com `javax.servlet:servlet-api:2.4`, `javax.servlet:jsp-api:2.0` e `javax.servlet.jsp.jstl:jstl-api:1.2` em `provided`.
 - [ ] 1.12 Declarar MyBatis 3.4.5, Log4j 1.2.14, Commons FileUpload 1.2.2, Reflections 0.9.10, Tiles 2.1.4, XMLBeans 2.3.0, dom4j 1.6.1, `xml-apis` 1.3.02 e Geronimo StAX 1.0.
 - [ ] 1.13 Configurar o fornecimento externo do `ojdbc7` para o laboratório, sem versionar o binário, e relacioná-lo ao datasource JNDI legado.
 - [ ] 1.14 Implementar a auditoria inicial da árvore Maven, escopos, conteúdo previsto de `WEB-INF/lib` e ausência de JARs manuais.
@@ -69,7 +69,7 @@
 ### Checkpoint CP-2C — EE 8, Maven e datasource
 
 - [ ] 2.11 Alinhar as APIs do build a Jakarta EE 8 com pacotes `javax.*` e escopo `provided`, rejeitando APIs do contêiner em `WEB-INF/lib`.
-- [ ] 2.12 Atualizar a ferramenta de build para Maven 3.9.16 e documentar a diferença entre a versão do Maven e `<modelVersion>4.0.0</modelVersion>`.
+- [ ] 2.12 Atualizar a ferramenta de build de Maven 3.8.9 para Maven 3.9.16 e documentar a diferença entre a versão do Maven e `<modelVersion>4.0.0</modelVersion>`.
 - [ ] 2.13 Validar o datasource Oracle, transações MyBatis, timestamps e LOBs com o driver aprovado para Java 8.
 - [ ] 2.14 Atualizar `doctor`, CI e auditoria do WAR para a combinação Java 8/WildFly 26/EE 8.
 - [ ] 2.15 Encerrar `CP-2C`: executar build, contratos aplicáveis, Oracle e auditorias, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-2C): align build with EE 8`.

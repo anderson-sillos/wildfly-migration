@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Ambiente legado isolado
-O laboratório SHALL iniciar a única árvore de código da aplicação em um ambiente isolado com Java 7u80, WildFly 9.0.2 e APIs Java EE da geração original, sem expor esse runtime obsoleto em interfaces de rede públicas.
+O laboratório SHALL iniciar a única árvore de código da aplicação em um ambiente isolado com Java 7u80, Maven 3.8.9, WildFly 9.0.2 e APIs Java EE da geração original, sem expor esse runtime obsoleto em interfaces de rede públicas.
 
 #### Scenario: Inicialização do ambiente legado
 - **WHEN** o usuário inicia o ambiente legado seguindo a documentação
@@ -10,6 +10,10 @@ O laboratório SHALL iniciar a única árvore de código da aplicação em um am
 #### Scenario: Versão incorreta do Java legado
 - **WHEN** o ambiente é iniciado com uma JVM diferente da versão ou faixa aprovada para a simulação
 - **THEN** a verificação de pré-requisitos encerra a execução com uma mensagem que informa a versão esperada e a encontrada
+
+#### Scenario: Ferramenta de build do legado
+- **WHEN** o build da fase 1 é executado
+- **THEN** Maven 3.8.9 executa com Java 7u80 e a verificação registra a versão, a origem e o checksum aprovados
 
 ### Requirement: Fluxo representativo de pedidos
 A aplicação legada SHALL permitir listar, criar e consultar pedidos, manter uma preferência em `HttpSession`, aplicar filtro de encoding/correlação e inicializar recursos por um `ServletContextListener`.
@@ -67,7 +71,7 @@ A aplicação legada SHALL importar um pedido XML usando XMLBeans 2.3.0 e dom4j 
 - **THEN** a aplicação o rejeita e informa os erros de validação sem persistir um pedido parcial
 
 ### Requirement: Manifesto verificável do legado
-O build legado SHALL gerar um manifesto com dependências diretas e transitivas, versões de ferramentas, conteúdo efetivo de `WEB-INF/lib` e checksum do WAR.
+O build legado SHALL gerar um manifesto com dependências diretas e transitivas, Java 7u80, Maven 3.8.9, WildFly 9.0.2, origem e checksums das ferramentas, conteúdo efetivo de `WEB-INF/lib` e checksum do WAR.
 
 #### Scenario: Auditoria do WAR legado
 - **WHEN** o WAR legado é empacotado
