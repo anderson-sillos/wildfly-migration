@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pedido xmlns="urn:wildfly-migration:pedido:1">
+  <numero>XML INVÁLIDO COM ESPAÇOS</numero>
+  <clienteNome></clienteNome>
+  <valorTotal>-1.00</valorTotal>
+  <status>DESCONHECIDO</status>
+</pedido>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:pedido="urn:wildfly-migration:pedido:1"
+    targetNamespace="urn:wildfly-migration:pedido:1"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified"
+    version="1.0">
+
+  <xs:element name="pedido" type="pedido:PedidoImportacaoType"/>
+
+  <xs:complexType name="PedidoImportacaoType">
+    <xs:sequence>
+      <xs:element name="numero" type="pedido:NumeroPedidoType"/>
+      <xs:element name="clienteNome" type="pedido:ClienteNomeType"/>
+      <xs:element name="descricao" type="pedido:DescricaoType" minOccurs="0"/>
+      <xs:element name="valorTotal" type="pedido:ValorMonetarioType"/>
+      <xs:element name="status" type="pedido:StatusPedidoType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="NumeroPedidoType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="32"/>
+      <xs:pattern value="[A-Za-z0-9][A-Za-z0-9._-]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="ClienteNomeType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="120"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="DescricaoType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="500"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="ValorMonetarioType">
+    <xs:restriction base="xs:decimal">
+      <xs:totalDigits value="15"/>
+      <xs:fractionDigits value="2"/>
+      <xs:minInclusive value="0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="StatusPedidoType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NOVO"/>
+      <xs:enumeration value="APROVADO"/>
+      <xs:enumeration value="CANCELADO"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

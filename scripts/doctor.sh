@@ -5,6 +5,7 @@ set -uo pipefail
 CHECKPOINT="${MIGRATION_CHECKPOINT:-CP-1A}"
 CHECKPOINT_EXPLICIT=false
 ENV_FILE=""
+LEGACY_RUNTIME_MANIFEST="runtime/legacy/runtime-manifest.tsv"
 CI_MODE=false
 PASS_COUNT=0
 FAIL_COUNT=0
@@ -86,7 +87,7 @@ load_env_file() {
       JAVA17_HOME|JAVA17_ARCHIVE|JAVA17_ARCHIVE_SHA256|\
       JAVA21_HOME|JAVA21_ARCHIVE|JAVA21_ARCHIVE_SHA256|\
       JAVA25_HOME|JAVA25_ARCHIVE|JAVA25_ARCHIVE_SHA256|\
-      MAVEN_HOME|\
+      MAVEN_HOME|MAVEN_ARCHIVE|MAVEN_ARCHIVE_SHA256|\
       WILDFLY9_HOME|WILDFLY9_ARCHIVE|WILDFLY9_ARCHIVE_SHA256|\
       WILDFLY26_HOME|WILDFLY26_ARCHIVE|WILDFLY26_ARCHIVE_SHA256|\
       WILDFLY41_HOME|WILDFLY41_ARCHIVE|WILDFLY41_ARCHIVE_SHA256|\
@@ -165,6 +166,7 @@ check_required_files() {
     "docs/checkpoints.md"
     ".github/pull_request_template.md"
     ".github/workflows/validate.yml"
+    "runtime/legacy/runtime-manifest.tsv"
     "scripts/doctor.sh"
   )
 
@@ -292,6 +294,7 @@ check_java() {
   local expected_pattern="$3"
   local archive_variable="$4"
   local checksum_variable="$5"
+  local manifest_component="${6:-}"
   local java_home="${!home_variable:-}"
   local output=""
 
@@ -308,7 +311,106 @@ check_java() {
     fi
   fi
 
-  check_archive_checksum "$label" "$archive_variable" "$checksum_variable"
+  if [[ -n "$manifest_component" ]]; then
+    check_manifest_archive "$manifest_component" "$label" \
+      "$archive_variable" "$checksum_variable"
+  else
+    check_archive_checksum "$label" "$archive_variable" "$checksum_variable"
+  fi
+}
+
+manifest_field() {
+  local component="$1"
+  local field="$2"
+
+  awk -F '\t' -v wanted_component="$component" -v wanted_field="$field" '
+    NR == 1 {
+      for (column = 1; column <= NF; column++) {
+        header[$column] = column
+      }
+      next
+    }
+    $1 == wanted_component {
+      if (!(wanted_field in header)) {
+        exit 2
+      }
+      print $header[wanted_field]
+      found = 1
+      exit
+    }
+    END {
+      if (!found) {
+        exit 1
+      }
+    }
+  ' "$LEGACY_RUNTIME_MANIFEST"
+}
+
+check_manifest_archive() {
+  local component="$1"
+  local label="$2"
+  local archive_variable="$3"
+  local checksum_variable="$4"
+  local archive="${!archive_variable:-}"
+  local configured_checksum="${!checksum_variable:-}"
+  local expected_archive=""
+  local expected_checksum=""
+  local origin=""
+  local license=""
+  local actual=""
+
+  if [[ ! -f "$LEGACY_RUNTIME_MANIFEST" ]]; then
+    fail "$label: manifesto legado ausente"
+    return
+  fi
+
+  expected_archive="$(manifest_field "$component" archive 2>/dev/null || true)"
+  expected_checksum="$(manifest_field "$component" sha256 2>/dev/null || true)"
+  origin="$(manifest_field "$component" origin 2>/dev/null || true)"
+  license="$(manifest_field "$component" license 2>/dev/null || true)"
+
+  if [[ -z "$expected_archive" || -z "$origin" || -z "$license" ]]; then
+    fail "$label: registro incompleto no manifesto legado"
+    return
+  fi
+
+  if [[ ! "$expected_checksum" =~ ^[[:xdigit:]]{64}$ ]]; then
+    fail "$label: checksum ainda não aprovado no manifesto legado"
+    return
+  fi
+
+  if [[ -n "$configured_checksum" ]] &&
+     [[ "${configured_checksum,,}" != "${expected_checksum,,}" ]]; then
+    fail "$label: $checksum_variable diverge do manifesto legado"
+    return
+  fi
+
+  if [[ -z "$archive" ]]; then
+    fail "$label: $archive_variable não definido"
+    return
+  fi
+  if [[ ! -f "$archive" ]]; then
+    fail "$label: arquivo externo não encontrado"
+    return
+  fi
+  if [[ "$(basename "$archive")" != "$expected_archive" ]]; then
+    fail "$label: nome do arquivo diverge do manifesto legado"
+    return
+  fi
+  if ! command -v sha256sum >/dev/null 2>&1; then
+    fail "$label: sha256sum ausente"
+    return
+  fi
+
+  actual="$(sha256sum "$archive" | awk '{print $1}')"
+  if [[ "${actual,,}" != "${expected_checksum,,}" ]]; then
+    fail "$label: checksum SHA-256 diverge do manifesto legado"
+    return
+  fi
+
+  pass "$label: origem aprovada $origin"
+  pass "$label: licença registrada $license"
+  pass "$label: checksum SHA-256 efetivo $actual"
 }
 
 check_archive_checksum() {
@@ -350,6 +452,7 @@ check_wildfly() {
   local expected_version="$3"
   local archive_variable="$4"
   local checksum_variable="$5"
+  local manifest_component="${6:-}"
   local wildfly_home="${!home_variable:-}"
   local manifest=""
 
@@ -369,10 +472,49 @@ check_wildfly() {
     fi
   fi
 
-  check_archive_checksum "$label" "$archive_variable" "$checksum_variable"
+  if [[ -n "$manifest_component" ]]; then
+    check_manifest_archive "$manifest_component" "$label" \
+      "$archive_variable" "$checksum_variable"
+  else
+    check_archive_checksum "$label" "$archive_variable" "$checksum_variable"
+  fi
 }
 
-check_maven() {
+check_legacy_maven() {
+  local maven_home="${MAVEN_HOME:-}"
+  local java_home="${JAVA7_HOME:-}"
+  local maven_command=""
+  local output=""
+
+  if [[ -z "$maven_home" ]]; then
+    fail "Maven legado: MAVEN_HOME não definido"
+  elif [[ ! -x "$maven_home/bin/mvn" ]]; then
+    fail "Maven legado: executável bin/mvn ausente no diretório configurado"
+  else
+    maven_command="$maven_home/bin/mvn"
+    output="$(
+      JAVA_HOME="$java_home" PATH="$java_home/bin:$PATH" \
+        "$maven_command" --version 2>&1 || true
+    )"
+
+    if [[ "$output" == *"Apache Maven 3.8.9"* ]]; then
+      pass "Maven legado: versão 3.8.9 detectada"
+    else
+      fail "Maven legado: versão 3.8.9 não detectada"
+    fi
+
+    if [[ "$output" == *"Java version: 1.7.0_80"* ]]; then
+      pass "Maven legado: execução efetiva com Java 7u80"
+    else
+      fail "Maven legado: não executou com Java 7u80"
+    fi
+  fi
+
+  check_manifest_archive apache-maven "Maven legado" \
+    MAVEN_ARCHIVE MAVEN_ARCHIVE_SHA256
+}
+
+check_modern_maven() {
   local maven_command="mvn"
   local output=""
 
@@ -494,13 +636,22 @@ if [[ "$CI_MODE" == true ]]; then
 elif rank_at_least CP-1B; then
   check_container_runtime
   check_network_defaults
-  check_java "Java 7u80" JAVA7_HOME '1.7.0_80' JAVA7_ARCHIVE JAVA7_ARCHIVE_SHA256
-  check_wildfly "WildFly 9" WILDFLY9_HOME '9.0.2.Final' WILDFLY9_ARCHIVE WILDFLY9_ARCHIVE_SHA256
+  check_java "Java 7u80" JAVA7_HOME '1.7.0_80' \
+    JAVA7_ARCHIVE JAVA7_ARCHIVE_SHA256 oracle-jdk
+  check_wildfly "WildFly 9" WILDFLY9_HOME '9.0.2.Final' \
+    WILDFLY9_ARCHIVE WILDFLY9_ARCHIVE_SHA256 wildfly
 else
   skip "runtime de containers (entra no CP-1B)"
   skip "portas e bind de runtime (entram no CP-1B)"
   skip "Java 7u80 e checksum (entram no CP-1B)"
   skip "WildFly 9 e checksum (entram no CP-1B)"
+fi
+
+if [[ "$CI_MODE" != true ]] && rank_at_least CP-1B &&
+   ! rank_at_least CP-2C; then
+  check_legacy_maven
+else
+  skip "Maven 3.8.9 com Java 7 (exigido de CP-1B a CP-2B)"
 fi
 
 if [[ "$CI_MODE" != true ]] && rank_at_least CP-1D; then
@@ -522,7 +673,7 @@ else
 fi
 
 if [[ "$CI_MODE" != true ]] && rank_at_least CP-2C; then
-  check_maven
+  check_modern_maven
 else
   skip "Maven 3.9.16 (entra no CP-2C)"
 fi

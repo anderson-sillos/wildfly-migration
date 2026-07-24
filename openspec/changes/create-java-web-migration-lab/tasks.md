@@ -10,11 +10,11 @@
 
 ### Checkpoint CP-1B — Estrutura e runtime legado
 
-- [ ] 1.6 Criar a única árvore Maven `app/` e as áreas `contract-tests/`, `runtime/`, `migration/steps/` e `docs/`, preservando uma única linha evolutiva.
-- [ ] 1.7 Definir a forma isolada de fornecer Java 7u80 e WildFly 9.0.2 sem versionar binários proprietários e fixar checksums e origem.
-- [ ] 1.8 Fixar Maven 3.8.9 como ferramenta do build legado e adicionar verificações executáveis para Java 7u80, Maven 3.8.9 e WildFly 9.0.2 que falhem rapidamente e registrem versões, origem e checksums efetivamente usados.
-- [ ] 1.9 Definir o modelo mínimo de pedido, anexo e preferência de sessão, scripts SQL idempotentes para Oracle 19c, XSD e exemplos XML válidos e maliciosos.
-- [ ] 1.10 Encerrar `CP-1B`: validar estrutura, documentação, `doctor`, checksums e scripts estáticos, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-1B): scaffold legacy runtime`.
+- [x] 1.6 Criar a única árvore Maven `app/` e as áreas `contract-tests/`, `runtime/`, `migration/steps/` e `docs/`, preservando uma única linha evolutiva.
+- [x] 1.7 Definir a forma isolada de fornecer Java 7u80 e WildFly 9.0.2 sem versionar binários proprietários e fixar checksums e origem.
+- [x] 1.8 Fixar Maven 3.8.9 como ferramenta do build legado e adicionar verificações executáveis para Java 7u80, Maven 3.8.9 e WildFly 9.0.2 que falhem rapidamente e registrem versões, origem e checksums efetivamente usados.
+- [x] 1.9 Definir o modelo mínimo de pedido, anexo e preferência de sessão, scripts SQL idempotentes para Oracle 19c, XSD e exemplos XML válidos e maliciosos.
+- [x] 1.10 Encerrar `CP-1B`: validar estrutura, documentação, `doctor`, checksums e scripts estáticos, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-1B): scaffold legacy runtime`.
 
 ### Checkpoint CP-1C — WAR e dependências legadas
 

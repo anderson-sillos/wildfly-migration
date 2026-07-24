@@ -7,10 +7,13 @@ cada entrega validável e reversível.
 
 Repositório GitHub: <https://github.com/anderson-sillos/wildfly-migration>
 
-O checkpoint **CP-1A — Repositório GitHub e ambiente** está concluído. O próximo
-incremento é o **CP-1B — Estrutura e runtime legado**. A árvore da aplicação
-ainda não existe por decisão de projeto: o primeiro checkpoint estabeleceu o
-repositório, as verificações, a documentação e o diagnóstico do ambiente.
+Os checkpoints **CP-1A — Repositório GitHub e ambiente** e **CP-1B — Estrutura
+e runtime legado** estão concluídos. A árvore única `app/`, o manifesto do
+runtime, o modelo mínimo, o SQL Oracle, o XSD e os fixtures já existem. O
+Oracle JDK 7u80 fornecido externamente, o Maven 3.8.9 e o WildFly 9.0.2.Final
+foram aprovados por versão, origem, licença e checksum. O próximo incremento é
+o **CP-1C — WAR e dependências legadas**; ainda não há `pom.xml`, WAR ou
+dependências.
 
 ## Fases públicas
 
@@ -38,9 +41,26 @@ O comando deve falhar de forma explícita enquanto identidade Git, autenticaçã
 GitHub ou `origin` ainda não estiverem configurados. Pré-requisitos de fases
 futuras aparecem como “não exigido”.
 
+Para validar o CP-1B depois de fornecer o runtime legado externo:
+
+```bash
+./scripts/validate-cp-1b.sh --release
+./scripts/doctor.sh CP-1B --env .env
+```
+
 Antes de contribuir, consulte [o fluxo GitHub](docs/github-workflow.md),
 [os checkpoints](docs/checkpoints.md), [CONTRIBUTING.md](CONTRIBUTING.md) e
 [SECURITY.md](SECURITY.md).
+
+A responsabilidade de cada diretório e as regras da linha evolutiva única estão
+em [estrutura do repositório](docs/repository-layout.md).
+
+O fornecimento do Java 7/Maven 3.8.9/WildFly 9 está em
+[runtime legado](runtime/legacy/README.md), e o domínio mínimo está em
+[modelo legado](docs/legacy-domain-model.md).
+
+A [preparação completa do ambiente](docs/environment-setup.md) contém a matriz
+de componentes por checkpoint e os endereços oficiais das fases futuras.
 
 ## Regras de segurança
 

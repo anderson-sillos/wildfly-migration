@@ -18,7 +18,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate shell syntax
-        run: bash -n scripts/doctor.sh
+        run: |
+          bash -n scripts/doctor.sh
+          bash -n scripts/validate-cp-1b.sh
 
       - name: Validate repository baseline
         run: ./scripts/doctor.sh CP-1A --ci
+
+      - name: Validate CP-1B static resources
+        run: ./scripts/validate-cp-1b.sh --release
