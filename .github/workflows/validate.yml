@@ -21,9 +21,15 @@ jobs:
         run: |
           bash -n scripts/doctor.sh
           bash -n scripts/validate-cp-1b.sh
+          bash -n scripts/audit-legacy-war.sh
+          bash -n scripts/build-cp-1c.sh
+          bash -n scripts/validate-cp-1c.sh
 
       - name: Validate repository baseline
         run: ./scripts/doctor.sh CP-1A --ci
 
       - name: Validate CP-1B static resources
         run: ./scripts/validate-cp-1b.sh --release
+
+      - name: Validate CP-1C static resources
+        run: ./scripts/validate-cp-1c.sh

@@ -48,11 +48,6 @@ for path in "${required_paths[@]}"; do
   fi
 done
 
-if [[ -e "$REPOSITORY_ROOT/app/pom.xml" ]]; then
-  printf 'FALHA: app/pom.xml pertence ao CP-1C, não ao CP-1B\n' >&2
-  exit 1
-fi
-
 awk -F '\t' '
   NR == 1 {
     expected = "component\tversion\tarchive\torigin\tlicense\tsha256\tsha512"

@@ -7,13 +7,11 @@ cada entrega validável e reversível.
 
 Repositório GitHub: <https://github.com/anderson-sillos/wildfly-migration>
 
-Os checkpoints **CP-1A — Repositório GitHub e ambiente** e **CP-1B — Estrutura
-e runtime legado** estão concluídos. A árvore única `app/`, o manifesto do
-runtime, o modelo mínimo, o SQL Oracle, o XSD e os fixtures já existem. O
-Oracle JDK 7u80 fornecido externamente, o Maven 3.8.9 e o WildFly 9.0.2.Final
-foram aprovados por versão, origem, licença e checksum. O próximo incremento é
-o **CP-1C — WAR e dependências legadas**; ainda não há `pom.xml`, WAR ou
-dependências.
+Os checkpoints **CP-1A — Repositório GitHub e ambiente**, **CP-1B — Estrutura
+e runtime legado** e **CP-1C — WAR e dependências legadas** estão concluídos.
+A árvore única `app/` gera um WAR Java 7 auditável com as dependências
+históricas, enquanto runtimes, driver Oracle e credenciais permanecem externos.
+O próximo incremento é o **CP-1D — Fluxo web e persistência**.
 
 ## Fases públicas
 
@@ -46,6 +44,14 @@ Para validar o CP-1B depois de fornecer o runtime legado externo:
 ```bash
 ./scripts/validate-cp-1b.sh --release
 ./scripts/doctor.sh CP-1B --env .env
+```
+
+Para validar e construir o CP-1C:
+
+```bash
+./scripts/doctor.sh CP-1C --env .env
+./scripts/validate-cp-1c.sh
+./scripts/build-cp-1c.sh --env .env
 ```
 
 Antes de contribuir, consulte [o fluxo GitHub](docs/github-workflow.md),

@@ -84,6 +84,12 @@ publicada pelo fornecedor.
 5. Copie `.env.example` para `.env`, configure os seis caminhos legados e
    execute `./scripts/doctor.sh CP-1B --env .env`.
 
+A partir do CP-1C, configure também `JAVA7_TRUSTSTORE` com um JKS atualizado
+fornecido pelo sistema. O Java 7u80 precisa de TLS 1.2 explícito e seu truststore
+original não reconhece a cadeia atual do Maven Central. A correção validada está
+em `migration/steps/CP-1C-legacy-build-https.md`; não use opções Maven que
+desabilitem a validação HTTPS.
+
 A Oracle não publica um checksum para o JDK 7u80 na página de arquivo. O
 responsável pelo laboratório forneceu o arquivo licenciado, e seu digest foi
 calculado localmente, revisado e fixado no manifesto. O diagnóstico rejeita
