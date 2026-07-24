@@ -37,12 +37,35 @@ O runtime SHALL preservar o driver legado necessário nas fases 1 e 2, SHALL usa
 - **WHEN** qualquer `ojdbc*.jar` é encontrado no WAR moderno
 - **THEN** a verificação de empacotamento falha
 
+### Requirement: Perfil H2 portátil
+O runtime SHALL fornecer um perfil H2 em memória para o CI hospedado, SHALL fixar uma versão compatível com o Java de cada fase, SHALL registrar origem, licença e checksum e MUST NOT empacotar o driver H2 no WAR ou expor console ou listener de rede.
+
+#### Scenario: Seleção do H2 para Java 7
+- **WHEN** o perfil portátil do baseline é preparado
+- **THEN** uma versão H2 compatível com Java 7 é comprovada no WildFly 9, registrada como infraestrutura de teste EOL quando aplicável e isolada do artefato da aplicação
+
+#### Scenario: Atualização por fase
+- **WHEN** uma fase adota uma JVM que permite uma versão H2 mantida mais recente
+- **THEN** a versão de teste é revisada, fixada e submetida aos mesmos contratos antes de substituir a anterior
+
+#### Scenario: Schema equivalente
+- **WHEN** o perfil H2 é iniciado
+- **THEN** scripts H2 próprios criam e populam um schema funcionalmente equivalente sem modificar os scripts Oracle canônicos
+
+#### Scenario: Isolamento do H2
+- **WHEN** runtime, portas publicadas e conteúdo do WAR são auditados
+- **THEN** H2 existe somente como componente do runtime de teste em memória e não disponibiliza console, listener TCP ou JAR em `WEB-INF/lib`
+
 ### Requirement: Datasource JNDI
-O runtime SHALL publicar o datasource moderno em `java:/jdbc/MigrationDS`, com pool gerenciado pelo WildFly, validação de conexão e transações compatíveis com o uso do MyBatis.
+O runtime SHALL publicar `java:/jdbc/MigrationDS` tanto no perfil H2 portátil quanto no perfil Oracle oficial, com pool gerenciado pelo WildFly, validação de conexão e transações compatíveis com o uso do MyBatis, sem exigir seleção de fornecedor pelo código de negócio.
 
 #### Scenario: Teste de conexão
 - **WHEN** as configurações Oracle válidas são fornecidas
 - **THEN** o comando de teste do datasource confirma uma conexão com Oracle Database 19c
+
+#### Scenario: Datasource portátil
+- **WHEN** o perfil `ci-h2` é selecionado
+- **THEN** o mesmo nome JNDI aponta para um banco H2 em memória sem exigir qualquer segredo Oracle
 
 #### Scenario: JNDI indisponível
 - **WHEN** o WAR é implantado sem o datasource
@@ -60,7 +83,7 @@ URL, usuário, senha, wallet e demais segredos de banco MUST ser fornecidos fora
 - **THEN** o relatório preserva o código e a categoria do erro sem imprimir a senha
 
 ### Requirement: Qualificação do Oracle 19c
-A suíte Oracle SHALL registrar a versão completa e o Release Update observados e SHALL testar transações, sequences, paginação, timestamps, CLOB/BLOB e os recursos Oracle efetivamente usados pelo laboratório.
+A suíte Oracle SHALL ser executável a partir de ambiente autorizado na rede interna, SHALL registrar a versão completa e o Release Update observados e SHALL testar transações, sequences, paginação, timestamps, CLOB/BLOB e os recursos Oracle efetivamente usados pelo laboratório. Ela MUST permanecer separada do resultado H2 e MUST NOT exigir exposição do banco à internet.
 
 #### Scenario: Registro da versão do banco
 - **WHEN** a suíte estabelece conexão
@@ -73,6 +96,10 @@ A suíte Oracle SHALL registrar a versão completa e o Release Update observados
 #### Scenario: Rollback transacional
 - **WHEN** uma operação de pedido falha depois de iniciar uma transação
 - **THEN** nenhuma alteração parcial permanece no banco
+
+#### Scenario: Evidência da rede interna
+- **WHEN** a suíte Oracle termina em uma máquina autorizada
+- **THEN** ela produz relatório sanitizado vinculado ao commit e ao checksum do WAR sem publicar endereço interno, URL JDBC completa, usuário, senha ou wallet
 
 ### Requirement: Isolamento de rede
 O ambiente legado SHALL ficar restrito a loopback ou rede interna e o ambiente moderno SHALL expor somente as portas necessárias para os testes locais.
@@ -104,7 +131,7 @@ O laboratório SHALL usar Maven 3.8.9 no baseline Java 7 e durante `CP-2A` e `CP
 - **THEN** Maven 3.9.16 executa com Java 8 ou superior e Maven 3.8.9 deixa de ser a ferramenta ativa do build
 
 ### Requirement: Documentação e diagnóstico do ambiente
-O primeiro checkpoint parcial SHALL documentar a instalação ou o fornecimento de Git, ferramenta de acesso ao GitHub, runtime de containers, Java 7/8/17/21/25, Maven 3.9.16, WildFly 9/26/41 e acesso ao Oracle 19c. No `CP-1B`, a documentação e o diagnóstico SHALL incorporar Maven 3.8.9 como ferramenta EOL do legado. Em todos os checkpoints, a documentação SHALL identificar quais distribuições são open source, proprietárias, restritas ou EOL e o diagnóstico `doctor` SHALL validar somente os pré-requisitos exigidos pelo checkpoint selecionado.
+O primeiro checkpoint parcial SHALL documentar a instalação ou o fornecimento de Git, ferramenta de acesso ao GitHub, runtime de containers, Java 7/8/17/21/25, Maven 3.9.16, WildFly 9/26/41 e acesso ao Oracle 19c. No `CP-1B`, a documentação e o diagnóstico SHALL incorporar Maven 3.8.9 como ferramenta EOL do legado. No `CP-1D`, eles SHALL documentar a distribuição Java 7 redistribuível, o H2 de teste, os perfis `ci-h2` e `oracle` e a execução Oracle na rede interna. Em todos os checkpoints, a documentação SHALL identificar quais distribuições são open source, proprietárias, restritas ou EOL e o diagnóstico `doctor` SHALL validar somente os pré-requisitos exigidos pelo checkpoint e pelo perfil selecionados.
 
 #### Scenario: Preparação a partir de checkout limpo
 - **WHEN** uma pessoa segue a documentação em um checkout limpo e executa o diagnóstico para o checkpoint atual
@@ -117,6 +144,14 @@ O primeiro checkpoint parcial SHALL documentar a instalação ou o fornecimento 
 #### Scenario: Pré-requisito de fase futura
 - **WHEN** Oracle ou um runtime de uma fase futura ainda não é necessário para validar o checkpoint atual
 - **THEN** o diagnóstico o marca como não exigido em vez de reprovar a entrega parcial
+
+#### Scenario: Diagnóstico do perfil portátil
+- **WHEN** o diagnóstico é executado com `ci-h2`
+- **THEN** ele valida Java, Maven, WildFly e H2 fixados sem exigir URL, usuário, senha, wallet ou driver Oracle
+
+#### Scenario: Diagnóstico do perfil Oracle
+- **WHEN** o diagnóstico é executado com `oracle`
+- **THEN** ele exige o driver e a configuração Oracle aplicáveis, testa somente a conectividade autorizada e não imprime valores sensíveis
 
 #### Scenario: Segredo no diagnóstico
 - **WHEN** variáveis de credencial são verificadas

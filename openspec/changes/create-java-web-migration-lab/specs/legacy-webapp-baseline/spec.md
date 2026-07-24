@@ -15,6 +15,10 @@ O laboratório SHALL iniciar a única árvore de código da aplicação em um am
 - **WHEN** o build da fase 1 é executado
 - **THEN** Maven 3.8.9 executa com Java 7u80 e a verificação registra a versão, a origem e o checksum aprovados
 
+#### Scenario: Compatibilidade portátil do legado
+- **WHEN** o pull request do baseline é validado em runner hospedado sem Oracle JDK 7u80 ou acesso ao Oracle 19c
+- **THEN** uma distribuição Java 7 redistribuível aprovada e o perfil H2 executam a trilha `portable-ci`, sem substituir a reprodução exata do ambiente legado
+
 ### Requirement: Fluxo representativo de pedidos
 A aplicação legada SHALL permitir listar, criar e consultar pedidos, manter uma preferência em `HttpSession`, aplicar filtro de encoding/correlação e inicializar recursos por um `ServletContextListener`.
 
@@ -49,7 +53,7 @@ A aplicação legada SHALL aceitar um anexo de pedido por meio de Commons FileUp
 - **THEN** a aplicação rejeita o upload com resposta funcional identificável pelos testes de contrato
 
 ### Requirement: Persistência MyBatis e Oracle
-A aplicação legada SHALL usar MyBatis 3.4.5 com datasource JNDI e um driver da família `ojdbc7` para executar o fluxo de pedidos contra o banco configurado.
+A aplicação legada SHALL usar MyBatis 3.4.5 com datasource JNDI e um driver da família `ojdbc7` para executar oficialmente o fluxo de pedidos contra Oracle 19c. O laboratório SHALL fornecer adicionalmente um perfil H2 em memória, somente para CI, sob o mesmo nome JNDI e sem alterar o código de negócio.
 
 #### Scenario: Persistência pelo datasource
 - **WHEN** um pedido é criado
@@ -58,6 +62,18 @@ A aplicação legada SHALL usar MyBatis 3.4.5 com datasource JNDI e um driver da
 #### Scenario: Falha de datasource
 - **WHEN** o datasource JNDI não está disponível
 - **THEN** a aplicação registra e apresenta uma falha controlada sem incluir senha ou URL sensível na resposta HTTP
+
+#### Scenario: Persistência portátil no CI
+- **WHEN** o perfil `ci-h2` é executado
+- **THEN** os mesmos fluxos HTTP usam `java:/jdbc/MigrationDS`, os mappers e as transações MyBatis e produzem evidência classificada como `portable-ci`
+
+#### Scenario: Qualificação oficial do legado
+- **WHEN** o fluxo de persistência é executado com `ojdbc7` contra Oracle Database 19c na rede interna
+- **THEN** o relatório registra evidência `oracle-qualified` vinculada ao commit e ao checksum do WAR, sem expor credenciais ou endereço interno
+
+#### Scenario: H2 ausente do artefato
+- **WHEN** o WAR legado é auditado
+- **THEN** o driver H2 não aparece em `WEB-INF/lib` e sua versão de teste é registrada separadamente no manifesto do ambiente
 
 ### Requirement: Processamento XML legado
 A aplicação legada SHALL importar um pedido XML usando XMLBeans 2.3.0 e dom4j 1.6.1, preservando no inventário as dependências `xml-apis` 1.3.02 e Geronimo StAX 1.0 que precisam ser removidas na migração.
@@ -86,7 +102,7 @@ O laboratório SHALL preservar o estado aprovado da fase 1 pela tag `migration/0
 
 #### Scenario: Criação do checkpoint legado
 - **WHEN** o WAR legado, o manifesto e os testes de contrato são aprovados
-- **THEN** a tag `migration/01-legacy-baseline` identifica exatamente o código e a documentação que produziram essas evidências
+- **THEN** a tag `migration/01-legacy-baseline` identifica exatamente o código e a documentação que produziram evidências verdes `portable-ci` e `oracle-qualified`
 
 #### Scenario: Reprodução posterior
 - **WHEN** o usuário materializa o checkpoint legado em um Git worktree e inicia seu runtime

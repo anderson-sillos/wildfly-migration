@@ -8,6 +8,8 @@ A migração direta de uma aplicação Java 7/WildFly 9 para Java 25/WildFly 41 
 - Preservar cada estado reproduzível por tag/checkpoint Git, artefato WAR, manifesto de dependências e resultado dos testes de contrato.
 - Dividir cada fase e gate em checkpoints parciais com no máximo quatro tarefas de implementação, uma validação mínima explícita e uma entrega própria no GitHub.
 - Iniciar o trabalho por um checkpoint de bootstrap que configure o repositório Git/GitHub, o fluxo de branches e pull requests, as verificações obrigatórias e a documentação de instalação e configuração do ambiente.
+- Executar, a partir do `CP-1D`, em cada pull request aplicável uma trilha portátil de CI com H2 em memória e modo de compatibilidade Oracle, usando o mesmo datasource JNDI e os mesmos contratos HTTP da aplicação, sem apresentar esse resultado como qualificação Oracle.
+- Executar separadamente a qualificação oficial contra Oracle Database 19c a partir de um ambiente autorizado na rede interna, vinculando a evidência sanitizada ao commit e ao WAR testados.
 - Exigir que cada checkpoint parcial seja reproduzível a partir de um checkout limpo, produza evidências proporcionais ao que já existe e seja integrado ao branch principal por um commit de entrega identificável.
 - Organizar a migração em exatamente três fases públicas:
   1. baseline legado em Java 7u80 e WildFly 9.0.2;
@@ -17,7 +19,7 @@ A migração direta de uma aplicação Java 7/WildFly 9 para Java 25/WildFly 41 
   disponível compatível com Java 7, mantendo-a até a atualização explícita para
   Maven 3.9.16 no `CP-2C`.
 - Adicionar fluxos funcionais de pedidos, sessão, filtros, listener, upload, acesso a dados via MyBatis/JNDI, páginas JSP, tag library customizada e processamento XML.
-- Congelar o comportamento funcional no baseline e executar o mesmo contrato após cada fase.
+- Congelar o comportamento funcional no baseline e executar o mesmo contrato após cada fase, distinguindo os resultados `portable-ci` obtidos com H2 dos resultados `oracle-qualified` obtidos com Oracle 19c.
 - Executar a fase 3 por três gates técnicos internos e sequenciais, sem apresentá-los como fases públicas ou destinos independentes de produção:
   1. Java 17 no WildFly 26.1.3 para atualizar bibliotecas compatíveis com EE 8/`javax` e remover APIs duplicadas;
   2. Java 21 no WildFly 41 para migrar a aplicação para Jakarta EE 11 e aplicar as substituições arquiteturais;
@@ -37,8 +39,8 @@ A migração direta de uma aplicação Java 7/WildFly 9 para Java 25/WildFly 41 
 
 - `legacy-webapp-baseline`: primeiro checkpoint da aplicação única, executável no ambiente legado e acompanhado de contrato funcional, inventário e artefato imutável.
 - `modern-jakarta-webapp`: estado final da mesma aplicação após a terceira fase, executável no WildFly 41/Jakarta EE 11 e sem dependências descontinuadas.
-- `migration-compatibility-lab`: progressão reproduzível pelos três checkpoints públicos, gates técnicos e checkpoints parciais entregues pelo GitHub, incluindo incompatibilidades, diagnósticos, evidências e rollback.
-- `wildfly-oracle-runtime`: provisionamento reproduzível dos runtimes das três fases e dos gates internos, incluindo documentação de pré-requisitos, diagnóstico do ambiente, drivers JDBC, datasources JNDI e conectividade com Oracle Database 19c.
+- `migration-compatibility-lab`: progressão reproduzível pelos três checkpoints públicos, gates técnicos e checkpoints parciais entregues pelo GitHub, incluindo incompatibilidades, diagnósticos, evidências portáteis e Oracle, e rollback.
+- `wildfly-oracle-runtime`: provisionamento reproduzível dos runtimes das três fases e dos gates internos, incluindo documentação de pré-requisitos, diagnóstico do ambiente, perfil H2 em memória para CI, drivers JDBC, datasources JNDI e conectividade oficial com Oracle Database 19c.
 
 ### Modified Capabilities
 
@@ -48,6 +50,7 @@ Nenhuma. O projeto ainda não possui especificações de capacidades existentes.
 
 - Uma única árvore Maven `app/`, modificada fase a fase, além de testes de contrato, runtimes, documentação e evidências.
 - Repositório GitHub com branch principal protegido, branches de checkpoint, pull requests, verificações automatizadas e convenção de commits de entrega.
+- CI hospedado sem acesso à rede interna, com H2 estritamente de teste, scripts de schema equivalentes e classificação explícita das evidências; Oracle 19c permanece externo e obrigatório para qualificar persistência e encerrar as fases.
 - Documentação inicial de instalação dos JDKs, Maven, WildFly, Git, ferramentas auxiliares e acesso ao Oracle, acompanhada de configuração segura e diagnóstico executável do ambiente.
 - Três checkpoints Git verdes: `migration/01-legacy-baseline`, `migration/02-java8-wildfly26` e `migration/03-final`.
 - Checkpoints parciais identificados por `CP-<fase><letra>`, preservados por commits de entrega no branch principal sem criar fases ou tags públicas adicionais.
@@ -55,6 +58,7 @@ Nenhuma. O projeto ainda não possui especificações de capacidades existentes.
 - WildFly 9.0.2 no baseline, WildFly 26.1.3 como ponte EE 8/`javax` e WildFly 41.0.0.Final como destino.
 - OpenJDK 25 e WildFly comunitário no destino, sem dependência de Oracle JDK, JBoss EAP ou outra distribuição proprietária do runtime.
 - Jakarta EE Web Profile 11 no escopo `provided` somente na fase final, substituindo as APIs Servlet, JSP e JSTL antigas.
-- Oracle Database 19c e `com.oracle.database.jdbc:ojdbc17:23.26.2.0.0`.
+- H2 em memória, em versão fixada e compatível com o Java de cada fase, somente no runtime de teste e nunca no WAR.
+- Oracle Database 19c e `com.oracle.database.jdbc:ojdbc17:23.26.2.0.0` na qualificação oficial.
 - Gates internos para modernizar MyBatis, logging, upload, Tiles, Reflections, XMLBeans, dom4j e APIs XML antes e durante a transição Jakarta.
 - Scripts, dados de teste, documentação, tags e verificações do conteúdo do WAR em cada fase.
