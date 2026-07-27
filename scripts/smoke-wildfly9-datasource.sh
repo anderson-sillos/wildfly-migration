@@ -64,6 +64,33 @@ configuration_value() {
   fi
 }
 
+sanitize_oracle_output() {
+  local line sanitized
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ -n "${ORACLE_DB_URL_VALUE:-}" &&
+          "$line" == *"$ORACLE_DB_URL_VALUE"* ]] ||
+       [[ -n "${ORACLE_DB_USER_VALUE:-}" &&
+          "$line" == *"$ORACLE_DB_USER_VALUE"* ]] ||
+       [[ -n "${ORACLE_DB_PASSWORD_VALUE:-}" &&
+          "$line" == *"$ORACLE_DB_PASSWORD_VALUE"* ]]; then
+      printf '[linha omitida por conter configuração Oracle]\n'
+      continue
+    fi
+
+    case "$line" in
+      *jdbc:oracle:*|*ORACLE_DB_*|*connection-url*|*user-name*|\
+      *password*|*PASSWORD*)
+        printf '[linha omitida por conter configuração Oracle]\n'
+        ;;
+      *)
+        sanitized="${line//"$TEMP_DIRECTORY"/<runtime-temporario>}"
+        printf '%s\n' "$sanitized"
+        ;;
+    esac
+  done
+}
+
 cleanup() {
   if [[ "$SERVER_STARTED" == true && -n "$RUNTIME_HOME" ]]; then
     JAVA_HOME="${SELECTED_JAVA_HOME:-}" \
@@ -282,8 +309,11 @@ if [[ "$ready" != true ]]; then
   if [[ "$PROFILE" == "ci-h2" && -f "$TEMP_DIRECTORY/server.log" ]]; then
     tail -n 30 "$TEMP_DIRECTORY/server.log" |
       sed "s#${TEMP_DIRECTORY}#<runtime-temporario>#g" >&2
+  elif [[ -f "$TEMP_DIRECTORY/server.log" ]]; then
+    tail -n 40 "$TEMP_DIRECTORY/server.log" |
+      sanitize_oracle_output >&2
   else
-    printf 'Detalhes Oracle foram ocultados para não expor configuração interna\n' >&2
+    printf 'Log do WildFly indisponível para diagnóstico sanitizado\n' >&2
   fi
   exit 1
 fi
@@ -293,6 +323,10 @@ if ! JAVA_HOME="$SELECTED_JAVA_HOME" \
     --controller="127.0.0.1:$MANAGEMENT_PORT_VALUE" \
     --file="$PROFILE_FILE" >"$TEMP_DIRECTORY/profile.out" 2>&1; then
   printf 'FALHA: não foi possível aplicar o perfil %s\n' "$PROFILE" >&2
+  if [[ "$PROFILE" == "oracle" ]]; then
+    tail -n 30 "$TEMP_DIRECTORY/profile.out" |
+      sanitize_oracle_output >&2
+  fi
   exit 1
 fi
 
@@ -302,6 +336,10 @@ if ! JAVA_HOME="$SELECTED_JAVA_HOME" \
     --commands='/subsystem=datasources/data-source=MigrationDS:test-connection-in-pool' \
     >"$TEMP_DIRECTORY/test.out" 2>&1; then
   printf 'FALHA: teste do datasource %s não concluiu\n' "$PROFILE" >&2
+  if [[ "$PROFILE" == "oracle" ]]; then
+    tail -n 30 "$TEMP_DIRECTORY/test.out" |
+      sanitize_oracle_output >&2
+  fi
   exit 1
 fi
 
@@ -309,6 +347,10 @@ if ! grep -Fq '"outcome" => "success"' "$TEMP_DIRECTORY/test.out" ||
    ! grep -Eq '"result" => (\[true\]|true)' "$TEMP_DIRECTORY/test.out"; then
   printf 'FALHA: pool MigrationDS não confirmou uma conexão no perfil %s\n' \
     "$PROFILE" >&2
+  if [[ "$PROFILE" == "oracle" ]]; then
+    tail -n 30 "$TEMP_DIRECTORY/test.out" |
+      sanitize_oracle_output >&2
+  fi
   exit 1
 fi
 

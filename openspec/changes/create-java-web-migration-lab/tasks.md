@@ -29,7 +29,7 @@
 - [x] 1.16 Revisar o impacto do H2 sobre as entregas `1.3`, `1.4`, `1.9` e `1.14`, selecionar e fixar uma distribuição Java 7 redistribuível e uma versão H2 compatível e atualizar documentação e manifestos com versão, origem, licença, checksum, condição EOL e distinção para a reprodução exata com Oracle JDK 7u80.
 - [x] 1.17 Estender `.env.example`, ignores, `doctor` e auditoria do WAR para os perfis `ci-h2` e `oracle`, exigindo somente os pré-requisitos do perfil selecionado e rejeitando H2, `ojdbc` ou segredos dentro do WAR ou do controle de versão.
 - [x] 1.18 Criar scripts H2 próprios de schema, massa e limpeza semanticamente equivalentes aos scripts Oracle canônicos, automatizar sua validação estática e registrar diferenças de tipos, constraints, sequences, timestamps e LOBs.
-- [ ] 1.19 Configurar no WildFly 9 os perfis `ci-h2` e `oracle` sob `java:/jdbc/MigrationDS`, impedir console/listener H2, testar os dois datasources e preparar o workflow portátil sem expor a rede interna.
+- [x] 1.19 Configurar no WildFly 9 os perfis `ci-h2` e `oracle` sob `java:/jdbc/MigrationDS`, impedir console/listener H2, testar os dois datasources e preparar o workflow portátil sem expor a rede interna.
 - [ ] 1.20 Encerrar `CP-1D`: executar `doctor`, auditorias, scripts e smoke de datasource `portable-ci` no CI hospedado e `oracle-qualified` na rede interna, registrar evidências sanitizadas e rollback e integrar o PR pelo commit `checkpoint(CP-1D): establish portable persistence foundation`.
 
 ### Checkpoint CP-1E — Fluxo web e persistência

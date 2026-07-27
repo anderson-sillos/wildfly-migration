@@ -31,6 +31,21 @@ for variable in "${required_variables[@]}"; do
   fi
 done
 
+documented_oracle_url_formats=(
+  'jdbc:oracle:thin:@//HOST:PORT/SERVICE_NAME'
+  'jdbc:oracle:thin:@(DESCRIPTION='
+  'jdbc:oracle:thin:@HOST:PORT:SID'
+  'never include them in URL'
+)
+
+for format in "${documented_oracle_url_formats[@]}"; do
+  if ! grep -Fq "$format" "$REPOSITORY_ROOT/.env.example"; then
+    printf 'FALHA: .env.example não documenta o formato Oracle: %s\n' \
+      "$format" >&2
+    exit 1
+  fi
+done
+
 redundant_placeholders=(
   "app/src/main/java/.gitkeep"
   "app/src/main/resources/.gitkeep"
