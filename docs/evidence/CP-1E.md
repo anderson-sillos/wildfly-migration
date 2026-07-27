@@ -100,8 +100,14 @@ git diff --check
 ```
 
 O job `portable-ci` executa build, auditoria, lifecycle H2, prova dinâmica
-MyBatis e o smoke web no runner hospedado. A execução será registrada antes do
-fechamento do checkpoint.
+MyBatis e o smoke web no runner hospedado. Para a revisão de código
+`2eb09dfeae87623e706b95cf7be2e0f43c8e6169`, a execução
+[`30309714160`](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30309714160)
+foi aprovada em 27 de julho de 2026:
+
+- `repository-baseline`: aprovado em 11 segundos;
+- `portable-ci`: aprovado em 52 segundos;
+- nenhum secret, Oracle JDK, `ojdbc7` ou rota interna foi fornecido ao runner.
 
 ## Rollback
 
