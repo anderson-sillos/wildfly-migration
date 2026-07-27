@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="br.com.asillos.migration.persistence.AnexoMapper">
+  <resultMap id="anexoResult" type="anexo">
+    <id property="id" column="ID" javaType="java.lang.Long"/>
+    <result property="pedidoId" column="PEDIDO_ID"
+            javaType="java.lang.Long"/>
+    <result property="nomeArquivo" column="NOME_ARQUIVO"/>
+    <result property="tipoConteudo" column="TIPO_CONTEUDO"/>
+    <result property="tamanhoBytes" column="TAMANHO_BYTES"
+            javaType="java.lang.Long"/>
+    <result property="sha256" column="SHA256"
+            javaType="java.lang.String" jdbcType="CHAR"
+            typeHandler="br.com.asillos.migration.persistence.Sha256TypeHandler"/>
+    <result property="conteudo" column="CONTEUDO"
+            javaType="[B" jdbcType="BLOB"/>
+    <result property="criadoEm" column="CRIADO_EM"
+            javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+  </resultMap>
+
+  <sql id="anexoColumns">
+    ID, PEDIDO_ID, NOME_ARQUIVO, TIPO_CONTEUDO, TAMANHO_BYTES,
+    SHA256, CONTEUDO, CRIADO_EM
+  </sql>
+
+  <!-- Somente a obtenção da sequence difere entre os fornecedores. -->
+  <select id="proximoId" resultType="java.lang.Long" databaseId="oracle">
+    SELECT LAB_ANEXO_SEQ.NEXTVAL FROM DUAL
+  </select>
+
+  <select id="proximoId" resultType="java.lang.Long" databaseId="h2">
+    SELECT NEXT VALUE FOR LAB_ANEXO_SEQ
+  </select>
+
+  <select id="listarPorPedido" resultMap="anexoResult">
+    SELECT
+      <include refid="anexoColumns"/>
+    FROM LAB_ANEXO
+    WHERE PEDIDO_ID = #{pedidoId,jdbcType=DECIMAL}
+    ORDER BY ID
+  </select>
+
+  <select id="buscarPorId" resultMap="anexoResult">
+    SELECT
+      <include refid="anexoColumns"/>
+    FROM LAB_ANEXO
+    WHERE ID = #{id,jdbcType=DECIMAL}
+  </select>
+
+  <insert id="inserir" parameterType="anexo">
+    INSERT INTO LAB_ANEXO (
+      ID,
+      PEDIDO_ID,
+      NOME_ARQUIVO,
+      TIPO_CONTEUDO,
+      TAMANHO_BYTES,
+      SHA256,
+      CONTEUDO,
+      CRIADO_EM
+    ) VALUES (
+      #{id,jdbcType=DECIMAL},
+      #{pedidoId,jdbcType=DECIMAL},
+      #{nomeArquivo,jdbcType=VARCHAR},
+      #{tipoConteudo,jdbcType=VARCHAR},
+      #{tamanhoBytes,jdbcType=DECIMAL},
+      #{sha256,jdbcType=CHAR,
+        typeHandler=br.com.asillos.migration.persistence.Sha256TypeHandler},
+      #{conteudo,jdbcType=BLOB},
+      #{criadoEm,jdbcType=TIMESTAMP}
+    )
+  </insert>
+</mapper>

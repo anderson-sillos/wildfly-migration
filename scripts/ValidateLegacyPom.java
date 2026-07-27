@@ -292,6 +292,9 @@ public final class ValidateLegacyPom {
         require("MigrationDS".equals(
                 properties.getProperty("datasource.pool-name")),
                 "pool legado divergente");
+        require("false".equals(
+                properties.getProperty("datasource.jta")),
+                "datasource legado deve usar transação local do MyBatis");
         require("h2-cp1d".equals(
                 properties.getProperty("profile.ci-h2.driver.name")),
                 "nome do driver H2 divergente");

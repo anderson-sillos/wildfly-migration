@@ -12,6 +12,12 @@ listener. `oracle.cli` usa `ojdbc7` e mantém URL, usuário e senha como
 expressões `${env.ORACLE_DB_*}` resolvidas pelo processo do WildFly. Nenhum
 valor real é gravado no XML ou nos arquivos CLI.
 
+A partir do CP-1E, ambos declaram `jta=false`: o WildFly continua responsável
+pelo pool JNDI, enquanto o MyBatis delimita a transação JDBC local e executa
+`commit` ou `rollback`. A justificativa e o ponto de adaptação para aplicações
+que já usam JTA estão em
+[`docs/mybatis-persistence.md`](../../../docs/mybatis-persistence.md).
+
 Os arquivos são aplicados somente sobre uma cópia temporária e limpa do
 WildFly pelo script:
 

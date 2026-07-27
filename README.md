@@ -73,6 +73,20 @@ No CP-1D, escolha o perfil sem misturar seus pré-requisitos:
 `ci-h2` nunca produz qualificação Oracle; `oracle` depende do ambiente
 autorizado na rede interna.
 
+Durante a construção do CP-1E, a base MyBatis pode ser verificada
+estaticamente ou, depois do build `ci-h2`, também de forma dinâmica:
+
+```bash
+./scripts/validate-cp-1e-persistence.sh
+./scripts/validate-cp-1e-persistence.sh \
+  --java-home /caminho/do/zulu7 \
+  --h2-jar /caminho/do/h2-1.4.200.jar
+```
+
+O segundo comando executa criação, consulta, BLOB e rollback pelos mesmos
+mappers do WAR. A arquitetura está em
+[persistência MyBatis](docs/mybatis-persistence.md).
+
 Antes de contribuir, consulte [o fluxo GitHub](docs/github-workflow.md),
 [os checkpoints](docs/checkpoints.md), [CONTRIBUTING.md](CONTRIBUTING.md) e
 [SECURITY.md](SECURITY.md).

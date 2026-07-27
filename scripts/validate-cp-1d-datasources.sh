@@ -35,7 +35,9 @@ done
 
 for profile in "$H2_PROFILE" "$ORACLE_PROFILE"; do
   if [[ "$(grep -Fc 'jndi-name=java:/jdbc/MigrationDS' "$profile")" != "1" ||
-        "$(grep -Fc 'pool-name=MigrationDS' "$profile")" != "1" ]]; then
+        "$(grep -Fc 'pool-name=MigrationDS' "$profile")" != "1" ||
+        "$(grep -Fc 'jta=false' "$profile")" != "1" ||
+        "$(grep -Fc 'jta=true' "$profile")" != "0" ]]; then
     printf 'FALHA: perfil não publica exatamente o contrato MigrationDS: %s\n' \
       "${profile##*/}" >&2
     exit 1
@@ -93,6 +95,7 @@ fi
 contract_rules=(
   'datasource.jndi-name=java:/jdbc/MigrationDS'
   'datasource.pool-name=MigrationDS'
+  'datasource.jta=false'
   'profile.ci-h2.driver.name=h2-cp1d'
   'profile.ci-h2.driver.module=com.h2database.h2.cp1d'
   'profile.oracle.driver.name=oracle'

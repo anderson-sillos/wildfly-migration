@@ -204,6 +204,16 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-1E; then
+    required+=(
+      "docs/mybatis-persistence.md"
+      "scripts/validate-cp-1e-persistence.sh"
+      "app/src/main/resources/mybatis-config.xml"
+      "app/src/main/resources/mybatis/PedidoMapper.xml"
+      "app/src/main/resources/mybatis/AnexoMapper.xml"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"

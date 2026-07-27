@@ -30,6 +30,7 @@ jobs:
           bash -n scripts/validate-cp-1d-datasources.sh
           bash -n scripts/build-cp-1d.sh
           bash -n scripts/smoke-wildfly9-datasource.sh
+          bash -n scripts/validate-cp-1e-persistence.sh
 
       - name: Validate repository baseline
         run: ./scripts/doctor.sh CP-1A --ci
@@ -51,6 +52,9 @@ jobs:
 
       - name: Validate CP-1D datasource profiles
         run: ./scripts/validate-cp-1d-datasources.sh
+
+      - name: Validate CP-1E persistence statically
+        run: ./scripts/validate-cp-1e-persistence.sh
 
   portable-ci:
     name: portable-ci
@@ -114,6 +118,12 @@ jobs:
 
       - name: Build and audit portable WAR
         run: ./scripts/build-cp-1d.sh --profile ci-h2
+
+      - name: Execute MyBatis portable persistence probe
+        run: |
+          ./scripts/validate-cp-1e-persistence.sh \
+            --java-home "$JAVA7_PORTABLE_HOME" \
+            --h2-jar "$H2_JAR"
 
       - name: Execute H2 schema lifecycle
         run: |
