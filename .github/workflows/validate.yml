@@ -30,7 +30,9 @@ jobs:
           bash -n scripts/validate-cp-1d-datasources.sh
           bash -n scripts/build-cp-1d.sh
           bash -n scripts/smoke-wildfly9-datasource.sh
+          bash -n scripts/oracle-lab-schema.sh
           bash -n scripts/validate-cp-1e-persistence.sh
+          bash -n scripts/validate-cp-1e-web.sh
 
       - name: Validate repository baseline
         run: ./scripts/doctor.sh CP-1A --ci
@@ -55,6 +57,9 @@ jobs:
 
       - name: Validate CP-1E persistence statically
         run: ./scripts/validate-cp-1e-persistence.sh
+
+      - name: Validate CP-1E web layer statically
+        run: ./scripts/validate-cp-1e-web.sh
 
   portable-ci:
     name: portable-ci
@@ -114,7 +119,7 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Run portable doctor
-        run: ./scripts/doctor.sh CP-1D --profile ci-h2 --ci
+        run: ./scripts/doctor.sh CP-1E --profile ci-h2 --ci
 
       - name: Build and audit portable WAR
         run: ./scripts/build-cp-1d.sh --profile ci-h2
@@ -132,4 +137,7 @@ jobs:
             --h2-jar "$H2_JAR"
 
       - name: Smoke WildFly 9 H2 datasource
-        run: ./scripts/smoke-wildfly9-datasource.sh --profile ci-h2
+        run: |
+          ./scripts/smoke-wildfly9-datasource.sh \
+            --profile ci-h2 \
+            --war app/target/wildfly-migration.war

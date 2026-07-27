@@ -47,11 +47,14 @@ done
 if ! grep -Fq \
     'connection-url="jdbc:h2:mem:migration;MODE=Oracle;DB_CLOSE_DELAY=-1"' \
     "$H2_PROFILE" ||
+   ! grep -Fq \
+    '/subsystem=ee/service=default-bindings:write-attribute(name=datasource,value=java:/jdbc/MigrationDS)' \
+    "$H2_PROFILE" ||
    ! grep -Fq 'driver-module-name=com.h2database.h2.cp1d' "$H2_PROFILE" ||
    grep -Eiq \
     'jdbc:h2:(tcp|ssl)|AUTO_SERVER|createTcpServer|createWebServer|user-name=|password=' \
     "$H2_PROFILE"; then
-  printf 'FALHA: perfil H2 não está restrito ao processo e sem credenciais\n' >&2
+  printf 'FALHA: perfil H2 não está restrito ao processo, sem credenciais e com binding padrão válido\n' >&2
   exit 1
 fi
 

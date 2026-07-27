@@ -115,6 +115,8 @@ public final class ValidateLegacyPom {
                 values("0.9.10", "compile"));
         expected.put("org.apache.tiles:tiles-api",
                 values("2.1.4", "compile"));
+        expected.put("org.apache.tiles:tiles-jsp",
+                values("2.1.4", "compile"));
         expected.put("org.apache.xmlbeans:xmlbeans",
                 values("2.3.0", "compile"));
         expected.put("xml-apis:xml-apis",

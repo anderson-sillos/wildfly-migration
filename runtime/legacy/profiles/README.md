@@ -8,9 +8,12 @@ jndi-name: java:/jdbc/MigrationDS
 ```
 
 `ci-h2.cli` usa H2 1.4.200 em memória e não declara usuário, senha, console ou
-listener. `oracle.cli` usa `ojdbc7` e mantém URL, usuário e senha como
-expressões `${env.ORACLE_DB_*}` resolvidas pelo processo do WildFly. Nenhum
-valor real é gravado no XML ou nos arquivos CLI.
+listener. Como o perfil remove o `ExampleDS`, ele também reaponta o binding
+Java EE `DefaultDataSource` para `java:/jdbc/MigrationDS`; sem isso, o WildFly
+recusa o deploy mesmo que a aplicação use somente o JNDI explícito.
+`oracle.cli` usa `ojdbc7` e mantém URL, usuário e senha como expressões
+`${env.ORACLE_DB_*}` resolvidas pelo processo do WildFly. Nenhum valor real é
+gravado no XML ou nos arquivos CLI.
 
 A partir do CP-1E, ambos declaram `jta=false`: o WildFly continua responsável
 pelo pool JNDI, enquanto o MyBatis delimita a transação JDBC local e executa

@@ -41,6 +41,11 @@ Extreme Performance, Release `19.0.0.0.0`. Esse banner não identifica o Release
 Update instalado; a identificação do RU permanece pendente para a suíte Oracle
 funcional que começa com a persistência da aplicação.
 
+Atualização posterior ao fechamento do CP-1D: durante o CP-1E,
+`V$VERSION.BANNER_FULL` retornou `Version 19.3.0.0.0`. A referência Oracle do
+laboratório passa a ser RU 19.3; patches `one-off` continuam desconhecidos sem
+o inventário do Oracle Home.
+
 ## Resultado `portable-ci`
 
 O job hospedado do PR `#10`, revisão `4758f38`, foi aprovado em 27 de julho de
@@ -132,7 +137,8 @@ de ferramentas ou qualquer schema Oracle como parte do rollback Git.
 ## Limitações abertas
 
 - H2 em modo Oracle não substitui Oracle Database 19c.
-- O Release Update exato do Oracle ainda precisa ser registrado.
+- O RU foi identificado posteriormente como 19.3; o inventário opcional de
+  patches `one-off` ainda não foi fornecido.
 - A conta Oracle usada no smoke comprovou conexão; seus privilégios mínimos
   para DDL/DML serão verificados antes de executar scripts contra um schema
   descartável.

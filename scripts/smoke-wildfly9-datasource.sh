@@ -5,17 +5,21 @@ set -euo pipefail
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPOSITORY_ROOT/.env"
 PROFILE=""
+WAR_FILE=""
 TEMP_DIRECTORY=""
 RUNTIME_HOME=""
 SERVER_PID=""
 SERVER_STARTED=false
+ORACLE_SMOKE_CREATED=false
 
 usage() {
   cat <<'USAGE'
 Uso:
-  ./scripts/smoke-wildfly9-datasource.sh --profile ci-h2|oracle [--env ARQUIVO]
+  ./scripts/smoke-wildfly9-datasource.sh --profile ci-h2|oracle \
+    [--env ARQUIVO] [--war ARQUIVO]
 
 Valores já exportados no ambiente prevalecem sobre o arquivo informado.
+Sem --war, valida somente o datasource. Com --war, valida também o fluxo web.
 USAGE
 }
 
@@ -92,6 +96,15 @@ sanitize_oracle_output() {
 }
 
 cleanup() {
+  if [[ "$ORACLE_SMOKE_CREATED" == true && "$PROFILE" == "oracle" ]]; then
+    ORACLE_DB_URL="$ORACLE_DB_URL_VALUE" \
+    ORACLE_DB_USER="$ORACLE_DB_USER_VALUE" \
+    ORACLE_DB_PASSWORD="$ORACLE_DB_PASSWORD_VALUE" \
+      "$REPOSITORY_ROOT/scripts/oracle-lab-schema.sh" \
+        cleanup-smokes --env "$ENV_FILE" >/dev/null 2>&1 || true
+    ORACLE_SMOKE_CREATED=false
+  fi
+
   if [[ "$SERVER_STARTED" == true && -n "$RUNTIME_HOME" ]]; then
     JAVA_HOME="${SELECTED_JAVA_HOME:-}" \
       "$RUNTIME_HOME/bin/jboss-cli.sh" --connect \
@@ -137,6 +150,14 @@ while [[ $# -gt 0 ]]; do
       ENV_FILE="$2"
       shift 2
       ;;
+    --war)
+      [[ $# -ge 2 ]] || {
+        printf 'FALHA: --war exige um arquivo\n' >&2
+        exit 2
+      }
+      WAR_FILE="$2"
+      shift 2
+      ;;
     -h|--help)
       usage
       exit 0
@@ -157,6 +178,18 @@ case "$PROFILE" in
     exit 2
     ;;
 esac
+
+if [[ -n "$WAR_FILE" ]]; then
+  if [[ ! -f "$WAR_FILE" ]]; then
+    printf 'FALHA: WAR não encontrado: %s\n' "$WAR_FILE" >&2
+    exit 1
+  fi
+  if ! command -v curl >/dev/null 2>&1; then
+    printf 'FALHA: curl é obrigatório para o smoke web\n' >&2
+    exit 1
+  fi
+  WAR_FILE="$(cd "$(dirname "$WAR_FILE")" && pwd)/$(basename "$WAR_FILE")"
+fi
 
 WILDFLY9_HOME_VALUE="$(configuration_value WILDFLY9_HOME)"
 WILDFLY9_ARCHIVE_VALUE="$(configuration_value WILDFLY9_ARCHIVE)"
@@ -272,6 +305,7 @@ if [[ "$PROFILE" == "ci-h2" ]]; then
       -bmanagement 127.0.0.1 \
       -Djboss.http.port="$HTTP_PORT_VALUE" \
       -Djboss.management.http.port="$MANAGEMENT_PORT_VALUE" \
+      -Dmigration.bootstrap.h2=true \
       >"$TEMP_DIRECTORY/server.log" 2>&1 &
 else
   ORACLE_DB_URL="$ORACLE_DB_URL_VALUE" \
@@ -372,6 +406,127 @@ else
       exit 1
     fi
   done
+fi
+
+if [[ -n "$WAR_FILE" ]]; then
+  if ! JAVA_HOME="$SELECTED_JAVA_HOME" \
+      "$RUNTIME_HOME/bin/jboss-cli.sh" --connect \
+      --controller="127.0.0.1:$MANAGEMENT_PORT_VALUE" \
+      --commands="deploy $WAR_FILE --force" \
+      >"$TEMP_DIRECTORY/deploy.out" 2>&1; then
+    printf 'FALHA: WAR não pôde ser implantado no perfil %s\n' "$PROFILE" >&2
+    if [[ "$PROFILE" == "oracle" ]]; then
+      tail -n 40 "$TEMP_DIRECTORY/deploy.out" |
+        sanitize_oracle_output >&2
+      tail -n 60 "$TEMP_DIRECTORY/server.log" |
+        sanitize_oracle_output >&2
+    else
+      tail -n 40 "$TEMP_DIRECTORY/deploy.out" >&2
+      tail -n 60 "$TEMP_DIRECTORY/server.log" |
+        sed "s#${TEMP_DIRECTORY}#<runtime-temporario>#g" >&2
+    fi
+    exit 1
+  fi
+
+  base_url="http://127.0.0.1:$HTTP_PORT_VALUE/wildfly-migration"
+  headers="$TEMP_DIRECTORY/headers.out"
+  body="$TEMP_DIRECTORY/body.out"
+  cookies="$TEMP_DIRECTORY/cookies.txt"
+  application_ready=false
+  for unused in $(seq 1 45); do
+    if curl --silent --show-error --fail \
+        --dump-header "$headers" \
+        --output "$body" \
+        "$base_url/health" &&
+       grep -Fq 'status=UP' "$body"; then
+      application_ready=true
+      break
+    fi
+    sleep 1
+  done
+  if [[ "$application_ready" != true ]]; then
+    printf 'FALHA: aplicação não ficou saudável no perfil %s\n' "$PROFILE" >&2
+    if [[ "$PROFILE" == "oracle" ]]; then
+      tail -n 60 "$TEMP_DIRECTORY/server.log" |
+        sanitize_oracle_output >&2
+    else
+      tail -n 60 "$TEMP_DIRECTORY/server.log" |
+        sed "s#${TEMP_DIRECTORY}#<runtime-temporario>#g" >&2
+    fi
+    exit 1
+  fi
+  if ! grep -Eiq '^X-Correlation-ID: [A-Za-z0-9._-]+' "$headers"; then
+    printf 'FALHA: resposta não publicou X-Correlation-ID válido\n' >&2
+    exit 1
+  fi
+
+  if ! curl --silent --show-error --fail \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --output "$body" \
+      "$base_url/pedidos" ||
+     ! grep -Fq 'data-page="pedidos-lista"' "$body" ||
+     ! grep -Fq 'LAB-0001' "$body"; then
+    printf 'FALHA: listagem JSP/JSTL não exibiu o seed esperado\n' >&2
+    exit 1
+  fi
+
+  if ! curl --silent --show-error --fail \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --output "$body" \
+      "$base_url/pedidos/novo" ||
+     ! grep -Fq 'data-page="pedidos-formulario"' "$body"; then
+    printf 'FALHA: formulário de pedido não foi renderizado\n' >&2
+    exit 1
+  fi
+
+  smoke_number="LAB-SMOKE-$(date +%s)-$SERVER_PID"
+  if [[ "$PROFILE" == "oracle" ]]; then
+    ORACLE_SMOKE_CREATED=true
+  fi
+  if ! curl --silent --show-error --fail --location \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --data-urlencode "numero=$smoke_number" \
+      --data-urlencode 'clienteNome=Cliente smoke' \
+      --data-urlencode 'descricao=Pedido criado pelo smoke CP-1E' \
+      --data-urlencode 'valorTotal=19.75' \
+      --output "$body" \
+      "$base_url/pedidos" ||
+     ! grep -Fq 'data-page="pedido-detalhe"' "$body" ||
+     ! grep -Fq "$smoke_number" "$body" ||
+     ! grep -Fq 'Cliente smoke' "$body"; then
+    printf 'FALHA: criação e consulta do pedido não concluíram\n' >&2
+    exit 1
+  fi
+
+  if ! curl --silent --show-error --fail --location \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --data-urlencode 'modoExibicao=COMPACTO' \
+      --output "$body" \
+      "$base_url/preferencia" ||
+     ! grep -Fq 'data-display-mode="COMPACTO"' "$body"; then
+    printf 'FALHA: preferência não persistiu na HttpSession\n' >&2
+    exit 1
+  fi
+
+  if [[ "$PROFILE" == "oracle" ]]; then
+    if ! ORACLE_DB_URL="$ORACLE_DB_URL_VALUE" \
+        ORACLE_DB_USER="$ORACLE_DB_USER_VALUE" \
+        ORACLE_DB_PASSWORD="$ORACLE_DB_PASSWORD_VALUE" \
+        "$REPOSITORY_ROOT/scripts/oracle-lab-schema.sh" \
+          cleanup-smokes --env "$ENV_FILE" \
+          >"$TEMP_DIRECTORY/cleanup.out" 2>&1; then
+      printf 'FALHA: dados transitórios do smoke Oracle não foram limpos\n' >&2
+      exit 1
+    fi
+    ORACLE_SMOKE_CREATED=false
+  fi
+
+  printf 'OK: fluxo web %s validou saúde, lista, criação, detalhe, TLD e sessão\n' \
+    "$PROFILE"
 fi
 
 printf 'OK: datasource %s publicou java:/jdbc/MigrationDS e passou no pool em loopback\n' \

@@ -35,9 +35,9 @@
 ### Checkpoint CP-1E — Fluxo web e persistência
 
 - [x] 1.21 Implementar domínio, mappers XML, aliases, type handlers e transações MyBatis por datasource JNDI, mantendo SQL comum e isolando por `databaseIdProvider` somente as diferenças H2/Oracle inevitáveis.
-- [ ] 1.22 Implementar Servlets de pedidos, filtro de encoding e correlação, listener de inicialização e preferência em `HttpSession`.
-- [ ] 1.23 Implementar JSPs/JSTL com layout Tiles e o TLD 2.0 com handler baseado em `javax.servlet.jsp.tagext`.
-- [ ] 1.24 Criar smoke tests para inicialização, listagem, criação, consulta e sessão nos perfis H2 e Oracle.
+- [x] 1.22 Implementar Servlets de pedidos, filtro de encoding e correlação, listener de inicialização e preferência em `HttpSession`.
+- [x] 1.23 Implementar JSPs/JSTL com layout Tiles e o TLD 2.0 com handler baseado em `javax.servlet.jsp.tagext`.
+- [x] 1.24 Criar smoke tests para inicialização, listagem, criação, consulta e sessão nos perfis H2 e Oracle.
 - [ ] 1.25 Encerrar `CP-1E`: executar build, implantação e smoke tests `portable-ci` no CI hospedado e `oracle-qualified` na rede interna, registrar commit, checksum do WAR, evidências sanitizadas e rollback e integrar o PR pelo commit `checkpoint(CP-1E): deliver legacy web flow`.
 
 ### Checkpoint CP-1F — Integrações e contratos

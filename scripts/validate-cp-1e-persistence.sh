@@ -132,6 +132,7 @@ if [[ ! -f "$H2_JAR_ARGUMENT" || ! -f "$WAR_FILE" ]]; then
   printf 'FALHA: H2 e WAR construído são obrigatórios na validação dinâmica\n' >&2
   exit 1
 fi
+WAR_FILE="$(cd "$(dirname "$WAR_FILE")" && pwd)/$(basename "$WAR_FILE")"
 
 expected_h2_checksum="$(
   awk -F '\t' '$1 == "h2" { print $6 }' \

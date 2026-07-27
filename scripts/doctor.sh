@@ -207,7 +207,11 @@ check_required_files() {
   if rank_at_least CP-1E; then
     required+=(
       "docs/mybatis-persistence.md"
+      "docs/oracle-lab-schema.md"
+      "docs/evidence/CP-1E.md"
+      "scripts/oracle-lab-schema.sh"
       "scripts/validate-cp-1e-persistence.sh"
+      "scripts/validate-cp-1e-web.sh"
       "app/src/main/resources/mybatis-config.xml"
       "app/src/main/resources/mybatis/PedidoMapper.xml"
       "app/src/main/resources/mybatis/AnexoMapper.xml"

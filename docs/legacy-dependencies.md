@@ -27,6 +27,7 @@ dependência Maven adicional.
 | `commons-fileupload:commons-fileupload` | 1.2.2 |
 | `org.reflections:reflections` | 0.9.10 |
 | `org.apache.tiles:tiles-api` | 2.1.4 |
+| `org.apache.tiles:tiles-jsp` | 2.1.4 |
 | `org.apache.xmlbeans:xmlbeans` | 2.3.0 |
 | `xml-apis:xml-apis` | 1.3.02 |
 | `org.apache.geronimo.specs:geronimo-stax-api_1.0_spec` | 1.0 |
@@ -37,7 +38,7 @@ efetivamente observada. A presença simultânea de `stax-api`, Geronimo StAX e
 `xml-apis` é preservada no baseline para que conflitos de classloader apareçam
 naturalmente durante a migração.
 
-### Lacunas preservadas para reprodução
+### Lacunas preservadas e correções incrementais
 
 O CP-1C não inventa dependências que não foram informadas para a aplicação
 original. A árvore resolvida expôs três pontos que os próximos fluxos deverão
@@ -47,15 +48,18 @@ testar antes de corrigir:
   `commons-io` não entrou automaticamente no WAR, embora classes de FileUpload
   o referenciem;
 - `tiles-api:2.1.4` fornece apenas a API, não a implementação completa de
-  renderização;
+  renderização. O problema foi reproduzido no início do CP-1E e corrigido com
+  a menor mudança compatível com o legado: `tiles-jsp:2.1.4`, que inclui
+  transitivamente `tiles-core`, `tiles-servlet`, `commons-digester` e
+  `commons-beanutils`;
 - `jstl-api:1.2` traz `javax.servlet.jsp:jsp-api:2.1` transitivamente em
   `provided`, enquanto o POM também declara a coordenada histórica
   `javax.servlet:jsp-api:2.0`.
 
-Esses pontos não impedem o WAR estrutural do CP-1C, porque ainda não há fluxo
-funcional. Eles serão reproduzidos naturalmente nos checkpoints que implementam
-Tiles, upload e JSP/JSTL. Qualquer correção deverá registrar sintoma, causa,
-menor mudança e impacto no baseline.
+Esses pontos não impediam o WAR estrutural do CP-1C, porque ainda não havia
+fluxo funcional. A correção de Tiles entra somente quando o CP-1E passa a
+renderizar JSPs; a lacuna do FileUpload continua reservada ao fluxo de upload.
+Qualquer correção registra sintoma, causa, menor mudança e impacto no baseline.
 
 ## Driver Oracle
 

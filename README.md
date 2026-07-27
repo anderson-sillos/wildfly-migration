@@ -78,13 +78,19 @@ estaticamente ou, depois do build `ci-h2`, também de forma dinâmica:
 
 ```bash
 ./scripts/validate-cp-1e-persistence.sh
+./scripts/validate-cp-1e-web.sh
 ./scripts/validate-cp-1e-persistence.sh \
   --java-home /caminho/do/zulu7 \
   --h2-jar /caminho/do/h2-1.4.200.jar
+./scripts/smoke-wildfly9-datasource.sh \
+  --profile ci-h2 \
+  --env .env \
+  --war app/target/wildfly-migration.war
 ```
 
 O segundo comando executa criação, consulta, BLOB e rollback pelos mesmos
-mappers do WAR. A arquitetura está em
+mappers do WAR. O último implanta o WAR e valida saúde, lista, criação,
+detalhe, Tiles/TLD e sessão. A arquitetura está em
 [persistência MyBatis](docs/mybatis-persistence.md).
 
 Antes de contribuir, consulte [o fluxo GitHub](docs/github-workflow.md),
@@ -104,6 +110,10 @@ As diferenças de schema e semântica estão na
 [matriz H2/Oracle](docs/h2-oracle-differences.md).
 A aprovação separada dos dois perfis e seu rollback estão na
 [evidência do CP-1D](docs/evidence/CP-1D.md).
+A evolução corrente do fluxo web e sua qualificação está na
+[evidência do CP-1E](docs/evidence/CP-1E.md).
+A verificação obrigatória antes de alterar o Oracle está em
+[aprovação do schema do laboratório](docs/oracle-lab-schema.md).
 
 A [preparação completa do ambiente](docs/environment-setup.md) contém a matriz
 de componentes por checkpoint e os endereços oficiais das fases futuras.
