@@ -92,9 +92,16 @@ if ! diff -u "$TEMP_DIRECTORY/expected-libraries.txt" \
 fi
 
 if grep -Eq \
-    '^WEB-INF/lib/(servlet-api|jsp-api|jstl-api)-[^/]+\.jar$|^WEB-INF/lib/ojdbc[^/]*\.jar$' \
+    '^WEB-INF/lib/(servlet-api|jsp-api|jstl-api|h2)-[^/]+\.jar$|^WEB-INF/lib/ojdbc[^/]*\.jar$' \
     "$TEMP_DIRECTORY/entries.txt"; then
-  printf 'FALHA: API do contêiner ou driver Oracle foi empacotado\n' >&2
+  printf 'FALHA: API do contêiner ou driver de banco foi empacotado\n' >&2
+  exit 1
+fi
+
+if grep -Eiq \
+    '(^|/)(\.env($|\.)|[^/]+\.(pem|key|p12|pfx|jks|wallet)$|tnsnames\.ora$|sqlnet\.ora$|ojdbc\.properties$)' \
+    "$TEMP_DIRECTORY/entries.txt"; then
+  printf 'FALHA: arquivo de segredo ou configuração sensível foi empacotado\n' >&2
   exit 1
 fi
 
@@ -124,6 +131,20 @@ fi
 
 if git -C "$REPOSITORY_ROOT" ls-files '*.jar' | grep -q .; then
   printf 'FALHA: há JAR versionado no repositório\n' >&2
+  exit 1
+fi
+
+tracked_sensitive="$(
+  git -C "$REPOSITORY_ROOT" ls-files | awk '
+    /(^|\/)\.env($|\.)/ && $0 !~ /(^|\/)\.env\.example$/ ||
+    /(^|\/)\.secrets\// ||
+    /(^|\/)oracle-wallet\// ||
+    /\.(pem|key|p12|pfx|jks|wallet)$/ ||
+    /(^|\/)(tnsnames|sqlnet)\.ora$/ { print; exit }
+  '
+)"
+if [[ -n "$tracked_sensitive" ]]; then
+  printf 'FALHA: há segredo ou configuração sensível versionada\n' >&2
   exit 1
 fi
 

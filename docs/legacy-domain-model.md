@@ -59,10 +59,16 @@ representa a forma normalizada observada pelos testes HTTP.
   [`002_seed.sql`](../app/src/main/resources/db/oracle/002_seed.sql);
 - limpeza reversível:
   [`rollback.sql`](../app/src/main/resources/db/oracle/rollback.sql);
+- scripts H2 equivalentes e exclusivos do CI:
+  [`db/h2/`](../app/src/main/resources/db/h2/);
+- matriz de diferenças H2/Oracle:
+  [`h2-oracle-differences.md`](h2-oracle-differences.md);
 - contrato XML:
   [`pedido-importacao-v1.xsd`](../app/src/main/resources/xsd/pedido-importacao-v1.xsd);
 - fixtures XML:
   [`contract-tests/fixtures/xml/`](../contract-tests/fixtures/xml/).
 
 Os scripts usam comandos compatíveis com SQL*Plus/SQLcl. Cada bloco PL/SQL deve
-ser terminado por `/` em uma linha separada.
+ser terminado por `/` em uma linha separada. Os scripts H2 são independentes,
+validados contra o mesmo contrato lógico e nunca substituem a qualificação
+Oracle.

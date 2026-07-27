@@ -171,7 +171,7 @@ Todos os runtimes publicarão `java:/jdbc/MigrationDS`, e a aplicação não sel
 | `ci-h2` | feedback automático em pull requests | H2 em memória, modo Oracle | `portable-ci` |
 | `oracle` | qualificação de compatibilidade e fechamento de fase | Oracle Database 19c externo | `oracle-qualified` |
 
-O perfil `ci-h2` não abrirá listener TCP ou console, não receberá credenciais e não empacotará H2 no WAR. A versão do H2 será fixada por fase, com origem, licença e checksum. No `CP-1D`, será aprovada uma versão compatível com Java 7 — considerando a versão fornecida pelo WildFly 9 e a linha H2 1.4.200 como candidatas — e uma distribuição Java 7 open source/redistribuível para a execução portátil. Ambos serão classificados como infraestrutura de teste EOL quando aplicável. A reprodução oficial do baseline continuará usando Oracle JDK 7u80.
+O perfil `ci-h2` não abrirá listener TCP ou console, não receberá credenciais e não empacotará H2 no WAR. A versão do H2 será fixada por fase, com origem, licença e checksum. No `CP-1D`, foram aprovados H2 1.4.200 e Zulu 7.56.0.11 CA/OpenJDK 7u352 depois de compará-los com o H2 1.3.173 fornecido pelo WildFly 9 e executar smokes nas duas distribuições Java 7. Ambos são infraestrutura de teste EOL. A reprodução oficial do baseline continua usando Oracle JDK 7u80.
 
 Mappers, aliases, type handlers e limites transacionais serão compartilhados. SQL comum permanecerá único; diferenças inevitáveis poderão usar `databaseIdProvider` ou fragmentos explicitamente identificados por fornecedor. Toda divergência H2/Oracle será documentada para impedir que o adaptador de teste esconda uma incompatibilidade real.
 
@@ -230,6 +230,5 @@ A partir do `CP-1D`, o CI hospedado executará a trilha `portable-ci` com H2 em 
 
 - Qual é o Release Update exato do Oracle Database 19c usado na validação?
 - Quais tags, classes handler, mappers MyBatis e schemas XML da aplicação real deverão inspirar uma segunda rodada de fixtures?
-- Qual distribuição Java 7 open source/redistribuível e qual versão H2 compatível serão aprovadas para a trilha `portable-ci` do baseline?
 - Quais versões intermediárias exatas serão aprovadas no gate Java 17 da fase 3 depois de confirmar suas dependências transitivas e compatibilidade com EE 8?
 - A aplicação real utiliza APIs Oracle específicas, procedures, tipos `STRUCT/ARRAY`, cursores ou somente JDBC padrão?

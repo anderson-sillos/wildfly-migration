@@ -1,9 +1,12 @@
 # Runtime legado isolado
 
-O baseline combina Oracle JDK 7u80, Apache Maven 3.8.9 e WildFly 9.0.2.Final.
-As versões, origens, licenças e os digests aprovados ficam em
-[`runtime-manifest.tsv`](runtime-manifest.tsv). Esse manifesto é a autoridade:
-um checksum informado no `.env` nunca substitui o valor versionado.
+O baseline histórico combina Oracle JDK 7u80, Apache Maven 3.8.9 e WildFly
+9.0.2.Final. As versões, origens, licenças e os digests dessa reprodução ficam
+em [`runtime-manifest.tsv`](runtime-manifest.tsv). O perfil portátil combina
+Zulu OpenJDK 7u352 e H2 1.4.200, fixados separadamente em
+[`portable-runtime-manifest.tsv`](portable-runtime-manifest.tsv). Os manifestos
+são as autoridades de suas trilhas: um checksum informado localmente nunca
+substitui o valor versionado.
 
 ## Limite de confiança
 
@@ -15,6 +18,9 @@ um checksum informado no `.env` nunca substitui o valor versionado.
   versionado, publicado ou enviado ao GitHub Actions.
 - O runtime é executado somente em host descartável, VM ou container local com
   bind em `127.0.0.1`, `localhost` ou `::1`.
+- Zulu OpenJDK 7u352 e H2 1.4.200 também são EOL e existem somente para a
+  trilha `portable-ci`; H2 fica em memória, sem console ou listener e fora do
+  WAR.
 
 ## Layout externo
 
@@ -130,3 +136,18 @@ seja encapsulado futuramente, a construção deverá ocorrer localmente com o JD
 fornecido como entrada externa e a imagem deverá permanecer privada no host.
 
 [oracle-jdk]: https://www.oracle.com/java/technologies/javase/javase7-archive-downloads.html
+
+## Runtime portátil do CP-1D
+
+O CI usa `zulu7.56.0.11-ca-jdk7.0.352-linux_x64.tar.gz`, sob GPLv2 com
+Classpath Exception, e `h2-1.4.200.jar`, sob MPL 2.0 ou EPL 1.0. Ambos são
+baixados de origens oficiais, validados pelos SHA-256 do manifesto portátil e
+mantidos fora do checkout.
+
+Essa combinação executou Maven 3.8.9 e o H2 em `MODE=Oracle` tanto no Zulu
+7u352 quanto no Oracle JDK 7u80. Isso comprova apenas que o runtime inicia. A
+qualificação oficial continua sendo Oracle JDK 7u80, `ojdbc7` e Oracle 19c na
+rede interna.
+
+Consulte [a decisão do CP-1D](../../docs/cp-1d-runtime-selection.md) antes de
+fornecer ou atualizar qualquer um desses artefatos.

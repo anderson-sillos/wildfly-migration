@@ -8,9 +8,10 @@ entraram na linha evolutiva.
 | 1 | CP-1A | GitHub, governança, documentação e diagnóstico |
 | 1 | CP-1B | Estrutura única e runtime Java 7/WildFly 9 |
 | 1 | CP-1C | WAR e dependências legadas |
-| 1 | CP-1D | Fluxo web, persistência e Oracle |
-| 1 | CP-1E | Upload, XML, descoberta e contratos |
-| 1 | CP-1F | Baseline completo e tag da fase 1 |
+| 1 | CP-1D | Fundação portátil H2 e qualificação Oracle |
+| 1 | CP-1E | Fluxo web e persistência |
+| 1 | CP-1F | Upload, XML, descoberta e contratos |
+| 1 | CP-1G | Baseline completo e tag da fase 1 |
 | 2 | CP-2A | Java 8 no WildFly 9 |
 | 2 | CP-2B | Migração do runtime para WildFly 26 |
 | 2 | CP-2C | EE 8, Maven 3.9.16 e datasource |

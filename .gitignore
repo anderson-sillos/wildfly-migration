@@ -20,6 +20,8 @@ downloads/
 .env
 .env.*
 !.env.example
+.secrets/
+oracle-wallet/
 *.local
 *.pem
 *.key
@@ -27,6 +29,11 @@ downloads/
 *.pfx
 *.jks
 *.wallet
+
+# Explicit profile artifacts (also covered by the generic archive/JAR rules).
+ojdbc*.jar
+h2-*.jar
+zulu7*-jdk7*-linux_x64.tar.gz
 
 # IDE and operating-system files
 .idea/

@@ -68,8 +68,11 @@ o fornece pelo módulo externo `com.oracle.ojdbc7`; a aplicação usa o datasour
 O Maven executa sobre Java 7, portanto os plugins também precisam ter bytecode
 compatível:
 
-As regras Enforcer usam ranges exatos: `[3.8.9]` para Maven e `[1.7.0-80]`
-para o Java 7u80 depois da normalização documentada pelo plugin.
+O Enforcer usa `[3.8.9]` para Maven. Sem perfil, e no perfil `oracle`, o range
+Java permanece `[1.7.0-80]` depois da normalização do plugin. O perfil
+`ci-h2` usa `[1.7,1.8)` para permitir a build Zulu 7u352, enquanto o `doctor`
+fixa e verifica exatamente Zulu 7.56.0.11 CA; Java 8 ou superior continua
+rejeitado.
 
 | Plugin | Versão | Motivo |
 | --- | --- | --- |

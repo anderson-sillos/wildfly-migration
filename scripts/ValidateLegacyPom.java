@@ -35,6 +35,9 @@ public final class ValidateLegacyPom {
         validateOracleModule(parse(file(
                 repository,
                 "runtime/legacy/ojdbc7/module.xml.template")));
+        validateH2Module(parse(file(
+                repository,
+                "runtime/legacy/h2/module.xml")));
         validateDatasourceContract(file(
                 repository,
                 "runtime/legacy/datasource-contract.properties"));
@@ -92,6 +95,9 @@ public final class ValidateLegacyPom {
                 "source do compilador deve ser 1.7");
         require("1.7".equals(properties.get("maven.compiler.target")),
                 "target do compilador deve ser 1.7");
+        require("[1.7.0-80]".equals(
+                properties.get("legacy.java.version.range")),
+                "range Java padrão deve preservar Oracle JDK 7u80");
 
         Map<String, String[]> expected =
                 new LinkedHashMap<String, String[]>();
@@ -192,12 +198,41 @@ public final class ValidateLegacyPom {
                         uniqueDescendant(plugin, "requireJavaVersion");
                 require("[3.8.9]".equals(text(requireMaven, "version")),
                         "Enforcer deve exigir exatamente Maven 3.8.9");
-                require("[1.7.0-80]".equals(text(requireJava, "version")),
-                        "Enforcer deve exigir exatamente Java 7u80");
+                require("${legacy.java.version.range}".equals(
+                        text(requireJava, "version")),
+                        "Enforcer deve usar o range Java selecionado pelo perfil");
             }
         }
         require(pluginCount == expectedPlugins.size(),
                 "quantidade de plugins divergente");
+
+        Map<String, String> expectedProfiles =
+                new LinkedHashMap<String, String>();
+        expectedProfiles.put("oracle", "[1.7.0-80]");
+        expectedProfiles.put("ci-h2", "[1.7,1.8)");
+
+        Element profiles = child(project, "profiles");
+        NodeList profileNodes = profiles.getChildNodes();
+        int profileCount = 0;
+        for (int index = 0; index < profileNodes.getLength(); index++) {
+            Node node = profileNodes.item(index);
+            if (!(node instanceof Element)
+                    || !"profile".equals(node.getLocalName())) {
+                continue;
+            }
+            profileCount++;
+            Element profile = (Element) node;
+            String profileId = text(profile, "id");
+            String expectedRange = expectedProfiles.get(profileId);
+            require(expectedRange != null,
+                    "perfil Maven inesperado: " + profileId);
+            Element profileProperties = child(profile, "properties");
+            require(expectedRange.equals(
+                    text(profileProperties, "legacy.java.version.range")),
+                    "range Java divergente no perfil " + profileId);
+        }
+        require(profileCount == expectedProfiles.size(),
+                "quantidade de perfis Maven divergente");
     }
 
     private static void validateWebXml(Document document) {
@@ -227,6 +262,22 @@ public final class ValidateLegacyPom {
                 "módulo Oracle deve usar ojdbc7.jar externo");
     }
 
+    private static void validateH2Module(Document document) {
+        Element module = document.getDocumentElement();
+        require("module".equals(module.getLocalName()),
+                "raiz do módulo H2 inválida");
+        require("com.h2database.h2.cp1d".equals(module.getAttribute("name")),
+                "nome do módulo H2 divergente");
+
+        NodeList resources =
+                document.getElementsByTagNameNS("*", "resource-root");
+        require(resources.getLength() == 1,
+                "módulo H2 deve declarar um único resource-root");
+        Element resource = (Element) resources.item(0);
+        require("h2-1.4.200.jar".equals(resource.getAttribute("path")),
+                "módulo H2 deve usar h2-1.4.200.jar externo");
+    }
+
     private static void validateDatasourceContract(File file) throws Exception {
         Properties properties = new Properties();
         InputStream input = new FileInputStream(file);
@@ -238,11 +289,26 @@ public final class ValidateLegacyPom {
         require("java:/jdbc/MigrationDS".equals(
                 properties.getProperty("datasource.jndi-name")),
                 "JNDI legado divergente");
+        require("MigrationDS".equals(
+                properties.getProperty("datasource.pool-name")),
+                "pool legado divergente");
+        require("h2-cp1d".equals(
+                properties.getProperty("profile.ci-h2.driver.name")),
+                "nome do driver H2 divergente");
+        require("com.h2database.h2.cp1d".equals(
+                properties.getProperty("profile.ci-h2.driver.module")),
+                "módulo do driver H2 divergente");
+        require("org.h2.Driver".equals(
+                properties.getProperty("profile.ci-h2.driver.class")),
+                "classe do driver H2 divergente");
+        require("oracle".equals(
+                properties.getProperty("profile.oracle.driver.name")),
+                "nome do driver Oracle divergente");
         require("com.oracle.ojdbc7".equals(
-                properties.getProperty("driver.module")),
-                "módulo do driver divergente");
+                properties.getProperty("profile.oracle.driver.module")),
+                "módulo do driver Oracle divergente");
         require("oracle.jdbc.OracleDriver".equals(
-                properties.getProperty("driver.class")),
+                properties.getProperty("profile.oracle.driver.class")),
                 "classe do driver divergente");
     }
 

@@ -6,6 +6,9 @@ CHECKPOINT="${MIGRATION_CHECKPOINT:-CP-1A}"
 CHECKPOINT_EXPLICIT=false
 ENV_FILE=""
 LEGACY_RUNTIME_MANIFEST="runtime/legacy/runtime-manifest.tsv"
+PORTABLE_RUNTIME_MANIFEST="runtime/legacy/portable-runtime-manifest.tsv"
+DB_PROFILE_ARGUMENT=""
+DB_PROFILE=""
 CI_MODE=false
 PASS_COUNT=0
 FAIL_COUNT=0
@@ -15,16 +18,19 @@ SKIP_COUNT=0
 usage() {
   cat <<'USAGE'
 Uso:
-  ./scripts/doctor.sh [CHECKPOINT] [--env ARQUIVO] [--ci]
+  ./scripts/doctor.sh [CHECKPOINT] [--profile PERFIL] [--env ARQUIVO] [--ci]
 
 Exemplos:
   ./scripts/doctor.sh CP-1A
   ./scripts/doctor.sh CP-1B --env .env
+  ./scripts/doctor.sh CP-1D --profile ci-h2 --env .env
+  ./scripts/doctor.sh CP-1D --profile oracle --env .env
   ./scripts/doctor.sh CP-3J --env .env
 
 Opções:
+  --profile PERFIL  Seleciona ci-h2 ou oracle a partir do CP-1D.
   --env ARQUIVO  Carrega pares simples NOME=VALOR sem executar o arquivo.
-  --ci           Valida somente o bootstrap portável do repositório.
+  --ci           Modo não interativo; no CP-1D aceita somente ci-h2.
   -h, --help     Mostra esta ajuda.
 USAGE
 }
@@ -81,8 +87,10 @@ load_env_file() {
     value="$(trim "$value")"
 
     case "$key" in
-      MIGRATION_CHECKPOINT|LAB_BIND_ADDRESS|WILDFLY_HTTP_PORT|WILDFLY_MANAGEMENT_PORT|\
+      MIGRATION_CHECKPOINT|MIGRATION_DB_PROFILE|\
+      LAB_BIND_ADDRESS|WILDFLY_HTTP_PORT|WILDFLY_MANAGEMENT_PORT|\
       JAVA7_HOME|JAVA7_ARCHIVE|JAVA7_ARCHIVE_SHA256|JAVA7_TRUSTSTORE|\
+      JAVA7_PORTABLE_HOME|JAVA7_PORTABLE_ARCHIVE|JAVA7_PORTABLE_ARCHIVE_SHA256|\
       JAVA8_HOME|JAVA8_ARCHIVE|JAVA8_ARCHIVE_SHA256|\
       JAVA17_HOME|JAVA17_ARCHIVE|JAVA17_ARCHIVE_SHA256|\
       JAVA21_HOME|JAVA21_ARCHIVE|JAVA21_ARCHIVE_SHA256|\
@@ -92,7 +100,7 @@ load_env_file() {
       WILDFLY26_HOME|WILDFLY26_ARCHIVE|WILDFLY26_ARCHIVE_SHA256|\
       WILDFLY41_HOME|WILDFLY41_ARCHIVE|WILDFLY41_ARCHIVE_SHA256|\
       ORACLE_DB_URL|ORACLE_DB_USER|ORACLE_DB_PASSWORD|ORACLE_DB_WALLET|\
-      OJDBC7_JAR|OJDBC7_SHA256)
+      OJDBC7_JAR|OJDBC7_SHA256|H2_JAR|H2_SHA256)
         ;;
       *)
         fail "variável não permitida na linha $line_number de $file: $key"
@@ -119,6 +127,7 @@ checkpoint_rank() {
     CP-1D) printf '13' ;;
     CP-1E) printf '14' ;;
     CP-1F) printf '15' ;;
+    CP-1G) printf '16' ;;
     CP-2A) printf '20' ;;
     CP-2B) printf '21' ;;
     CP-2C) printf '22' ;;
@@ -178,6 +187,20 @@ check_required_files() {
       "scripts/audit-legacy-war.sh"
       "scripts/build-cp-1c.sh"
       "scripts/validate-cp-1c.sh"
+    )
+  fi
+
+  if rank_at_least CP-1D; then
+    required+=(
+      "docs/cp-1d-runtime-selection.md"
+      "docs/evidence/CP-1D.md"
+      "runtime/legacy/portable-runtime-manifest.tsv"
+      "scripts/validate-cp-1d-selection.sh"
+      "scripts/validate-cp-1d-profiles.sh"
+      "scripts/validate-cp-1d-h2.sh"
+      "scripts/validate-cp-1d-datasources.sh"
+      "scripts/build-cp-1d.sh"
+      "scripts/smoke-wildfly9-datasource.sh"
     )
   fi
 
@@ -252,7 +275,8 @@ check_sensitive_paths() {
       \( -name '*.pem' -o -name '*.key' -o \
          -name '*.p12' -o -name '*.pfx' -o -name '*.jks' -o \
          -name '*.wallet' -o -name 'ojdbc*.jar' -o \
-         -name 'jdk-7u80*' \) -print -quit
+         -name 'h2-*.jar' -o -name 'jdk-7u80*' -o \
+         -name 'zulu7*-jdk7*-linux_x64.tar.gz' \) -print -quit
   )"
 
   if [[ -z "$found" ]]; then
@@ -268,7 +292,11 @@ check_sensitive_paths() {
         /(^|\/)\.env$/ ||
         /\.(pem|key|p12|pfx|jks|wallet)$/ ||
         /(^|\/)ojdbc[^/]*\.jar$/ ||
-        /(^|\/)jdk-7u80/ { print; exit }
+        /(^|\/)h2-[^/]*\.jar$/ ||
+        /(^|\/)jdk-7u80/ ||
+        /(^|\/)zulu7[^/]*-jdk7[^/]*-linux_x64\.tar\.gz$/ ||
+        /(^|\/)\.secrets\// ||
+        /(^|\/)oracle-wallet\// { print; exit }
       '
     )"
     if [[ -z "$tracked" ]]; then
@@ -355,6 +383,158 @@ manifest_field() {
       }
     }
   ' "$LEGACY_RUNTIME_MANIFEST"
+}
+
+portable_manifest_field() {
+  local component="$1"
+  local field="$2"
+
+  awk -F '\t' -v wanted_component="$component" -v wanted_field="$field" '
+    NR == 1 {
+      for (column = 1; column <= NF; column++) {
+        header[$column] = column
+      }
+      next
+    }
+    $1 == wanted_component {
+      if (!(wanted_field in header)) {
+        exit 2
+      }
+      print $header[wanted_field]
+      found = 1
+      exit
+    }
+    END {
+      if (!found) {
+        exit 1
+      }
+    }
+  ' "$PORTABLE_RUNTIME_MANIFEST"
+}
+
+check_portable_artifact() {
+  local component="$1"
+  local label="$2"
+  local artifact_variable="$3"
+  local checksum_variable="$4"
+  local artifact="${!artifact_variable:-}"
+  local configured_checksum="${!checksum_variable:-}"
+  local expected_artifact=""
+  local expected_checksum=""
+  local origin=""
+  local license=""
+  local lifecycle=""
+  local scope=""
+  local actual=""
+
+  if [[ ! -f "$PORTABLE_RUNTIME_MANIFEST" ]]; then
+    fail "$label: manifesto portátil ausente"
+    return
+  fi
+
+  expected_artifact="$(
+    portable_manifest_field "$component" artifact 2>/dev/null || true
+  )"
+  expected_checksum="$(
+    portable_manifest_field "$component" sha256 2>/dev/null || true
+  )"
+  origin="$(portable_manifest_field "$component" origin 2>/dev/null || true)"
+  license="$(portable_manifest_field "$component" license 2>/dev/null || true)"
+  lifecycle="$(
+    portable_manifest_field "$component" lifecycle 2>/dev/null || true
+  )"
+  scope="$(portable_manifest_field "$component" scope 2>/dev/null || true)"
+
+  if [[ -z "$expected_artifact" || -z "$origin" || -z "$license" ||
+        "$lifecycle" != "EOL" || "$scope" != "portable-ci" ]]; then
+    fail "$label: registro incompleto no manifesto portátil"
+    return
+  fi
+  if [[ ! "$expected_checksum" =~ ^[[:xdigit:]]{64}$ ]]; then
+    fail "$label: checksum inválido no manifesto portátil"
+    return
+  fi
+  if [[ -n "$configured_checksum" &&
+        "${configured_checksum,,}" != "${expected_checksum,,}" ]]; then
+    fail "$label: $checksum_variable diverge do manifesto portátil"
+    return
+  fi
+  if [[ -z "$artifact" ]]; then
+    fail "$label: $artifact_variable não definido"
+    return
+  fi
+  if [[ ! -f "$artifact" ]]; then
+    fail "$label: artefato externo não encontrado"
+    return
+  fi
+  if [[ "$(basename "$artifact")" != "$expected_artifact" ]]; then
+    fail "$label: nome do artefato diverge do manifesto portátil"
+    return
+  fi
+  if ! command -v sha256sum >/dev/null 2>&1; then
+    fail "$label: sha256sum ausente"
+    return
+  fi
+
+  actual="$(sha256sum "$artifact" | awk '{print $1}')"
+  if [[ "${actual,,}" != "${expected_checksum,,}" ]]; then
+    fail "$label: checksum SHA-256 diverge do manifesto portátil"
+    return
+  fi
+
+  pass "$label: origem aprovada $origin"
+  pass "$label: licença registrada $license"
+  pass "$label: lifecycle EOL e escopo portable-ci registrados"
+  pass "$label: checksum SHA-256 efetivo $actual"
+}
+
+check_portable_java7() {
+  local java_home="${JAVA7_PORTABLE_HOME:-}"
+  local output=""
+
+  if [[ -z "$java_home" ]]; then
+    fail "Zulu Java 7 portátil: JAVA7_PORTABLE_HOME não definido"
+  elif [[ ! -x "$java_home/bin/java" ]]; then
+    fail "Zulu Java 7 portátil: executável bin/java ausente"
+  else
+    output="$("$java_home/bin/java" -version 2>&1 || true)"
+    if [[ "$output" == *'openjdk version "1.7.0_352"'* &&
+          "$output" == *"Zulu 7.56.0.11-CA"* ]]; then
+      pass "Zulu Java 7 portátil: build 7.56.0.11 CA / 1.7.0_352 detectada"
+    else
+      fail "Zulu Java 7 portátil: build aprovada não detectada"
+    fi
+  fi
+
+  check_portable_artifact zulu-openjdk "Zulu Java 7 portátil" \
+    JAVA7_PORTABLE_ARCHIVE JAVA7_PORTABLE_ARCHIVE_SHA256
+}
+
+check_h2() {
+  local driver="${H2_JAR:-}"
+  local java_home="${JAVA7_PORTABLE_HOME:-}"
+  local output=""
+
+  check_portable_artifact h2 "H2 portátil" H2_JAR H2_SHA256
+
+  if [[ -z "$driver" || ! -f "$driver" ]]; then
+    return
+  fi
+  if [[ -z "$java_home" || ! -x "$java_home/bin/java" ]]; then
+    fail "H2 portátil: Java portátil indisponível para o smoke"
+    return
+  fi
+
+  output="$(
+    "$java_home/bin/java" -cp "$driver" org.h2.tools.Shell \
+      -url 'jdbc:h2:mem:doctor;MODE=Oracle;DB_CLOSE_DELAY=-1' \
+      -user sa -password '' -sql 'SELECT H2VERSION();' 2>&1 || true
+  )"
+  if [[ "$output" == *"1.4.200"* && "$output" == *"(1 row"* ]]; then
+    pass "H2 portátil: versão 1.4.200 iniciou em memória no modo Oracle"
+  else
+    fail "H2 portátil: smoke em memória no modo Oracle falhou"
+  fi
 }
 
 check_manifest_archive() {
@@ -492,8 +672,11 @@ check_wildfly() {
 }
 
 check_legacy_maven() {
+  local java_home_variable="$1"
+  local expected_java_version="$2"
+  local java_label="$3"
   local maven_home="${MAVEN_HOME:-}"
-  local java_home="${JAVA7_HOME:-}"
+  local java_home="${!java_home_variable:-}"
   local maven_command=""
   local output=""
 
@@ -514,10 +697,10 @@ check_legacy_maven() {
       fail "Maven legado: versão 3.8.9 não detectada"
     fi
 
-    if [[ "$output" == *"Java version: 1.7.0_80"* ]]; then
-      pass "Maven legado: execução efetiva com Java 7u80"
+    if [[ "$output" == *"Java version: $expected_java_version"* ]]; then
+      pass "Maven legado: execução efetiva com $java_label"
     else
-      fail "Maven legado: não executou com Java 7u80"
+      fail "Maven legado: não executou com $java_label"
     fi
   fi
 
@@ -655,6 +838,14 @@ while [[ $# -gt 0 ]]; do
       ENV_FILE="$2"
       shift 2
       ;;
+    --profile)
+      if [[ $# -lt 2 ]]; then
+        printf 'FALHA        --profile exige ci-h2 ou oracle\n'
+        exit 2
+      fi
+      DB_PROFILE_ARGUMENT="$2"
+      shift 2
+      ;;
     --ci)
       CI_MODE=true
       shift
@@ -690,47 +881,109 @@ if ! SELECTED_RANK="$(checkpoint_rank "$CHECKPOINT")"; then
   exit 2
 fi
 
-printf 'Doctor do laboratório — checkpoint %s\n\n' "$CHECKPOINT"
+if [[ -n "$DB_PROFILE_ARGUMENT" ]]; then
+  DB_PROFILE="$DB_PROFILE_ARGUMENT"
+else
+  DB_PROFILE="${MIGRATION_DB_PROFILE:-ci-h2}"
+fi
+
+case "$DB_PROFILE" in
+  ci-h2|oracle)
+    ;;
+  *)
+    printf 'FALHA        perfil inválido: %s; use ci-h2 ou oracle\n' \
+      "$DB_PROFILE"
+    exit 2
+    ;;
+esac
+
+if [[ "$CI_MODE" == true && "$DB_PROFILE" == "oracle" ]] &&
+   rank_at_least CP-1D; then
+  printf 'FALHA        --ci não permite o perfil oracle; use ci-h2\n'
+  exit 2
+fi
+
+if rank_at_least CP-1D; then
+  printf 'Doctor do laboratório — checkpoint %s, perfil %s\n\n' \
+    "$CHECKPOINT" "$DB_PROFILE"
+else
+  printf 'Doctor do laboratório — checkpoint %s\n\n' "$CHECKPOINT"
+fi
 
 check_required_files
 check_repository
 check_sensitive_paths
 
-if [[ "$CI_MODE" == true ]]; then
-  skip "runtimes locais, checksums, variáveis Oracle e portas (execução em CI)"
-elif rank_at_least CP-1B; then
-  check_container_runtime
+if rank_at_least CP-1B; then
+  if [[ "$CI_MODE" == true ]]; then
+    skip "runtime de containers (perfil portátil usa runtime direto no CI)"
+  else
+    check_container_runtime
+  fi
   check_network_defaults
-  check_java "Java 7u80" JAVA7_HOME '1.7.0_80' \
-    JAVA7_ARCHIVE JAVA7_ARCHIVE_SHA256 oracle-jdk
-  check_wildfly "WildFly 9" WILDFLY9_HOME '9.0.2.Final' \
-    WILDFLY9_ARCHIVE WILDFLY9_ARCHIVE_SHA256 wildfly
+
+  if ! rank_at_least CP-2A; then
+    if rank_at_least CP-1D && [[ "$DB_PROFILE" == "ci-h2" ]]; then
+      check_portable_java7
+      skip "Oracle JDK 7u80 (perfil ci-h2)"
+    elif [[ "$CI_MODE" == true ]]; then
+      skip "Java 7u80 e checksum (bootstrap anterior ao CP-1D em CI)"
+    else
+      check_java "Java 7u80" JAVA7_HOME '1.7.0_80' \
+        JAVA7_ARCHIVE JAVA7_ARCHIVE_SHA256 oracle-jdk
+    fi
+
+    if [[ "$CI_MODE" == true ]] && ! rank_at_least CP-1D; then
+      skip "WildFly 9 e checksum (bootstrap anterior ao CP-1D em CI)"
+    else
+      check_wildfly "WildFly 9" WILDFLY9_HOME '9.0.2.Final' \
+        WILDFLY9_ARCHIVE WILDFLY9_ARCHIVE_SHA256 wildfly
+    fi
+  else
+    skip "Java 7 e WildFly 9 do baseline (encerrados antes do CP-2A)"
+  fi
 else
   skip "runtime de containers (entra no CP-1B)"
   skip "portas e bind de runtime (entram no CP-1B)"
-  skip "Java 7u80 e checksum (entram no CP-1B)"
-  skip "WildFly 9 e checksum (entram no CP-1B)"
+  skip "Java 7 e WildFly 9 (entram no CP-1B)"
 fi
 
-if [[ "$CI_MODE" != true ]] && rank_at_least CP-1B &&
-   ! rank_at_least CP-2C; then
-  check_legacy_maven
+if rank_at_least CP-1B && ! rank_at_least CP-2C; then
+  if [[ "$CI_MODE" == true ]] && ! rank_at_least CP-1D; then
+    skip "Maven 3.8.9 (bootstrap anterior ao CP-1D em CI)"
+  elif rank_at_least CP-2A; then
+    check_legacy_maven JAVA8_HOME '1.8.0' "Java 8"
+  elif rank_at_least CP-1D && [[ "$DB_PROFILE" == "ci-h2" ]]; then
+    check_legacy_maven JAVA7_PORTABLE_HOME '1.7.0_352' \
+      "Zulu Java 7 portátil"
+  else
+    check_legacy_maven JAVA7_HOME '1.7.0_80' "Java 7u80"
+  fi
 else
-  skip "Maven 3.8.9 com Java 7 (exigido de CP-1B a CP-2B)"
+  skip "Maven 3.8.9 (exigido de CP-1B a CP-2B)"
 fi
 
-if [[ "$CI_MODE" != true ]] && rank_at_least CP-1C &&
-   ! rank_at_least CP-2A; then
-  check_java7_truststore
+if rank_at_least CP-1C && ! rank_at_least CP-2A; then
+  if rank_at_least CP-1D && [[ "$DB_PROFILE" == "ci-h2" ]]; then
+    skip "truststore externo do Oracle JDK (perfil ci-h2)"
+  elif [[ "$CI_MODE" == true ]]; then
+    skip "truststore atualizado (bootstrap anterior ao CP-1D em CI)"
+  else
+    check_java7_truststore
+  fi
 else
-  skip "truststore atualizado para downloads no Java 7 (exigido de CP-1C a CP-1F)"
+  skip "truststore atualizado do Oracle JDK (exigido de CP-1C a CP-1G)"
 fi
 
-if [[ "$CI_MODE" != true ]] && rank_at_least CP-1D; then
+if rank_at_least CP-1D && [[ "$DB_PROFILE" == "ci-h2" ]]; then
+  check_h2
+  skip "variáveis Oracle 19c e ojdbc7 externo (perfil ci-h2)"
+elif rank_at_least CP-1D; then
   check_oracle_variables
   check_ojdbc7
+  skip "H2 portátil (perfil oracle)"
 else
-  skip "variáveis Oracle 19c e ojdbc7 externo (entram no CP-1D)"
+  skip "H2, variáveis Oracle 19c e ojdbc7 externo (entram no CP-1D)"
 fi
 
 if [[ "$CI_MODE" != true ]] && rank_at_least CP-2A; then
