@@ -8,11 +8,11 @@ cada entrega validável e reversível.
 Repositório GitHub: <https://github.com/anderson-sillos/wildfly-migration>
 
 Os checkpoints **CP-1A — Repositório GitHub e ambiente**, **CP-1B — Estrutura
-e runtime legado** e **CP-1C — WAR e dependências legadas** estão concluídos.
-A árvore única `app/` gera um WAR Java 7 auditável com as dependências
-históricas, enquanto runtimes, driver Oracle e credenciais permanecem externos.
-O próximo incremento é o **CP-1D — Fundação portátil H2 e qualificação
-Oracle**.
+e runtime legado**, **CP-1C — WAR e dependências legadas** e **CP-1D —
+Fundação portátil H2 e qualificação Oracle** estão concluídos. A árvore única
+`app/` gera um WAR Java 7 auditável com as dependências históricas, enquanto
+runtimes, drivers e credenciais permanecem externos. O próximo incremento é o
+**CP-1E — Fluxo web e persistência**.
 
 ## Fases públicas
 
@@ -88,6 +88,8 @@ A distinção entre Oracle JDK 7u80/Oracle 19c e Zulu OpenJDK 7u352/H2 está em
 [seleção do runtime portátil](docs/cp-1d-runtime-selection.md).
 As diferenças de schema e semântica estão na
 [matriz H2/Oracle](docs/h2-oracle-differences.md).
+A aprovação separada dos dois perfis e seu rollback estão na
+[evidência do CP-1D](docs/evidence/CP-1D.md).
 
 A [preparação completa do ambiente](docs/environment-setup.md) contém a matriz
 de componentes por checkpoint e os endereços oficiais das fases futuras.
