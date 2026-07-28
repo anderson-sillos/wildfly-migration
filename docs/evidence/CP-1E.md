@@ -8,8 +8,10 @@
 - contrato de banco comum: `java:/jdbc/MigrationDS`, transações JDBC locais
   delimitadas pelo MyBatis 3.4.5;
 - aplicação: Servlets 2.4, JSP 2.0/JSTL 1.2, Tiles 2.1.4 e TLD 2.0;
-- WAR auditado: 19 bibliotecas, bytecode Java 7, SHA-256
-  `1f99c324c6f6a22e6fff8b3660746fef886a76554385d36cb9bdb13f86de3658`;
+- revisão funcional qualificada:
+  `454ec833aecdef0e70f0a00b66fde63b7a7809ba`;
+- WAR auditado nessa revisão: 19 bibliotecas, bytecode Java 7, SHA-256
+  `60b09b60dc15e3a542a80fe05932fee1f92d9074cde6ed4198da554e1f6a6392`;
 - nenhuma credencial, URL, nome de usuário, serviço interno ou binário
   proprietário integra esta evidência.
 
@@ -87,9 +89,12 @@ aplicáveis a partir do `CP-1D` recebem `--profile` explicitamente; o `doctor`
 encerra com código 2 e diagnóstico objetivo quando esse argumento é omitido,
 sem impedir que checkpoints anteriores ao CP-1D sejam diagnosticados.
 
-Em 28 de julho de 2026, o modo `--manual` foi validado no perfil Oracle:
+Em 28 de julho de 2026, o modo `--manual` e o checklist publicado no runbook
+foram concluídos pelo operador no perfil Oracle:
 
 - o provisionamento e o smoke inicial foram aprovados;
+- saúde/correlação, listagem, Tiles/TLD, criação, detalhe, preferência de sessão
+  e erros controlados foram verificados manualmente;
 - o processo permaneceu ativo e imprimiu URLs em loopback, o caminho temporário
   do `server.log`, um comando `tail -f` copiável e o alerta de segurança Oracle;
 - o arquivo de log existiu durante a sessão sem que seu identificador temporário
@@ -99,6 +104,19 @@ Em 28 de julho de 2026, o modo `--manual` foi validado no perfil Oracle:
 - nenhum valor de conexão foi impresso e os objetos Oracle permaneceram.
 
 ## Validações
+
+Na revisão funcional `454ec833aecdef0e70f0a00b66fde63b7a7809ba`, o WAR
+`60b09b60dc15e3a542a80fe05932fee1f92d9074cde6ed4198da554e1f6a6392`
+foi construído uma única vez no perfil `ci-h2`. O checksum foi conferido antes
+e depois dos smokes H2 e Oracle, comprovando que as duas trilhas executaram
+exatamente o mesmo artefato. Os resultados foram:
+
+- `doctor` H2: 73 aprovados, nenhuma falha ou aviso;
+- smoke H2: saúde, lista, criação, detalhe, TLD, sessão, JNDI e pool aprovados;
+- `doctor` Oracle: 72 aprovados, nenhuma falha ou aviso;
+- smoke Oracle: os mesmos casos, JNDI e pool aprovados;
+- nenhum endereço interno, usuário, senha ou conteúdo bruto de log foi
+  incorporado à evidência.
 
 ```bash
 ./scripts/doctor.sh CP-1E --profile oracle --env .env
@@ -125,13 +143,13 @@ git diff --check
 ```
 
 O job `portable-ci` executa build, auditoria, lifecycle H2, prova dinâmica
-MyBatis e o smoke web no runner hospedado. Para a revisão de código
-`2eb09dfeae87623e706b95cf7be2e0f43c8e6169`, a execução
-[`30309714160`](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30309714160)
-foi aprovada em 27 de julho de 2026:
+MyBatis e o smoke web no runner hospedado. Para a revisão funcional
+`454ec833aecdef0e70f0a00b66fde63b7a7809ba`, a execução
+[`30372169700`](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30372169700)
+foi aprovada em 28 de julho de 2026:
 
 - `repository-baseline`: aprovado em 11 segundos;
-- `portable-ci`: aprovado em 52 segundos;
+- `portable-ci`: aprovado em 1 minuto e 48 segundos;
 - nenhum secret, Oracle JDK, `ojdbc7` ou rota interna foi fornecido ao runner.
 
 ## Rollback
