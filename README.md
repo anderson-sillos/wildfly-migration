@@ -25,74 +25,48 @@ runtimes, drivers e credenciais permanecem externos. O próximo incremento é o
 Java 17/WildFly 26 e Java 21/WildFly 41 são gates técnicos internos da fase 3,
 não fases adicionais.
 
-## Validar o bootstrap do CP-1A
+## Começar
 
-1. Leia [a preparação do ambiente](docs/environment-setup.md).
-2. Configure sua identidade Git e autentique a GitHub CLI.
-3. Copie `.env.example` para `.env` sem inserir valores no arquivo de exemplo.
-4. Execute:
+1. Abra o [índice da documentação](docs/README.md).
+2. Leia [a preparação do ambiente](docs/environment-setup.md).
+3. Para executar a aplicação, siga o
+   [runbook legado](docs/legacy-application-runbook.md).
+4. Para contribuir, consulte [o fluxo GitHub](docs/github-workflow.md).
+
+No primeiro checkout:
+
+1. Configure sua identidade Git e autentique a GitHub CLI.
+2. Copie `.env.example` para `.env` sem inserir valores no arquivo de exemplo.
+3. Execute:
 
 ```bash
 ./scripts/doctor.sh CP-1A
 ```
 
-O comando deve falhar de forma explícita enquanto identidade Git, autenticação
-GitHub ou `origin` ainda não estiverem configurados. Pré-requisitos de fases
-futuras aparecem como “não exigido”.
+O comando falha de forma explícita enquanto identidade Git, autenticação ou
+`origin` não estiverem configurados. Pré-requisitos futuros aparecem como
+“não exigido”.
 
-Para validar o CP-1B depois de fornecer o runtime legado externo:
+## Executar a aplicação legada
 
-```bash
-./scripts/validate-cp-1b.sh --release
-./scripts/doctor.sh CP-1B --env .env
-```
+O [runbook legado](docs/legacy-application-runbook.md) é a fonte operacional
+para os perfis H2 e Oracle. Ele consolida diagnóstico, schema, build, start,
+URLs, testes manuais, stop, limpeza e troubleshooting.
 
-Para validar e construir o CP-1C:
-
-```bash
-./scripts/doctor.sh CP-1C --env .env
-./scripts/validate-cp-1c.sh
-./scripts/build-cp-1c.sh --env .env
-```
-
-No CP-1D, escolha o perfil sem misturar seus pré-requisitos:
+O modo manual provisiona uma cópia temporária do WildFly e mantém a aplicação
+ativa em loopback até `Ctrl+C`:
 
 ```bash
-./scripts/doctor.sh CP-1D --profile ci-h2 --env .env --ci
-./scripts/build-cp-1d.sh --profile ci-h2 --env .env
-./scripts/validate-cp-1d-h2.sh \
-  --java-home /caminho/do/zulu7 \
-  --h2-jar /caminho/do/h2-1.4.200.jar
-./scripts/smoke-wildfly9-datasource.sh --profile ci-h2 --env .env
-
-./scripts/doctor.sh CP-1D --profile oracle --env .env
-./scripts/build-cp-1d.sh --profile oracle --env .env
-./scripts/smoke-wildfly9-datasource.sh --profile oracle --env .env
+./scripts/smoke-wildfly9-datasource.sh \
+  --profile ci-h2 \
+  --env .env \
+  --war app/target/wildfly-migration.war \
+  --manual
 ```
 
-`ci-h2` nunca produz qualificação Oracle; `oracle` depende do ambiente
-autorizado na rede interna.
-
-Antes de contribuir, consulte [o fluxo GitHub](docs/github-workflow.md),
-[os checkpoints](docs/checkpoints.md), [CONTRIBUTING.md](CONTRIBUTING.md) e
+Use `--profile oracle` somente no host autorizado e depois da aprovação do
+schema. Consulte também [CONTRIBUTING.md](CONTRIBUTING.md) e
 [SECURITY.md](SECURITY.md).
-
-A responsabilidade de cada diretório e as regras da linha evolutiva única estão
-em [estrutura do repositório](docs/repository-layout.md).
-
-O fornecimento do Java 7/Maven 3.8.9/WildFly 9 está em
-[runtime legado](runtime/legacy/README.md), e o domínio mínimo está em
-[modelo legado](docs/legacy-domain-model.md).
-
-A distinção entre Oracle JDK 7u80/Oracle 19c e Zulu OpenJDK 7u352/H2 está em
-[seleção do runtime portátil](docs/cp-1d-runtime-selection.md).
-As diferenças de schema e semântica estão na
-[matriz H2/Oracle](docs/h2-oracle-differences.md).
-A aprovação separada dos dois perfis e seu rollback estão na
-[evidência do CP-1D](docs/evidence/CP-1D.md).
-
-A [preparação completa do ambiente](docs/environment-setup.md) contém a matriz
-de componentes por checkpoint e os endereços oficiais das fases futuras.
 
 ## Regras de segurança
 

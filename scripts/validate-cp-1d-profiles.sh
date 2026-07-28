@@ -10,7 +10,6 @@ if [[ $# -ne 0 ]]; then
 fi
 
 required_variables=(
-  MIGRATION_DB_PROFILE
   JAVA7_PORTABLE_HOME
   JAVA7_PORTABLE_ARCHIVE
   JAVA7_PORTABLE_ARCHIVE_SHA256
@@ -27,6 +26,17 @@ for variable in "${required_variables[@]}"; do
   if [[ "$(grep -Ec "^${variable}=" "$REPOSITORY_ROOT/.env.example")" != "1" ]]; then
     printf 'FALHA: .env.example deve declarar %s exatamente uma vez\n' \
       "$variable" >&2
+    exit 1
+  fi
+done
+
+for path in \
+  ".env.example" \
+  "docs/environment-setup.md" \
+  "docs/legacy-application-runbook.md"; do
+  if grep -Fq 'MIGRATION_DB_PROFILE' "$REPOSITORY_ROOT/$path"; then
+    printf 'FALHA: %s ainda permite selecionar o perfil pelo ambiente\n' \
+      "$path" >&2
     exit 1
   fi
 done
@@ -84,6 +94,18 @@ for path in "${ignored_examples[@]}"; do
     exit 1
   fi
 done
+
+if missing_profile_output="$(
+  "$REPOSITORY_ROOT/scripts/doctor.sh" CP-1D --ci 2>&1
+)"; then
+  printf 'FALHA: doctor aceitou CP-1D sem --profile\n' >&2
+  exit 1
+fi
+
+if [[ "$missing_profile_output" != *"--profile é obrigatório a partir do CP-1D"* ]]; then
+  printf 'FALHA: doctor não explicou que --profile é obrigatório\n' >&2
+  exit 1
+fi
 
 if "$REPOSITORY_ROOT/scripts/doctor.sh" CP-1D \
     --profile perfil-invalido --ci >/dev/null 2>&1; then

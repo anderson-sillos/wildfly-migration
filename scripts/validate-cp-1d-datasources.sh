@@ -35,7 +35,9 @@ done
 
 for profile in "$H2_PROFILE" "$ORACLE_PROFILE"; do
   if [[ "$(grep -Fc 'jndi-name=java:/jdbc/MigrationDS' "$profile")" != "1" ||
-        "$(grep -Fc 'pool-name=MigrationDS' "$profile")" != "1" ]]; then
+        "$(grep -Fc 'pool-name=MigrationDS' "$profile")" != "1" ||
+        "$(grep -Fc 'jta=false' "$profile")" != "1" ||
+        "$(grep -Fc 'jta=true' "$profile")" != "0" ]]; then
     printf 'FALHA: perfil não publica exatamente o contrato MigrationDS: %s\n' \
       "${profile##*/}" >&2
     exit 1
@@ -45,11 +47,14 @@ done
 if ! grep -Fq \
     'connection-url="jdbc:h2:mem:migration;MODE=Oracle;DB_CLOSE_DELAY=-1"' \
     "$H2_PROFILE" ||
+   ! grep -Fq \
+    '/subsystem=ee/service=default-bindings:write-attribute(name=datasource,value=java:/jdbc/MigrationDS)' \
+    "$H2_PROFILE" ||
    ! grep -Fq 'driver-module-name=com.h2database.h2.cp1d' "$H2_PROFILE" ||
    grep -Eiq \
     'jdbc:h2:(tcp|ssl)|AUTO_SERVER|createTcpServer|createWebServer|user-name=|password=' \
     "$H2_PROFILE"; then
-  printf 'FALHA: perfil H2 não está restrito ao processo e sem credenciais\n' >&2
+  printf 'FALHA: perfil H2 não está restrito ao processo, sem credenciais e com binding padrão válido\n' >&2
   exit 1
 fi
 
@@ -93,6 +98,7 @@ fi
 contract_rules=(
   'datasource.jndi-name=java:/jdbc/MigrationDS'
   'datasource.pool-name=MigrationDS'
+  'datasource.jta=false'
   'profile.ci-h2.driver.name=h2-cp1d'
   'profile.ci-h2.driver.module=com.h2database.h2.cp1d'
   'profile.oracle.driver.name=oracle'

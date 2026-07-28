@@ -17,7 +17,8 @@ não por cópias da aplicação em outros diretórios.
 | `src/test/resources/` | recursos dos testes internos |
 
 O CP-1C adiciona o `pom.xml`, um marcador compilável e o descritor Servlet 2.4.
-O WAR ainda não implementa o fluxo funcional, que começa no CP-1D.
+O CP-1D estabelece os perfis de datasource. No CP-1E, a implementação começa
+pelo domínio e pelos mappers MyBatis compartilhados.
 
 Build legado:
 
@@ -36,3 +37,7 @@ Oracle JDK 7u80.
 
 Nenhum JAR manual, driver Oracle, runtime ou arquivo gerado em `target/` deve
 ser versionado.
+
+A configuração, o limite transacional e a pequena divergência de sequences
+entre os bancos estão em
+[`docs/mybatis-persistence.md`](../docs/mybatis-persistence.md).

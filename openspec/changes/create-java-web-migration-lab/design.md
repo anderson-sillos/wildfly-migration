@@ -177,6 +177,11 @@ Mappers, aliases, type handlers e limites transacionais serão compartilhados. S
 
 Nas fases 1 e 2, o perfil `oracle` usará o driver legado necessário para reproduzir o ambiente. No gate Java 17 da fase 3, ele adotará um driver mantido compatível com Java 17 e Oracle 19c. Nos gates WildFly 41, o servidor provisionará `com.oracle.database.jdbc:ojdbc17:23.26.2.0.0`; o driver não será empacotado no WAR.
 
+O ambiente Oracle fornecido para o laboratório retornou
+`Version 19.3.0.0.0` em `V$VERSION`, portanto a referência da qualificação é
+Oracle Database 19c RU 19.3. O inventário de patches `one-off` do Oracle Home
+não foi fornecido e será registrado separadamente se estiver disponível.
+
 O CI hospedado executará o perfil H2 em cada pull request aplicável a partir do `CP-1D`. A suíte Oracle será iniciada sob demanda a partir de uma máquina autorizada na rede interna e vinculará o relatório sanitizado ao commit e ao checksum do WAR testados. Não será necessário expor o Oracle à internet. Credenciais e URL serão fornecidas por ambiente ou secret local ignorado pelo controle de versão.
 
 Uma aprovação H2 nunca promoverá automaticamente o estado Oracle. Checkpoints que alteram persistência, driver ou datasource e as tags `migration/01-legacy-baseline`, `migration/02-java8-wildfly26` e `migration/03-final` exigirão as duas evidências verdes.
@@ -203,7 +208,7 @@ Os runtimes WildFly 9 e WildFly 26 ficarão ligados apenas a loopback ou rede in
 - [WildFly 26.1.3 também é uma linha antiga] → Tratá-lo apenas como ponte reproduzível da fase 2 e do primeiro gate interno, nunca como destino sustentável de produção.
 - [Unificar a modernização mínima e o destino final aumenta o tamanho aparente da fase 3] → Exigir três gates internos verdes, commits isolados por dependência, evidências próprias e rollback para o último estado aprovado.
 - [WildFly 41 recomenda Java 25, mas a certificação EE 11 publicada é para Java 17 e 21] → Executar o alvo principal em Java 25 e oferecer uma matriz de verificação adicional em Java 21.
-- [O banner Oracle `19.0.0.0.0` não identifica o Release Update instalado] → Registrar o RU real no início da suíte Oracle e incluir esse valor no relatório.
+- [O banner resumido Oracle `19.0.0.0.0` não identificava o Release Update instalado] → A consulta completa identificou `19.3.0.0.0`; preservar esse valor nos relatórios e complementar com `opatch lspatches` quando houver acesso ao Oracle Home.
 - [O modo Oracle do H2 cobre apenas parte das diferenças entre bancos] → Manter DDL por fornecedor, classificar H2 somente como `portable-ci` e não considerar persistência ou fase qualificadas sem a suíte Oracle 19c.
 - [A versão H2 compatível com Java 7 será histórica e poderá ter vulnerabilidades conhecidas] → Usá-la somente em memória, sem listener ou console, fora do WAR e em runner efêmero, registrando a exceção EOL e atualizando-a nos gates em que o Java permitir.
 - [Commits intermediários podem ficar temporariamente quebrados] → Exigir que cada uma das três tags públicas e cada gate interno sejam verdes; falhas naturais não serão apresentadas como checkpoints.
@@ -228,7 +233,6 @@ A partir do `CP-1D`, o CI hospedado executará a trilha `portable-ci` com H2 em 
 
 ## Open Questions
 
-- Qual é o Release Update exato do Oracle Database 19c usado na validação?
 - Quais tags, classes handler, mappers MyBatis e schemas XML da aplicação real deverão inspirar uma segunda rodada de fixtures?
 - Quais versões intermediárias exatas serão aprovadas no gate Java 17 da fase 3 depois de confirmar suas dependências transitivas e compatibilidade com EE 8?
 - A aplicação real utiliza APIs Oracle específicas, procedures, tipos `STRUCT/ARRAY`, cursores ou somente JDBC padrão?

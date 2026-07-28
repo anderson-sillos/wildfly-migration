@@ -115,6 +115,8 @@ public final class ValidateLegacyPom {
                 values("0.9.10", "compile"));
         expected.put("org.apache.tiles:tiles-api",
                 values("2.1.4", "compile"));
+        expected.put("org.apache.tiles:tiles-jsp",
+                values("2.1.4", "compile"));
         expected.put("org.apache.xmlbeans:xmlbeans",
                 values("2.3.0", "compile"));
         expected.put("xml-apis:xml-apis",
@@ -292,6 +294,9 @@ public final class ValidateLegacyPom {
         require("MigrationDS".equals(
                 properties.getProperty("datasource.pool-name")),
                 "pool legado divergente");
+        require("false".equals(
+                properties.getProperty("datasource.jta")),
+                "datasource legado deve usar transação local do MyBatis");
         require("h2-cp1d".equals(
                 properties.getProperty("profile.ci-h2.driver.name")),
                 "nome do driver H2 divergente");

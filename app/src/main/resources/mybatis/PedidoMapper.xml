@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="br.com.asillos.migration.persistence.PedidoMapper">
+  <resultMap id="pedidoResult" type="pedido">
+    <id property="id" column="ID" javaType="java.lang.Long"/>
+    <result property="numero" column="NUMERO"/>
+    <result property="clienteNome" column="CLIENTE_NOME"/>
+    <result property="descricao" column="DESCRICAO"/>
+    <result property="valorTotal" column="VALOR_TOTAL"
+            javaType="java.math.BigDecimal"/>
+    <result property="status" column="STATUS"
+            javaType="br.com.asillos.migration.domain.StatusPedido"
+            typeHandler="br.com.asillos.migration.persistence.StatusPedidoTypeHandler"/>
+    <result property="criadoEm" column="CRIADO_EM"
+            javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    <result property="atualizadoEm" column="ATUALIZADO_EM"
+            javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+  </resultMap>
+
+  <sql id="pedidoColumns">
+    ID, NUMERO, CLIENTE_NOME, DESCRICAO, VALOR_TOTAL, STATUS,
+    CRIADO_EM, ATUALIZADO_EM
+  </sql>
+
+  <!-- Somente a obtenção da sequence difere entre os fornecedores. -->
+  <select id="proximoId" resultType="java.lang.Long" databaseId="oracle">
+    SELECT LAB_PEDIDO_SEQ.NEXTVAL FROM DUAL
+  </select>
+
+  <select id="proximoId" resultType="java.lang.Long" databaseId="h2">
+    SELECT NEXT VALUE FOR LAB_PEDIDO_SEQ
+  </select>
+
+  <select id="listar" resultMap="pedidoResult">
+    SELECT
+      <include refid="pedidoColumns"/>
+    FROM LAB_PEDIDO
+    ORDER BY ID
+  </select>
+
+  <select id="buscarPorId" resultMap="pedidoResult">
+    SELECT
+      <include refid="pedidoColumns"/>
+    FROM LAB_PEDIDO
+    WHERE ID = #{id,jdbcType=DECIMAL}
+  </select>
+
+  <select id="buscarPorNumero" resultMap="pedidoResult">
+    SELECT
+      <include refid="pedidoColumns"/>
+    FROM LAB_PEDIDO
+    WHERE NUMERO = #{numero,jdbcType=VARCHAR}
+  </select>
+
+  <insert id="inserir" parameterType="pedido">
+    INSERT INTO LAB_PEDIDO (
+      ID,
+      NUMERO,
+      CLIENTE_NOME,
+      DESCRICAO,
+      VALOR_TOTAL,
+      STATUS,
+      CRIADO_EM,
+      ATUALIZADO_EM
+    ) VALUES (
+      #{id,jdbcType=DECIMAL},
+      #{numero,jdbcType=VARCHAR},
+      #{clienteNome,jdbcType=VARCHAR},
+      #{descricao,jdbcType=VARCHAR},
+      #{valorTotal,jdbcType=DECIMAL},
+      #{status,jdbcType=VARCHAR,
+        typeHandler=br.com.asillos.migration.persistence.StatusPedidoTypeHandler},
+      #{criadoEm,jdbcType=TIMESTAMP},
+      #{atualizadoEm,jdbcType=TIMESTAMP}
+    )
+  </insert>
+
+  <update id="atualizar" parameterType="pedido">
+    UPDATE LAB_PEDIDO
+    SET CLIENTE_NOME = #{clienteNome,jdbcType=VARCHAR},
+        DESCRICAO = #{descricao,jdbcType=VARCHAR},
+        VALOR_TOTAL = #{valorTotal,jdbcType=DECIMAL},
+        STATUS = #{status,jdbcType=VARCHAR,
+          typeHandler=br.com.asillos.migration.persistence.StatusPedidoTypeHandler},
+        ATUALIZADO_EM = #{atualizadoEm,jdbcType=TIMESTAMP}
+    WHERE ID = #{id,jdbcType=DECIMAL}
+  </update>
+</mapper>

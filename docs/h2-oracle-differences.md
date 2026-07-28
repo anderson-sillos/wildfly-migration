@@ -15,7 +15,7 @@ LOBs, além dos mecanismos de idempotência e limpeza.
 | texto | `VARCHAR2(n CHAR)` | `VARCHAR(n)` | tamanho lógico e obrigatoriedade são equivalentes para os fixtures; semântica completa de caracteres e NLS não |
 | digest | `CHAR(64 CHAR)` com `REGEXP_LIKE(..., ..., 'c')` | `CHAR(64)` com `REGEXP_LIKE(...)` | aceita somente hexadecimal minúsculo; collation e flags Oracle não são qualificadas |
 | constraints | PK, UK, FK e CHECK nomeadas | mesmos nomes e regras | ordem/tempo de validação e códigos de violação podem divergir |
-| sequences | `LAB_*_SEQ.NEXTVAL`, `NOCACHE NOCYCLE` | `NEXT VALUE FOR LAB_*_SEQ` | geração e unicidade são exercitadas; cache, concorrência e comportamento Oracle exigem qualificação |
+| sequences | `LAB_*_SEQ.NEXTVAL`, `NOCACHE NOCYCLE` | `NEXT VALUE FOR LAB_*_SEQ` | somente `proximoId` é duplicado por `databaseIdProvider`; geração, cache, concorrência e comportamento Oracle exigem qualificação |
 | timestamps | `TIMESTAMP(6)` preenchido por `SYSTIMESTAMP` | `TIMESTAMP(6)` preenchido por `SYSTIMESTAMP` | H2 permite o fluxo e microssegundos; timezone, sessão, conversão JDBC e precisão efetiva precisam do Oracle |
 | LOB binário | `BLOB` Oracle, normalmente por locator/stream | `BLOB` em memória | conteúdo e tamanho pequenos são portáveis; locator, streaming, limites e transação são Oracle-only |
 | idempotência do DDL | blocos PL/SQL consultam `USER_*` | `CREATE ... IF NOT EXISTS` | ambos preservam objetos existentes, por mecanismos diferentes |

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+    PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+  <settings>
+    <setting name="cacheEnabled" value="false"/>
+    <setting name="mapUnderscoreToCamelCase" value="false"/>
+  </settings>
+
+  <typeAliases>
+    <typeAlias alias="pedido"
+               type="br.com.asillos.migration.domain.Pedido"/>
+    <typeAlias alias="anexo"
+               type="br.com.asillos.migration.domain.Anexo"/>
+  </typeAliases>
+
+  <typeHandlers>
+    <typeHandler javaType="br.com.asillos.migration.domain.StatusPedido"
+                 handler="br.com.asillos.migration.persistence.StatusPedidoTypeHandler"/>
+    <typeHandler javaType="java.lang.String" jdbcType="CHAR"
+                 handler="br.com.asillos.migration.persistence.Sha256TypeHandler"/>
+  </typeHandlers>
+
+  <environments default="legacy-jndi">
+    <environment id="legacy-jndi">
+      <transactionManager type="JDBC"/>
+      <dataSource type="JNDI">
+        <property name="data_source" value="java:/jdbc/MigrationDS"/>
+      </dataSource>
+    </environment>
+  </environments>
+
+  <databaseIdProvider type="DB_VENDOR">
+    <property name="Oracle" value="oracle"/>
+    <property name="H2" value="h2"/>
+  </databaseIdProvider>
+
+  <mappers>
+    <mapper resource="mybatis/PedidoMapper.xml"/>
+    <mapper resource="mybatis/AnexoMapper.xml"/>
+  </mappers>
+</configuration>
