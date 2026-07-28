@@ -224,9 +224,13 @@ check_required_files() {
   if rank_at_least CP-1F; then
     required+=(
       "docs/legacy-upload.md"
+      "docs/legacy-xml-import.md"
       "scripts/validate-cp-1f-upload.sh"
+      "scripts/validate-cp-1f-xml.sh"
       "app/src/main/java/br/com/asillos/migration/persistence/AnexoRepository.java"
       "app/src/main/java/br/com/asillos/migration/web/UploadServlet.java"
+      "app/src/main/java/br/com/asillos/migration/integration/xml/LegacyPedidoXmlParser.java"
+      "app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java"
     )
   fi
 

@@ -21,6 +21,7 @@ passos.
 - [dependências do WAR legado](legacy-dependencies.md);
 - [persistência MyBatis](mybatis-persistence.md).
 - [upload legado e metadados comparáveis](legacy-upload.md).
+- [importação XML legada](legacy-xml-import.md).
 
 ## Runtime e banco
 

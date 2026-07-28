@@ -239,6 +239,30 @@ No Oracle, use um prefixo identificável para dados manuais, por exemplo
 `MANUAL-`. O stop remove apenas registros automáticos `LAB-SMOKE-*`; pedidos
 criados manualmente permanecem no schema.
 
+### Importação XML
+
+Com o runtime manual ativo, envie uma cópia da fixture válida com número
+exclusivo:
+
+```bash
+sed 's/XML-0001/MANUAL-XML-0001/' \
+  contract-tests/fixtures/xml/pedido-valido.xml |
+  curl --include --location \
+    --header 'Content-Type: application/xml' \
+    --data-binary @- \
+    http://127.0.0.1:18080/wildfly-migration/pedidos/importar-xml
+```
+
+Confirme HTTP final `200`, `data-xml-import-status="ok"` e os valores da
+fixture no detalhe. Se repetir o teste, troque `MANUAL-XML-0001`, pois o número
+do pedido é único e a limpeza automática remove apenas `LAB-SMOKE-*`.
+
+Depois envie `pedido-invalido-xsd.xml`, `pedido-xxe.xml` e
+`pedido-entidades-expansivas.xml` para o mesmo endpoint. Cada documento deve
+retornar HTTP `400`; nenhum número rejeitado pode aparecer na listagem. O
+contrato completo e o limite de 128 KiB estão em
+[Importação XML legada](legacy-xml-import.md).
+
 ### Preferência em sessão
 
 1. Na lista, altere a exibição de `Detalhada` para `Compacta`.

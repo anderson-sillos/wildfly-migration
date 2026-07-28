@@ -42,6 +42,24 @@ public final class PedidoRepository {
     }
 
     public Pedido criar(final Pedido pedido) {
+        if (pedido != null) {
+            pedido.setStatus(StatusPedido.NOVO);
+        }
+        return persistirNovo(pedido);
+    }
+
+    /**
+     * Persiste um pedido já validado pelo contrato de importação.
+     */
+    public Pedido importar(final Pedido pedido) {
+        if (pedido == null || pedido.getStatus() == null) {
+            throw new IllegalArgumentException(
+                    "Status do pedido importado é obrigatório");
+        }
+        return persistirNovo(pedido);
+    }
+
+    private Pedido persistirNovo(final Pedido pedido) {
         validateNewPedido(pedido);
         return transactions.execute(new TransactionWork<Pedido>() {
             @Override
@@ -49,7 +67,6 @@ public final class PedidoRepository {
                 PedidoMapper mapper = session.getMapper(PedidoMapper.class);
                 Date now = new Date();
                 pedido.setId(mapper.proximoId());
-                pedido.setStatus(StatusPedido.NOVO);
                 pedido.setCriadoEm(now);
                 pedido.setAtualizadoEm(now);
                 int affectedRows = mapper.inserir(pedido);

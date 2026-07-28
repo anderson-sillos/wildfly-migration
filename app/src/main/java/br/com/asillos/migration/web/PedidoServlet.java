@@ -116,6 +116,10 @@ public final class PedidoServlet extends HttpServlet {
                     "uploadConcluido",
                     Boolean.valueOf("ok".equals(
                             request.getParameter("upload"))));
+            request.setAttribute(
+                    "importacaoConcluida",
+                    Boolean.valueOf("ok".equals(
+                            request.getParameter("importacao"))));
             exposePreference(request);
             forward(request, response, DETAIL_VIEW);
         } catch (RuntimeException exception) {

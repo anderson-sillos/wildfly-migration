@@ -23,6 +23,11 @@ LOBs, além dos mecanismos de idempotência e limpeza.
 | limpeza | PL/SQL verifica objetos e usa `PURGE` | `DROP ... IF EXISTS` | remove os mesmos quatro objetos; recycle bin e commits implícitos não são simulados |
 | string vazia | Oracle trata string vazia como `NULL` | fornecida pelo modo Oracle do H2 | somente os fixtures do laboratório são cobertos |
 
+No fluxo XML do CP-1F, a consulta do mesmo valor `349.90` chegou à JSP como
+`349.90` pelo H2 e como `349.9` pelo Oracle/ojdbc7. As representações são
+numericamente equivalentes; por isso o contrato normaliza o decimal antes da
+comparação e não usa zeros à direita como diferença funcional.
+
 ## Invariantes automatizados
 
 O validador do CP-1D exige:

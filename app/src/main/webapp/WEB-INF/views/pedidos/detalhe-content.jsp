@@ -4,6 +4,9 @@
 <%@ taglib prefix="migration" uri="http://asillos.com.br/migration/tags" %>
 <article data-page="pedido-detalhe">
   <h1>Pedido <c:out value="${pedido.numero}"/></h1>
+  <c:if test="${importacaoConcluida}">
+    <p data-xml-import-status="ok">Pedido importado por XML com sucesso.</p>
+  </c:if>
   <dl>
     <dt>Cliente</dt>
     <dd><c:out value="${pedido.clienteNome}"/></dd>

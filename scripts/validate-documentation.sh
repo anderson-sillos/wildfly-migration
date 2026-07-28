@@ -10,6 +10,7 @@ required_paths=(
   "docs/environment-setup.md"
   "docs/legacy-application-runbook.md"
   "docs/legacy-upload.md"
+  "docs/legacy-xml-import.md"
   "docs/oracle-lab-schema.md"
   "runtime/legacy/README.md"
   "runtime/legacy/profiles/README.md"
@@ -39,6 +40,7 @@ required_runbook_markers=(
   'Ctrl+C'
   'LAB-SMOKE-*'
   'Upload legado do CP-1F'
+  'Importação XML'
   'DROP USER ... CASCADE'
 )
 

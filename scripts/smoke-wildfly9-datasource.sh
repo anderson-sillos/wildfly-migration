@@ -583,6 +583,89 @@ if [[ -n "$WAR_FILE" ]]; then
     exit 1
   fi
 
+  xml_number="LAB-SMOKE-XML-$(date +%s)-$SERVER_PID"
+  valid_xml="$TEMP_DIRECTORY/pedido-valido.xml"
+  sed "s/XML-0001/$xml_number/" \
+    "$REPOSITORY_ROOT/contract-tests/fixtures/xml/pedido-valido.xml" \
+    >"$valid_xml"
+  xml_detail_url=""
+  if ! xml_detail_url="$(curl --silent --show-error --fail --location \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --header 'Content-Type: application/xml' \
+      --data-binary "@$valid_xml" \
+      --output "$body" \
+      --write-out '%{url_effective}' \
+      "$base_url/pedidos/importar-xml")" ||
+     ! grep -Fq 'data-xml-import-status="ok"' "$body" ||
+     ! grep -Fq "$xml_number" "$body" ||
+     ! grep -Fq 'Cliente XML' "$body" ||
+     ! grep -Eq '>349[,.]9(0)?<' "$body"; then
+    printf 'FALHA: importação XML válida não criou pedido equivalente\n' >&2
+    grep -Fq 'data-xml-import-status="ok"' "$body" ||
+      printf 'FALHA: marcador de sucesso XML ausente\n' >&2
+    grep -Fq "$xml_number" "$body" ||
+      printf 'FALHA: número importado ausente no detalhe\n' >&2
+    grep -Fq 'Cliente XML' "$body" ||
+      printf 'FALHA: cliente importado ausente no detalhe\n' >&2
+    grep -Eq '>349[,.]9(0)?<' "$body" ||
+      printf 'FALHA: valor importado ausente no detalhe\n' >&2
+    if [[ "$PROFILE" == "oracle" ]]; then
+      tail -n 80 "$TEMP_DIRECTORY/server.log" |
+        sanitize_oracle_output >&2
+    else
+      tail -n 80 "$TEMP_DIRECTORY/server.log" |
+        sed "s#${TEMP_DIRECTORY}#<runtime-temporario>#g" >&2
+    fi
+    exit 1
+  fi
+  case "$xml_detail_url" in
+    "$base_url"/pedidos/detalhe?id=*"&importacao=ok")
+      ;;
+    *)
+      printf 'FALHA: redirect da importação XML não preservou o contrato\n' >&2
+      exit 1
+      ;;
+  esac
+
+  for hostile_fixture in \
+    pedido-invalido-xsd.xml \
+    pedido-xxe.xml \
+    pedido-entidades-expansivas.xml; do
+    xml_status=""
+    if ! xml_status="$(curl --silent --show-error \
+        --cookie-jar "$cookies" \
+        --cookie "$cookies" \
+        --header 'Content-Type: application/xml' \
+        --data-binary \
+          "@$REPOSITORY_ROOT/contract-tests/fixtures/xml/$hostile_fixture" \
+        --output "$body" \
+        --write-out '%{http_code}' \
+        "$base_url/pedidos/importar-xml")"; then
+      printf 'FALHA: cenário XML negativo não respondeu: %s\n' \
+        "$hostile_fixture" >&2
+      exit 1
+    fi
+    if [[ "$xml_status" != "400" ]] ||
+       ! grep -Fq 'data-page="erro-controlado"' "$body"; then
+      printf 'FALHA: fixture XML deveria ser rejeitada com HTTP 400: %s\n' \
+        "$hostile_fixture" >&2
+      exit 1
+    fi
+  done
+
+  if ! curl --silent --show-error --fail \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --output "$body" \
+      "$base_url/pedidos" ||
+     grep -Fq 'XML INVÁLIDO COM ESPAÇOS' "$body" ||
+     grep -Fq 'XML-XXE-0001' "$body" ||
+     grep -Fq 'XML-ENTITY-0001' "$body"; then
+    printf 'FALHA: XML rejeitado deixou persistência parcial\n' >&2
+    exit 1
+  fi
+
   if ! curl --silent --show-error --fail --location \
       --cookie-jar "$cookies" \
       --cookie "$cookies" \
@@ -607,7 +690,7 @@ if [[ -n "$WAR_FILE" ]]; then
     ORACLE_SMOKE_CREATED=false
   fi
 
-  printf 'OK: fluxo web %s validou pedidos, sessão, upload e limite multipart\n' \
+  printf 'OK: fluxo web %s validou pedidos, sessão, upload e importação XML\n' \
     "$PROFILE"
 fi
 
