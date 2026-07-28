@@ -502,7 +502,8 @@ if [[ -n "$WAR_FILE" ]]; then
   if [[ "$PROFILE" == "oracle" ]]; then
     ORACLE_SMOKE_CREATED=true
   fi
-  if ! curl --silent --show-error --fail --location \
+  detail_url=""
+  if ! detail_url="$(curl --silent --show-error --fail --location \
       --cookie-jar "$cookies" \
       --cookie "$cookies" \
       --data-urlencode "numero=$smoke_number" \
@@ -510,11 +511,75 @@ if [[ -n "$WAR_FILE" ]]; then
       --data-urlencode 'descricao=Pedido criado pelo smoke CP-1E' \
       --data-urlencode 'valorTotal=19.75' \
       --output "$body" \
-      "$base_url/pedidos" ||
+      --write-out '%{url_effective}' \
+      "$base_url/pedidos")" ||
      ! grep -Fq 'data-page="pedido-detalhe"' "$body" ||
      ! grep -Fq "$smoke_number" "$body" ||
      ! grep -Fq 'Cliente smoke' "$body"; then
     printf 'FALHA: criação e consulta do pedido não concluíram\n' >&2
+    exit 1
+  fi
+
+  case "$detail_url" in
+    "$base_url"/pedidos/detalhe?id=*)
+      smoke_id="${detail_url##*id=}"
+      smoke_id="${smoke_id%%&*}"
+      ;;
+    *)
+      printf 'FALHA: redirect do pedido não informou o identificador\n' >&2
+      exit 1
+      ;;
+  esac
+  if [[ ! "$smoke_id" =~ ^[1-9][0-9]*$ ]]; then
+    printf 'FALHA: identificador criado não é positivo\n' >&2
+    exit 1
+  fi
+
+  upload_file="$TEMP_DIRECTORY/upload-smoke.txt"
+  printf 'conteúdo portátil do upload CP-1F\n' >"$upload_file"
+  upload_size="$(wc -c <"$upload_file" | tr -d '[:space:]')"
+  upload_sha256="$(sha256sum "$upload_file" | awk '{print $1}')"
+  if ! curl --silent --show-error --fail --location \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --form "arquivo=@$upload_file;filename=../upload-smoke.txt;type=text/plain" \
+      --output "$body" \
+      "$base_url/anexos/upload?pedidoId=$smoke_id" ||
+     ! grep -Fq 'data-upload-status="ok"' "$body" ||
+     ! grep -Fq 'data-anexo-nome="upload-smoke.txt"' "$body" ||
+     ! grep -Fq '>text/plain</td>' "$body" ||
+     ! grep -Fq ">$upload_size</td>" "$body" ||
+     ! grep -Fq "$upload_sha256" "$body"; then
+    printf 'FALHA: upload e metadados comparáveis não concluíram\n' >&2
+    if [[ "$PROFILE" == "oracle" ]]; then
+      tail -n 80 "$TEMP_DIRECTORY/server.log" |
+        sanitize_oracle_output >&2
+    else
+      tail -n 80 "$TEMP_DIRECTORY/server.log" |
+        sed "s#${TEMP_DIRECTORY}#<runtime-temporario>#g" >&2
+    fi
+    exit 1
+  fi
+
+  oversized_file="$TEMP_DIRECTORY/upload-oversized.bin"
+  dd if=/dev/zero of="$oversized_file" \
+    bs=1024 count=512 status=none
+  printf 'x' >>"$oversized_file"
+  oversized_status=""
+  if ! oversized_status="$(curl --silent --show-error \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --form "arquivo=@$oversized_file;filename=oversized.bin;type=application/octet-stream" \
+      --output "$body" \
+      --write-out '%{http_code}' \
+      "$base_url/anexos/upload?pedidoId=$smoke_id")"; then
+    printf 'FALHA: cenário negativo do limite de upload não respondeu\n' >&2
+    exit 1
+  fi
+  if [[ "$oversized_status" != "413" ]] ||
+     ! grep -Fq 'data-page="erro-controlado"' "$body" ||
+     ! grep -Fq 'excede o limite de 512 KiB' "$body"; then
+    printf 'FALHA: arquivo acima do limite não foi rejeitado com HTTP 413\n' >&2
     exit 1
   fi
 
@@ -542,7 +607,7 @@ if [[ -n "$WAR_FILE" ]]; then
     ORACLE_SMOKE_CREATED=false
   fi
 
-  printf 'OK: fluxo web %s validou saúde, lista, criação, detalhe, TLD e sessão\n' \
+  printf 'OK: fluxo web %s validou pedidos, sessão, upload e limite multipart\n' \
     "$PROFILE"
 fi
 

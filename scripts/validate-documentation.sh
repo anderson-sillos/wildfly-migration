@@ -9,6 +9,7 @@ required_paths=(
   "docs/README.md"
   "docs/environment-setup.md"
   "docs/legacy-application-runbook.md"
+  "docs/legacy-upload.md"
   "docs/oracle-lab-schema.md"
   "runtime/legacy/README.md"
   "runtime/legacy/profiles/README.md"
@@ -37,6 +38,7 @@ required_runbook_markers=(
   'o `server.log` é bruto'
   'Ctrl+C'
   'LAB-SMOKE-*'
+  'Upload legado do CP-1F'
   'DROP USER ... CASCADE'
 )
 

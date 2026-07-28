@@ -221,6 +221,15 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-1F; then
+    required+=(
+      "docs/legacy-upload.md"
+      "scripts/validate-cp-1f-upload.sh"
+      "app/src/main/java/br/com/asillos/migration/persistence/AnexoRepository.java"
+      "app/src/main/java/br/com/asillos/migration/web/UploadServlet.java"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"

@@ -34,6 +34,7 @@ jobs:
           bash -n scripts/validate-documentation.sh
           bash -n scripts/validate-cp-1e-persistence.sh
           bash -n scripts/validate-cp-1e-web.sh
+          bash -n scripts/validate-cp-1f-upload.sh
 
       - name: Validate repository baseline
         run: ./scripts/doctor.sh CP-1A --ci
@@ -64,6 +65,9 @@ jobs:
 
       - name: Validate consolidated documentation
         run: ./scripts/validate-documentation.sh
+
+      - name: Validate CP-1F legacy upload statically
+        run: ./scripts/validate-cp-1f-upload.sh
 
   portable-ci:
     name: portable-ci
@@ -104,8 +108,7 @@ jobs:
           tar -xzf wildfly-9.0.2.Final.tar.gz -C "$tools"
 
           {
-            echo "MIGRATION_CHECKPOINT=CP-1D"
-            echo "MIGRATION_DB_PROFILE=ci-h2"
+            echo "MIGRATION_CHECKPOINT=CP-1F"
             echo "LAB_BIND_ADDRESS=127.0.0.1"
             echo "WILDFLY_HTTP_PORT=18080"
             echo "WILDFLY_MANAGEMENT_PORT=19990"
@@ -123,7 +126,7 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Run portable doctor
-        run: ./scripts/doctor.sh CP-1E --profile ci-h2 --ci
+        run: ./scripts/doctor.sh CP-1F --profile ci-h2 --ci
 
       - name: Build and audit portable WAR
         run: ./scripts/build-cp-1d.sh --profile ci-h2

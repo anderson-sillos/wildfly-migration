@@ -108,6 +108,14 @@ public final class PedidoServlet extends HttpServlet {
                 return;
             }
             request.setAttribute("pedido", pedido);
+            request.setAttribute(
+                    "anexos",
+                    ApplicationResources.anexoRepository(getServletContext())
+                            .listarPorPedido(id));
+            request.setAttribute(
+                    "uploadConcluido",
+                    Boolean.valueOf("ok".equals(
+                            request.getParameter("upload"))));
             exposePreference(request);
             forward(request, response, DETAIL_VIEW);
         } catch (RuntimeException exception) {

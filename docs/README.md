@@ -20,6 +20,7 @@ passos.
 - [modelo mínimo do domínio](legacy-domain-model.md);
 - [dependências do WAR legado](legacy-dependencies.md);
 - [persistência MyBatis](mybatis-persistence.md).
+- [upload legado e metadados comparáveis](legacy-upload.md).
 
 ## Runtime e banco
 

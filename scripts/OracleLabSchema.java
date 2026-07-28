@@ -223,6 +223,16 @@ public final class OracleLabSchema {
     private static void cleanupSmokes(Connection connection)
             throws SQLException {
         PreparedStatement statement = connection.prepareStatement(
+                "DELETE FROM LAB_ANEXO WHERE PEDIDO_ID IN "
+                + "(SELECT ID FROM LAB_PEDIDO WHERE NUMERO LIKE ?)");
+        try {
+            statement.setString(1, "LAB-SMOKE-%");
+            statement.executeUpdate();
+        } finally {
+            statement.close();
+        }
+
+        statement = connection.prepareStatement(
                 "DELETE FROM LAB_PEDIDO WHERE NUMERO LIKE ?");
         try {
             statement.setString(1, "LAB-SMOKE-%");

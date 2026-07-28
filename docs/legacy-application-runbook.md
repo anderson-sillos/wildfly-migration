@@ -13,10 +13,11 @@ O CP-1E disponibiliza:
 - persistência MyBatis pelo datasource `java:/jdbc/MigrationDS`;
 - JSP/JSTL, Tiles 2.1.4 e TLD 2.0;
 - preferência de exibição em `HttpSession`;
+- upload por Commons FileUpload 1.2.2 com limites e metadados SHA-256;
 - filtro UTF-8 e cabeçalho `X-Correlation-ID`.
 
-Upload, importação XML, Reflections e uso funcional do Log4j entram no CP-1F e
-ainda não fazem parte dos testes manuais.
+Importação XML, Reflections e uso funcional do Log4j entram nos próximos
+incrementos do CP-1F e ainda não fazem parte dos testes manuais.
 
 ## Escolha do perfil
 
@@ -246,6 +247,18 @@ criados manualmente permanecem no schema.
 4. Abra uma janela privada para confirmar que uma nova sessão volta ao padrão
    `Detalhada`.
 
+### Upload
+
+1. Abra o detalhe de um pedido.
+2. Na seção `Anexos`, escolha um arquivo de até 512 KiB.
+3. Confirme a mensagem de sucesso após o redirecionamento.
+4. Compare na tabela nome normalizado, tipo, número de bytes e SHA-256.
+5. Tente um arquivo maior que 512 KiB e confirme HTTP `413` com erro controlado.
+
+O fluxo e os limites estão detalhados em
+[Upload legado do CP-1F](legacy-upload.md). Não use dados sensíveis: o
+laboratório persiste o conteúdo integral no BLOB.
+
 ### Erros controlados
 
 Confirme que as respostas não exibem URL ou credenciais:
@@ -330,7 +343,7 @@ evidências do CP-1E; ele não abre uma sessão para exploração pelo navegador
 | datasource não conecta | execute primeiro o smoke sem `--war`; no Oracle, valide a rota interna |
 | `status=DOWN` ou HTTP 503 | confirme schema/seed e `java:/jdbc/MigrationDS` |
 | deploy reclama de `ExampleDS` | confirme que `ci-h2.cli` reaponta `DefaultDataSource` para `MigrationDS` |
-| página JSP/Tiles falha | reconstrua o WAR e confirme as 19 bibliotecas auditadas |
+| página JSP/Tiles ou upload falha | reconstrua o WAR e confirme as 20 bibliotecas auditadas, incluindo `commons-io-1.3.2.jar` |
 
 O script sanitiza diagnósticos Oracle. Não publique logs brutos do WildFly
 antes de revisar a presença de host, serviço, usuário ou URL interna.
@@ -342,5 +355,6 @@ antes de revisar a presença de host, serviço, usuário ou URL interna.
 - [runtime legado e checksums](../runtime/legacy/README.md);
 - [perfis do datasource](../runtime/legacy/profiles/README.md);
 - [persistência MyBatis](mybatis-persistence.md);
+- [upload legado](legacy-upload.md);
 - [diferenças H2/Oracle](h2-oracle-differences.md);
 - [evidência do CP-1E](evidence/CP-1E.md).

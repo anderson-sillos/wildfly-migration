@@ -2,6 +2,7 @@ package br.com.asillos.migration.web;
 
 import javax.servlet.ServletContext;
 
+import br.com.asillos.migration.persistence.AnexoRepository;
 import br.com.asillos.migration.persistence.PedidoRepository;
 
 /**
@@ -10,6 +11,8 @@ import br.com.asillos.migration.persistence.PedidoRepository;
 public final class ApplicationResources {
     public static final String PEDIDO_REPOSITORY =
             PedidoRepository.class.getName();
+    public static final String ANEXO_REPOSITORY =
+            AnexoRepository.class.getName();
     public static final String STARTED_AT =
             ApplicationResources.class.getName() + ".startedAt";
 
@@ -23,5 +26,14 @@ public final class ApplicationResources {
                     "Repositório de pedidos não foi inicializado");
         }
         return (PedidoRepository) value;
+    }
+
+    public static AnexoRepository anexoRepository(ServletContext context) {
+        Object value = context.getAttribute(ANEXO_REPOSITORY);
+        if (!(value instanceof AnexoRepository)) {
+            throw new IllegalStateException(
+                    "Repositório de anexos não foi inicializado");
+        }
+        return (AnexoRepository) value;
     }
 }
