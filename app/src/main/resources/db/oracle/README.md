@@ -20,4 +20,4 @@ Neste laboratório descartável, a mesma conta pode ser temporariamente dona dos
 objetos e usada pelo datasource para manter a preparação reproduzível; isso não
 deve ser copiado para produção. A criação, aprovação e eliminação segura dessa
 conta estão em
-[`docs/oracle-lab-schema.md`](../../../../../docs/oracle-lab-schema.md).
+[`docs/oracle-lab-schema.md`](../../../../../../docs/oracle-lab-schema.md).

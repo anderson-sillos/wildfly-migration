@@ -6,6 +6,7 @@ REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPOSITORY_ROOT/.env"
 PROFILE=""
 WAR_FILE=""
+MANUAL_MODE=false
 TEMP_DIRECTORY=""
 RUNTIME_HOME=""
 SERVER_PID=""
@@ -16,10 +17,12 @@ usage() {
   cat <<'USAGE'
 Uso:
   ./scripts/smoke-wildfly9-datasource.sh --profile ci-h2|oracle \
-    [--env ARQUIVO] [--war ARQUIVO]
+    [--env ARQUIVO] [--war ARQUIVO] [--manual]
 
 Valores já exportados no ambiente prevalecem sobre o arquivo informado.
 Sem --war, valida somente o datasource. Com --war, valida também o fluxo web.
+Com --manual, mantém a aplicação ativa em loopback até Ctrl+C; exige --war.
+No modo manual, imprime o caminho do log bruto do WildFly.
 USAGE
 }
 
@@ -132,6 +135,11 @@ cleanup() {
 }
 trap cleanup EXIT
 
+handle_signal() {
+  exit 130
+}
+trap handle_signal HUP INT TERM
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --profile)
@@ -158,6 +166,10 @@ while [[ $# -gt 0 ]]; do
       WAR_FILE="$2"
       shift 2
       ;;
+    --manual)
+      MANUAL_MODE=true
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -178,6 +190,11 @@ case "$PROFILE" in
     exit 2
     ;;
 esac
+
+if [[ "$MANUAL_MODE" == true && -z "$WAR_FILE" ]]; then
+  printf 'FALHA: --manual exige --war\n' >&2
+  exit 2
+fi
 
 if [[ -n "$WAR_FILE" ]]; then
   if [[ ! -f "$WAR_FILE" ]]; then
@@ -531,3 +548,26 @@ fi
 
 printf 'OK: datasource %s publicou java:/jdbc/MigrationDS e passou no pool em loopback\n' \
   "$PROFILE"
+
+if [[ "$MANUAL_MODE" == true ]]; then
+  printf '\nAplicação legada disponível somente em loopback:\n'
+  printf '  Lista:  http://127.0.0.1:%s/wildfly-migration/pedidos\n' \
+    "$HTTP_PORT_VALUE"
+  printf '  Novo:   http://127.0.0.1:%s/wildfly-migration/pedidos/novo\n' \
+    "$HTTP_PORT_VALUE"
+  printf '  Saúde:  http://127.0.0.1:%s/wildfly-migration/health\n' \
+    "$HTTP_PORT_VALUE"
+  printf '\nLog bruto do WildFly:\n'
+  printf '  Arquivo: %s\n' "$TEMP_DIRECTORY/server.log"
+  printf '  Acompanhar: tail -f -- %q\n' "$TEMP_DIRECTORY/server.log"
+  if [[ "$PROFILE" == "oracle" ]]; then
+    printf '  ATENÇÃO: revise host, serviço, usuário e URL interna antes de compartilhar este log.\n'
+  fi
+  printf 'Use outro terminal ou navegador para os testes. Ctrl+C encerra e limpa o runtime temporário.\n'
+
+  while kill -0 "$SERVER_PID" >/dev/null 2>&1; do
+    sleep 5
+  done
+  printf 'FALHA: WildFly encerrou durante a sessão manual\n' >&2
+  exit 1
+fi

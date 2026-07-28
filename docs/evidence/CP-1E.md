@@ -74,6 +74,30 @@ exclusivo do laboratório:
 - não foi executado `rollback.sql`, `DROP USER` nem qualquer DDL fora do
   conjunto `LAB_*`.
 
+## Operação manual consolidada
+
+O ciclo operacional foi centralizado em
+`docs/legacy-application-runbook.md`, com índice em `docs/README.md`. O runbook
+é a fonte única para diagnóstico, banco, build, start, URLs, casos manuais,
+stop, limpeza e troubleshooting; documentos de instalação, arquitetura e
+evidência passaram a apontar para ele em vez de repetir comandos.
+
+A seleção `ci-h2`/`oracle` não é armazenada no `.env`. Todos os comandos
+aplicáveis a partir do `CP-1D` recebem `--profile` explicitamente; o `doctor`
+encerra com código 2 e diagnóstico objetivo quando esse argumento é omitido,
+sem impedir que checkpoints anteriores ao CP-1D sejam diagnosticados.
+
+Em 28 de julho de 2026, o modo `--manual` foi validado no perfil Oracle:
+
+- o provisionamento e o smoke inicial foram aprovados;
+- o processo permaneceu ativo e imprimiu URLs em loopback, o caminho temporário
+  do `server.log`, um comando `tail -f` copiável e o alerta de segurança Oracle;
+- o arquivo de log existiu durante a sessão sem que seu identificador temporário
+  ou conteúdo bruto fossem incorporados a esta evidência;
+- `/wildfly-migration/health` respondeu `status=UP`;
+- `Ctrl+C` encerrou o servidor e removeu a cópia temporária do WildFly e o log;
+- nenhum valor de conexão foi impresso e os objetos Oracle permaneceram.
+
 ## Validações
 
 ```bash
@@ -86,6 +110,7 @@ exclusivo do laboratório:
 ./scripts/validate-cp-1d-datasources.sh
 ./scripts/validate-cp-1e-persistence.sh
 ./scripts/validate-cp-1e-web.sh
+./scripts/validate-documentation.sh
 ./scripts/build-cp-1d.sh --profile oracle --env .env
 ./scripts/oracle-lab-schema.sh inspect --env .env
 ./scripts/oracle-lab-schema.sh apply --env .env

@@ -5,6 +5,10 @@ credencial configuradas comprovam conectividade, mas isso não torna o schema
 automaticamente descartável. A execução de DDL, DML e rollback Oracle exige
 evidência técnica e autorização administrativa.
 
+Depois da aprovação e aplicação do schema, volte ao
+[runbook da aplicação legada](legacy-application-runbook.md) para construir,
+iniciar e testar o perfil Oracle.
+
 ## Criação pelo DBA
 
 No Oracle, o schema é criado junto com o usuário que o possui. A criação

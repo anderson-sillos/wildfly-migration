@@ -379,40 +379,38 @@ A partir do CP-1D, selecione explicitamente uma das duas trilhas:
 | `ci-h2` | Zulu Java 7 portátil, Maven 3.8.9, WildFly 9 e H2 fixados | Oracle JDK, truststore externo, `ojdbc7` e qualquer segredo Oracle | `portable-ci` |
 | `oracle` | Oracle JDK 7u80, truststore, Maven 3.8.9, WildFly 9, `ojdbc7`, URL, usuário e senha | Zulu Java 7 e H2 | `oracle-qualified`, depois da suíte interna |
 
-O argumento `--profile` prevalece sobre `MIGRATION_DB_PROFILE` do `.env`.
+O perfil não é armazenado no `.env`. A partir do `CP-1D`, todo comando
+aplicável exige `--profile ci-h2` ou `--profile oracle` explicitamente.
 O modo `--ci` é não interativo e recusa o perfil `oracle`, impedindo que o
-workflow hospedado dependa de rota ou credenciais internas:
+workflow hospedado dependa de rota ou credenciais internas.
 
 ```bash
-./scripts/doctor.sh CP-1D --profile ci-h2 --env .env --ci
-./scripts/build-cp-1d.sh --profile ci-h2 --env .env
-./scripts/validate-cp-1d-h2.sh \
-  --java-home /caminho/do/zulu7 \
-  --h2-jar /caminho/do/h2-1.4.200.jar
-./scripts/smoke-wildfly9-datasource.sh --profile ci-h2 --env .env
-
-./scripts/doctor.sh CP-1D --profile oracle --env .env
-./scripts/build-cp-1d.sh --profile oracle --env .env
-./scripts/smoke-wildfly9-datasource.sh --profile oracle --env .env
+./scripts/doctor.sh CP-1E --profile ci-h2 --env .env
+./scripts/doctor.sh CP-1E --profile oracle --env .env
 ```
 
-O GitHub Actions executa apenas os quatro comandos da trilha `ci-h2`. A
-execução Oracle deve ocorrer em um host autorizado na rede interna e com
+Build, preparação do schema, inicialização, URLs, testes manuais, stop e
+limpeza estão consolidados no
+[runbook da aplicação legada](legacy-application-runbook.md). Esta página
+permanece como fonte para instalação, versões e variáveis.
+
+O GitHub Actions executa somente a trilha `ci-h2`. A execução Oracle deve
+ocorrer em um host autorizado na rede interna e com
 `OJDBC7_JAR`, `OJDBC7_SHA256`, `ORACLE_DB_URL`, `ORACLE_DB_USER` e
 `ORACLE_DB_PASSWORD` definidos no `.env` ignorado. Não copie esses valores para
 o workflow, para logs ou para o repositório.
 
-O primeiro comando não valida nem exige `ORACLE_DB_*` ou `OJDBC7_*`. O segundo
-não valida nem exige `JAVA7_PORTABLE_*` ou `H2_*`. Senhas e URLs nunca são
-impressas; o diagnóstico informa somente presença, validade estrutural e
+O perfil `ci-h2` não valida nem exige `ORACLE_DB_*` ou `OJDBC7_*`. O perfil
+`oracle` não valida nem exige `JAVA7_PORTABLE_*` ou `H2_*`. Senhas e URLs nunca
+são impressas; o diagnóstico informa somente presença, validade estrutural e
 resultado da conectividade quando esse teste estiver disponível.
 
 Outros exemplos:
 
 ```bash
 ./scripts/doctor.sh CP-1B --env .env
-./scripts/doctor.sh CP-2C --env .env
-./scripts/doctor.sh CP-3J --env .env
+./scripts/doctor.sh CP-2C --profile ci-h2 --env .env
+./scripts/doctor.sh CP-3J --profile ci-h2 --env .env
 ```
 
 Um resultado `NÃO EXIGIDO` significa que o checkpoint ainda não depende daquele

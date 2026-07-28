@@ -8,7 +8,7 @@ O laboratório usa uma única aplicação que evolui sobre a branch principal.
 | `contract-tests/` | contratos externos, independentes das classes do WAR |
 | `runtime/` | configuração e automação dos runtimes por fase e gate |
 | `migration/steps/` | roteiro e evidências das incompatibilidades |
-| `docs/` | documentação transversal e evidências de checkpoints |
+| `docs/` | índice, runbooks, documentação transversal e evidências |
 | `openspec/` | proposta, decisões, requisitos e tarefas executáveis |
 | `scripts/` | diagnóstico e automações portáteis do repositório |
 
@@ -24,3 +24,7 @@ O laboratório usa uma única aplicação que evolui sobre a branch principal.
 
 O scaffold do CP-1B contém apenas diretórios e fronteiras de responsabilidade.
 O WAR e suas dependências começam no CP-1C.
+
+O ponto de entrada da documentação é [`docs/README.md`](README.md). Procedimentos
+operacionais ficam em runbooks; evidências registram execuções históricas e não
+substituem instruções atuais.

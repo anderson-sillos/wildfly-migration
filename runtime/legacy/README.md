@@ -90,6 +90,11 @@ publicada pelo fornecedor.
 5. Copie `.env.example` para `.env`, configure os seis caminhos legados e
    execute `./scripts/doctor.sh CP-1B --env .env`.
 
+Depois do fornecimento, use o
+[runbook da aplicação legada](../../docs/legacy-application-runbook.md) para
+diagnóstico do CP-1E, build, inicialização, testes manuais, stop e limpeza.
+Este documento permanece como fonte de downloads, licenças e checksums.
+
 A partir do CP-1C, configure também `JAVA7_TRUSTSTORE` com um JKS atualizado
 fornecido pelo sistema. O Java 7u80 precisa de TLS 1.2 explícito e seu truststore
 original não reconhece a cadeia atual do Maven Central. A correção validada está

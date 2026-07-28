@@ -31,6 +31,7 @@ jobs:
           bash -n scripts/build-cp-1d.sh
           bash -n scripts/smoke-wildfly9-datasource.sh
           bash -n scripts/oracle-lab-schema.sh
+          bash -n scripts/validate-documentation.sh
           bash -n scripts/validate-cp-1e-persistence.sh
           bash -n scripts/validate-cp-1e-web.sh
 
@@ -60,6 +61,9 @@ jobs:
 
       - name: Validate CP-1E web layer statically
         run: ./scripts/validate-cp-1e-web.sh
+
+      - name: Validate consolidated documentation
+        run: ./scripts/validate-documentation.sh
 
   portable-ci:
     name: portable-ci

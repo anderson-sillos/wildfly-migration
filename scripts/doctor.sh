@@ -25,12 +25,12 @@ Exemplos:
   ./scripts/doctor.sh CP-1B --env .env
   ./scripts/doctor.sh CP-1D --profile ci-h2 --env .env
   ./scripts/doctor.sh CP-1D --profile oracle --env .env
-  ./scripts/doctor.sh CP-3J --env .env
+  ./scripts/doctor.sh CP-3J --profile ci-h2 --env .env
 
 Opções:
-  --profile PERFIL  Seleciona ci-h2 ou oracle a partir do CP-1D.
+  --profile PERFIL  Obrigatório a partir do CP-1D; use ci-h2 ou oracle.
   --env ARQUIVO  Carrega pares simples NOME=VALOR sem executar o arquivo.
-  --ci           Modo não interativo; no CP-1D aceita somente ci-h2.
+  --ci           Modo não interativo; a partir do CP-1D aceita somente ci-h2.
   -h, --help     Mostra esta ajuda.
 USAGE
 }
@@ -87,7 +87,7 @@ load_env_file() {
     value="$(trim "$value")"
 
     case "$key" in
-      MIGRATION_CHECKPOINT|MIGRATION_DB_PROFILE|\
+      MIGRATION_CHECKPOINT|\
       LAB_BIND_ADDRESS|WILDFLY_HTTP_PORT|WILDFLY_MANAGEMENT_PORT|\
       JAVA7_HOME|JAVA7_ARCHIVE|JAVA7_ARCHIVE_SHA256|JAVA7_TRUSTSTORE|\
       JAVA7_PORTABLE_HOME|JAVA7_PORTABLE_ARCHIVE|JAVA7_PORTABLE_ARCHIVE_SHA256|\
@@ -172,6 +172,8 @@ check_required_files() {
     "CONTRIBUTING.md"
     "SECURITY.md"
     "docs/environment-setup.md"
+    "docs/README.md"
+    "docs/legacy-application-runbook.md"
     "docs/github-workflow.md"
     "docs/checkpoints.md"
     ".github/pull_request_template.md"
@@ -210,6 +212,7 @@ check_required_files() {
       "docs/oracle-lab-schema.md"
       "docs/evidence/CP-1E.md"
       "scripts/oracle-lab-schema.sh"
+      "scripts/validate-documentation.sh"
       "scripts/validate-cp-1e-persistence.sh"
       "scripts/validate-cp-1e-web.sh"
       "app/src/main/resources/mybatis-config.xml"
@@ -895,11 +898,12 @@ if ! SELECTED_RANK="$(checkpoint_rank "$CHECKPOINT")"; then
   exit 2
 fi
 
-if [[ -n "$DB_PROFILE_ARGUMENT" ]]; then
-  DB_PROFILE="$DB_PROFILE_ARGUMENT"
-else
-  DB_PROFILE="${MIGRATION_DB_PROFILE:-ci-h2}"
+if rank_at_least CP-1D && [[ -z "$DB_PROFILE_ARGUMENT" ]]; then
+  printf 'FALHA        --profile é obrigatório a partir do CP-1D; use ci-h2 ou oracle\n'
+  exit 2
 fi
+
+DB_PROFILE="${DB_PROFILE_ARGUMENT:-ci-h2}"
 
 case "$DB_PROFILE" in
   ci-h2|oracle)

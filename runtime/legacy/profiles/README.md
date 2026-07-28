@@ -22,17 +22,14 @@ que já usam JTA estão em
 [`docs/mybatis-persistence.md`](../../../docs/mybatis-persistence.md).
 
 Os arquivos são aplicados somente sobre uma cópia temporária e limpa do
-WildFly pelo script:
+WildFly. O
+[runbook da aplicação legada](../../../docs/legacy-application-runbook.md)
+consolida os comandos automatizados e manuais dos dois perfis.
 
-```bash
-./scripts/validate-cp-1d-datasources.sh
-./scripts/smoke-wildfly9-datasource.sh --profile ci-h2 --env .env
-./scripts/smoke-wildfly9-datasource.sh --profile oracle --env .env
-```
-
-O smoke liga HTTP e management apenas em `127.0.0.1`, executa
-`test-connection-in-pool`, registra somente resultado sanitizado e encerra o
-servidor. O perfil Oracle deve ser executado apenas em máquina autorizada na
+O script liga HTTP e management apenas em `127.0.0.1`, executa
+`test-connection-in-pool` e sanitiza resultados Oracle. Sem `--manual`, ele
+encerra o servidor após o smoke; com `--manual`, mantém a aplicação ativa até
+`Ctrl+C`. O perfil Oracle deve ser executado apenas em máquina autorizada na
 rede interna.
 
 O workflow hospedado baixa e verifica Zulu Java 7, Maven 3.8.9, WildFly
