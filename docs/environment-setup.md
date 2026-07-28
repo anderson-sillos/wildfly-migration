@@ -258,6 +258,55 @@ Mantenha cada JDK em diretório próprio e configure `JAVA8_HOME`, `JAVA17_HOME`
 O destino final será fixado em uma build OpenJDK 25 aprovada. Oracle JDK não
 será aceito nesse gate.
 
+### VS Code no baseline Java 7
+
+O build Maven continua sendo a fonte de verdade do baseline. Para que o
+diagnóstico do editor também aceite `source` e `target` 1.7, use a extensão
+Language Support for Java by Red Hat exatamente na versão `1.32.0`. A partir da
+versão `1.33.0`, a plataforma do servidor de linguagem deixou de compilar
+projetos anteriores ao Java 8; atualizar a extensão durante a fase 1 faz o
+editor exibir a mensagem `Minimal supported version is '1.8'`, embora o build
+real com Java 7 continue válido.
+
+Em uma janela VS Code conectada ao mesmo ambiente remoto do projeto, instale e
+confirme a versão:
+
+```bash
+code --install-extension redhat.java@1.32.0 --force
+code --list-extensions --show-versions | grep '^redhat\.java@'
+```
+
+O resultado esperado é `redhat.java@1.32.0`. Ao instalar uma versão específica,
+mantenha desabilitada a atualização automática dessa extensão até o `CP-2A`,
+quando o código passar a Java 8. O workspace já relaciona `JavaSE-1.7` ao Zulu
+7 portátil e `JavaSE-1.8` ao OpenJDK 8 em `.vscode/settings.json`; adapte apenas
+os caminhos locais se o host usar diretórios diferentes. O servidor de
+linguagem inicia com o JRE 17 incorporado à extensão, enquanto a compilação do
+projeto usa o JDK 7 configurado. Esses runtimes têm responsabilidades distintas.
+
+Depois da troca de versão, abra a paleta de comandos e execute, nesta ordem:
+
+1. `Developer: Reload Window`;
+2. `Java: Clean Java Language Server Workspace`;
+3. confirme o reinício e a remoção do cache solicitados pelo comando.
+
+Para validar todos os arquivos de uma vez, pressione `Ctrl+Shift+B` e execute a
+tarefa padrão `Baseline: validar Java 7 em massa`. Ela chama o build completo
+com o perfil `ci-h2`, Java 7 e Maven 3.8.9. Os comandos `Java: Force Java
+Compilation` ou `Java Projects: Rebuild All` podem atualizar os marcadores do
+editor, mas não substituem este build:
+
+```bash
+./scripts/doctor.sh CP-1F --profile ci-h2 --env .env
+./scripts/build-cp-1d.sh --profile ci-h2 --env .env
+```
+
+Referências: [histórico de versões do VS Code Java][vscode-java-changelog] e
+[matriz de compilação do Eclipse JDT Language Server][jdtls-readme].
+
+[vscode-java-changelog]: https://github.com/redhat-developer/vscode-java/blob/main/CHANGELOG.md
+[jdtls-readme]: https://github.com/eclipse-jdtls/eclipse.jdt.ls
+
 ## 5. Maven
 
 ### Maven 3.8.9 no legado
