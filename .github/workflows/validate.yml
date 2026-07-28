@@ -36,6 +36,9 @@ jobs:
           bash -n scripts/validate-cp-1e-web.sh
           bash -n scripts/validate-cp-1f-upload.sh
           bash -n scripts/validate-cp-1f-xml.sh
+          bash -n scripts/validate-cp-1f-discovery-logging.sh
+          bash -n scripts/validate-cp-1f-contracts.sh
+          bash -n contract-tests/run.sh
 
       - name: Validate repository baseline
         run: ./scripts/doctor.sh CP-1A --ci
@@ -72,6 +75,12 @@ jobs:
 
       - name: Validate CP-1F legacy XML import statically
         run: ./scripts/validate-cp-1f-xml.sh
+
+      - name: Validate CP-1F Reflections and Log4j statically
+        run: ./scripts/validate-cp-1f-discovery-logging.sh
+
+      - name: Validate CP-1F external contracts statically
+        run: ./scripts/validate-cp-1f-contracts.sh
 
   portable-ci:
     name: portable-ci
@@ -151,4 +160,12 @@ jobs:
         run: |
           ./scripts/smoke-wildfly9-datasource.sh \
             --profile ci-h2 \
-            --war app/target/wildfly-migration.war
+            --war app/target/wildfly-migration.war \
+            --contract-result app/target/contract-results/ci-h2.json
+
+      - name: Upload sanitized portable contract result
+        uses: actions/upload-artifact@v4
+        with:
+          name: cp-1f-portable-contract-result
+          path: app/target/contract-results/ci-h2.json
+          if-no-files-found: error

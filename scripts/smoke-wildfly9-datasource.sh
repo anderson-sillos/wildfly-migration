@@ -6,6 +6,7 @@ REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPOSITORY_ROOT/.env"
 PROFILE=""
 WAR_FILE=""
+CONTRACT_RESULT_FILE=""
 MANUAL_MODE=false
 TEMP_DIRECTORY=""
 RUNTIME_HOME=""
@@ -17,12 +18,13 @@ usage() {
   cat <<'USAGE'
 Uso:
   ./scripts/smoke-wildfly9-datasource.sh --profile ci-h2|oracle \
-    [--env ARQUIVO] [--war ARQUIVO] [--manual]
+    [--env ARQUIVO] [--war ARQUIVO] [--contract-result ARQUIVO] [--manual]
 
 Valores já exportados no ambiente prevalecem sobre o arquivo informado.
 Sem --war, valida somente o datasource. Com --war, valida também o fluxo web.
 Com --manual, mantém a aplicação ativa em loopback até Ctrl+C; exige --war.
 No modo manual, imprime o caminho do log bruto do WildFly.
+Com --contract-result, preserva fora do runtime o relatório JSON sanitizado.
 USAGE
 }
 
@@ -164,6 +166,14 @@ while [[ $# -gt 0 ]]; do
         exit 2
       }
       WAR_FILE="$2"
+      shift 2
+      ;;
+    --contract-result)
+      [[ $# -ge 2 ]] || {
+        printf 'FALHA: --contract-result exige um arquivo\n' >&2
+        exit 2
+      }
+      CONTRACT_RESULT_FILE="$2"
       shift 2
       ;;
     --manual)
@@ -584,16 +594,27 @@ if [[ -n "$WAR_FILE" ]]; then
   fi
 
   xml_number="LAB-SMOKE-XML-$(date +%s)-$SERVER_PID"
+  xml_correlation="cp1f-xml-$SERVER_PID"
   valid_xml="$TEMP_DIRECTORY/pedido-valido.xml"
   sed "s/XML-0001/$xml_number/" \
     "$REPOSITORY_ROOT/contract-tests/fixtures/xml/pedido-valido.xml" \
     >"$valid_xml"
+  if ! curl --silent --show-error --fail \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --output "$body" \
+      "$base_url/pedidos/importar-xml" ||
+     ! grep -Fq 'data-page="pedidos-importacao-xml"' "$body" ||
+     ! grep -Fq 'name="arquivoXml"' "$body"; then
+    printf 'FALHA: formulário de seleção do arquivo XML não foi renderizado\n' >&2
+    exit 1
+  fi
   xml_detail_url=""
   if ! xml_detail_url="$(curl --silent --show-error --fail --location \
       --cookie-jar "$cookies" \
       --cookie "$cookies" \
-      --header 'Content-Type: application/xml' \
-      --data-binary "@$valid_xml" \
+      --header "X-Correlation-ID: $xml_correlation" \
+      --form "arquivoXml=@$valid_xml;type=application/xml" \
       --output "$body" \
       --write-out '%{url_effective}' \
       "$base_url/pedidos/importar-xml")" ||
@@ -627,6 +648,17 @@ if [[ -n "$WAR_FILE" ]]; then
       exit 1
       ;;
   esac
+
+  if ! grep -Fq \
+      'legacy_validator_order=numero-formato,valor-monetario' \
+      "$TEMP_DIRECTORY/server.log" ||
+     ! grep -Fq 'legacy_xml_import accepted' \
+      "$TEMP_DIRECTORY/server.log" ||
+     ! grep -Fq "correlation=$xml_correlation" \
+      "$TEMP_DIRECTORY/server.log"; then
+    printf 'FALHA: descoberta ou correlação do log legado não foi observada\n' >&2
+    exit 1
+  fi
 
   for hostile_fixture in \
     pedido-invalido-xsd.xml \
@@ -674,6 +706,40 @@ if [[ -n "$WAR_FILE" ]]; then
       "$base_url/preferencia" ||
      ! grep -Fq 'data-display-mode="COMPACTO"' "$body"; then
     printf 'FALHA: preferência não persistiu na HttpSession\n' >&2
+    exit 1
+  fi
+
+  contract_result="$CONTRACT_RESULT_FILE"
+  if [[ -z "$contract_result" ]]; then
+    contract_result="$TEMP_DIRECTORY/contract-result-$PROFILE.json"
+  fi
+  contract_correlation="cp1f-contract-$SERVER_PID"
+  commit_sha="$(git -C "$REPOSITORY_ROOT" rev-parse HEAD)"
+  if ! "$REPOSITORY_ROOT/contract-tests/run.sh" \
+      --base-url "$base_url" \
+      --profile "$PROFILE" \
+      --war "$WAR_FILE" \
+      --result "$contract_result" \
+      --commit "$commit_sha" \
+      --runtime java7-wildfly9.0.2 \
+      --correlation-id "$contract_correlation"; then
+    printf 'FALHA: suíte externa de contratos falhou no perfil %s\n' \
+      "$PROFILE" >&2
+    if [[ "$PROFILE" == "oracle" ]]; then
+      tail -n 80 "$TEMP_DIRECTORY/server.log" |
+        sanitize_oracle_output >&2
+    else
+      tail -n 80 "$TEMP_DIRECTORY/server.log" |
+        sed "s#${TEMP_DIRECTORY}#<runtime-temporario>#g" >&2
+    fi
+    exit 1
+  fi
+  if ! grep -Fq \
+      'legacy_validator_order=numero-formato,valor-monetario' \
+      "$TEMP_DIRECTORY/server.log" ||
+     ! grep -Fq "correlation=$contract_correlation" \
+      "$TEMP_DIRECTORY/server.log"; then
+    printf 'FALHA: logs da execução externa não preservaram o contrato\n' >&2
     exit 1
   fi
 
