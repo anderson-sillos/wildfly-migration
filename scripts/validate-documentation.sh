@@ -11,6 +11,7 @@ required_paths=(
   "docs/legacy-application-runbook.md"
   "docs/legacy-upload.md"
   "docs/legacy-xml-import.md"
+  "docs/legacy-validation-logging.md"
   "docs/oracle-lab-schema.md"
   "runtime/legacy/README.md"
   "runtime/legacy/profiles/README.md"

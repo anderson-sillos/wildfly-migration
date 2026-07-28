@@ -241,8 +241,12 @@ criados manualmente permanecem no schema.
 
 ### Importação XML
 
-Com o runtime manual ativo, envie uma cópia da fixture válida com número
-exclusivo:
+Com o runtime manual ativo, abra
+`http://127.0.0.1:18080/wildfly-migration/pedidos/importar-xml`, selecione uma
+fixture `.xml` com número exclusivo e clique em **Importar pedido**.
+
+Para executar o mesmo caso pela linha de comando, envie uma cópia da fixture
+válida com número exclusivo:
 
 ```bash
 sed 's/XML-0001/MANUAL-XML-0001/' \

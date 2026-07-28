@@ -4,6 +4,12 @@ O CP-1F expõe `POST /wildfly-migration/pedidos/importar-xml` para reproduzir
 o processamento histórico com XMLBeans 2.3.0 e dom4j 1.6.1. O corpo deve usar
 `Content-Type: application/xml` ou `text/xml` e não pode exceder 128 KiB.
 
+Para uso manual, abra `GET /wildfly-migration/pedidos/importar-xml`, selecione
+um arquivo `.xml` e envie o formulário. Essa página usa
+`multipart/form-data`; o servidor aceita exatamente o campo `arquivoXml`,
+limita o arquivo a 128 KiB, limita a requisição a 160 KiB e elimina o item
+temporário depois da leitura.
+
 ## Ordem do processamento
 
 1. o corpo é lido com limite explícito;

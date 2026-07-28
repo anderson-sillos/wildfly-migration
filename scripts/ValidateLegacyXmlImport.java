@@ -33,6 +33,10 @@ public final class ValidateLegacyXmlImport {
                 repository,
                 "app/src/main/webapp/WEB-INF/views/pedidos/"
                 + "detalhe-content.jsp"));
+        String importForm = read(file(
+                repository,
+                "app/src/main/webapp/WEB-INF/views/pedidos/"
+                + "importacao-xml-content.jsp"));
         String schema = read(file(
                 repository,
                 "app/src/main/resources/xsd/pedido-importacao-v1.xsd"));
@@ -55,6 +59,12 @@ public final class ValidateLegacyXmlImport {
                 "proteções contra DTD e entidades externas incompletas");
         require(servlet.indexOf("MAX_XML_BYTES = 128 * 1024") >= 0,
                 "limite de 128 KiB do XML ausente");
+        require(servlet.indexOf(
+                "MAX_MULTIPART_REQUEST_BYTES = 160L * 1024L") >= 0
+                && servlet.indexOf(
+                        "ServletFileUpload.isMultipartContent(request)") >= 0
+                && servlet.indexOf("item.delete()") >= 0,
+                "seleção multipart, limite ou limpeza estão incompletos");
         require(servlet.indexOf("application/xml") >= 0
                 && servlet.indexOf("text/xml") >= 0,
                 "tipos de mídia do contrato XML ausentes");
@@ -72,6 +82,12 @@ public final class ValidateLegacyXmlImport {
                 "endpoint de importação XML ausente");
         require(detail.indexOf("data-xml-import-status=\"ok\"") >= 0,
                 "marcador de sucesso da importação ausente");
+        require(importForm.indexOf(
+                "enctype=\"multipart/form-data\"") >= 0
+                && importForm.indexOf("name=\"arquivoXml\"") >= 0
+                && importForm.indexOf(
+                        "data-page=\"pedidos-importacao-xml\"") >= 0,
+                "página de seleção do arquivo XML ausente");
         require(schema.indexOf("[A-Za-z0-9._\\-]*") >= 0,
                 "hífen do pattern deve estar escapado para XMLBeans 2.3.0");
 

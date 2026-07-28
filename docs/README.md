@@ -22,6 +22,7 @@ passos.
 - [persistência MyBatis](mybatis-persistence.md).
 - [upload legado e metadados comparáveis](legacy-upload.md).
 - [importação XML legada](legacy-xml-import.md).
+- [descoberta Reflections e logging Log4j 1](legacy-validation-logging.md).
 
 ## Runtime e banco
 

@@ -6,6 +6,7 @@
     <nav>
       <a href="<c:url value='/pedidos'/>">Pedidos</a>
       <a href="<c:url value='/pedidos/novo'/>">Novo pedido</a>
+      <a href="<c:url value='/pedidos/importar-xml'/>">Importar XML</a>
     </nav>
   </div>
   <form action="<c:url value='/preferencia'/>" method="post">

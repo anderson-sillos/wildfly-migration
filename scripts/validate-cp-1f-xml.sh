@@ -24,6 +24,8 @@ required_paths=(
   "app/src/main/java/br/com/asillos/migration/integration/xml/XmlImportException.java"
   "app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java"
   "app/src/main/resources/xsd/pedido-importacao-v1.xsd"
+  "app/src/main/webapp/WEB-INF/views/pedidos/importacao-xml.jsp"
+  "app/src/main/webapp/WEB-INF/views/pedidos/importacao-xml-content.jsp"
   "contract-tests/fixtures/xml/pedido-valido.xml"
   "contract-tests/fixtures/xml/pedido-invalido-xsd.xml"
   "contract-tests/fixtures/xml/pedido-xxe.xml"

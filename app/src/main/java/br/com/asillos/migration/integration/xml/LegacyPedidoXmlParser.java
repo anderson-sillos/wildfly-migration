@@ -14,7 +14,10 @@ import javax.xml.parsers.SAXParserFactory;
 
 import br.com.asillos.migration.domain.Pedido;
 import br.com.asillos.migration.domain.StatusPedido;
+import br.com.asillos.migration.integration.validation.LegacyValidatorDiscovery;
+import br.com.asillos.migration.integration.validation.PedidoImportValidator;
 
+import org.apache.log4j.Logger;
 import org.apache.xmlbeans.SchemaTypeLoader;
 import org.apache.xmlbeans.XmlBeans;
 import org.apache.xmlbeans.XmlError;
@@ -34,10 +37,14 @@ import org.xml.sax.XMLReader;
  * Valida com XMLBeans 2.3.0 e mapeia com dom4j 1.6.1.
  */
 public final class LegacyPedidoXmlParser {
+    private static final Logger LOGGER =
+            Logger.getLogger(LegacyPedidoXmlParser.class);
+
     public static final String NAMESPACE =
             "urn:wildfly-migration:pedido:1";
 
     private final SchemaTypeLoader schemaTypes;
+    private final List<PedidoImportValidator> validators;
 
     public LegacyPedidoXmlParser(InputStream schemaInput)
             throws XmlImportException {
@@ -49,6 +56,10 @@ public final class LegacyPedidoXmlParser {
             XmlObject schema = XmlObject.Factory.parse(
                     schemaInput, secureLoadOptions());
             schemaTypes = XmlBeans.loadXsd(new XmlObject[] {schema});
+            validators = LegacyValidatorDiscovery.discover();
+            LOGGER.info(
+                    "legacy_validator_order="
+                    + LegacyValidatorDiscovery.describe(validators));
         } catch (XmlException exception) {
             throw new XmlImportException(
                     "XSD de importação não pôde ser compilado", exception);
@@ -70,7 +81,11 @@ public final class LegacyPedidoXmlParser {
         }
 
         validateWithXmlBeans(xml);
-        return mapWithDom4j(xml);
+        Pedido pedido = mapWithDom4j(xml);
+        for (PedidoImportValidator validator : validators) {
+            validator.validate(pedido);
+        }
+        return pedido;
     }
 
     private void validateWithXmlBeans(byte[] xml)
