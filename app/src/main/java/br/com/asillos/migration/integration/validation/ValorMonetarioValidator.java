@@ -3,7 +3,6 @@ package br.com.asillos.migration.integration.validation;
 import java.math.BigDecimal;
 
 import br.com.asillos.migration.domain.Pedido;
-import br.com.asillos.migration.integration.xml.XmlImportException;
 
 /**
  * Confirma a semântica monetária comum ao XSD e aos dois bancos.
@@ -21,12 +20,13 @@ public final class ValorMonetarioValidator
     }
 
     @Override
-    public void validate(Pedido pedido) throws XmlImportException {
+    public void validate(Pedido pedido)
+            throws PedidoImportValidationException {
         BigDecimal value =
                 pedido == null ? null : pedido.getValorTotal();
         if (value == null || value.signum() < 0 || value.scale() > 2
                 || value.precision() - value.scale() > 13) {
-            throw new XmlImportException(
+            throw new PedidoImportValidationException(
                     "Pedido importado tem valor fora do contrato");
         }
     }

@@ -3,7 +3,6 @@ package br.com.asillos.migration.integration.validation;
 import java.util.regex.Pattern;
 
 import br.com.asillos.migration.domain.Pedido;
-import br.com.asillos.migration.integration.xml.XmlImportException;
 
 /**
  * Confirma a regra de número já expressa pelo XSD.
@@ -24,10 +23,11 @@ public final class NumeroFormatoValidator
     }
 
     @Override
-    public void validate(Pedido pedido) throws XmlImportException {
+    public void validate(Pedido pedido)
+            throws PedidoImportValidationException {
         String numero = pedido == null ? null : pedido.getNumero();
         if (numero == null || !FORMAT.matcher(numero).matches()) {
-            throw new XmlImportException(
+            throw new PedidoImportValidationException(
                     "Pedido importado tem número fora do contrato");
         }
     }

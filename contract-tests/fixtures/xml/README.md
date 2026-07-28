@@ -3,6 +3,9 @@
 - `pedido-valido.xml`: documento bem-formado que deve atender ao XSD;
 - `pedido-invalido-xsd.xml`: bem-formado, mas viola pattern, tamanho, valor e
   enumeração do schema;
+- `pedido-invalido-validador.xml`: atende ao XSD, mas usa status `APROVADO` e
+  deve ser rejeitado pelo validador de negócio que exige status inicial
+  `NOVO`;
 - `pedido-xxe.xml`: referencia uma entidade externa e deve ser rejeitado sem
   acessar o sistema de arquivos;
 - `pedido-entidades-expansivas.xml`: contém expansão de entidades e deve ser

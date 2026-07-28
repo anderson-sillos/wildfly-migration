@@ -24,6 +24,8 @@ required_paths=(
   "app/src/main/java/br/com/asillos/migration/integration/validation/LegacyValidatorDiscovery.java"
   "app/src/main/java/br/com/asillos/migration/integration/validation/NumeroFormatoValidator.java"
   "app/src/main/java/br/com/asillos/migration/integration/validation/ValorMonetarioValidator.java"
+  "app/src/main/java/br/com/asillos/migration/integration/validation/StatusInicialValidator.java"
+  "app/src/main/java/br/com/asillos/migration/integration/validation/PedidoImportValidationException.java"
   "app/src/main/resources/log4j.properties"
   "docs/legacy-validation-logging.md"
   "scripts/ValidateLegacyDiscoveryLogging.java"

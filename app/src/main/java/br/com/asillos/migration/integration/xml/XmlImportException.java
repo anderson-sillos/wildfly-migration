@@ -3,7 +3,7 @@ package br.com.asillos.migration.integration.xml;
 /**
  * Falha funcional e segura do contrato de importação XML.
  */
-public final class XmlImportException extends Exception {
+public class XmlImportException extends Exception {
     private static final long serialVersionUID = 1L;
 
     public XmlImportException(String message) {

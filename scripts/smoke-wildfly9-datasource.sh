@@ -650,13 +650,38 @@ if [[ -n "$WAR_FILE" ]]; then
   esac
 
   if ! grep -Fq \
-      'legacy_validator_order=numero-formato,valor-monetario' \
+      'legacy_validator_order=numero-formato,valor-monetario,status-inicial' \
       "$TEMP_DIRECTORY/server.log" ||
      ! grep -Fq 'legacy_xml_import accepted' \
       "$TEMP_DIRECTORY/server.log" ||
      ! grep -Fq "correlation=$xml_correlation" \
       "$TEMP_DIRECTORY/server.log"; then
     printf 'FALHA: descoberta ou correlação do log legado não foi observada\n' >&2
+    exit 1
+  fi
+
+  validator_xml="$REPOSITORY_ROOT/contract-tests/fixtures/xml/"
+  validator_xml="${validator_xml}pedido-invalido-validador.xml"
+  validator_status=""
+  if ! validator_status="$(curl --silent --show-error \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --header "X-Correlation-ID: $xml_correlation" \
+      --header 'Content-Type: application/xml' \
+      --data-binary "@$validator_xml" \
+      --output "$body" \
+      --write-out '%{http_code}' \
+      "$base_url/pedidos/importar-xml")"; then
+    printf 'FALHA: cenário de rejeição pelo validador não respondeu\n' >&2
+    exit 1
+  fi
+  if [[ "$validator_status" != "400" ]] ||
+     ! grep -Fq 'data-page="erro-controlado"' "$body" ||
+     ! grep -Fq 'deve iniciar com status NOVO' "$body" ||
+     ! grep -Fq \
+        'legacy_xml_import rejected reason=domain_validator' \
+        "$TEMP_DIRECTORY/server.log"; then
+    printf 'FALHA: regra descoberta não rejeitou o status inicial inválido\n' >&2
     exit 1
   fi
 
@@ -692,6 +717,7 @@ if [[ -n "$WAR_FILE" ]]; then
       --output "$body" \
       "$base_url/pedidos" ||
      grep -Fq 'XML INVÁLIDO COM ESPAÇOS' "$body" ||
+     grep -Fq 'XML-VALIDATOR-0001' "$body" ||
      grep -Fq 'XML-XXE-0001' "$body" ||
      grep -Fq 'XML-ENTITY-0001' "$body"; then
     printf 'FALHA: XML rejeitado deixou persistência parcial\n' >&2
@@ -735,7 +761,10 @@ if [[ -n "$WAR_FILE" ]]; then
     exit 1
   fi
   if ! grep -Fq \
-      'legacy_validator_order=numero-formato,valor-monetario' \
+      'legacy_validator_order=numero-formato,valor-monetario,status-inicial' \
+      "$TEMP_DIRECTORY/server.log" ||
+     ! grep -Fq \
+      'legacy_xml_import rejected reason=domain_validator' \
       "$TEMP_DIRECTORY/server.log" ||
      ! grep -Fq "correlation=$contract_correlation" \
       "$TEMP_DIRECTORY/server.log"; then

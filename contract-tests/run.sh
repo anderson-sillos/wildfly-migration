@@ -293,6 +293,25 @@ case "$XML_DETAIL_URL" in
     ;;
 esac
 
+VALIDATOR_XML="$REPOSITORY_ROOT/contract-tests/fixtures/xml/"
+VALIDATOR_XML="${VALIDATOR_XML}pedido-invalido-validador.xml"
+XML_VALIDATOR_STATUS="$(
+  curl --silent --show-error \
+    --cookie-jar "$COOKIES" \
+    --cookie "$COOKIES" \
+    --header "X-Correlation-ID: $CORRELATION_ID" \
+    --header 'Content-Type: application/xml' \
+    --data-binary "@$VALIDATOR_XML" \
+    --output "$BODY" \
+    --write-out '%{http_code}' \
+    "$BASE_URL/pedidos/importar-xml"
+)" || fail "cenário de rejeição pelo validador não respondeu"
+if [[ "$XML_VALIDATOR_STATUS" != "400" ]] ||
+   ! grep -Fq 'data-page="erro-controlado"' "$BODY" ||
+   ! grep -Fq 'deve iniciar com status NOVO' "$BODY"; then
+  fail "XML válido no XSD não foi rejeitado pela regra de status inicial"
+fi
+
 for HOSTILE_FIXTURE in \
   pedido-invalido-xsd.xml \
   pedido-xxe.xml \
@@ -322,6 +341,7 @@ if ! curl --silent --show-error --fail \
    ! grep -Fq "$ORDER_NUMBER" "$BODY" ||
    ! grep -Fq "$XML_NUMBER" "$BODY" ||
    grep -Fq 'XML INVÁLIDO COM ESPAÇOS' "$BODY" ||
+   grep -Fq 'XML-VALIDATOR-0001' "$BODY" ||
    grep -Fq 'XML-XXE-0001' "$BODY" ||
    grep -Fq 'XML-ENTITY-0001' "$BODY"; then
   fail "estado final divergiu ou XML rejeitado deixou persistência parcial"
@@ -360,6 +380,7 @@ RESULT_TEMPORARY="$RESULT_FILE.tmp.$$"
   printf '    "xmlForm": "passed",\n'
   printf '    "xmlValid": "passed",\n'
   printf '    "xmlInvalidXsd": "passed",\n'
+  printf '    "xmlValidatorRejected": "passed",\n'
   printf '    "xmlXxe": "passed",\n'
   printf '    "xmlEntityExpansion": "passed",\n'
   printf '    "persistedState": "passed"\n'

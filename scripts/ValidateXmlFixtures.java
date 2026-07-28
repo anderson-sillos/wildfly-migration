@@ -33,6 +33,9 @@ public final class ValidateXmlFixtures {
                 "contract-tests/fixtures/xml/pedido-valido.xml");
         File invalidXml = file(repository,
                 "contract-tests/fixtures/xml/pedido-invalido-xsd.xml");
+        File validatorInvalidXml = file(repository,
+                "contract-tests/fixtures/xml/"
+                + "pedido-invalido-validador.xml");
         File xxeXml = file(repository,
                 "contract-tests/fixtures/xml/pedido-xxe.xml");
         File expansionXml = file(repository,
@@ -40,6 +43,7 @@ public final class ValidateXmlFixtures {
 
         Schema schema = createSchema(schemaFile);
         validateExpectedValid(schema, validXml);
+        validateExpectedValid(schema, validatorInvalidXml);
         validateExpectedInvalid(schema, invalidXml);
         rejectDoctype(xxeXml);
         rejectDoctype(expansionXml);

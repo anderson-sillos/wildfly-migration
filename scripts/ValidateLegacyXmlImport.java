@@ -40,6 +40,10 @@ public final class ValidateLegacyXmlImport {
         String schema = read(file(
                 repository,
                 "app/src/main/resources/xsd/pedido-importacao-v1.xsd"));
+        String validatorFixture = read(file(
+                repository,
+                "contract-tests/fixtures/xml/"
+                + "pedido-invalido-validador.xml"));
 
         require(pom.indexOf(
                 "<xmlbeans.version>2.3.0</xmlbeans.version>") >= 0,
@@ -68,6 +72,11 @@ public final class ValidateLegacyXmlImport {
         require(servlet.indexOf("application/xml") >= 0
                 && servlet.indexOf("text/xml") >= 0,
                 "tipos de mídia do contrato XML ausentes");
+        require(servlet.indexOf(
+                "catch (PedidoImportValidationException exception)") >= 0
+                && servlet.indexOf(
+                        "rejected reason=domain_validator") >= 0,
+                "rejeição do validador não está distinguível no contrato");
 
         int parsePosition = servlet.indexOf("parser.parse(xml)");
         int persistPosition = servlet.indexOf(".importar(pedido)");
@@ -90,6 +99,11 @@ public final class ValidateLegacyXmlImport {
                 "página de seleção do arquivo XML ausente");
         require(schema.indexOf("[A-Za-z0-9._\\-]*") >= 0,
                 "hífen do pattern deve estar escapado para XMLBeans 2.3.0");
+        require(validatorFixture.indexOf(
+                "<numero>XML-VALIDATOR-0001</numero>") >= 0
+                && validatorFixture.indexOf(
+                        "<status>APROVADO</status>") >= 0,
+                "fixture válida no XSD e inválida no validador divergiu");
 
         System.out.println(
                 "OK: importação XMLBeans/dom4j, XSD e proteções validadas");

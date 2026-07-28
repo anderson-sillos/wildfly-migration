@@ -28,6 +28,7 @@ required_paths=(
   "app/src/main/webapp/WEB-INF/views/pedidos/importacao-xml-content.jsp"
   "contract-tests/fixtures/xml/pedido-valido.xml"
   "contract-tests/fixtures/xml/pedido-invalido-xsd.xml"
+  "contract-tests/fixtures/xml/pedido-invalido-validador.xml"
   "contract-tests/fixtures/xml/pedido-xxe.xml"
   "contract-tests/fixtures/xml/pedido-entidades-expansivas.xml"
   "docs/legacy-xml-import.md"

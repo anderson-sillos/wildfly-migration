@@ -18,6 +18,7 @@ O conjunto e a ordem congelados são:
 | --- | --- | --- |
 | 10 | `numero-formato` | confirma o formato do número do pedido |
 | 20 | `valor-monetario` | confirma sinal, precisão e escala do valor |
+| 30 | `status-inicial` | exige status `NOVO` em toda importação |
 
 O Reflections localiza os subtipos; `LegacyValidatorDiscovery` ordena por
 `order()` e, em caso de empate, pelo nome completo da classe. Identificadores
@@ -28,6 +29,11 @@ construtor sem argumentos, implemente `PedidoImportValidator`, escolha ordem e
 identificador únicos e atualize o contrato automatizado. A tarefa final de
 migração substituirá essa descoberta por registro explícito preservando o
 mesmo conjunto e a mesma ordem.
+
+O XSD aceita `NOVO`, `APROVADO` e `CANCELADO` porque descreve todos os estados
+persistidos. A importação, porém, só pode criar pedidos em `NOVO`. Essa
+diferença intencional permite comprovar que o documento passou pelo XSD,
+chegou ao validador descoberto e foi rejeitado por regra de negócio.
 
 ## Logging e dados permitidos
 
@@ -44,7 +50,10 @@ Não podem ser registrados:
 
 O teste de runtime procura no `server.log` o identificador de correlação, o
 evento aceito e
-`legacy_validator_order=numero-formato,valor-monetario`.
+`legacy_validator_order=numero-formato,valor-monetario,status-inicial`.
+A fixture `pedido-invalido-validador.xml` também deve produzir HTTP `400` e o
+evento `legacy_xml_import rejected reason=domain_validator`, com a mesma
+correlação da requisição e sem persistência parcial.
 
 ## Acoplamento transitivo observado
 

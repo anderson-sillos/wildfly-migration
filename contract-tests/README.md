@@ -11,6 +11,7 @@ Ela cobre:
 - preferência em sessão;
 - upload, metadados persistidos e limite HTTP `413`;
 - página multipart e importação XML válida;
+- XML válido no XSD rejeitado pelo validador de status inicial;
 - XSD inválido, XXE e expansão de entidades sem persistência parcial.
 
 O mesmo arquivo é chamado pelos perfis `ci-h2` e `oracle`. O resultado JSON

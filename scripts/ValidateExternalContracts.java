@@ -42,6 +42,7 @@ public final class ValidateExternalContracts {
             "\"xmlForm\": \"passed\"",
             "\"xmlValid\": \"passed\"",
             "\"xmlInvalidXsd\": \"passed\"",
+            "\"xmlValidatorRejected\": \"passed\"",
             "\"xmlXxe\": \"passed\"",
             "\"xmlEntityExpansion\": \"passed\"",
             "\"persistedState\": \"passed\""

@@ -6,7 +6,7 @@ explicam versões e decisões; os comandos operacionais ficam aqui.
 
 ## Escopo atual
 
-O CP-1E disponibiliza:
+O CP-1F disponibiliza:
 
 - health check;
 - listagem, criação e detalhe de pedidos;
@@ -14,10 +14,10 @@ O CP-1E disponibiliza:
 - JSP/JSTL, Tiles 2.1.4 e TLD 2.0;
 - preferência de exibição em `HttpSession`;
 - upload por Commons FileUpload 1.2.2 com limites e metadados SHA-256;
+- importação XML por XMLBeans/dom4j, com XSD e validadores descobertos por
+  Reflections;
+- eventos do fluxo XML em Log4j 1 com correlação;
 - filtro UTF-8 e cabeçalho `X-Correlation-ID`.
-
-Importação XML, Reflections e uso funcional do Log4j entram nos próximos
-incrementos do CP-1F e ainda não fazem parte dos testes manuais.
 
 ## Escolha do perfil
 
@@ -261,10 +261,22 @@ Confirme HTTP final `200`, `data-xml-import-status="ok"` e os valores da
 fixture no detalhe. Se repetir o teste, troque `MANUAL-XML-0001`, pois o número
 do pedido é único e a limpeza automática remove apenas `LAB-SMOKE-*`.
 
-Depois envie `pedido-invalido-xsd.xml`, `pedido-xxe.xml` e
+Depois envie `pedido-invalido-validador.xml`,
+`pedido-invalido-xsd.xml`, `pedido-xxe.xml` e
 `pedido-entidades-expansivas.xml` para o mesmo endpoint. Cada documento deve
-retornar HTTP `400`; nenhum número rejeitado pode aparecer na listagem. O
-contrato completo e o limite de 128 KiB estão em
+retornar HTTP `400`; nenhum número rejeitado pode aparecer na listagem.
+
+A fixture `pedido-invalido-validador.xml` é o caso específico da atividade
+1.28: ela atende ao XSD, mas o validador descoberto por Reflections rejeita o
+status `APROVADO`. No `server.log`, confirme:
+
+```text
+legacy_validator_order=numero-formato,valor-monetario,status-inicial
+legacy_xml_import rejected reason=domain_validator
+```
+
+Confirme também que `XML-VALIDATOR-0001` não aparece na listagem. O contrato
+completo e o limite de 128 KiB estão em
 [Importação XML legada](legacy-xml-import.md).
 
 ### Preferência em sessão

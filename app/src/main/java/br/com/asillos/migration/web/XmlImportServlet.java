@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import br.com.asillos.migration.domain.Pedido;
+import br.com.asillos.migration.integration.validation.PedidoImportValidationException;
 import br.com.asillos.migration.integration.xml.LegacyPedidoXmlParser;
 import br.com.asillos.migration.integration.xml.XmlImportException;
 
@@ -134,6 +135,14 @@ public final class XmlImportServlet extends HttpServlet {
                     response,
                     HttpServletResponse.SC_BAD_REQUEST,
                     "Não foi possível interpretar o arquivo XML enviado");
+        } catch (PedidoImportValidationException exception) {
+            LOGGER.warn(
+                    "legacy_xml_import rejected reason=domain_validator");
+            safeError(
+                    request,
+                    response,
+                    HttpServletResponse.SC_BAD_REQUEST,
+                    exception.getMessage());
         } catch (XmlImportException exception) {
             LOGGER.warn("legacy_xml_import rejected reason=xml_contract");
             safeError(

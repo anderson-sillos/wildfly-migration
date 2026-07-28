@@ -24,6 +24,7 @@ required_paths=(
   "contract-tests/README.md"
   "contract-tests/fixtures/xml/pedido-valido.xml"
   "contract-tests/fixtures/xml/pedido-invalido-xsd.xml"
+  "contract-tests/fixtures/xml/pedido-invalido-validador.xml"
   "contract-tests/fixtures/xml/pedido-xxe.xml"
   "contract-tests/fixtures/xml/pedido-entidades-expansivas.xml"
   "scripts/ValidateExternalContracts.java"

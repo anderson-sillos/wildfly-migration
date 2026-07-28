@@ -26,6 +26,10 @@ public final class ValidateLegacyDiscoveryLogging {
                 repository,
                 "app/src/main/java/br/com/asillos/migration/integration/"
                 + "validation/ValorMonetarioValidator.java"));
+        String statusValidator = read(file(
+                repository,
+                "app/src/main/java/br/com/asillos/migration/integration/"
+                + "validation/StatusInicialValidator.java"));
         String parser = read(file(
                 repository,
                 "app/src/main/java/br/com/asillos/migration/integration/xml/"
@@ -62,6 +66,11 @@ public final class ValidateLegacyDiscoveryLogging {
                 && moneyValidator.indexOf(
                         "return \"valor-monetario\";") >= 0,
                 "contrato do validador monetário divergiu");
+        require(statusValidator.indexOf("return 30;") >= 0
+                && statusValidator.indexOf(
+                        "return \"status-inicial\";") >= 0
+                && statusValidator.indexOf("StatusPedido.NOVO") >= 0,
+                "regra de negócio do status inicial divergiu");
         require(parser.indexOf(
                 "LegacyValidatorDiscovery.discover()") >= 0
                 && parser.indexOf("validator.validate(pedido)") >= 0,
@@ -74,7 +83,9 @@ public final class ValidateLegacyDiscoveryLogging {
         require(servlet.indexOf(
                 "legacy_xml_import accepted") >= 0
                 && servlet.indexOf(
-                        "legacy_xml_import rejected reason=") >= 0,
+                        "legacy_xml_import rejected reason=") >= 0
+                && servlet.indexOf(
+                        "rejected reason=domain_validator") >= 0,
                 "eventos funcionais do fluxo XML não são registrados");
         require(servlet.indexOf("LOGGER.info(xml") < 0
                 && servlet.indexOf("LOGGER.warn(xml") < 0,
@@ -84,10 +95,13 @@ public final class ValidateLegacyDiscoveryLogging {
                 && logConfiguration.indexOf("%X{correlationId}") >= 0,
                 "appender ou correlação do Log4j 1 ausente");
         require(smoke.indexOf(
-                "legacy_validator_order=numero-formato,valor-monetario")
+                "legacy_validator_order=numero-formato,"
+                + "valor-monetario,status-inicial")
                 >= 0
+                && smoke.indexOf(
+                        "rejected reason=domain_validator") >= 0
                 && smoke.indexOf("correlation=$xml_correlation") >= 0,
-                "smoke não congela descoberta, ordem e correlação");
+                "smoke não congela descoberta, regra e correlação");
 
         System.out.println(
                 "OK: Reflections e Log4j 1 têm contrato determinístico");
