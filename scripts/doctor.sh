@@ -7,6 +7,7 @@ CHECKPOINT_EXPLICIT=false
 ENV_FILE=""
 LEGACY_RUNTIME_MANIFEST="runtime/legacy/runtime-manifest.tsv"
 PORTABLE_RUNTIME_MANIFEST="runtime/legacy/portable-runtime-manifest.tsv"
+PHASE2_JAVA8_RUNTIME_MANIFEST="runtime/phase2/java8-wildfly9/runtime-manifest.tsv"
 DB_PROFILE_ARGUMENT=""
 DB_PROFILE=""
 CI_MODE=false
@@ -256,6 +257,24 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-2A; then
+    required+=(
+      "docs/cp-2a-java8-wildfly9.md"
+      "docs/evidence/CP-2A.md"
+      "runtime/phase2/java8-wildfly9/README.md"
+      "runtime/phase2/java8-wildfly9/runtime-manifest.tsv"
+      "migration/evidence/CP-2A/before-runtime.properties"
+      "migration/evidence/CP-2A/before-build.properties"
+      "migration/evidence/CP-2A/after.properties"
+      "migration/evidence/CP-2A/contract-ci-h2.json"
+      "migration/evidence/CP-2A/contract-oracle.json"
+      "migration/steps/CP-2A-java8-toolchain.md"
+      "migration/steps/CP-2A-wildfly9-max-perm-size.md"
+      "scripts/build-cp-2a.sh"
+      "scripts/validate-cp-2a.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"
@@ -464,6 +483,104 @@ portable_manifest_field() {
   ' "$PORTABLE_RUNTIME_MANIFEST"
 }
 
+phase2_java8_manifest_field() {
+  local field="$1"
+
+  awk -F '\t' -v wanted_field="$field" '
+    NR == 1 {
+      for (column = 1; column <= NF; column++) {
+        header[$column] = column
+      }
+      next
+    }
+    $1 == "temurin-openjdk" {
+      if (!(wanted_field in header)) {
+        exit 2
+      }
+      print $header[wanted_field]
+      found = 1
+      exit
+    }
+    END {
+      if (!found) {
+        exit 1
+      }
+    }
+  ' "$PHASE2_JAVA8_RUNTIME_MANIFEST"
+}
+
+check_phase2_java8() {
+  local java_home="${JAVA8_HOME:-}"
+  local archive="${JAVA8_ARCHIVE:-}"
+  local configured_checksum="${JAVA8_ARCHIVE_SHA256:-}"
+  local expected_archive=""
+  local expected_checksum=""
+  local origin=""
+  local license=""
+  local lifecycle=""
+  local scope=""
+  local version_output=""
+  local actual_checksum=""
+
+  if [[ ! -f "$PHASE2_JAVA8_RUNTIME_MANIFEST" ]]; then
+    fail "Temurin Java 8: manifesto CP-2A ausente"
+    return
+  fi
+
+  expected_archive="$(
+    phase2_java8_manifest_field archive 2>/dev/null || true
+  )"
+  expected_checksum="$(
+    phase2_java8_manifest_field sha256 2>/dev/null || true
+  )"
+  origin="$(phase2_java8_manifest_field origin 2>/dev/null || true)"
+  license="$(phase2_java8_manifest_field license 2>/dev/null || true)"
+  lifecycle="$(
+    phase2_java8_manifest_field lifecycle 2>/dev/null || true
+  )"
+  scope="$(phase2_java8_manifest_field scope 2>/dev/null || true)"
+
+  if [[ -z "$origin" || -z "$license" ||
+        "$lifecycle" != "maintained-by-Eclipse-Temurin" ||
+        "$scope" != "CP-2A-and-CP-2B" ]]; then
+    fail "Temurin Java 8: proveniência incompleta no manifesto CP-2A"
+  else
+    pass "Temurin Java 8: origem aprovada $origin"
+    pass "Temurin Java 8: licença registrada $license"
+  fi
+
+  if [[ -z "$java_home" || ! -x "$java_home/bin/java" ]]; then
+    fail "Temurin Java 8: JAVA8_HOME não aponta para um JDK"
+  else
+    version_output="$("$java_home/bin/java" -version 2>&1 || true)"
+    if [[ "$version_output" == *'openjdk version "1.8.0_492"'* &&
+          "$version_output" == *"(Temurin)"* ]]; then
+      pass "Temurin Java 8: OpenJDK 8u492-b09 detectado"
+    else
+      fail "Temurin Java 8: distribuição ou build divergente"
+    fi
+  fi
+
+  if [[ -z "$archive" || ! -f "$archive" ]]; then
+    fail "Temurin Java 8: JAVA8_ARCHIVE não encontrado"
+    return
+  fi
+  if [[ "$(basename "$archive")" != "$expected_archive" ]]; then
+    fail "Temurin Java 8: nome do arquivo diverge do manifesto CP-2A"
+    return
+  fi
+  if [[ "${configured_checksum,,}" != "${expected_checksum,,}" ]]; then
+    fail "Temurin Java 8: JAVA8_ARCHIVE_SHA256 diverge do manifesto CP-2A"
+    return
+  fi
+  actual_checksum="$(sha256sum "$archive" | awk '{print $1}')"
+  if [[ "$actual_checksum" == "$expected_checksum" ]]; then
+    pass "Temurin Java 8: checksum SHA-256 efetivo $actual_checksum"
+  else
+    fail "Temurin Java 8: checksum efetivo diverge do manifesto CP-2A"
+  fi
+}
+
 check_portable_artifact() {
   local component="$1"
   local label="$2"
@@ -566,6 +683,10 @@ check_h2() {
   local driver="${H2_JAR:-}"
   local java_home="${JAVA7_PORTABLE_HOME:-}"
   local output=""
+
+  if rank_at_least CP-2A; then
+    java_home="${JAVA8_HOME:-}"
+  fi
 
   check_portable_artifact h2 "H2 portátil" H2_JAR H2_SHA256
 
@@ -1009,6 +1130,11 @@ if rank_at_least CP-1B; then
         JAVA7_ARCHIVE JAVA7_ARCHIVE_SHA256 oracle-jdk
     fi
 
+  else
+    skip "Java 7 do baseline (encerrado antes do CP-2A)"
+  fi
+
+  if ! rank_at_least CP-2B; then
     if [[ "$CI_MODE" == true ]] && ! rank_at_least CP-1D; then
       skip "WildFly 9 e checksum (bootstrap anterior ao CP-1D em CI)"
     else
@@ -1016,7 +1142,7 @@ if rank_at_least CP-1B; then
         WILDFLY9_ARCHIVE WILDFLY9_ARCHIVE_SHA256 wildfly
     fi
   else
-    skip "Java 7 e WildFly 9 do baseline (encerrados antes do CP-2A)"
+    skip "WildFly 9 (encerrado antes do CP-2B)"
   fi
 else
   skip "runtime de containers (entra no CP-1B)"
@@ -1062,8 +1188,8 @@ else
   skip "H2, variáveis Oracle 19c e ojdbc7 externo (entram no CP-1D)"
 fi
 
-if [[ "$CI_MODE" != true ]] && rank_at_least CP-2A; then
-  check_java "OpenJDK 8" JAVA8_HOME '1.8.0' JAVA8_ARCHIVE JAVA8_ARCHIVE_SHA256
+if rank_at_least CP-2A; then
+  check_phase2_java8
 else
   skip "OpenJDK 8 e checksum (entram no CP-2A)"
 fi

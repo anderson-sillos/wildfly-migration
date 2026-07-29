@@ -5,15 +5,16 @@ set -euo pipefail
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPOSITORY_ROOT/.env"
 ACTION=""
+JAVA_HOME_ARGUMENT=""
 TEMP_DIRECTORY="$(mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-oracle.XXXXXXXX")"
 
 usage() {
   cat <<'USAGE'
 Uso:
-  ./scripts/oracle-lab-schema.sh inspect [--env ARQUIVO]
-  ./scripts/oracle-lab-schema.sh apply [--env ARQUIVO]
-  ./scripts/oracle-lab-schema.sh verify [--env ARQUIVO]
-  ./scripts/oracle-lab-schema.sh cleanup-smokes [--env ARQUIVO]
+  ./scripts/oracle-lab-schema.sh inspect [--java-home DIRETORIO] [--env ARQUIVO]
+  ./scripts/oracle-lab-schema.sh apply [--java-home DIRETORIO] [--env ARQUIVO]
+  ./scripts/oracle-lab-schema.sh verify [--java-home DIRETORIO] [--env ARQUIVO]
+  ./scripts/oracle-lab-schema.sh cleanup-smokes [--java-home DIRETORIO] [--env ARQUIVO]
 
 inspect é somente leitura. apply executa 001_schema.sql e 002_seed.sql apenas
 depois de aprovar identidade, container, quota, privilégios e objetos existentes.
@@ -105,6 +106,14 @@ while [[ $# -gt 0 ]]; do
       ENV_FILE="$2"
       shift 2
       ;;
+    --java-home)
+      [[ $# -ge 2 ]] || {
+        printf 'FALHA: --java-home exige um diretório\n' >&2
+        exit 2
+      }
+      JAVA_HOME_ARGUMENT="$2"
+      shift 2
+      ;;
     *)
       printf 'FALHA: argumento desconhecido\n' >&2
       usage >&2
@@ -113,20 +122,20 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-JAVA7_HOME_VALUE="$(configuration_value JAVA7_HOME)"
+SELECTED_JAVA_HOME="${JAVA_HOME_ARGUMENT:-$(configuration_value JAVA7_HOME)}"
 OJDBC7_JAR_VALUE="$(configuration_value OJDBC7_JAR)"
 OJDBC7_SHA256_VALUE="$(configuration_value OJDBC7_SHA256)"
 export ORACLE_DB_URL="$(configuration_value ORACLE_DB_URL)"
 export ORACLE_DB_USER="$(configuration_value ORACLE_DB_USER)"
 export ORACLE_DB_PASSWORD="$(configuration_value ORACLE_DB_PASSWORD)"
 
-if [[ ! -x "$JAVA7_HOME_VALUE/bin/java" ||
-      ! -x "$JAVA7_HOME_VALUE/bin/javac" ||
+if [[ ! -x "$SELECTED_JAVA_HOME/bin/java" ||
+      ! -x "$SELECTED_JAVA_HOME/bin/javac" ||
       ! -f "$OJDBC7_JAR_VALUE" ||
       -z "$ORACLE_DB_URL" ||
       -z "$ORACLE_DB_USER" ||
       -z "$ORACLE_DB_PASSWORD" ]]; then
-  printf 'FALHA: JDK 7, ojdbc7 e configuração Oracle são obrigatórios\n' >&2
+  printf 'FALHA: JDK selecionado, ojdbc7 e configuração Oracle são obrigatórios\n' >&2
   exit 1
 fi
 
@@ -137,11 +146,11 @@ if [[ ! "$OJDBC7_SHA256_VALUE" =~ ^[[:xdigit:]]{64}$ ]] ||
   exit 1
 fi
 
-"$JAVA7_HOME_VALUE/bin/javac" \
+"$SELECTED_JAVA_HOME/bin/javac" \
   -Xlint:-options -source 1.7 -target 1.7 \
   -d "$TEMP_DIRECTORY" \
   "$REPOSITORY_ROOT/scripts/OracleLabSchema.java"
 
-"$JAVA7_HOME_VALUE/bin/java" \
+"$SELECTED_JAVA_HOME/bin/java" \
   -cp "$TEMP_DIRECTORY:$OJDBC7_JAR_VALUE" \
   OracleLabSchema "$ACTION" "$REPOSITORY_ROOT"

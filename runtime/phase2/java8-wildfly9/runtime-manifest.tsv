@@ -1,0 +1,2 @@
+component	version	archive	origin	license	sha256	lifecycle	scope
+temurin-openjdk	8u492-b09	OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz	https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u492-b09/OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz	GPL-2.0-only WITH Classpath-exception-2.0	da257f161d7f8c6ca5b0e5d9e4090f65ac28c5e398072e68b8ae87988b1d1a2e	maintained-by-Eclipse-Temurin	CP-2A-and-CP-2B

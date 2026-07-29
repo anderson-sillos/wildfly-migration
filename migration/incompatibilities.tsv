@@ -3,3 +3,5 @@ INC-001	CP-1C	Java-7u80/Maven-3.8.9	Maven-Central-atual	compilation	environment	
 INC-002	CP-1F	Commons-FileUpload-1.2.2	WAR-no-WildFly-9	execution	dependency	natural	resolved	migration/steps/CP-1F-commons-fileupload-commons-io.md
 INC-003	CP-1F	XMLBeans-2.3.0/XSD	JAXP-pattern-compatible	execution	library	natural	resolved	migration/steps/CP-1F-xmlbeans-xsd-regex.md
 INC-004	CP-1G	ojdbc7-DatabaseMetaData	Oracle-19c-RU-19.3	execution	observability	natural	resolved	migration/steps/CP-1G-oracle-ru-detection.md
+INC-005	CP-2A	Java-7-Maven-Enforcer	Temurin-8u492	compilation	toolchain-policy	natural	resolved	migration/steps/CP-2A-java8-toolchain.md
+INC-006	CP-2A	WildFly-9-Java7-JAVA_OPTS	Temurin-8u492	execution	runtime-configuration	natural	resolved	migration/steps/CP-2A-wildfly9-max-perm-size.md

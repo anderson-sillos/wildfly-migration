@@ -5,13 +5,16 @@ set -euo pipefail
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPOSITORY_ROOT/.env"
 PROFILE=""
+JAVA_RELEASE="7"
 
 usage() {
   cat <<'USAGE'
 Uso:
-  ./scripts/build-cp-1d.sh --profile ci-h2|oracle [--env ARQUIVO]
+  ./scripts/build-cp-1d.sh --profile ci-h2|oracle [--java 7|8] \
+    [--env ARQUIVO]
 
 Valores já exportados no ambiente prevalecem sobre o arquivo informado.
+O padrão 7 preserva o uso histórico. O wrapper build-cp-2a.sh seleciona 8.
 USAGE
 }
 
@@ -78,6 +81,14 @@ while [[ $# -gt 0 ]]; do
       ENV_FILE="$2"
       shift 2
       ;;
+    --java)
+      [[ $# -ge 2 && ( "$2" == "7" || "$2" == "8" ) ]] || {
+        printf 'FALHA: --java exige 7 ou 8\n' >&2
+        exit 2
+      }
+      JAVA_RELEASE="$2"
+      shift 2
+      ;;
     -h|--help)
       usage
       exit 0
@@ -102,17 +113,27 @@ case "$PROFILE" in
     JAVA7_TRUSTSTORE_VALUE="$(configuration_value JAVA7_TRUSTSTORE)"
     EXPECTED_JAVA='Java version: 1.7.0_80'
     MAVEN_PROFILE='oracle'
-    if [[ ! -f "$JAVA7_TRUSTSTORE_VALUE" ]]; then
-      printf 'FALHA: JAVA7_TRUSTSTORE não aponta para um JKS atualizado\n' >&2
-      exit 1
+    if [[ "$JAVA_RELEASE" == "7" ]]; then
+      if [[ ! -f "$JAVA7_TRUSTSTORE_VALUE" ]]; then
+        printf 'FALHA: JAVA7_TRUSTSTORE não aponta para um JKS atualizado\n' >&2
+        exit 1
+      fi
+      MAVEN_OPTIONS="-Dhttps.protocols=TLSv1.2 -Djavax.net.ssl.trustStore=$JAVA7_TRUSTSTORE_VALUE -Djavax.net.ssl.trustStorePassword=changeit"
+    else
+      MAVEN_OPTIONS='-Dhttps.protocols=TLSv1.2'
     fi
-    MAVEN_OPTIONS="-Dhttps.protocols=TLSv1.2 -Djavax.net.ssl.trustStore=$JAVA7_TRUSTSTORE_VALUE -Djavax.net.ssl.trustStorePassword=changeit"
     ;;
   *)
     printf 'FALHA: informe --profile ci-h2 ou --profile oracle\n' >&2
     exit 2
     ;;
 esac
+
+if [[ "$JAVA_RELEASE" == "8" ]]; then
+  JAVA_HOME_VALUE="$(configuration_value JAVA8_HOME)"
+  EXPECTED_JAVA='Java version: 1.8.0_492'
+  MAVEN_OPTIONS='-Dhttps.protocols=TLSv1.2'
+fi
 
 MAVEN_HOME_VALUE="$(configuration_value MAVEN_HOME)"
 
@@ -150,6 +171,9 @@ MAVEN_OPTS="$MAVEN_OPTIONS" \
 
 "$REPOSITORY_ROOT/scripts/audit-legacy-war.sh" \
   --java-home "$JAVA_HOME_VALUE" \
+  --expected-bytecode "$([[ "$JAVA_RELEASE" == "8" ]] && printf 52 || printf 51)" \
+  --expected-java-label "Java $JAVA_RELEASE" \
   "$REPOSITORY_ROOT/app/target/wildfly-migration.war"
 
-printf 'OK: WAR do CP-1D construído e auditado no perfil %s\n' "$PROFILE"
+printf 'OK: WAR construído e auditado com Java %s no perfil %s\n' \
+  "$JAVA_RELEASE" "$PROFILE"

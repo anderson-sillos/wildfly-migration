@@ -7,10 +7,10 @@ cada entrega validável e reversível.
 
 Repositório GitHub: <https://github.com/anderson-sillos/wildfly-migration>
 
-Os checkpoints **CP-1A** a **CP-1F** estão concluídos. A árvore única `app/`
-gera um WAR Java 7 auditável com fluxo web, persistência, upload, importação XML
-e contratos HTTP comuns, enquanto runtimes, drivers e credenciais permanecem
-externos. O incremento atual é o **CP-1G — Baseline completo**.
+Os checkpoints da fase 1 estão concluídos e preservados pela tag
+`migration/01-legacy-baseline`. A árvore única `app/` está agora no
+**CP-2A — Java 8 no WildFly 9**, mantendo as dependências, os pacotes `javax`,
+os perfis H2/Oracle e o contrato funcional do baseline.
 
 ## Fases públicas
 
@@ -31,7 +31,9 @@ não fases adicionais.
    [runbook legado](docs/legacy-application-runbook.md).
 4. Para reproduzir a fase 1, siga
    [o fechamento do baseline legado](docs/legacy-baseline-reproduction.md).
-5. Para contribuir, consulte [o fluxo GitHub](docs/github-workflow.md).
+5. Para executar o estado atual, siga
+   [o CP-2A no Java 8/WildFly 9](docs/cp-2a-java8-wildfly9.md).
+6. Para contribuir, consulte [o fluxo GitHub](docs/github-workflow.md).
 
 No primeiro checkout:
 
@@ -47,17 +49,17 @@ O comando falha de forma explícita enquanto identidade Git, autenticação ou
 `origin` não estiverem configurados. Pré-requisitos futuros aparecem como
 “não exigido”.
 
-## Executar a aplicação legada
+## Executar a aplicação no CP-2A
 
-O [runbook legado](docs/legacy-application-runbook.md) é a fonte operacional
-para os perfis H2 e Oracle. Ele consolida diagnóstico, schema, build, start,
-URLs, testes manuais, stop, limpeza e troubleshooting.
+O [runbook do CP-2A](docs/cp-2a-java8-wildfly9.md) documenta a versão exata e
+a URL de origem do JDK, diagnóstico, build, H2, Oracle, testes e rollback.
 
 O modo manual provisiona uma cópia temporária do WildFly e mantém a aplicação
 ativa em loopback até `Ctrl+C`:
 
 ```bash
 ./scripts/smoke-wildfly9-datasource.sh \
+  --java 8 \
   --profile ci-h2 \
   --env .env \
   --war app/target/wildfly-migration.war \

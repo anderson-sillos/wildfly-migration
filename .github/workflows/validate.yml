@@ -40,6 +40,8 @@ jobs:
           bash -n scripts/validate-cp-1f-discovery-logging.sh
           bash -n scripts/validate-cp-1f-contracts.sh
           bash -n scripts/validate-cp-1g-baseline.sh
+          bash -n scripts/build-cp-2a.sh
+          bash -n scripts/validate-cp-2a.sh
           bash -n contract-tests/run.sh
 
       - name: Validate repository baseline
@@ -87,6 +89,9 @@ jobs:
       - name: Validate CP-1G frozen baseline statically
         run: ./scripts/validate-cp-1g-baseline.sh
 
+      - name: Validate CP-2A Java 8 transition statically
+        run: ./scripts/validate-cp-2a.sh
+
   portable-ci:
     name: portable-ci
     runs-on: ubuntu-latest
@@ -99,13 +104,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          runtime_root="$RUNNER_TEMP/wildfly-migration-cp1d"
+          runtime_root="$RUNNER_TEMP/wildfly-migration-cp2a"
           archives="$runtime_root/archives"
           tools="$runtime_root/tools"
           install -d -m 0755 "$archives" "$tools"
 
-          curl -fsSLo "$archives/zulu7.56.0.11-ca-jdk7.0.352-linux_x64.tar.gz" \
-            https://cdn.azul.com/zulu/bin/zulu7.56.0.11-ca-jdk7.0.352-linux_x64.tar.gz
+          curl -fsSLo "$archives/OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz" \
+            https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u492-b09/OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz
           curl -fsSLo "$archives/apache-maven-3.8.9-bin.tar.gz" \
             https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz
           curl -fsSLo "$archives/wildfly-9.0.2.Final.tar.gz" \
@@ -115,24 +120,24 @@ jobs:
 
           cd "$archives"
           sha256sum --check <<'CHECKSUMS'
-          8a7387c1ed151474301b6553c6046f865dc6c1e1890bcf106acc2780c55727c8  zulu7.56.0.11-ca-jdk7.0.352-linux_x64.tar.gz
+          da257f161d7f8c6ca5b0e5d9e4090f65ac28c5e398072e68b8ae87988b1d1a2e  OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz
           3e4c68cdd70f96635e713f36c8fc3ea3182035245d3da2156576710ca0fe4b0c  apache-maven-3.8.9-bin.tar.gz
           74689569d6e04402abb7d94921c558940725d8065dce21a2d7194fa354249bb6  wildfly-9.0.2.Final.tar.gz
           3ad9ac4b6aae9cd9d3ac1c447465e1ed06019b851b893dd6a8d76ddb6d85bca6  h2-1.4.200.jar
           CHECKSUMS
 
-          tar -xzf zulu7.56.0.11-ca-jdk7.0.352-linux_x64.tar.gz -C "$tools"
+          tar -xzf OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz -C "$tools"
           tar -xzf apache-maven-3.8.9-bin.tar.gz -C "$tools"
           tar -xzf wildfly-9.0.2.Final.tar.gz -C "$tools"
 
           {
-            echo "MIGRATION_CHECKPOINT=CP-1G"
+            echo "MIGRATION_CHECKPOINT=CP-2A"
             echo "LAB_BIND_ADDRESS=127.0.0.1"
             echo "WILDFLY_HTTP_PORT=18080"
             echo "WILDFLY_MANAGEMENT_PORT=19990"
-            echo "JAVA7_PORTABLE_HOME=$tools/zulu7.56.0.11-ca-jdk7.0.352-linux_x64"
-            echo "JAVA7_PORTABLE_ARCHIVE=$archives/zulu7.56.0.11-ca-jdk7.0.352-linux_x64.tar.gz"
-            echo "JAVA7_PORTABLE_ARCHIVE_SHA256=8a7387c1ed151474301b6553c6046f865dc6c1e1890bcf106acc2780c55727c8"
+            echo "JAVA8_HOME=$tools/jdk8u492-b09"
+            echo "JAVA8_ARCHIVE=$archives/OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz"
+            echo "JAVA8_ARCHIVE_SHA256=da257f161d7f8c6ca5b0e5d9e4090f65ac28c5e398072e68b8ae87988b1d1a2e"
             echo "MAVEN_HOME=$tools/apache-maven-3.8.9"
             echo "MAVEN_ARCHIVE=$archives/apache-maven-3.8.9-bin.tar.gz"
             echo "MAVEN_ARCHIVE_SHA256=3e4c68cdd70f96635e713f36c8fc3ea3182035245d3da2156576710ca0fe4b0c"
@@ -144,39 +149,40 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Run portable doctor
-        run: ./scripts/doctor.sh CP-1G --profile ci-h2 --ci
+        run: ./scripts/doctor.sh CP-2A --profile ci-h2 --ci
 
       - name: Build and audit portable WAR
-        run: ./scripts/build-cp-1d.sh --profile ci-h2
+        run: ./scripts/build-cp-2a.sh --profile ci-h2
 
       - name: Execute MyBatis portable persistence probe
         run: |
           ./scripts/validate-cp-1e-persistence.sh \
-            --java-home "$JAVA7_PORTABLE_HOME" \
+            --java-home "$JAVA8_HOME" \
             --h2-jar "$H2_JAR"
 
       - name: Execute H2 schema lifecycle
         run: |
           ./scripts/validate-cp-1d-h2.sh \
-            --java-home "$JAVA7_PORTABLE_HOME" \
+            --java-home "$JAVA8_HOME" \
             --h2-jar "$H2_JAR"
 
       - name: Smoke WildFly 9 H2 datasource
         run: |
           ./scripts/smoke-wildfly9-datasource.sh \
+            --java 8 \
             --profile ci-h2 \
             --war app/target/wildfly-migration.war \
-            --contract-result app/target/contract-results/ci-h2.json
+            --contract-result app/target/contract-results/cp-2a-ci-h2.json
 
       - name: Compare portable result with the frozen baseline
         run: |
-          ./scripts/validate-cp-1g-baseline.sh \
+          ./scripts/validate-cp-2a.sh \
             --war app/target/wildfly-migration.war \
-            --contract-result app/target/contract-results/ci-h2.json
+            --contract-result app/target/contract-results/cp-2a-ci-h2.json
 
       - name: Upload sanitized portable contract result
         uses: actions/upload-artifact@v4
         with:
-          name: cp-1g-portable-contract-result
-          path: app/target/contract-results/ci-h2.json
+          name: cp-2a-portable-contract-result
+          path: app/target/contract-results/cp-2a-ci-h2.json
           if-no-files-found: error

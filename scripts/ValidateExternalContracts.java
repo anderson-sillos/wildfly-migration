@@ -66,7 +66,7 @@ public final class ValidateExternalContracts {
                 && smoke.indexOf("--profile \"$PROFILE\"") >= 0,
                 "smoke não chama a mesma suíte para ambos os perfis");
         require(workflow.indexOf(
-                "app/target/contract-results/ci-h2.json") >= 0,
+                "app/target/contract-results/cp-2a-ci-h2.json") >= 0,
                 "CI não preserva o resultado portable-ci");
 
         System.out.println(

@@ -16,24 +16,20 @@ não por cópias da aplicação em outros diretórios.
 | `src/test/java/` | testes internos da aplicação |
 | `src/test/resources/` | recursos dos testes internos |
 
-O CP-1C adiciona o `pom.xml`, um marcador compilável e o descritor Servlet 2.4.
-O CP-1D estabelece os perfis de datasource. No CP-1E, a implementação começa
-pelo domínio e pelos mappers MyBatis compartilhados.
+O CP-1C adicionou o `pom.xml` e o descritor Servlet 2.4. O CP-1D estabeleceu os
+perfis de datasource e o CP-1E iniciou o domínio e os mappers. A tag
+`migration/01-legacy-baseline` preserva esse estado Java 7.
 
-Build legado:
+Build do estado atual, CP-2A:
 
 ```bash
-./scripts/build-cp-1c.sh --env .env
+./scripts/build-cp-2a.sh --profile ci-h2 --env .env
 ```
 
-O wrapper exige Maven 3.8.9 executando no Java 7u80, mantém o acesso ao Maven
-Central sob TLS validado e audita o WAR. As dependências e transitivas aprovadas
-estão em [`docs/legacy-dependencies.md`](../docs/legacy-dependencies.md).
-
-No CP-1D, o perfil Maven `ci-h2` permite a mesma compilação Java 7 no Zulu
-7u352. O `doctor` continua responsável por fixar a distribuição e a build
-exatas; o perfil `oracle` e a execução sem perfil preservam a exigência
-Oracle JDK 7u80.
+O wrapper exige Maven 3.8.9 executando no Temurin OpenJDK 8u492-b09, compila
+bytecode major `52` e audita o WAR. Nenhuma dependência ou API `javax` é
+atualizada no CP-2A. Para reproduzir o build Java 7, materialize a tag da fase
+1 e siga o runbook congelado.
 
 Nenhum JAR manual, driver Oracle, runtime ou arquivo gerado em `target/` deve
 ser versionado.

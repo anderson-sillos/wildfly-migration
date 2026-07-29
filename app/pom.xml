@@ -9,16 +9,16 @@
   <version>1.0.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
-  <name>WildFly Migration Lab — Legacy WAR</name>
-  <description>Baseline Java 7 e Java EE legado usado pelo laboratório de migração.</description>
+  <name>WildFly Migration Lab — Java 8 on WildFly 9</name>
+  <description>Aplicação Java EE legada recompilada no Java 8 durante o CP-2A.</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.build.outputTimestamp>2026-01-01T00:00:00Z</project.build.outputTimestamp>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
-    <legacy.java.version.range>[1.7.0-80]</legacy.java.version.range>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <phase2.java.version.range>[1.8,1.9)</phase2.java.version.range>
 
     <servlet.api.version>2.4</servlet.api.version>
     <jsp.api.version>2.0</jsp.api.version>
@@ -134,7 +134,7 @@
                   <version>[3.8.9]</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
-                  <version>${legacy.java.version.range}</version>
+                  <version>${phase2.java.version.range}</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
@@ -173,14 +173,14 @@
     <profile>
       <id>oracle</id>
       <properties>
-        <legacy.java.version.range>[1.7.0-80]</legacy.java.version.range>
+        <phase2.java.version.range>[1.8,1.9)</phase2.java.version.range>
       </properties>
     </profile>
     <profile>
       <id>ci-h2</id>
       <properties>
-        <!-- O doctor fixa Zulu 7u352; o POM continua rejeitando Java 8+. -->
-        <legacy.java.version.range>[1.7,1.8)</legacy.java.version.range>
+        <!-- O doctor fixa Temurin 8u492 para os dois perfis do CP-2A. -->
+        <phase2.java.version.range>[1.8,1.9)</phase2.java.version.range>
       </properties>
     </profile>
   </profiles>
