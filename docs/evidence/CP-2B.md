@@ -53,6 +53,11 @@ A falha JNDI limita a profundidade da observação do classloader; os contratos
 das tarefas 2.8 e 2.9 deverão confirmar que nenhuma quebra aparece depois da
 ativação do contexto.
 
+Ao iniciar a correção, a aplicação direta do arquivo CLI do WildFly 9 revelou
+`INC-010`: o WildFly 26 rejeita o argumento `pool-name` na operação
+`data-source:add`. A correção mantém perfis próprios por servidor e remove
+somente esse atributo redundante.
+
 ## Evidência legível por máquina
 
 O registro sanitizado está em

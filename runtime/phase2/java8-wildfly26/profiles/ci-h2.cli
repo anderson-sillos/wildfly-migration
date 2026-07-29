@@ -1,0 +1,6 @@
+batch
+/subsystem=datasources/data-source=ExampleDS:remove
+/subsystem=datasources/jdbc-driver=h2-cp1d:add(driver-name=h2-cp1d,driver-module-name=com.h2database.h2.cp1d,driver-class-name=org.h2.Driver,driver-xa-datasource-class-name=org.h2.jdbcx.JdbcDataSource)
+/subsystem=datasources/data-source=MigrationDS:add(jndi-name=java:/jdbc/MigrationDS,driver-name=h2-cp1d,connection-url="jdbc:h2:mem:migration;MODE=Oracle;DB_CLOSE_DELAY=-1",jta=false,use-java-context=true,min-pool-size=1,max-pool-size=5,pool-prefill=true,validate-on-match=true,background-validation=false,check-valid-connection-sql="SELECT 1",enabled=true)
+/subsystem=ee/service=default-bindings:write-attribute(name=datasource,value=java:/jdbc/MigrationDS)
+run-batch

@@ -9,7 +9,7 @@
 - etapa: `deployment`;
 - categoria: configuração de datasource;
 - reprodução: `natural`;
-- estado: aberto.
+- estado: resolvido.
 
 ## Tentativa antes da correção
 
@@ -33,7 +33,7 @@ O datasource é configuração gerenciada do servidor e não faz parte do WAR.
 Atualizar somente o binário do WildFly não transfere módulos, drivers,
 datasources, pool, validações ou credenciais do WildFly 9.
 
-## Menor correção planejada
+## Menor correção
 
 Criar na cópia temporária do WildFly 26 o driver correspondente ao perfil e o
 datasource `java:/jdbc/MigrationDS`, preservando código, POM, schema e contrato
@@ -43,7 +43,7 @@ funcional. H2 e Oracle continuarão configurações separadas.
 
 - antes:
   [`before-deployment.properties`](../evidence/CP-2B/before-deployment.properties);
-- depois: será preenchido nas tarefas 2.8 e 2.9.
+- depois: contratos H2 e Oracle do runtime `java8-wildfly26.1.3`.
 
 ## Aplicação equivalente no sistema real
 

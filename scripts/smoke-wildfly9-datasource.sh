@@ -6,6 +6,7 @@ REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPOSITORY_ROOT/.env"
 PROFILE=""
 JAVA_RELEASE="7"
+SERVER_RELEASE="9"
 WAR_FILE=""
 CONTRACT_RESULT_FILE=""
 MANUAL_MODE=false
@@ -20,7 +21,7 @@ usage() {
   cat <<'USAGE'
 Uso:
   ./scripts/smoke-wildfly9-datasource.sh --profile ci-h2|oracle \
-    [--java 7|8] [--env ARQUIVO] [--war ARQUIVO] \
+    [--java 7|8] [--server 9|26] [--env ARQUIVO] [--war ARQUIVO] \
     [--contract-result ARQUIVO] [--manual]
 
 Valores já exportados no ambiente prevalecem sobre o arquivo informado.
@@ -29,6 +30,7 @@ Com --manual, mantém a aplicação ativa em loopback até Ctrl+C; exige --war.
 No modo manual, imprime o caminho do log bruto do WildFly.
 Com --contract-result, preserva fora do runtime o relatório JSON sanitizado.
 O padrão Java 7 preserva a reprodução histórica; CP-2A deve informar --java 8.
+O argumento --server 26 é usado pelo wrapper do CP-2B e exige Java 8.
 USAGE
 }
 
@@ -195,6 +197,14 @@ while [[ $# -gt 0 ]]; do
       JAVA_RELEASE="$2"
       shift 2
       ;;
+    --server)
+      [[ $# -ge 2 && ( "$2" == "9" || "$2" == "26" ) ]] || {
+        printf 'FALHA: --server exige 9 ou 26\n' >&2
+        exit 2
+      }
+      SERVER_RELEASE="$2"
+      shift 2
+      ;;
     --war)
       [[ $# -ge 2 ]] || {
         printf 'FALHA: --war exige um arquivo\n' >&2
@@ -241,6 +251,11 @@ if [[ "$MANUAL_MODE" == true && -z "$WAR_FILE" ]]; then
   exit 2
 fi
 
+if [[ "$SERVER_RELEASE" == "26" && "$JAVA_RELEASE" != "8" ]]; then
+  printf 'FALHA: WildFly 26 do CP-2B exige --java 8\n' >&2
+  exit 2
+fi
+
 if [[ -n "$WAR_FILE" ]]; then
   if [[ ! -f "$WAR_FILE" ]]; then
     printf 'FALHA: WAR não encontrado: %s\n' "$WAR_FILE" >&2
@@ -253,32 +268,49 @@ if [[ -n "$WAR_FILE" ]]; then
   WAR_FILE="$(cd "$(dirname "$WAR_FILE")" && pwd)/$(basename "$WAR_FILE")"
 fi
 
-WILDFLY9_HOME_VALUE="$(configuration_value WILDFLY9_HOME)"
-WILDFLY9_ARCHIVE_VALUE="$(configuration_value WILDFLY9_ARCHIVE)"
+if [[ "$SERVER_RELEASE" == "26" ]]; then
+  WILDFLY_HOME_VARIABLE="WILDFLY26_HOME"
+  WILDFLY_ARCHIVE_VARIABLE="WILDFLY26_ARCHIVE"
+  WILDFLY_RUNTIME_DIRECTORY="wildfly-26.1.3.Final"
+  WILDFLY_EXPECTED_VERSION="26.1.3.Final"
+  WILDFLY_MANIFEST="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/runtime-manifest.tsv"
+  WILDFLY_MANIFEST_COMPONENT="wildfly-community"
+else
+  WILDFLY_HOME_VARIABLE="WILDFLY9_HOME"
+  WILDFLY_ARCHIVE_VARIABLE="WILDFLY9_ARCHIVE"
+  WILDFLY_RUNTIME_DIRECTORY="wildfly-9.0.2.Final"
+  WILDFLY_EXPECTED_VERSION="9.0.2.Final"
+  WILDFLY_MANIFEST="$REPOSITORY_ROOT/runtime/legacy/runtime-manifest.tsv"
+  WILDFLY_MANIFEST_COMPONENT="wildfly"
+fi
+WILDFLY_HOME_VALUE="$(configuration_value "$WILDFLY_HOME_VARIABLE")"
+WILDFLY_ARCHIVE_VALUE="$(configuration_value "$WILDFLY_ARCHIVE_VARIABLE")"
 HTTP_PORT_VALUE="$(configuration_value WILDFLY_HTTP_PORT)"
 MANAGEMENT_PORT_VALUE="$(configuration_value WILDFLY_MANAGEMENT_PORT)"
 HTTP_PORT_VALUE="${HTTP_PORT_VALUE:-8080}"
 MANAGEMENT_PORT_VALUE="${MANAGEMENT_PORT_VALUE:-9990}"
 
-if [[ ! -x "$WILDFLY9_HOME_VALUE/bin/standalone.sh" ||
-      ! -x "$WILDFLY9_HOME_VALUE/bin/jboss-cli.sh" ]]; then
-  printf 'FALHA: WILDFLY9_HOME não aponta para uma distribuição completa\n' >&2
+if [[ ! -x "$WILDFLY_HOME_VALUE/bin/standalone.sh" ||
+      ! -x "$WILDFLY_HOME_VALUE/bin/jboss-cli.sh" ]]; then
+  printf 'FALHA: %s não aponta para uma distribuição completa\n' \
+    "$WILDFLY_HOME_VARIABLE" >&2
   exit 1
 fi
-if [[ ! -f "$WILDFLY9_ARCHIVE_VALUE" ]]; then
-  printf 'FALHA: WILDFLY9_ARCHIVE não foi fornecido\n' >&2
+if [[ ! -f "$WILDFLY_ARCHIVE_VALUE" ]]; then
+  printf 'FALHA: %s não foi fornecido\n' "$WILDFLY_ARCHIVE_VARIABLE" >&2
   exit 1
 fi
 
 expected_wildfly_checksum="$(
-  awk -F '\t' '$1 == "wildfly" { print $6 }' \
-    "$REPOSITORY_ROOT/runtime/legacy/runtime-manifest.tsv"
+  awk -F '\t' -v component="$WILDFLY_MANIFEST_COMPONENT" \
+    '$1 == component { print $6 }' "$WILDFLY_MANIFEST"
 )"
 actual_wildfly_checksum="$(
-  sha256sum "$WILDFLY9_ARCHIVE_VALUE" | awk '{print $1}'
+  sha256sum "$WILDFLY_ARCHIVE_VALUE" | awk '{print $1}'
 )"
 if [[ "$actual_wildfly_checksum" != "$expected_wildfly_checksum" ]]; then
-  printf 'FALHA: checksum do WildFly 9 diverge do manifesto\n' >&2
+  printf 'FALHA: checksum do WildFly %s diverge do manifesto\n' \
+    "$SERVER_RELEASE" >&2
   exit 1
 fi
 
@@ -320,7 +352,11 @@ if [[ "$JAVA_RELEASE" == "8" ]]; then
     printf 'FALHA: Eclipse Temurin OpenJDK 8u492-b09 não foi detectado\n' >&2
     exit 1
   fi
-  RUNTIME_IDENTIFIER="java8-wildfly9.0.2"
+  if [[ "$SERVER_RELEASE" == "26" ]]; then
+    RUNTIME_IDENTIFIER="java8-wildfly26.1.3"
+  else
+    RUNTIME_IDENTIFIER="java8-wildfly9.0.2"
+  fi
 elif [[ "$PROFILE" == "ci-h2" ]]; then
   SELECTED_JAVA_HOME="$(configuration_value JAVA7_PORTABLE_HOME)"
 else
@@ -342,7 +378,11 @@ if [[ "$PROFILE" == "ci-h2" ]]; then
     printf 'FALHA: checksum do H2 diverge do manifesto portátil\n' >&2
     exit 1
   fi
-  PROFILE_FILE="$REPOSITORY_ROOT/runtime/legacy/profiles/ci-h2.cli"
+  if [[ "$SERVER_RELEASE" == "26" ]]; then
+    PROFILE_FILE="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/profiles/ci-h2.cli"
+  else
+    PROFILE_FILE="$REPOSITORY_ROOT/runtime/legacy/profiles/ci-h2.cli"
+  fi
 else
   OJDBC7_JAR_VALUE="$(configuration_value OJDBC7_JAR)"
   OJDBC7_SHA256_VALUE="$(configuration_value OJDBC7_SHA256)"
@@ -366,19 +406,49 @@ else
     printf 'FALHA: checksum do ojdbc7 não foi aprovado\n' >&2
     exit 1
   fi
-  PROFILE_FILE="$REPOSITORY_ROOT/runtime/legacy/profiles/oracle.cli"
+  if [[ "$SERVER_RELEASE" == "26" ]]; then
+    PROFILE_FILE="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/profiles/oracle.cli"
+  else
+    PROFILE_FILE="$REPOSITORY_ROOT/runtime/legacy/profiles/oracle.cli"
+  fi
 fi
 
 TEMP_DIRECTORY="$(mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-datasource.XXXXXXXX")"
-RUNTIME_HOME="$TEMP_DIRECTORY/wildfly-9.0.2.Final"
+RUNTIME_HOME="$TEMP_DIRECTORY/$WILDFLY_RUNTIME_DIRECTORY"
 install -d -m 0755 "$RUNTIME_HOME"
-cp -a "$WILDFLY9_HOME_VALUE/." "$RUNTIME_HOME/"
+cp -a "$WILDFLY_HOME_VALUE/." "$RUNTIME_HOME/"
 install -d -m 0755 "$RUNTIME_HOME/standalone/log"
 
-if [[ "$JAVA_RELEASE" == "8" ]]; then
+if [[ "$JAVA_RELEASE" == "8" && "$SERVER_RELEASE" == "9" ]]; then
   sed -i -E \
     's/[[:space:]]+-XX:MaxPermSize=[^"[:space:]]+//g' \
     "$RUNTIME_HOME/bin/standalone.conf"
+fi
+
+if [[ "$SERVER_RELEASE" == "26" ]]; then
+  configuration="$RUNTIME_HOME/standalone/configuration/standalone.xml"
+  for required_resource in \
+    '<https-listener name="https"' \
+    '<key-store name="applicationKS">' \
+    '<key-manager name="applicationKM"' \
+    '<server-ssl-context name="applicationSSC"'; do
+    if ! grep -Fq "$required_resource" "$configuration"; then
+      printf 'FALHA: recurso HTTPS padrão não localizado: %s\n' \
+        "$required_resource" >&2
+      exit 1
+    fi
+  done
+  sed -i \
+    -e '/<https-listener name="https"/d' \
+    -e '/<key-store name="applicationKS">/,/<\/key-store>/d' \
+    -e '/<key-manager name="applicationKM"/,/<\/key-manager>/d' \
+    -e '/<server-ssl-context name="applicationSSC"/d' \
+    "$configuration"
+  if grep -Eq 'https-listener name="https"|applicationKS|applicationKM|applicationSSC' \
+      "$configuration"; then
+    printf 'FALHA: recursos HTTPS desnecessários não foram removidos\n' >&2
+    exit 1
+  fi
 fi
 
 if [[ "$PROFILE" == "ci-h2" ]]; then
@@ -439,7 +509,8 @@ for unused in $(seq 1 60); do
 done
 
 if [[ "$ready" != true ]]; then
-  printf 'FALHA: WildFly 9 não iniciou no tempo esperado\n' >&2
+  printf 'FALHA: WildFly %s não iniciou no tempo esperado\n' \
+    "$SERVER_RELEASE" >&2
   if [[ "$PROFILE" == "ci-h2" && -f "$TEMP_DIRECTORY/server.log" ]]; then
     tail -n 30 "$TEMP_DIRECTORY/server.log" |
       sed "s#${TEMP_DIRECTORY}#<runtime-temporario>#g" >&2
@@ -458,6 +529,12 @@ if [[ "$JAVA_RELEASE" == "8" ]] &&
   exit 1
 fi
 
+if [[ "$SERVER_RELEASE" == "26" ]] &&
+   grep -Eq 'WFLYELY00023|WFLYELY01084' "$TEMP_DIRECTORY/server.log"; then
+  printf 'FALHA: runtime WildFly 26 ainda tentou criar keystore HTTPS\n' >&2
+  exit 1
+fi
+
 if ! JAVA_HOME="$SELECTED_JAVA_HOME" \
     "$RUNTIME_HOME/bin/jboss-cli.sh" --connect \
     --controller="127.0.0.1:$MANAGEMENT_PORT_VALUE" \
@@ -466,6 +543,9 @@ if ! JAVA_HOME="$SELECTED_JAVA_HOME" \
   if [[ "$PROFILE" == "oracle" ]]; then
     tail -n 30 "$TEMP_DIRECTORY/profile.out" |
       sanitize_oracle_output >&2
+  else
+    tail -n 30 "$TEMP_DIRECTORY/profile.out" |
+      sed "s#${TEMP_DIRECTORY}#<runtime-temporario>#g" >&2
   fi
   exit 1
 fi
@@ -848,6 +928,14 @@ if [[ -n "$WAR_FILE" ]]; then
      ! grep -Fq "correlation=$contract_correlation" \
       "$TEMP_DIRECTORY/server.log"; then
     printf 'FALHA: logs da execução externa não preservaram o contrato\n' >&2
+    exit 1
+  fi
+
+  if [[ "$SERVER_RELEASE" == "26" ]] &&
+     grep -Eq \
+       'ClassNotFoundException|NoClassDefFoundError|(^|[^A-Za-z])LinkageError' \
+       "$TEMP_DIRECTORY/server.log"; then
+    printf 'FALHA: WildFly 26 registrou quebra de classloader\n' >&2
     exit 1
   fi
 

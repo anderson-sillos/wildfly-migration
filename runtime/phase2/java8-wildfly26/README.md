@@ -49,3 +49,14 @@ O WildFly iniciou em loopback, mas o deployment ficou `FAILED` porque
 `java:/jdbc/MigrationDS` não existe na configuração original. A evidência está
 em
 [`migration/evidence/CP-2B/before-deployment.properties`](../../../migration/evidence/CP-2B/before-deployment.properties).
+
+## Configuração corrigida
+
+Use `scripts/smoke-wildfly26-datasource.sh`. O wrapper fixa Java 8/WildFly 26
+e reutiliza o ciclo seguro de cópia temporária, sanitização e limpeza do
+runtime anterior. Os arquivos em `profiles/` tratam a diferença do modelo de
+datasource sem alterar os perfis do WildFly 9.
+
+A distribuição instalada em `/opt` nunca é modificada. HTTPS e os recursos de
+keystore padrão são removidos somente da cópia temporária porque o laboratório
+expõe apenas HTTP e management em loopback.

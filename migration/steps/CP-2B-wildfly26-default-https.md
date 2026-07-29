@@ -8,7 +8,7 @@
 - etapa: `startup`;
 - categoria: configuração de segurança;
 - reprodução: `natural`;
-- estado: aberto.
+- estado: resolvido.
 
 ## Assinatura sanitizada
 
@@ -24,11 +24,12 @@ com keystore autogerado. A aplicação do laboratório não declara
 `security-constraint`, `login-config` nem domínio próprio e seus testes locais
 precisam somente do listener HTTP em loopback.
 
-## Menor correção planejada
+## Menor correção
 
-Remover somente o listener HTTPS da cópia temporária do runtime usada pelo
-laboratório, mantendo management e HTTP ligados a loopback. Não criar,
-versionar ou reutilizar um keystore apenas para ocultar o aviso.
+Remover o listener HTTPS e seus recursos exclusivos `applicationSSC`,
+`applicationKM` e `applicationKS` somente da cópia temporária do runtime,
+mantendo management e HTTP ligados a loopback. Não criar, versionar ou
+reutilizar um keystore apenas para ocultar o aviso.
 
 ## Aplicação equivalente no sistema real
 

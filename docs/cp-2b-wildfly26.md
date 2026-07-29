@@ -64,6 +64,58 @@ A matriz completa está em
 As tarefas 2.8 e 2.9 deverão resolver `INC-007` e `INC-009` e revalidar o
 classloader depois que a aplicação estiver ativa.
 
+## Runtime corrigido
+
+O runtime cria uma cópia temporária do WildFly 26 e:
+
+1. remove o listener HTTPS, o contexto SSL, o key manager e o keystore padrão
+   que não fazem parte do contrato local;
+2. mantém HTTP e management em loopback;
+3. instala o módulo H2 1.4.200 ou `ojdbc7`, conforme o perfil;
+4. aplica o arquivo CLI específico do modelo WildFly 26;
+5. publica e testa `java:/jdbc/MigrationDS`;
+6. implanta o WAR aprovado e executa os mesmos 14 contratos;
+7. reprova `ClassNotFoundException`, `NoClassDefFoundError` ou `LinkageError`.
+
+O modelo de gerenciamento revelou `INC-010`: `pool-name` não é aceito pelo
+WildFly 26. Os perfis novos removem somente esse argumento; JNDI, pool,
+validação, transação, URLs e schema permanecem equivalentes.
+
+### H2 portátil
+
+```bash
+./scripts/doctor.sh CP-2B --profile ci-h2 --env .env
+./scripts/build-cp-2a.sh --profile ci-h2 --env .env
+./scripts/smoke-wildfly26-datasource.sh \
+  --profile ci-h2 \
+  --env .env \
+  --war app/target/wildfly-migration.war \
+  --contract-result app/target/contract-results/cp-2b-ci-h2.json
+```
+
+### Oracle qualificado
+
+```bash
+./scripts/doctor.sh CP-2B --profile oracle --env .env
+./scripts/oracle-lab-schema.sh verify \
+  --java-home "$JAVA8_HOME" --env .env
+./scripts/build-cp-2a.sh --profile oracle --env .env
+./scripts/smoke-wildfly26-datasource.sh \
+  --profile oracle \
+  --env .env \
+  --war app/target/wildfly-migration.war \
+  --contract-result app/target/contract-results/cp-2b-oracle.json
+```
+
+O perfil continua selecionado pela linha de comando. H2 permanece
+`portable-ci`; somente a segunda execução produz `oracle-qualified`.
+
+## Teste manual
+
+Acrescente `--manual` ao comando do perfil desejado. No VS Code, use
+`Tasks: Run Task` e selecione uma das tarefas `CP-2B: iniciar...`. A tarefa
+`CP-2B: acompanhar log do WildFly 26` encontra o log da sessão ativa.
+
 ## Rollback atual
 
 A tentativa usa somente uma cópia temporária do runtime. Pare o processo e

@@ -40,9 +40,14 @@ for path in \
   "$REPOSITORY_ROOT/docs/cp-2b-wildfly26.md" \
   "$REPOSITORY_ROOT/docs/evidence/CP-2B.md" \
   "$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/README.md" \
+  "$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/profiles/README.md" \
+  "$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/profiles/ci-h2.cli" \
+  "$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/profiles/oracle.cli" \
   "$REPOSITORY_ROOT/migration/steps/CP-2B-wildfly26-missing-datasource.md" \
   "$REPOSITORY_ROOT/migration/steps/CP-2B-wildfly26-log4j-deprecation.md" \
-  "$REPOSITORY_ROOT/migration/steps/CP-2B-wildfly26-default-https.md"; do
+  "$REPOSITORY_ROOT/migration/steps/CP-2B-wildfly26-default-https.md" \
+  "$REPOSITORY_ROOT/migration/steps/CP-2B-wildfly26-pool-name.md" \
+  "$REPOSITORY_ROOT/scripts/smoke-wildfly26-datasource.sh"; do
   [[ -f "$path" ]] ||
     fail "arquivo obrigatório ausente: ${path#"$REPOSITORY_ROOT/"}"
 done
@@ -71,12 +76,21 @@ grep -Fq $'INC-008\tCP-2B\t' \
 grep -Fq $'INC-009\tCP-2B\t' \
   "$REPOSITORY_ROOT/migration/incompatibilities.tsv" ||
   fail "INC-009 não foi catalogada"
+grep -Fq $'INC-010\tCP-2B\t' \
+  "$REPOSITORY_ROOT/migration/incompatibilities.tsv" ||
+  fail "INC-010 não foi catalogada"
 grep -Fq -- '- [x] 2.6 Tentar implantar no WildFly 26.1.3' \
   "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.6 não está concluída"
 grep -Fq -- '- [x] 2.7 Capturar incompatibilidades de configuração' \
   "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.7 não está concluída"
+grep -Fq -- '- [x] 2.8 Provisionar WildFly 26.1.3/Java 8' \
+  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  fail "tarefa 2.8 não está concluída"
+grep -Fq -- '- [x] 2.9 Configurar no WildFly 26 os perfis H2 e Oracle' \
+  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  fail "tarefa 2.9 não está concluída"
 
 OBSERVATIONS="$REPOSITORY_ROOT/migration/evidence/CP-2B/compatibility-observations.tsv"
 [[ "$(head -n 1 "$OBSERVATIONS")" == \
@@ -86,6 +100,29 @@ for area in configuration datasource security logging classloader; do
   [[ "$(awk -F '\t' -v wanted="$area" '$1 == wanted { count++ } END { print count + 0 }' "$OBSERVATIONS")" == "1" ]] ||
     fail "matriz deve conter exatamente uma observação para $area"
 done
+
+for profile_file in \
+  "$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/profiles/ci-h2.cli" \
+  "$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/profiles/oracle.cli"; do
+  grep -Fq 'jndi-name=java:/jdbc/MigrationDS' "$profile_file" ||
+    fail "perfil WildFly 26 não publica o JNDI aprovado"
+  if grep -Fq 'pool-name=' "$profile_file"; then
+    fail "perfil WildFly 26 reintroduziu o atributo pool-name incompatível"
+  fi
+done
+
+grep -Fq -- '--server 26' \
+  "$REPOSITORY_ROOT/scripts/smoke-wildfly26-datasource.sh" ||
+  fail "wrapper do CP-2B não fixa WildFly 26"
+grep -Fq -- '--java 8' \
+  "$REPOSITORY_ROOT/scripts/smoke-wildfly26-datasource.sh" ||
+  fail "wrapper do CP-2B não fixa Java 8"
+grep -Fq 'https-listener name="https"' \
+  "$REPOSITORY_ROOT/scripts/smoke-wildfly9-datasource.sh" ||
+  fail "runtime compartilhado não contém a regressão do HTTPS padrão"
+grep -Fq 'ClassNotFoundException|NoClassDefFoundError' \
+  "$REPOSITORY_ROOT/scripts/smoke-wildfly9-datasource.sh" ||
+  fail "runtime compartilhado não verifica quebras de classloader"
 
 expected_wildfly_row=$'wildfly-community\t26.1.3.Final\twildfly-26.1.3.Final.tar.gz\thttps://github.com/wildfly/wildfly/releases/download/26.1.3.Final/wildfly-26.1.3.Final.tar.gz\tLGPL-2.1-or-later\taadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f02528ae59\tsha1:b9f52ba41df890e09bb141d72947d2510caf758c\tEOL-bridge-runtime\tCP-2B-and-CP-3A-to-CP-3D'
 [[ "$(sed -n '3p' "$MANIFEST")" == "$expected_wildfly_row" ]] ||

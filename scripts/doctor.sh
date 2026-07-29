@@ -275,6 +275,26 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-2B; then
+    required+=(
+      "docs/cp-2b-wildfly26.md"
+      "docs/evidence/CP-2B.md"
+      "runtime/phase2/java8-wildfly26/README.md"
+      "runtime/phase2/java8-wildfly26/runtime-manifest.tsv"
+      "runtime/phase2/java8-wildfly26/profiles/README.md"
+      "runtime/phase2/java8-wildfly26/profiles/ci-h2.cli"
+      "runtime/phase2/java8-wildfly26/profiles/oracle.cli"
+      "migration/evidence/CP-2B/before-deployment.properties"
+      "migration/evidence/CP-2B/compatibility-observations.tsv"
+      "migration/steps/CP-2B-wildfly26-missing-datasource.md"
+      "migration/steps/CP-2B-wildfly26-log4j-deprecation.md"
+      "migration/steps/CP-2B-wildfly26-default-https.md"
+      "migration/steps/CP-2B-wildfly26-pool-name.md"
+      "scripts/smoke-wildfly26-datasource.sh"
+      "scripts/validate-cp-2b.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"
