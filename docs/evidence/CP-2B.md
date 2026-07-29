@@ -148,6 +148,26 @@ SHA-256, não realizou downloads e aprovou todos os mesmos passos em 1 minuto
 e 2 segundos. A economia observada foi de 1 minuto e 40 segundos, cerca de
 62% do tempo do job portátil nessa comparação.
 
+O aprimoramento seguinte criou a chave de runtime `v2` para comprovar a nova
+origem e adicionou o cache Maven estrito. Na
+[`tentativa 1`](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30479982987/attempts/1),
+ambos começaram vazios. Maven Central entregou e validou o Maven 3.8.9 em
+aproximadamente 0,1 segundo; os quatro downloads e extrações terminaram em 6
+segundos. O build Maven informou 19,468 segundos e o `portable-ci` completo
+passou em 1 minuto e 4 segundos.
+
+Essa tentativa gravou 330.748.175 bytes para o runtime e 28.626.190 bytes
+para `~/.m2/repository`. A
+[`tentativa 2`](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30479982987/attempts/2)
+restaurou as duas chaves, revalidou os quatro arquivos de runtime sem download
+e executou o Maven em 2,158 segundos. O job completo passou em 39 segundos,
+incluindo os mesmos 17 segundos do smoke WildFly e os mesmos 14 contratos.
+
+Comparado ao cache miss anterior de 2 minutos e 42 segundos, o novo cache miss
+economizou 1 minuto e 38 segundos, cerca de 60%. Comparado ao cache hit
+anterior de 1 minuto e 2 segundos, o cache Maven reduziu mais 23 segundos,
+cerca de 37%.
+
 O cache criado em um PR pertence à referência temporária
 `refs/pull/16/merge`, portanto comprova o reaproveitamento nas reexecuções
 desse PR. A primeira execução posterior em `main` deverá criar o cache da

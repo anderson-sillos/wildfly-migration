@@ -130,10 +130,16 @@ Sobre `c76f42f`:
   Apache Archive como fallback;
 - os workflows cancelam execuções obsoletas da mesma referência; o smoke
   WildFly e os 14 contratos não foram alterados.
+- no workflow `30479982987`, a tentativa 1 comprovou ambos os cache misses,
+  Maven Central em aproximadamente 0,1s, build Maven em 19,468s e job completo
+  em 1m04s; a tentativa 2 restaurou runtime e Maven, executou o Maven em
+  2,158s e concluiu o mesmo job em 39s;
+- os caches medidos no PR ocupam 330.748.175 bytes para o runtime e
+  28.626.190 bytes para `~/.m2/repository`.
 
 ## Próximas ações
 
-1. Confirmar cache miss/save e cache hit dos dois caches no CI do PR #16.
+1. Confirmar o CI do commit documental final do PR #16.
 2. Integrar o PR por squash como
    `checkpoint(CP-2B): migrate runtime to WildFly 26`.
 3. Atualizar `main` e iniciar o CP-2C pela tarefa 2.11.
