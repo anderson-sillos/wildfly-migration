@@ -6,6 +6,9 @@ REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPOSITORY_ROOT/.env"
 RESULT_DIRECTORY="$REPOSITORY_ROOT/app/target/contract-results"
 CLEANUP_REQUIRED=false
+TEMP_DIRECTORY="$(
+  mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-cp2d-oracle.XXXXXXXX"
+)"
 
 usage() {
   cat <<'USAGE'
@@ -25,6 +28,15 @@ cleanup() {
       cleanup-smokes --java 8 --env "$ENV_FILE" >/dev/null 2>&1 || true
     CLEANUP_REQUIRED=false
   fi
+
+  case "$TEMP_DIRECTORY" in
+    "${TMPDIR:-/tmp}"/wildfly-migration-cp2d-oracle.*)
+      rm -rf -- "$TEMP_DIRECTORY"
+      ;;
+    *)
+      printf 'AVISO: diretório temporário inesperado não foi removido\n' >&2
+      ;;
+  esac
 }
 trap cleanup EXIT
 
@@ -68,6 +80,8 @@ SUMMARY_RESULT="$RESULT_DIRECTORY/cp-2d-phase-comparison.json"
   printf 'FALHA: execute qualify-cp-2d-h2.sh antes da qualificação Oracle\n' >&2
   exit 1
 }
+PORTABLE_CONTRACT_BACKUP="$TEMP_DIRECTORY/cp-2d-ci-h2.json"
+cp "$PORTABLE_CONTRACT_RESULT" "$PORTABLE_CONTRACT_BACKUP"
 
 "$REPOSITORY_ROOT/scripts/doctor.sh" \
   CP-2D --profile oracle --env "$ENV_FILE"
@@ -79,6 +93,8 @@ CLEANUP_REQUIRED=true
 
 "$REPOSITORY_ROOT/scripts/build-cp-2c.sh" \
   --profile oracle --env "$ENV_FILE"
+install -d -m 0755 "$RESULT_DIRECTORY"
+cp "$PORTABLE_CONTRACT_BACKUP" "$PORTABLE_CONTRACT_RESULT"
 "$REPOSITORY_ROOT/scripts/smoke-wildfly26-datasource.sh" \
   --profile oracle \
   --env "$ENV_FILE" \
@@ -99,7 +115,7 @@ CLEANUP_REQUIRED=true
   --oracle-persistence-result "$ORACLE_PERSISTENCE_RESULT"
 "$REPOSITORY_ROOT/scripts/validate-cp-2d-phase-comparison.sh" \
   --war "$WAR_FILE" \
-  --contract-result "$PORTABLE_CONTRACT_RESULT" \
+  --contract-result "$PORTABLE_CONTRACT_BACKUP" \
   --contract-result "$ORACLE_CONTRACT_RESULT" \
   --oracle-state-result "$ORACLE_STATE_RESULT" \
   --oracle-persistence-result "$ORACLE_PERSISTENCE_RESULT" \

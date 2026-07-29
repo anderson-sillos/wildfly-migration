@@ -114,6 +114,14 @@ for preserve_marker in \
     "$REPOSITORY_ROOT/scripts/smoke-wildfly9-datasource.sh" ||
     fail "smoke não contém o controle transitório: $preserve_marker"
 done
+for portable_result_marker in \
+  'PORTABLE_CONTRACT_BACKUP=' \
+  'cp "$PORTABLE_CONTRACT_RESULT" "$PORTABLE_CONTRACT_BACKUP"' \
+  'cp "$PORTABLE_CONTRACT_BACKUP" "$PORTABLE_CONTRACT_RESULT"'; do
+  grep -Fq "$portable_result_marker" \
+    "$REPOSITORY_ROOT/scripts/qualify-cp-2d-oracle.sh" ||
+    fail "qualificação Oracle não preserva o relatório H2: $portable_result_marker"
+done
 
 [[ "$(property phase)" == "1" ]] ||
   fail "referência funcional não identifica a fase 1"
