@@ -29,7 +29,7 @@
     <commons.io.version>1.3.2</commons.io.version>
     <reflections.version>0.9.10</reflections.version>
     <tiles.version>2.1.4</tiles.version>
-    <xmlbeans.version>2.3.0</xmlbeans.version>
+    <xmlbeans.version>3.0.0</xmlbeans.version>
     <xml.apis.version>1.3.02</xml.apis.version>
     <geronimo.stax.version>1.0</geronimo.stax.version>
     <dom4j.version>1.6.1</dom4j.version>
