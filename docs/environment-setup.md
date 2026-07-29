@@ -375,7 +375,14 @@ significa que Maven 4 esteja sendo usado.
 Baixe as distribuições 9.0.2, 26.1.3 e 41.0.0.Final da página oficial, valide o
 digest aprovado e extraia cada uma fora do checkout. Para o WildFly 9, use
 exatamente o arquivo `wildfly-9.0.2.Final.tar.gz` e o digest fixado no manifesto
-legado. Configure:
+legado. Para o CP-2B, use o arquivo comunitário
+`wildfly-26.1.3.Final.tar.gz`, publicado em
+<https://github.com/wildfly/wildfly/releases/download/26.1.3.Final/wildfly-26.1.3.Final.tar.gz>.
+O release oficial publicou SHA-1
+`b9f52ba41df890e09bb141d72947d2510caf758c`; o laboratório fixa também o
+SHA-256
+`aadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f02528ae59`.
+Configure:
 
 ```text
 WILDFLY9_HOME=/opt/migration-lab/tools/wildfly-9.0.2.Final

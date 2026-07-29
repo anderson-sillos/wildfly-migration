@@ -1,6 +1,6 @@
 # Codex handoff
 
-Atualizado em 2026-07-29 durante o checkpoint `CP-2A`.
+Atualizado em 2026-07-29 durante o checkpoint `CP-2B`.
 
 Este documento preserva o contexto operacional necessário para continuar o
 laboratório em outra sessão do Codex. Ele não substitui o OpenSpec, o runbook
@@ -29,24 +29,14 @@ conteúdo do `.env`.
 ## Estado atual
 
 - Mudança OpenSpec: `create-java-web-migration-lab`.
-- Branch: `checkpoint/cp-2a-java8-wildfly9`.
-- Commit de implementação qualificado:
-  `c76f42f4035ac08b13fca478f1d8e375190761b9`.
-- Último commit revalidado pelo CI:
-  `45caea0`.
-- Commits do checkpoint:
-  - `c76f42f feat(CP-2A): run application on Java 8`;
-  - `d4cfef1 test(CP-2A): record Java 8 qualification evidence`;
-  - `ed271a7 docs(CP-2A): update Codex handoff`;
-  - `45caea0 docs(CP-2A): expand checkpoint conclusion`.
-- Último squash no `main`: `a7c7b5b`, fechamento do `CP-1G`.
+- Branch: `checkpoint/cp-2b-wildfly26`.
+- Último squash no `main`: `bce4fb9`, fechamento do `CP-2A` pelo PR 15.
 - Tag pública da fase 1:
   `migration/01-legacy-baseline`, apontando para `a7c7b5b`.
-- Tarefas OpenSpec 2.1 a 2.5 concluídas no conteúdo do PR; o squash efetiva o
-  encerramento no branch principal.
-- Progresso preparado: 40 de 110 tarefas.
+- Tarefas OpenSpec 2.1 a 2.6 concluídas.
+- Progresso preparado: 41 de 110 tarefas.
 
-## Entrega CP-2A preparada
+## CP-2A encerrado
 
 O CP-2A executou primeiro o WAR congelado Java 7, bytecode major 51 e SHA-256
 `9dc324fcdb800e5f65ca7f54d42c65fb2ac6edcdda7ebddc023665fb6191edbe`
@@ -83,14 +73,40 @@ Sobre `c76f42f`:
 - schema Oracle descartável, datasource JNDI, pool e limpeza: aprovados;
 - H2 e Oracle produziram o mesmo WAR e relatórios sanitizados ligados a
   `c76f42f`;
-- o CI hospedado aprovou `repository-baseline` e `portable-ci` no workflow
-  `30465639289` sobre a conclusão documental ampliada.
+- o CI hospedado aprovou os checks finais no workflow `30465991815`;
+- o PR 15 foi integrado pelo squash
+  `bce4fb90b85301a0f2dd60c46f0ec5f6a96ff7a0`.
+
+## CP-2B iniciado
+
+- WildFly comunitário 26.1.3.Final baixado do release oficial:
+  `wildfly-26.1.3.Final.tar.gz`;
+- SHA-1 publicado:
+  `b9f52ba41df890e09bb141d72947d2510caf758c`;
+- SHA-256 fixado:
+  `aadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f02528ae59`;
+- instalação externa:
+  `/opt/migration-lab/tools/wildfly-26.1.3.Final`;
+- o `.env` local ignorado foi selecionado para `CP-2B` e recebeu os três
+  valores `WILDFLY26_*`;
+- `doctor CP-2B/ci-h2`: 108 OK, sem falha ou aviso;
+- o WAR aprovado no CP-2A manteve SHA-256
+  `bb6caddd16d36028ef8547398634c6e6fbf0de389d7a63b5c5f803a3409a53e4`;
+- a tentativa sem correção iniciou o WildFly em loopback, mas deixou o
+  deployment `FAILED` e o health em `404`;
+- causa natural catalogada como `INC-007`: ausência de
+  `java:/jdbc/MigrationDS` na configuração original do WildFly 26;
+- aviso preliminar `WFLYLOG0100`: suporte a `log4j.properties` no deployment
+  está depreciado.
 
 ## Próximas ações
 
-1. Integrar o PR 15 por squash
-   `checkpoint(CP-2A): run legacy application on Java 8`.
-2. Iniciar CP-2B tentando o mesmo WAR no Java 8/WildFly 26 antes de corrigir.
+1. Classificar as observações de configuração, datasource, segurança, logging
+   e classloader e concluir a tarefa 2.7.
+2. Adaptar o runtime temporário e o diagnóstico para Java 8/WildFly 26 sem
+   alterar `app/` ou o namespace `javax.*`.
+3. Provisionar H2 e Oracle sob `java:/jdbc/MigrationDS`, executar smokes e
+   contratos e resolver `INC-007`.
 
 ## Comandos de retomada
 
@@ -98,14 +114,11 @@ Sobre `c76f42f`:
 git status --short --branch
 openspec status --change create-java-web-migration-lab --json
 openspec instructions apply --change create-java-web-migration-lab --json
-./scripts/doctor.sh CP-2A --profile ci-h2 --env .env
+./scripts/doctor.sh CP-2B --profile ci-h2 --env .env
 ./scripts/build-cp-2a.sh --profile ci-h2 --env .env
-./scripts/validate-cp-2a.sh \
-  --war app/target/wildfly-migration.war \
-  --contract-result app/target/contract-results/cp-2a-ci-h2.json \
-  --contract-result app/target/contract-results/cp-2a-oracle.json
+./scripts/validate-cp-2b.sh --war app/target/wildfly-migration.war
 ```
 
-As cópias sanitizadas aprovadas estão em
-`migration/evidence/CP-2A/`. O `.env`, URLs internas e credenciais continuam
-fora do controle de versão.
+A primeira evidência sanitizada do CP-2B está em
+`migration/evidence/CP-2B/before-deployment.properties`. O `.env`, logs
+temporários, URLs internas e credenciais continuam fora do controle de versão.

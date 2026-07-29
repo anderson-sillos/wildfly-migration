@@ -1,0 +1,59 @@
+# CP-2B — WildFly 26 no Java 8
+
+Este checkpoint troca somente WildFly 9.0.2.Final por WildFly 26.1.3.Final.
+Eclipse Temurin OpenJDK 8u492-b09, Maven 3.8.9, bytecode Java 8, dependências
+legadas e pacotes `javax.*` permanecem inalterados.
+
+## Entrada imutável
+
+A entrada é o squash do CP-2A,
+`bce4fb90b85301a0f2dd60c46f0ec5f6a96ff7a0`. O WAR aprovado possui:
+
+- SHA-256:
+  `bb6caddd16d36028ef8547398634c6e6fbf0de389d7a63b5c5f803a3409a53e4`;
+- bytecode Java 8 major `52`;
+- 20 JARs em `WEB-INF/lib`;
+- namespace `javax.*`.
+
+## WildFly 26 fixado
+
+Use a distribuição comunitária documentada em
+[`runtime/phase2/java8-wildfly26/`](../runtime/phase2/java8-wildfly26/).
+O endereço oficial, a licença, o checksum publicado e o SHA-256 calculado
+estão no manifesto dessa pasta e em `.env.example`.
+
+## Tentativa antes da correção
+
+Foi criada uma base temporária a partir do `standalone.xml` original do
+WildFly 26. O WAR aprovado foi copiado diretamente para `deployments/`, com o
+mesmo checksum. Nenhum datasource, driver, módulo, ajuste de segurança ou
+alteração de código foi aplicado.
+
+O resultado natural foi:
+
+- WildFly 26 iniciou com Java 8 e permaneceu acessível somente em loopback;
+- o deployment foi marcado como `FAILED`;
+- `/wildfly-migration/health` respondeu `404`;
+- `java:/jdbc/MigrationDS` não existia;
+- a causa-raiz foi `javax.naming.NameNotFoundException` durante o bootstrap
+  do MyBatis;
+- o servidor aceitou `log4j.properties`, mas emitiu `WFLYLOG0100` informando
+  que esse suporte está depreciado.
+
+Consulte a
+[evidência CP-2B](evidence/CP-2B.md) e o cenário
+[`INC-007`](../migration/steps/CP-2B-wildfly26-missing-datasource.md).
+
+## Estado da evolução
+
+A tarefa 2.6 está concluída. A tarefa 2.7 ainda deve classificar, sem antecipar
+correções, os efeitos observados em configuração, datasource, segurança,
+logging e classloader. Depois disso, as tarefas 2.8 e 2.9 provisionarão os dois
+perfis sob o mesmo JNDI.
+
+## Rollback atual
+
+A tentativa usa somente uma cópia temporária do runtime. Pare o processo e
+descarte essa cópia; a instalação externa e o código permanecem inalterados.
+Para retornar ao último checkpoint verde, use o commit
+`bce4fb90b85301a0f2dd60c46f0ec5f6a96ff7a0`.
