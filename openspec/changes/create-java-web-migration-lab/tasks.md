@@ -72,7 +72,7 @@
 - [x] 2.7 Capturar incompatibilidades de configuração, datasource, segurança, logging e classloader entre WildFly 9 e 26.1.3.
 - [x] 2.8 Provisionar WildFly 26.1.3/Java 8 e migrar sua configuração sem alterar o namespace `javax.*`.
 - [x] 2.9 Configurar no WildFly 26 os perfis H2 e Oracle, seus drivers, o mesmo JNDI e verificações de saúde sem alterar o contrato funcional do schema.
-- [ ] 2.10 Encerrar `CP-2B`: validar implantação e smoke tests no WildFly 26, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-2B): migrate runtime to WildFly 26`.
+- [x] 2.10 Encerrar `CP-2B`: validar implantação e smoke tests no WildFly 26, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-2B): migrate runtime to WildFly 26`.
 
 ### Checkpoint CP-2C — EE 8, Maven e datasource
 

@@ -167,6 +167,9 @@ grep -Fq -- '- [x] 2.8 Provisionar WildFly 26.1.3/Java 8' \
 grep -Fq -- '- [x] 2.9 Configurar no WildFly 26 os perfis H2 e Oracle' \
   "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.9 não está concluída"
+grep -Fq -- '- [x] 2.10 Encerrar `CP-2B`' \
+  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  fail "tarefa 2.10 não está concluída"
 
 OBSERVATIONS="$REPOSITORY_ROOT/migration/evidence/CP-2B/compatibility-observations.tsv"
 [[ "$(head -n 1 "$OBSERVATIONS")" == \

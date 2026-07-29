@@ -89,7 +89,8 @@ Sobre `c76f42f`:
   `/opt/migration-lab/tools/wildfly-26.1.3.Final`;
 - o `.env` local ignorado foi selecionado para `CP-2B` e recebeu os três
   valores `WILDFLY26_*`;
-- `doctor CP-2B/ci-h2`: 108 OK, sem falha ou aviso;
+- `doctor CP-2B/ci-h2`: 126 OK, sem falha ou aviso;
+- `doctor CP-2B/oracle`: 125 OK, sem falha ou aviso;
 - o WAR aprovado no CP-2A manteve SHA-256
   `bb6caddd16d36028ef8547398634c6e6fbf0de389d7a63b5c5f803a3409a53e4`;
 - a tentativa sem correção iniciou o WildFly em loopback, mas deixou o
@@ -107,14 +108,16 @@ Sobre `c76f42f`:
   `5d1f6be20168909e8777a5f8a479e7d6b6d4a81a`;
 - `INC-008` permanece não bloqueante; foi registrada a alternativa de retirar
   a configuração do WAR sem trocar a biblioteca, preferindo o subsistema de
-  logging a uma propriedade global de arquivo externo.
+  logging a uma propriedade global de arquivo externo;
+- PR #16 aberto; a execução GitHub Actions `30475883532` aprovou
+  `repository-baseline` e `portable-ci` no WildFly 26.
 
 ## Próximas ações
 
-1. Validar as evidências congeladas e criar o commit documental.
-2. Abrir o PR do CP-2B e confirmar o CI portátil.
-3. Encerrar 2.10 e integrar por squash depois das validações e da conclusão
-   explicativa.
+1. Confirmar o CI do commit final do PR #16.
+2. Integrar o PR por squash como
+   `checkpoint(CP-2B): migrate runtime to WildFly 26`.
+3. Atualizar `main` e iniciar o CP-2C pela tarefa 2.11.
 
 ## Comandos de retomada
 

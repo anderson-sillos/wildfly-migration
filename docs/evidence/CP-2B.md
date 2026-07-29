@@ -95,6 +95,22 @@ Os relatórios sanitizados estão em
 e
 [`after.properties`](../../migration/evidence/CP-2B/after.properties).
 
+## CI hospedado
+
+O PR
+[#16](https://github.com/anderson-sillos/wildfly-migration/pull/16)
+reproduziu a trilha portátil no GitHub Actions sem acesso ao Oracle interno.
+A execução
+[`30475883532`](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30475883532)
+aprovou `repository-baseline` em 15 segundos e `portable-ci` em 3 minutos e
+45 segundos.
+
+O job portátil baixou Java 8, Maven 3.8.9, WildFly 26.1.3 e H2 1.4.200 das
+origens registradas, verificou seus checksums, construiu o WAR reproduzível,
+publicou `java:/jdbc/MigrationDS`, executou os 14 contratos e preservou o
+relatório sanitizado como artefato do workflow. Essa execução confirma a
+reprodução fora da máquina que realizou a qualificação Oracle.
+
 ## Conclusão comprovada
 
 O CP-2B comprova que o mesmo binário aprovado no CP-2A pode ser executado no
