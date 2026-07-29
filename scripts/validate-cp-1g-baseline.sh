@@ -156,7 +156,7 @@ TREE_SHA256="$(property maven.tree.sha256)"
   $'component\tversion\tusage\tartifact\tsha256\torigin\tlicense\tprovenance' ]] ||
   fail "cabeçalho dos componentes divergente"
 [[ "$(head -n 1 "$DEPENDENCIES_FILE")" == \
-  $'groupId\tartifactId\tversion\tscope\trelation\tpackaged\twarFile\torigin\tlicense\tlicenseEvidence' ]] ||
+  $'groupId\tartifactId\tversion\tscope\trelation\tpackaged\twarFile\tsha256\torigin\tlicense\tlicenseEvidence' ]] ||
   fail "cabeçalho das dependências divergente"
 
 SCENARIO_COUNT="$(awk -F '\t' 'NR > 1 { count++ } END { print count + 0 }' \
@@ -248,12 +248,13 @@ PROVIDED_COUNT="$(awk -F '\t' 'NR > 1 && $4 == "provided" { count++ } END { prin
 if ! awk -F '\t' '
   NR > 1 {
     key = $1 ":" $2
-    if (NF != 10 || seen[key]++ ||
+    if (NF != 11 || seen[key]++ ||
         $1 == "" || $2 == "" || $3 == "" ||
         ($4 != "compile" && $4 != "provided") ||
         ($5 != "direct" && $5 != "transitive") ||
         ($6 != "true" && $6 != "false") ||
-        $8 !~ /^https:\/\// || $9 == "" || $10 == "") {
+        $8 !~ /^[0-9a-f]{64}$/ || $9 !~ /^https:\/\// ||
+        $10 == "" || $11 == "") {
       exit 1
     }
     if (($6 == "true" && $7 !~ /\.jar$/) ||
@@ -322,6 +323,17 @@ if [[ -n "$WAR_FILE" ]]; then
     "$TEMP_DIRECTORY/war-libraries.txt"; then
     fail "WEB-INF/lib real diverge do inventário congelado"
   fi
+
+  unzip -qq "$WAR_FILE" 'WEB-INF/lib/*.jar' -d "$TEMP_DIRECTORY/extracted"
+  while IFS=$'\t' read -r _ _ _ _ _ packaged war_file expected_sha _; do
+    [[ "$packaged" == "packaged" || "$packaged" == "false" ]] && continue
+    ACTUAL_LIBRARY_SHA="$(
+      sha256sum "$TEMP_DIRECTORY/extracted/WEB-INF/lib/$war_file" |
+        awk '{print $1}'
+    )"
+    [[ "$ACTUAL_LIBRARY_SHA" == "$expected_sha" ]] ||
+      fail "checksum do JAR empacotado diverge: $war_file"
+  done <"$DEPENDENCIES_FILE"
 fi
 
 for result_file in "${CONTRACT_RESULTS[@]}"; do

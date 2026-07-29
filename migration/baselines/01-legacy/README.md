@@ -16,7 +16,8 @@ próprio commit que cria a tag.
 - `components.tsv`: runtimes, build, banco e drivers externos, com versão,
   origem, licença e checksum quando existe artefato;
 - `maven-dependencies.tsv`: todas as 24 dependências diretas e transitivas,
-  inclusive APIs `provided`, além das 20 entradas efetivas de `WEB-INF/lib`.
+  inclusive APIs `provided`, com SHA-256 individual, além das 20 entradas
+  efetivas de `WEB-INF/lib`.
 
 As diferenças deliberadas do adaptador portátil permanecem na
 [matriz H2/Oracle](../../../docs/h2-oracle-differences.md). O comando abaixo

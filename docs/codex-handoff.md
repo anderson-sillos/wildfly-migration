@@ -47,7 +47,8 @@ conteúdo do `.env`.
 - 14 cenários normalizados;
 - estado persistido Oracle e seed `LAB-0001`;
 - sete componentes de runtime/teste;
-- 24 dependências Maven, quatro `provided` e 20 em `WEB-INF/lib`;
+- 24 dependências Maven com SHA-256 individual, quatro `provided` e 20 em
+  `WEB-INF/lib`;
 - WAR SHA-256
   `9dc324fcdb800e5f65ca7f54d42c65fb2ac6edcdda7ebddc023665fb6191edbe`;
 - árvore Maven SHA-256

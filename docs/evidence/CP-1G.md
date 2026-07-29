@@ -22,8 +22,8 @@
 - matriz H2/Oracle separada, sem promover H2 a qualificação oficial;
 - sete componentes de runtime, build, banco e drivers com versão, origem,
   licença e checksum quando aplicável;
-- 24 dependências Maven diretas e transitivas, das quais quatro são
-  `provided` e 20 integram `WEB-INF/lib`;
+- 24 dependências Maven diretas e transitivas com SHA-256 individual, das
+  quais quatro são `provided` e 20 integram `WEB-INF/lib`;
 - WAR SHA-256
   `9dc324fcdb800e5f65ca7f54d42c65fb2ac6edcdda7ebddc023665fb6191edbe`;
 - árvore Maven SHA-256

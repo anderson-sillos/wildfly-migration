@@ -95,9 +95,10 @@ git status --short
 ```
 
 Os valores devem corresponder a `baseline.properties`. O validador também
-compara as 24 dependências Maven, as 20 entradas reais de `WEB-INF/lib`, as
-APIs `provided`, o contrato normalizado e a ausência de configuração sensível
-nos relatórios.
+compara as 24 dependências Maven, o SHA-256 individual dos 20 JARs extraídos
+de `WEB-INF/lib`, as APIs `provided`, o contrato normalizado e a ausência de
+configuração sensível nos relatórios. Uma divergência em outra máquina deve ser
+investigada; não atualize checksums apenas para fazer o gate passar.
 
 O WildFly temporário deve publicar HTTP e management somente em loopback e
 encerrar ao final. Não publique `server.log` bruto do perfil Oracle.
