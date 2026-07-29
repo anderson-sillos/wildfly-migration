@@ -39,6 +39,7 @@ jobs:
           bash -n scripts/validate-cp-1f-xml.sh
           bash -n scripts/validate-cp-1f-discovery-logging.sh
           bash -n scripts/validate-cp-1f-contracts.sh
+          bash -n scripts/validate-cp-1g-baseline.sh
           bash -n contract-tests/run.sh
 
       - name: Validate repository baseline
@@ -83,6 +84,9 @@ jobs:
       - name: Validate CP-1F external contracts statically
         run: ./scripts/validate-cp-1f-contracts.sh
 
+      - name: Validate CP-1G frozen baseline statically
+        run: ./scripts/validate-cp-1g-baseline.sh
+
   portable-ci:
     name: portable-ci
     runs-on: ubuntu-latest
@@ -122,7 +126,7 @@ jobs:
           tar -xzf wildfly-9.0.2.Final.tar.gz -C "$tools"
 
           {
-            echo "MIGRATION_CHECKPOINT=CP-1F"
+            echo "MIGRATION_CHECKPOINT=CP-1G"
             echo "LAB_BIND_ADDRESS=127.0.0.1"
             echo "WILDFLY_HTTP_PORT=18080"
             echo "WILDFLY_MANAGEMENT_PORT=19990"
@@ -140,7 +144,7 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Run portable doctor
-        run: ./scripts/doctor.sh CP-1F --profile ci-h2 --ci
+        run: ./scripts/doctor.sh CP-1G --profile ci-h2 --ci
 
       - name: Build and audit portable WAR
         run: ./scripts/build-cp-1d.sh --profile ci-h2
@@ -164,9 +168,15 @@ jobs:
             --war app/target/wildfly-migration.war \
             --contract-result app/target/contract-results/ci-h2.json
 
+      - name: Compare portable result with the frozen baseline
+        run: |
+          ./scripts/validate-cp-1g-baseline.sh \
+            --war app/target/wildfly-migration.war \
+            --contract-result app/target/contract-results/ci-h2.json
+
       - name: Upload sanitized portable contract result
         uses: actions/upload-artifact@v4
         with:
-          name: cp-1f-portable-contract-result
+          name: cp-1g-portable-contract-result
           path: app/target/contract-results/ci-h2.json
           if-no-files-found: error

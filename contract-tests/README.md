@@ -18,6 +18,11 @@ O mesmo arquivo é chamado pelos perfis `ci-h2` e `oracle`. O resultado JSON
 registra perfil, qualificação, commit, SHA-256 do WAR, runtime e cenários, mas
 omite URL base, host, usuário e credenciais.
 
+Os resultados esperados independentes do perfil estão congelados em
+[`migration/baselines/01-legacy/contract-scenarios.tsv`](../migration/baselines/01-legacy/contract-scenarios.tsv).
+Depois da execução, `scripts/validate-cp-1g-baseline.sh` compara o relatório,
+o WAR e a árvore Maven com esse baseline.
+
 Exemplo com a aplicação já ativa:
 
 ```bash

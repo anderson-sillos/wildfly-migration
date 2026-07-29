@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -199,8 +200,24 @@ public final class OracleLabSchema {
     }
 
     private static void verify(Connection connection) throws SQLException {
+        String databaseVersion =
+                connection.getMetaData().getDatabaseProductVersion();
+        require(databaseVersion != null
+                && databaseVersion.indexOf("Oracle Database 19c") >= 0,
+                "produto conectado não é Oracle Database 19c");
+
         Statement statement = connection.createStatement();
         try {
+            ResultSet version = statement.executeQuery(
+                    "SELECT VERSION_FULL FROM PRODUCT_COMPONENT_VERSION "
+                    + "WHERE PRODUCT LIKE 'Oracle Database%'");
+            require(version.next()
+                    && "19.3.0.0.0".equals(version.getString(1)),
+                    "Oracle Database RU diverge de 19.3.0.0.0");
+            require(!version.next(),
+                    "versão Oracle retornou mais de um registro");
+            version.close();
+
             require(count(statement,
                     "SELECT COUNT(*) FROM USER_TABLES "
                     + "WHERE TABLE_NAME IN ('LAB_PEDIDO','LAB_ANEXO')") == 2L,
@@ -217,6 +234,33 @@ public final class OracleLabSchema {
             validateOwnedObjects(statement);
         } finally {
             statement.close();
+        }
+
+        PreparedStatement seed = connection.prepareStatement(
+                "SELECT CLIENTE_NOME, DESCRICAO, VALOR_TOTAL, STATUS "
+                + "FROM LAB_PEDIDO WHERE NUMERO = ?");
+        try {
+            seed.setString(1, "LAB-0001");
+            ResultSet row = seed.executeQuery();
+            try {
+                require(row.next(), "seed Oracle ausente");
+                require("Cliente de referência".equals(row.getString(1)),
+                        "cliente do seed Oracle divergente");
+                require("Pedido mínimo para validar o baseline".equals(
+                        row.getString(2)),
+                        "descrição do seed Oracle divergente");
+                BigDecimal value = row.getBigDecimal(3);
+                require(value != null
+                        && value.compareTo(new BigDecimal("125.50")) == 0,
+                        "valor do seed Oracle divergente");
+                require("NOVO".equals(row.getString(4)),
+                        "status do seed Oracle divergente");
+                require(!row.next(), "seed Oracle duplicado");
+            } finally {
+                row.close();
+            }
+        } finally {
+            seed.close();
         }
     }
 

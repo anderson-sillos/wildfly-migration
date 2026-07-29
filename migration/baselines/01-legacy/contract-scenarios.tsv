@@ -1,0 +1,15 @@
+scenario	result	normalized_observation
+health	passed	HTTP 200; status=UP; X-Correlation-ID preenchido
+list	passed	HTTP 200; página pedidos-lista; seed LAB-0001 visível
+create	passed	redirect para detalhe; pedido com número único e status NOVO
+detail	passed	nova requisição recupera número e cliente persistidos
+session	passed	preferência COMPACTO preservada na mesma HttpSession
+upload	passed	nome normalizado; MIME; tamanho; SHA-256 e BLOB persistidos
+uploadLimit	passed	arquivo de 524289 bytes retorna HTTP 413 controlado
+xmlForm	passed	formulário multipart de seleção XML disponível
+xmlValid	passed	XML válido cria pedido equivalente; decimal comparado numericamente
+xmlInvalidXsd	passed	XML fora do XSD retorna HTTP 400 sem persistência parcial
+xmlValidatorRejected	passed	XML válido no XSD com status não inicial retorna HTTP 400
+xmlXxe	passed	DOCTYPE e entidade externa retornam HTTP 400
+xmlEntityExpansion	passed	expansão de entidades retorna HTTP 400
+persistedState	passed	pedidos HTTP e XML aceitos persistem; entradas rejeitadas não persistem

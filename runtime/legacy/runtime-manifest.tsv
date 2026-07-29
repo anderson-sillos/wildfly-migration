@@ -1,4 +1,4 @@
 component	version	archive	origin	license	sha256	sha512
 oracle-jdk	1.7.0_80	jdk-7u80-linux-x64.tar.gz	https://download.oracle.com/otn/java/jdk/7u80-b15/jdk-7u80-linux-x64.tar.gz	Oracle-BCLA-Java-SE	bad9a731639655118740bee119139c1ed019737ec802a630dd7ad7aab4309623	-
 apache-maven	3.8.9	apache-maven-3.8.9-bin.tar.gz	https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz	Apache-2.0	3e4c68cdd70f96635e713f36c8fc3ea3182035245d3da2156576710ca0fe4b0c	4a490b7f331a0e7869b61da24600241e445339f2801ed94e32f835b63ed78597ad05ef8c1cce2501b4c2c3dcde30030eb395cd5756be739c20ac687ad6f82f0e
-wildfly	9.0.2.Final	wildfly-9.0.2.Final.tar.gz	https://download.jboss.org/wildfly/9.0.2.Final/wildfly-9.0.2.Final.tar.gz	Apache-2.0	74689569d6e04402abb7d94921c558940725d8065dce21a2d7194fa354249bb6	-
+wildfly	9.0.2.Final	wildfly-9.0.2.Final.tar.gz	https://download.jboss.org/wildfly/9.0.2.Final/wildfly-9.0.2.Final.tar.gz	LGPL-2.1-only	74689569d6e04402abb7d94921c558940725d8065dce21a2d7194fa354249bb6	-

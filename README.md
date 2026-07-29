@@ -7,12 +7,10 @@ cada entrega validável e reversível.
 
 Repositório GitHub: <https://github.com/anderson-sillos/wildfly-migration>
 
-Os checkpoints **CP-1A — Repositório GitHub e ambiente**, **CP-1B — Estrutura
-e runtime legado**, **CP-1C — WAR e dependências legadas** e **CP-1D —
-Fundação portátil H2 e qualificação Oracle** estão concluídos. A árvore única
-`app/` gera um WAR Java 7 auditável com as dependências históricas, enquanto
-runtimes, drivers e credenciais permanecem externos. O próximo incremento é o
-**CP-1E — Fluxo web e persistência**.
+Os checkpoints **CP-1A** a **CP-1F** estão concluídos. A árvore única `app/`
+gera um WAR Java 7 auditável com fluxo web, persistência, upload, importação XML
+e contratos HTTP comuns, enquanto runtimes, drivers e credenciais permanecem
+externos. O incremento atual é o **CP-1G — Baseline completo**.
 
 ## Fases públicas
 
@@ -31,7 +29,9 @@ não fases adicionais.
 2. Leia [a preparação do ambiente](docs/environment-setup.md).
 3. Para executar a aplicação, siga o
    [runbook legado](docs/legacy-application-runbook.md).
-4. Para contribuir, consulte [o fluxo GitHub](docs/github-workflow.md).
+4. Para reproduzir a fase 1, siga
+   [o fechamento do baseline legado](docs/legacy-baseline-reproduction.md).
+5. Para contribuir, consulte [o fluxo GitHub](docs/github-workflow.md).
 
 No primeiro checkout:
 

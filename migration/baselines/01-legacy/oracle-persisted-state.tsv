@@ -1,0 +1,16 @@
+area	key	expected	normalization
+database	product	Oracle Database 19c	edição e texto promocional não alteram o contrato
+database	releaseUpdate	19.3.0.0.0	valor observado em PRODUCT_COMPONENT_VERSION/metadata JDBC
+schema	tables	LAB_ANEXO,LAB_PEDIDO	ordem lexical
+schema	sequences	LAB_ANEXO_SEQ,LAB_PEDIDO_SEQ	ordem lexical
+schema	index	LAB_ANEXO.IX_LAB_ANEXO_PEDIDO	nome e tabela
+seed	numero	LAB-0001	chave funcional estável
+seed	clienteNome	Cliente de referência	Unicode preservado
+seed	descricao	Pedido mínimo para validar o baseline	Unicode preservado
+seed	valorTotal	125.50	BigDecimal com escala 2
+seed	status	NOVO	valor literal
+contract	create	pedido LAB-SMOKE-C-* e campos do contrato	prefixo e identificador gerado são normalizados
+contract	upload	contrato-upload.txt,text/plain,46 bytes,SHA-256,BLOB	conteúdo comparado por tamanho e digest
+contract	xml	pedido LAB-SMOKE-X-*; Cliente XML; 349.90	prefixo gerado e zeros decimais à direita são normalizados
+contract	rejected	nenhum pedido das fixtures negativas	persistência parcial é proibida
+cleanup	automatic	LAB-SMOKE-* removidos ao final	dados MANUAL-* e seed ficam fora da limpeza automática

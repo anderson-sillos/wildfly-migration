@@ -50,11 +50,11 @@
 
 ### Checkpoint CP-1G — Baseline completo
 
-- [ ] 1.31 Congelar resultados normalizados dos contratos comuns, o estado persistido Oracle de referência e as diferenças H2 documentadas que servirão de comparação para as fases seguintes.
-- [ ] 1.32 Gerar manifesto com árvore Maven, versões, origem e licença dos componentes e da infraestrutura de teste, conteúdo de `WEB-INF/lib` e checksum do WAR.
-- [ ] 1.33 Implantar o WAR no WildFly 9.0.2 isolado e aprovar `portable-ci`, `oracle-qualified`, contratos, persistência, auditorias, segredos e portas.
-- [ ] 1.34 Documentar preparação, execução, verificação, limpeza e rollback do baseline a partir de checkout limpo.
-- [ ] 1.35 Encerrar `CP-1G`: validar todas as evidências H2 e Oracle da fase, integrar o PR pelo commit `checkpoint(CP-1G): complete legacy baseline` e criar a tag `migration/01-legacy-baseline`.
+- [x] 1.31 Congelar resultados normalizados dos contratos comuns, o estado persistido Oracle de referência e as diferenças H2 documentadas que servirão de comparação para as fases seguintes.
+- [x] 1.32 Gerar manifesto com árvore Maven, versões, origem e licença dos componentes e da infraestrutura de teste, conteúdo de `WEB-INF/lib` e checksum do WAR.
+- [x] 1.33 Implantar o WAR no WildFly 9.0.2 isolado e aprovar `portable-ci`, `oracle-qualified`, contratos, persistência, auditorias, segredos e portas.
+- [x] 1.34 Documentar preparação, execução, verificação, limpeza e rollback do baseline a partir de checkout limpo.
+- [x] 1.35 Encerrar `CP-1G`: validar todas as evidências H2 e Oracle da fase, integrar o PR pelo commit `checkpoint(CP-1G): complete legacy baseline` e criar a tag `migration/01-legacy-baseline`.
 
 ## 2. Modernização máxima com baixo impacto
 

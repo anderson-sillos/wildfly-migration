@@ -13,6 +13,7 @@ required_paths=(
   "docs/evidence/CP-1F.md"
   "docs/environment-setup.md"
   "docs/legacy-application-runbook.md"
+  "docs/legacy-baseline-reproduction.md"
   "docs/legacy-upload.md"
   "docs/legacy-xml-import.md"
   "docs/legacy-validation-logging.md"
@@ -51,6 +52,7 @@ required_runbook_markers=(
   'Upload legado do CP-1F'
   'Importação XML'
   'DROP USER ... CASCADE'
+  'legacy-baseline-reproduction.md'
 )
 
 if ! grep -Fq -- '[Codex handoff](codex-handoff.md)' \
@@ -85,7 +87,8 @@ done
 
 for reference in \
   'docs/legacy-application-runbook.md' \
-  'docs/README.md'; do
+  'docs/README.md' \
+  'docs/legacy-baseline-reproduction.md'; do
   if ! grep -Fq "$reference" "$REPOSITORY_ROOT/README.md"; then
     printf 'FALHA: README principal não aponta para %s\n' "$reference" >&2
     exit 1
@@ -101,6 +104,24 @@ if ! grep -Fq 'legacy-application-runbook.md' \
   printf 'FALHA: documentos especializados não apontam para o runbook\n' >&2
   exit 1
 fi
+
+required_baseline_markers=(
+  './scripts/doctor.sh CP-1G --profile ci-h2 --env .env'
+  './scripts/doctor.sh CP-1G --profile oracle --env .env'
+  './scripts/validate-cp-1g-baseline.sh'
+  'migration/01-legacy-baseline'
+  '19.3.0.0.0'
+  'cleanup-smokes'
+  'checkout limpo'
+)
+
+for marker in "${required_baseline_markers[@]}"; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/legacy-baseline-reproduction.md"; then
+    printf 'FALHA: reprodução do baseline não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
 
 help_output="$(
   "$REPOSITORY_ROOT/scripts/smoke-wildfly9-datasource.sh" --help
