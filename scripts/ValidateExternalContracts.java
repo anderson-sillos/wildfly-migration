@@ -19,7 +19,7 @@ public final class ValidateExternalContracts {
         String smoke = read(file(
                 repository, "scripts/smoke-wildfly9-datasource.sh"));
         String workflow = read(file(
-                repository, ".github/workflows/validate.yml"));
+                repository, ".github/workflows/portable.yml"));
 
         require(runner.indexOf("--base-url") >= 0
                 && runner.indexOf("--profile") >= 0
@@ -66,7 +66,10 @@ public final class ValidateExternalContracts {
                 && smoke.indexOf("--profile \"$PROFILE\"") >= 0,
                 "smoke não chama a mesma suíte para ambos os perfis");
         require(workflow.indexOf(
-                "app/target/contract-results/cp-2a-ci-h2.json") >= 0,
+                "app/target/contract-results/cp-2b-ci-h2.json") >= 0
+                && workflow.indexOf(
+                "name: cp-2b-portable-contract-result") >= 0
+                && workflow.indexOf("if-no-files-found: error") >= 0,
                 "CI não preserva o resultado portable-ci");
 
         System.out.println(

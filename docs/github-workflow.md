@@ -70,3 +70,24 @@ Cada PR deve:
 
 Somente os finais das três fases públicas recebem tags. Gates Java 17 e Java 21
 da fase 3 ficam identificados por commits e manifestos, sem tags públicas.
+
+## Workflows de validação
+
+O CI é separado por finalidade:
+
+- `.github/workflows/validate.yml` executa `repository-baseline` em todo pull
+  request e em todo push para `main`;
+- `.github/workflows/portable.yml` executa `portable-ci` somente quando mudam
+  configuração de exemplo, aplicação, contratos, baseline executável,
+  runtimes, scripts ou o próprio workflow portátil.
+
+Alterações exclusivamente em `docs/`, `openspec/` ou evidências já capturadas
+continuam recebendo a validação estática, mas não recriam Java, Maven, WildFly,
+H2 e o WAR. Uma alteração em `scripts/`, `runtime/`, `contract-tests/`,
+`migration/baselines/`, `app/`, `.env.example` ou no workflow portátil sempre
+executa a trilha H2 completa.
+
+Os dois workflows agrupam execuções pelo nome do workflow e pela referência
+Git. Quando um novo commit chega ao mesmo PR, a execução anterior ainda em
+andamento é cancelada. Isso não cancela validações de outros PRs nem mistura
+`repository-baseline` com `portable-ci`.

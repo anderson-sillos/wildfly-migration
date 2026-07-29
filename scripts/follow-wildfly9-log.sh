@@ -10,8 +10,8 @@ usage() {
 Uso:
   ./scripts/follow-wildfly9-log.sh [--lines QUANTIDADE]
 
-Localiza o server.log da única sessão manual ativa do WildFly 9 e acompanha
-suas últimas linhas até o runtime ser encerrado.
+Localiza o server.log da única sessão manual ativa do WildFly 9 ou 26 e
+acompanha suas últimas linhas até o runtime ser encerrado.
 USAGE
 }
 
@@ -76,7 +76,8 @@ for marker_file in "${marker_files[@]}"; do
 
   process_command="$(tr '\0' ' ' <"$process_command_file")"
   case "$process_command" in
-    *"$runtime_directory/wildfly-9.0.2.Final"*)
+    *"$runtime_directory/wildfly-9.0.2.Final"*|\
+    *"$runtime_directory/wildfly-26.1.3.Final"*)
       log_files[${#log_files[@]}]="$log_file"
       ;;
   esac
@@ -84,7 +85,7 @@ done
 
 case "${#log_files[@]}" in
   0)
-    printf 'FALHA: nenhuma sessão manual ativa do WildFly 9 foi encontrada\n' \
+    printf 'FALHA: nenhuma sessão manual ativa do WildFly 9 ou 26 foi encontrada\n' \
       >&2
     printf 'Inicie primeiro uma das tasks de aplicação H2 ou Oracle.\n' >&2
     exit 1
@@ -93,7 +94,7 @@ case "${#log_files[@]}" in
     LOG_FILE="${log_files[0]}"
     ;;
   *)
-    printf 'FALHA: mais de uma sessão do WildFly 9 foi encontrada:\n' >&2
+    printf 'FALHA: mais de uma sessão WildFly foi encontrada:\n' >&2
     for log_file in "${log_files[@]}"; do
       printf '  %s\n' "$log_file" >&2
     done

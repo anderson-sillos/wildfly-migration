@@ -17,6 +17,8 @@ passos.
    limpo, validações H2/Oracle, limpeza e rollback da fase 1.
 6. [CP-2A — Java 8 no WildFly 9](cp-2a-java8-wildfly9.md): download fixado,
    tentativa antes da correção, build, contratos e rollback.
+7. [CP-2B — WildFly 26 no Java 8](cp-2b-wildfly26.md): runtime fixado,
+   tentativa do WAR anterior sem correção e evolução da configuração.
 
 ## Aplicação e arquitetura
 
@@ -32,6 +34,7 @@ passos.
 
 - [Runtime legado externo](../runtime/legacy/README.md);
 - [Runtime Java 8/WildFly 9 do CP-2A](../runtime/phase2/java8-wildfly9/README.md);
+- [Runtime Java 8/WildFly 26 do CP-2B](../runtime/phase2/java8-wildfly26/README.md);
 - [seleção Java 7/H2 do CP-1D](cp-1d-runtime-selection.md);
 - [diferenças H2/Oracle](h2-oracle-differences.md);
 - [aprovação do schema Oracle](oracle-lab-schema.md).

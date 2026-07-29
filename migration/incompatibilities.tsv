@@ -5,3 +5,7 @@ INC-003	CP-1F	XMLBeans-2.3.0/XSD	JAXP-pattern-compatible	execution	library	natur
 INC-004	CP-1G	ojdbc7-DatabaseMetaData	Oracle-19c-RU-19.3	execution	observability	natural	resolved	migration/steps/CP-1G-oracle-ru-detection.md
 INC-005	CP-2A	Java-7-Maven-Enforcer	Temurin-8u492	compilation	toolchain-policy	natural	resolved	migration/steps/CP-2A-java8-toolchain.md
 INC-006	CP-2A	WildFly-9-Java7-JAVA_OPTS	Temurin-8u492	execution	runtime-configuration	natural	resolved	migration/steps/CP-2A-wildfly9-max-perm-size.md
+INC-007	CP-2B	Java8-WildFly9-config	Java8-WildFly26-default	deployment	datasource-configuration	natural	resolved	migration/steps/CP-2B-wildfly26-missing-datasource.md
+INC-008	CP-2B	Log4j1-deployment-config	WildFly26-logging-subsystem	deployment	logging	natural	deferred-CP-3B	migration/steps/CP-2B-wildfly26-log4j-deprecation.md
+INC-009	CP-2B	WildFly9-loopback-http	WildFly26-default-https-keystore	startup	security-configuration	natural	resolved	migration/steps/CP-2B-wildfly26-default-https.md
+INC-010	CP-2B	WildFly9-datasource-CLI	WildFly26-datasource-model	configuration	management-model	natural	resolved	migration/steps/CP-2B-wildfly26-pool-name.md

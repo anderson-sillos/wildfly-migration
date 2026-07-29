@@ -103,9 +103,11 @@ if ! awk -F '\t' '
     if (NF != 9 || $1 !~ /^INC-[0-9][0-9][0-9]$/ || seen[$1]++ ||
         $2 !~ /^CP-[123][A-Z]$/ ||
         ($5 != "compilation" && $5 != "packaging" &&
-         $5 != "deployment" && $5 != "execution") ||
+         $5 != "deployment" && $5 != "execution" &&
+         $5 != "startup" && $5 != "configuration") ||
         ($7 != "natural" && $7 != "fixture-opt-in") ||
-        ($8 != "observed" && $8 != "resolved") ||
+        ($8 != "observed" && $8 != "resolved" &&
+         $8 !~ /^deferred-CP-[123][A-Z]$/) ||
         $9 !~ /^migration\/steps\/[A-Za-z0-9._-]+\.md$/) {
       exit 1
     }

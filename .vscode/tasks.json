@@ -109,6 +109,77 @@
         "focus": true,
         "clear": true
       }
+    },
+    {
+      "label": "CP-2B: iniciar aplicação WildFly 26 com H2",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/smoke-wildfly26-datasource.sh",
+      "args": [
+        "--profile",
+        "ci-h2",
+        "--env",
+        "${workspaceFolder}/.env",
+        "--war",
+        "${workspaceFolder}/app/target/wildfly-migration.war",
+        "--manual"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": [
+        "CP-2A: validar Java 8 em massa"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true,
+        "clear": true
+      }
+    },
+    {
+      "label": "CP-2B: iniciar aplicação WildFly 26 com Oracle",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/smoke-wildfly26-datasource.sh",
+      "args": [
+        "--profile",
+        "oracle",
+        "--env",
+        "${workspaceFolder}/.env",
+        "--war",
+        "${workspaceFolder}/app/target/wildfly-migration.war",
+        "--manual"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": [
+        "CP-2A: validar Java 8 com Oracle"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true,
+        "clear": true
+      }
+    },
+    {
+      "label": "CP-2B: acompanhar log do WildFly 26",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/follow-wildfly9-log.sh",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true,
+        "clear": true
+      }
     }
   ]
 }

@@ -51,7 +51,7 @@ absolutos no `.env`.
 | Componente | Arquivo e endereço |
 | --- | --- |
 | Oracle JDK 7u80 | Página: <https://www.oracle.com/java/technologies/javase/javase7-archive-downloads.html><br>Origem autenticada: <https://download.oracle.com/otn/java/jdk/7u80-b15/jdk-7u80-linux-x64.tar.gz> |
-| Apache Maven 3.8.9 | <https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz><br>SHA-512 publicado: <https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz.sha512> |
+| Apache Maven 3.8.9 | Origem primária do CI: <https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.8.9/apache-maven-3.8.9-bin.tar.gz><br>Arquivo histórico e fallback: <https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz><br>SHA-512 publicado: <https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz.sha512> |
 | WildFly 9.0.2.Final Full/Web | <https://download.jboss.org/wildfly/9.0.2.Final/wildfly-9.0.2.Final.tar.gz> |
 
 Na página da Oracle, escolha **Java SE Development Kit 7u80 → Linux x64 →
