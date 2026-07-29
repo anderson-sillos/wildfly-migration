@@ -44,6 +44,8 @@ funcional. H2 e Oracle continuarão configurações separadas.
 - antes:
   [`before-deployment.properties`](../evidence/CP-2B/before-deployment.properties);
 - depois: contratos H2 e Oracle do runtime `java8-wildfly26.1.3`.
+  Consulte
+  [`after.properties`](../evidence/CP-2B/after.properties).
 
 ## Aplicação equivalente no sistema real
 

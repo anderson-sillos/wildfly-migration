@@ -37,6 +37,9 @@ for path in \
   "$MANIFEST" \
   "$EVIDENCE" \
   "$REPOSITORY_ROOT/migration/evidence/CP-2B/compatibility-observations.tsv" \
+  "$REPOSITORY_ROOT/migration/evidence/CP-2B/after.properties" \
+  "$REPOSITORY_ROOT/migration/evidence/CP-2B/contract-ci-h2.json" \
+  "$REPOSITORY_ROOT/migration/evidence/CP-2B/contract-oracle.json" \
   "$REPOSITORY_ROOT/docs/cp-2b-wildfly26.md" \
   "$REPOSITORY_ROOT/docs/evidence/CP-2B.md" \
   "$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/README.md" \
@@ -50,6 +53,62 @@ for path in \
   "$REPOSITORY_ROOT/scripts/smoke-wildfly26-datasource.sh"; do
   [[ -f "$path" ]] ||
     fail "arquivo obrigatório ausente: ${path#"$REPOSITORY_ROOT/"}"
+done
+
+AFTER="$REPOSITORY_ROOT/migration/evidence/CP-2B/after.properties"
+for marker in \
+  'implementation.commit=5d1f6be20168909e8777a5f8a479e7d6b6d4a81a' \
+  'app.changed=false' \
+  'pom.changed=false' \
+  'war.changed=false' \
+  'datasource.jndi=java:/jdbc/MigrationDS' \
+  'datasource.pool.test=passed' \
+  'runtime.https.enabled=false' \
+  'classloader.linkage-errors=0' \
+  'portable-ci.result=passed' \
+  'oracle-qualified.result=passed' \
+  'logging.log4j1.active=true' \
+  'logging.externalization=not-yet-qualified'; do
+  grep -Fxq "$marker" "$AFTER" ||
+    fail "evidência depois da correção não contém: $marker"
+done
+
+for evidence_contract in contract-ci-h2.json contract-oracle.json; do
+  evidence_path="$REPOSITORY_ROOT/migration/evidence/CP-2B/$evidence_contract"
+  grep -Fq '"commit": "5d1f6be20168909e8777a5f8a479e7d6b6d4a81a"' \
+    "$evidence_path" ||
+    fail "contrato CP-2B não aponta para o commit de implementação"
+  grep -Fq '"warSha256": "bb6caddd16d36028ef8547398634c6e6fbf0de389d7a63b5c5f803a3409a53e4"' \
+    "$evidence_path" ||
+    fail "contrato CP-2B não aponta para o WAR aprovado"
+  grep -Fq '"runtime": "java8-wildfly26.1.3"' "$evidence_path" ||
+    fail "contrato CP-2B não identifica o runtime corrigido"
+  [[ "$(grep -Ec '^[[:space:]]+\"[A-Za-z][A-Za-z0-9]*\": \"passed\",?$' "$evidence_path")" == "14" ]] ||
+    fail "contrato CP-2B não contém os 14 cenários"
+  if grep -Eiq \
+    'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url' \
+    "$evidence_path"; then
+    fail "contrato CP-2B contém configuração sensível"
+  fi
+done
+grep -Fq '"qualification": "portable-ci"' \
+  "$REPOSITORY_ROOT/migration/evidence/CP-2B/contract-ci-h2.json" ||
+  fail "contrato H2 CP-2B perdeu a classificação portable-ci"
+grep -Fq '"qualification": "oracle-qualified"' \
+  "$REPOSITORY_ROOT/migration/evidence/CP-2B/contract-oracle.json" ||
+  fail "contrato Oracle CP-2B perdeu a qualificação"
+
+for conclusion_marker in \
+  'Conclusão comprovada' \
+  'Configuração não acompanha o binário do servidor' \
+  'Migração mínima do runtime' \
+  'Equivalência funcional e persistência' \
+  'Namespace, empacotamento e classloader preservados' \
+  'Logging permanece uma limitação conhecida' \
+  'Limites da conclusão'; do
+  grep -Fq "$conclusion_marker" \
+    "$REPOSITORY_ROOT/docs/evidence/CP-2B.md" ||
+    fail "conclusão CP-2B não contém: $conclusion_marker"
 done
 
 for marker in \

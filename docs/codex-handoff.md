@@ -102,18 +102,19 @@ Sobre `c76f42f`:
   temporária;
 - `INC-010`: CLI do WildFly 26 não aceita `pool-name`; perfis próprios
   preservam o restante do contrato;
-- H2 e Oracle aprovaram preliminarmente 14/14 contratos, pool, health e
-  classloader no runtime `java8-wildfly26.1.3`;
+- H2 e Oracle aprovaram 14/14 contratos, pool, health e classloader no runtime
+  `java8-wildfly26.1.3`, vinculados ao commit
+  `5d1f6be20168909e8777a5f8a479e7d6b6d4a81a`;
 - `INC-008` permanece não bloqueante; foi registrada a alternativa de retirar
   a configuração do WAR sem trocar a biblioteca, preferindo o subsistema de
   logging a uma propriedade global de arquivo externo.
 
 ## Próximas ações
 
-1. Registrar o commit de implementação das tarefas 2.8 e 2.9.
-2. Reexecutar H2 e Oracle sobre esse commit e congelar os relatórios
-   sanitizados.
-3. Fechar o CP-2B por PR depois das validações e da conclusão explicativa.
+1. Validar as evidências congeladas e criar o commit documental.
+2. Abrir o PR do CP-2B e confirmar o CI portátil.
+3. Encerrar 2.10 e integrar por squash depois das validações e da conclusão
+   explicativa.
 
 ## Comandos de retomada
 

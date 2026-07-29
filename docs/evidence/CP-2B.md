@@ -68,4 +68,102 @@ O log bruto permaneceu apenas na área temporária local e não foi versionado.
 
 Provisionar os perfis H2 e Oracle no WildFly 26 sob
 `java:/jdbc/MigrationDS`, preservando schema, código, namespace e WAR. A
-correção ainda não faz parte desta evidência.
+correção foi implementada no commit
+`5d1f6be20168909e8777a5f8a479e7d6b6d4a81a`.
+
+## Depois da correção
+
+O runtime corrigido criou uma cópia temporária da distribuição aprovada,
+removeu somente os recursos HTTPS não usados, instalou o driver do perfil e
+aplicou a CLI específica do WildFly 26. A instalação externa original não foi
+modificada.
+
+Os dois perfis produziram:
+
+| Trilha | Perfil | Contratos | Pool | Resultado |
+| --- | --- | ---: | --- | --- |
+| `portable-ci` | H2 1.4.200 | 14/14 | aprovado | aprovado |
+| `oracle-qualified` | Oracle 19c RU 19.3 / `ojdbc7` | 14/14 | aprovado | aprovado |
+
+Ambas as execuções usaram o runtime `java8-wildfly26.1.3`, o commit
+`5d1f6be20168909e8777a5f8a479e7d6b6d4a81a` e o mesmo WAR do CP-2A:
+`bb6caddd16d36028ef8547398634c6e6fbf0de389d7a63b5c5f803a3409a53e4`.
+
+Os relatórios sanitizados estão em
+[`contract-ci-h2.json`](../../migration/evidence/CP-2B/contract-ci-h2.json),
+[`contract-oracle.json`](../../migration/evidence/CP-2B/contract-oracle.json)
+e
+[`after.properties`](../../migration/evidence/CP-2B/after.properties).
+
+## Conclusão comprovada
+
+O CP-2B comprova que o mesmo binário aprovado no CP-2A pode ser executado no
+WildFly 26.1.3.Final com Java 8, sem recompilar a aplicação e sem alterar POM,
+dependências, bytecode, namespace `javax.*`, schema ou contrato funcional.
+
+### Configuração não acompanha o binário do servidor
+
+A tentativa anterior à correção demonstrou que substituir a instalação do
+WildFly não transfere seus recursos gerenciados. O servidor iniciou, mas a
+aplicação ficou indisponível porque `java:/jdbc/MigrationDS` não existia.
+
+Isso comprova que datasource, driver, pool, validação e segredos externos
+precisam ser inventariados e migrados explicitamente; copiar somente o WAR e
+o novo servidor não produz um ambiente funcional.
+
+### Migração mínima do runtime
+
+A correção permaneceu fora da aplicação. Ela:
+
+1. fixou a distribuição comunitária WildFly 26 por origem, licença e
+   checksum;
+2. criou uma cópia temporária reproduzível;
+3. removeu apenas HTTPS e o keystore autogerado que não fazem parte do
+   contrato local;
+4. provisionou drivers e `java:/jdbc/MigrationDS` por perfil;
+5. adaptou somente a diferença `pool-name` do modelo de gerenciamento.
+
+A instalação externa continuou imutável e o rollback permanece o descarte da
+cópia temporária.
+
+### Equivalência funcional e persistência
+
+Os mesmos 14 cenários do baseline passaram em H2 e Oracle. Foram exercitados
+health, pedidos, sessão, upload, XML, validações negativas, MyBatis, pool e
+estado persistido.
+
+O H2 comprova apenas a trilha portátil. A execução separada no Oracle 19c RU
+19.3 comprova que a configuração Oracle, o `ojdbc7`, o pool e os contratos
+selecionados continuam funcionais no WildFly 26.
+
+### Namespace, empacotamento e classloader preservados
+
+O WAR manteve bytecode major `52`, SHA-256 idêntico e as bibliotecas legadas.
+Não houve `ClassNotFoundException`, `NoClassDefFoundError` ou `LinkageError`
+depois que o datasource permitiu ativar a aplicação. Nenhum JAR foi adicionado
+para silenciar os avisos opcionais de Tiles ou Weld.
+
+Isso isola a troca do WildFly das mudanças de EE, Maven e bibliotecas que
+pertencem aos checkpoints seguintes.
+
+### Logging permanece uma limitação conhecida
+
+Log4j 1.2.14 continua ativo e o contrato de logs passou. O WildFly 26 emitiu
+`WFLYLOG0100`, indicando que a configuração Log4j dentro do deployment está
+depreciada, mas ainda funcional.
+
+Foi documentada como alternativa retirar o arquivo do WAR e configurar o
+logging no runtime sem trocar imediatamente a biblioteca. Essa alternativa
+ainda não foi qualificada e não é apresentada como correção concluída. A
+substituição da biblioteca permanece reservada ao gate de dependências.
+
+### Limites da conclusão
+
+O CP-2B não comprova alinhamento com EE 8, Maven 3.9.16 ou driver Oracle
+moderno; esses itens começam no CP-2C ou na fase 3. Também não qualifica
+autenticação, TLS, cluster, carga ou integrações externas ausentes do
+laboratório.
+
+WildFly 26 e Java 8 são uma ponte EOL reproduzível, não o destino final de
+produção. A conclusão para uma aplicação real depende de repetir o inventário
+e os contratos próprios do sistema.
