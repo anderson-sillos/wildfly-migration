@@ -62,6 +62,14 @@ O wrapper `build-cp-2c.sh` seleciona explicitamente Java 8 e Maven 3.9.16.
 O Enforcer do POM também exige exatamente `[3.9.16]`, impedindo um sucesso
 acidental com outra instalação.
 
+O `portable-ci` usa a mesma combinação: identifica o ambiente como `CP-2C`,
+baixa a distribuição Maven registrada no manifesto, valida seu SHA-256,
+executa `doctor.sh CP-2C --ci` e constrói o WAR por `build-cp-2c.sh`. O
+validador estático exige que POM, manifesto, cache lock, chave de cache,
+download, `MAVEN_HOME`, wrapper e workflow permaneçam em Maven 3.9.16. Assim,
+uma divergência entre configuração local e CI falha em `repository-baseline`
+antes da trilha portátil completa.
+
 ### Maven 3.9.16 não é `modelVersion` 4.0.0
 
 São dois contratos independentes:

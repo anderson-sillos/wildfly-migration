@@ -1224,7 +1224,7 @@ else
   skip "WildFly 26 e checksum (entram no CP-2B)"
 fi
 
-if [[ "$CI_MODE" != true ]] && rank_at_least CP-2C; then
+if rank_at_least CP-2C; then
   check_modern_maven
 else
   skip "Maven 3.9.16 (entra no CP-2C)"

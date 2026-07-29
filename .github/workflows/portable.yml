@@ -54,15 +54,15 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: ~/.m2/repository
-          key: maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-${{ hashFiles('app/pom.xml') }}
+          key: maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.9.16-${{ hashFiles('app/pom.xml') }}
           restore-keys: |
-            maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-
+            maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.9.16-
 
       - name: Download and verify fixed portable runtime
         shell: bash
         run: |
           set -euo pipefail
-          runtime_root="$RUNNER_TEMP/wildfly-migration-cp2b"
+          runtime_root="$RUNNER_TEMP/wildfly-migration-cp2c"
           archives="$RUNNER_TEMP/wildfly-migration-cache/runtime-archives"
           cache_lock="$GITHUB_WORKSPACE/runtime/portable-runtime-cache.sha256"
           tools="$runtime_root/tools"
@@ -120,10 +120,10 @@ jobs:
             OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz \
             https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u492-b09/OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz
           ensure_archive \
-            3e4c68cdd70f96635e713f36c8fc3ea3182035245d3da2156576710ca0fe4b0c \
-            apache-maven-3.8.9-bin.tar.gz \
-            https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.8.9/apache-maven-3.8.9-bin.tar.gz \
-            https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz
+            80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb \
+            apache-maven-3.9.16-bin.tar.gz \
+            https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz \
+            https://archive.apache.org/dist/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz
           ensure_archive \
             aadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f02528ae59 \
             wildfly-26.1.3.Final.tar.gz \
@@ -141,20 +141,20 @@ jobs:
           cd "$archives"
 
           tar -xzf OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz -C "$tools"
-          tar -xzf apache-maven-3.8.9-bin.tar.gz -C "$tools"
+          tar -xzf apache-maven-3.9.16-bin.tar.gz -C "$tools"
           tar -xzf wildfly-26.1.3.Final.tar.gz -C "$tools"
 
           {
-            echo "MIGRATION_CHECKPOINT=CP-2B"
+            echo "MIGRATION_CHECKPOINT=CP-2C"
             echo "LAB_BIND_ADDRESS=127.0.0.1"
             echo "WILDFLY_HTTP_PORT=18080"
             echo "WILDFLY_MANAGEMENT_PORT=19990"
             echo "JAVA8_HOME=$tools/jdk8u492-b09"
             echo "JAVA8_ARCHIVE=$archives/OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz"
             echo "JAVA8_ARCHIVE_SHA256=da257f161d7f8c6ca5b0e5d9e4090f65ac28c5e398072e68b8ae87988b1d1a2e"
-            echo "MAVEN_HOME=$tools/apache-maven-3.8.9"
-            echo "MAVEN_ARCHIVE=$archives/apache-maven-3.8.9-bin.tar.gz"
-            echo "MAVEN_ARCHIVE_SHA256=3e4c68cdd70f96635e713f36c8fc3ea3182035245d3da2156576710ca0fe4b0c"
+            echo "MAVEN_HOME=$tools/apache-maven-3.9.16"
+            echo "MAVEN_ARCHIVE=$archives/apache-maven-3.9.16-bin.tar.gz"
+            echo "MAVEN_ARCHIVE_SHA256=80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb"
             echo "WILDFLY26_HOME=$tools/wildfly-26.1.3.Final"
             echo "WILDFLY26_ARCHIVE=$archives/wildfly-26.1.3.Final.tar.gz"
             echo "WILDFLY26_ARCHIVE_SHA256=aadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f02528ae59"
@@ -163,10 +163,10 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Run portable doctor
-        run: ./scripts/doctor.sh CP-2B --profile ci-h2 --ci
+        run: ./scripts/doctor.sh CP-2C --profile ci-h2 --ci
 
       - name: Build and audit portable WAR
-        run: ./scripts/build-cp-2a.sh --profile ci-h2
+        run: ./scripts/build-cp-2c.sh --profile ci-h2
 
       - name: Execute MyBatis portable persistence probe
         run: |
@@ -185,19 +185,19 @@ jobs:
           ./scripts/smoke-wildfly26-datasource.sh \
             --profile ci-h2 \
             --war app/target/wildfly-migration.war \
-            --contract-result app/target/contract-results/cp-2b-ci-h2.json
+            --contract-result app/target/contract-results/cp-2c-ci-h2.json
 
       - name: Compare portable result with the frozen baseline
         run: |
-          ./scripts/validate-cp-2b.sh \
+          ./scripts/validate-cp-2c.sh \
             --war app/target/wildfly-migration.war \
-            --contract-result app/target/contract-results/cp-2b-ci-h2.json
+            --contract-result app/target/contract-results/cp-2c-ci-h2.json
 
       - name: Upload sanitized portable contract result
         uses: actions/upload-artifact@v6
         with:
-          name: cp-2b-portable-contract-result
-          path: app/target/contract-results/cp-2b-ci-h2.json
+          name: cp-2c-portable-contract-result
+          path: app/target/contract-results/cp-2c-ci-h2.json
           if-no-files-found: error
 
       - name: Save reusable runtime archive cache

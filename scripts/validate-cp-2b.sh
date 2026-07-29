@@ -216,7 +216,7 @@ grep -Fxq \
 
 for cache_lock_row in \
   'da257f161d7f8c6ca5b0e5d9e4090f65ac28c5e398072e68b8ae87988b1d1a2e  OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz' \
-  '3e4c68cdd70f96635e713f36c8fc3ea3182035245d3da2156576710ca0fe4b0c  apache-maven-3.8.9-bin.tar.gz' \
+  '80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb  apache-maven-3.9.16-bin.tar.gz' \
   'aadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f02528ae59  wildfly-26.1.3.Final.tar.gz' \
   '3ad9ac4b6aae9cd9d3ac1c447465e1ed06019b851b893dd6a8d76ddb6d85bca6  h2-1.4.200.jar'; do
   grep -Fxq "$cache_lock_row" "$RUNTIME_CACHE_LOCK" ||
@@ -268,16 +268,16 @@ for cache_marker in \
   "key: runtime-archives-v4-\${{ runner.os }}-\${{ runner.arch }}-\${{ hashFiles('runtime/portable-runtime-cache.sha256') }}" \
   'runtime-archives-v4-${{ runner.os }}-${{ runner.arch }}-' \
   'path: ~/.m2/repository' \
-  'key: maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-${{ hashFiles(' \
-  'maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-' \
+  'key: maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.9.16-${{ hashFiles(' \
+  'maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.9.16-' \
   "hashFiles('app/pom.xml')" \
   'archives="$RUNNER_TEMP/wildfly-migration-cache/runtime-archives"' \
   'cache_lock="$GITHUB_WORKSPACE/runtime/portable-runtime-cache.sha256"' \
   'Removendo arquivo obsoleto do cache restaurado' \
   'Cache validado por SHA-256' \
   'Download validado por SHA-256' \
-  'https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.8.9/apache-maven-3.8.9-bin.tar.gz' \
-  'https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz' \
+  'https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz' \
+  'https://archive.apache.org/dist/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz' \
   'sha256sum --check "$cache_lock"' \
   'key: ${{ steps.runtime-archive-cache.outputs.cache-primary-key }}' \
   'key: ${{ steps.maven-dependency-cache.outputs.cache-primary-key }}'; do
