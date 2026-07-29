@@ -114,10 +114,26 @@ Sobre `c76f42f`:
 - o fechamento do PR passou a cachear somente os arquivos fixados de Java,
   Maven, WildFly e H2, com chave derivada dos manifestos e SHA-256 revalidado
   em toda execução.
+- a tentativa 1 do workflow `30477479488` gravou o cache de 330.748.197 bytes
+  e concluiu `portable-ci` em 2m42s; a tentativa 2 restaurou a mesma chave,
+  revalidou os quatro arquivos sem download e concluiu em 1m02s;
+- `checkout` e `upload-artifact` foram atualizadas para v6; com
+  `actions/cache@v5`, as três actions do workflow usam Node 24.
+- o CI estático permanece em `.github/workflows/validate.yml`; a trilha
+  completa foi isolada em `.github/workflows/portable.yml` para que PRs
+  exclusivamente documentais não recriem o runtime;
+- o workflow portátil passou a cachear somente `~/.m2/repository`, com chave
+  exata baseada em SO, arquitetura, Maven 3.8.9 e `app/pom.xml`, sem
+  `restore-keys`, `settings.xml`, resultados ou credenciais;
+- Maven Central foi comprovado com os mesmos 8.296.518 bytes e SHA-256
+  aprovado do Maven 3.8.9 e passou a ser a origem primária do CI, mantendo
+  Apache Archive como fallback;
+- os workflows cancelam execuções obsoletas da mesma referência; o smoke
+  WildFly e os 14 contratos não foram alterados.
 
 ## Próximas ações
 
-1. Confirmar o CI do commit final do PR #16.
+1. Confirmar cache miss/save e cache hit dos dois caches no CI do PR #16.
 2. Integrar o PR por squash como
    `checkpoint(CP-2B): migrate runtime to WildFly 26`.
 3. Atualizar `main` e iniciar o CP-2C pela tarefa 2.11.

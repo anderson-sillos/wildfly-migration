@@ -212,22 +212,80 @@ grep -Fxq \
   "$REPOSITORY_ROOT/.env.example" ||
   fail ".env.example não contém o SHA-256 fixado do WildFly 26"
 
-WORKFLOW="$REPOSITORY_ROOT/.github/workflows/validate.yml"
+STATIC_WORKFLOW="$REPOSITORY_ROOT/.github/workflows/validate.yml"
+WORKFLOW="$REPOSITORY_ROOT/.github/workflows/portable.yml"
+for action_marker in \
+  'uses: actions/checkout@v6' \
+  'uses: actions/upload-artifact@v6'; do
+  grep -Fq "$action_marker" "$WORKFLOW" ||
+    fail "workflow do CP-2B não usa a action Node 24: $action_marker"
+done
+if grep -Eq 'uses: actions/(checkout|upload-artifact)@v4' \
+    "$STATIC_WORKFLOW" "$WORKFLOW"; then
+  fail "workflow do CP-2B não deve usar actions baseadas em Node 20"
+fi
+for concurrent_workflow in "$STATIC_WORKFLOW" "$WORKFLOW"; do
+  grep -Fq 'group: ${{ github.workflow }}-${{ github.ref }}' \
+    "$concurrent_workflow" ||
+    fail "workflow não isola concorrência por workflow e referência"
+  grep -Fq 'cancel-in-progress: true' "$concurrent_workflow" ||
+    fail "workflow não cancela execução obsoleta da mesma referência"
+done
+for path_marker in \
+  '".env.example"' \
+  '".github/workflows/portable.yml"' \
+  '"app/**"' \
+  '"contract-tests/**"' \
+  '"migration/baselines/**"' \
+  '"runtime/**"' \
+  '"scripts/**"'; do
+  grep -Fq "$path_marker" "$WORKFLOW" ||
+    fail "portable-ci não declara caminho aplicável: $path_marker"
+done
+if grep -Fq '"docs/**"' "$WORKFLOW"; then
+  fail "portable-ci não deve executar por alteração exclusivamente documental"
+fi
 for cache_marker in \
   'uses: actions/cache@v5' \
   'path: ${{ runner.temp }}/wildfly-migration-cache/cp-2b/runtime-archives' \
-  'key: cp-2b-runtime-archives-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(' \
+  'key: cp-2b-runtime-archives-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(' \
   'runtime/legacy/runtime-manifest.tsv' \
   'runtime/legacy/portable-runtime-manifest.tsv' \
   'runtime/phase2/java8-wildfly26/runtime-manifest.tsv' \
+  'path: ~/.m2/repository' \
+  'key: cp-2b-maven-repository-v1-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-${{ hashFiles(' \
+  "hashFiles('app/pom.xml')" \
   'archives="$RUNNER_TEMP/wildfly-migration-cache/cp-2b/runtime-archives"' \
   'Cache validado por SHA-256' \
+  'Download validado por SHA-256' \
+  'https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.8.9/apache-maven-3.8.9-bin.tar.gz' \
+  'https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz' \
   'sha256sum --check'; do
   grep -Fq "$cache_marker" "$WORKFLOW" ||
     fail "cache portátil do CP-2B não contém: $cache_marker"
 done
-if grep -Fq 'path: ~/.m2/repository' "$WORKFLOW"; then
-  fail "CP-2B não deve ampliar o cache para o repositório Maven"
+if [[ "$(grep -Fc 'uses: actions/cache@v5' "$WORKFLOW")" -ne 2 ]]; then
+  fail "portable-ci deve conter exatamente os caches de runtime e Maven"
+fi
+if grep -Fq 'restore-keys:' "$WORKFLOW"; then
+  fail "cache Maven do CP-2B deve usar somente a chave exata"
+fi
+if awk '
+  /^[[:space:]]+- name:/ {
+    cache_action = 0
+  }
+  /uses: actions\/cache@v5/ {
+    cache_action = 1
+  }
+  cache_action &&
+      /path: .*settings\.xml|path: .*app\/target|path: .*contract-results/ {
+    unsafe_path = 1
+  }
+  END {
+    exit unsafe_path ? 0 : 1
+  }
+' "$WORKFLOW"; then
+  fail "cache do CP-2B inclui configuração ou resultado que deve ser recriado"
 fi
 if grep -Fq 'path: .cache/' "$WORKFLOW"; then
   fail "cache do CP-2B não deve ficar dentro do checkout"

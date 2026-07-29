@@ -36,7 +36,7 @@ Fontes oficiais:
 - Azul Metadata API: <https://api.azul.com/metadata/v1/zulu/packages/f436b3cb-0115-4814-b7fa-e180747bd68f>
 - termos do Azul Zulu: <https://www.azul.com/products/core/openjdk-terms-of-use/>
 - Maven 3.9.16: <https://maven.apache.org/download.cgi>
-- Maven 3.8.9: <https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/>
+- Maven 3.8.9: <https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.8.9/>; fallback em <https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/>
 - WildFly comunitário: <https://www.wildfly.org/downloads/>
 - Oracle Database 19c: <https://www.oracle.com/database/technologies/oracle-database-software-downloads.html>
 - H2 1.4.200: <https://github.com/h2database/h2database/releases/tag/version-1.4.200>
@@ -320,11 +320,14 @@ Referências: [histórico de versões do VS Code Java][vscode-java-changelog] e
 ### Maven 3.8.9 no legado
 
 Maven 3.8.9 é a última versão disponível capaz de executar com Java 7. Ela está
-em fim de vida e será usada somente do CP-1B ao CP-2B. Baixe o arquivo e o
-SHA-512 no arquivo histórico oficial da Apache, valide-os e extraia fora do
-checkout. Configure:
+em fim de vida e será usada somente do CP-1B ao CP-2B. O Maven Central é a
+origem primária do CI; o arquivo histórico oficial da Apache permanece como
+fallback e como origem canônica do manifesto legado. As duas URLs entregam o
+mesmo arquivo aprovado de 8.296.518 bytes. Valide o SHA-256 ou o SHA-512
+publicado e extraia fora do checkout:
 
 ```text
+https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.8.9/apache-maven-3.8.9-bin.tar.gz
 https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz
 https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz.sha512
 ```

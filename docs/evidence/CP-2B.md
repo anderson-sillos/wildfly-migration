@@ -121,13 +121,60 @@ cria uma chave nova.
 
 Um `cache hit` evita somente os downloads externos. Os checksums SHA-256 são
 revalidados em toda execução e a extração, o `doctor`, o build, o WAR, o
-runtime temporário e os contratos continuam sendo recriados. O cache não
-inclui `app/target`, relatórios, evidências, configuração modificada do
-WildFly, credenciais ou o repositório Maven local.
+runtime temporário e os contratos continuam sendo recriados. Um segundo cache
+contém somente `~/.m2/repository`, com chave exata derivada de sistema,
+arquitetura, Maven 3.8.9 e `app/pom.xml`, sem chave parcial de restauração.
+Ele não inclui `settings.xml`, credenciais, `app/target`, relatórios,
+evidências ou configuração modificada do WildFly.
+
+No cache miss do runtime, Maven Central é a origem primária do Maven 3.8.9 e
+Apache Archive é o fallback. Os dois endereços entregaram localmente o mesmo
+arquivo de 8.296.518 bytes e SHA-256
+`3e4c68cdd70f96635e713f36c8fc3ea3182035245d3da2156576710ca0fe4b0c`.
+O download usa arquivo parcial e só o promove ao cache depois de validar o
+digest aprovado.
+
+O primeiro uso, na tentativa 1 da execução
+[`30477479488`](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30477479488),
+registrou `Cache not found`, baixou os quatro arquivos e gravou
+330.748.197 bytes sob a chave
+`cp-2b-runtime-archives-v1-Linux-X64-5bc79c15852d00395655eeca56c4039730dffc60746a4fc25d45999e4eba9fb2`.
+O `portable-ci` concluiu em 2 minutos e 42 segundos.
+
+A
+[`tentativa 2`](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30477479488/attempts/2)
+restaurou exatamente essa chave, revalidou individualmente os quatro
+SHA-256, não realizou downloads e aprovou todos os mesmos passos em 1 minuto
+e 2 segundos. A economia observada foi de 1 minuto e 40 segundos, cerca de
+62% do tempo do job portátil nessa comparação.
+
+O cache criado em um PR pertence à referência temporária
+`refs/pull/16/merge`, portanto comprova o reaproveitamento nas reexecuções
+desse PR. A primeira execução posterior em `main` deverá criar o cache da
+branch padrão; execuções seguintes poderão reutilizá-lo de acordo com as
+regras de escopo do GitHub Actions.
 
 O cache é uma otimização descartável e não constitui evidência de
 compatibilidade. Em sua ausência ou expiração, o workflow volta a baixar das
 origens registradas e produz o mesmo resultado após validar os checksums.
+
+As actions auxiliares também foram alinhadas ao runtime Node 24:
+`actions/checkout@v6`, `actions/cache@v5` e
+`actions/upload-artifact@v6`.
+
+### Execuções aplicáveis e concorrência
+
+`repository-baseline` permanece em todos os pull requests. O job
+`portable-ci` foi isolado em workflow próprio e é disparado quando mudam
+`.env.example`, o próprio workflow, `app/`, `contract-tests/`,
+`migration/baselines/`, `runtime/` ou `scripts/`. Alterações exclusivamente
+documentais continuam sendo verificadas estaticamente, mas não recriam o
+runtime portátil.
+
+Ambos os workflows cancelam uma execução anterior ainda ativa quando um novo
+commit é enviado à mesma referência. Essa regra reduz fila e consumo, sem
+cancelar outro PR e sem alterar qualquer etapa do smoke WildFly ou dos 14
+contratos.
 
 ## Conclusão comprovada
 

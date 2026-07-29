@@ -19,7 +19,7 @@ public final class ValidateExternalContracts {
         String smoke = read(file(
                 repository, "scripts/smoke-wildfly9-datasource.sh"));
         String workflow = read(file(
-                repository, ".github/workflows/validate.yml"));
+                repository, ".github/workflows/portable.yml"));
 
         require(runner.indexOf("--base-url") >= 0
                 && runner.indexOf("--profile") >= 0

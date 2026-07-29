@@ -195,6 +195,7 @@ check_required_files() {
 
   if rank_at_least CP-1D; then
     required+=(
+      ".github/workflows/portable.yml"
       "docs/cp-1d-runtime-selection.md"
       "docs/evidence/CP-1D.md"
       "runtime/legacy/portable-runtime-manifest.tsv"
