@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - ".env.example"
+      - ".github/workflows/pr-cache-cleanup.yml"
       - ".github/workflows/portable.yml"
       - "app/**"
       - "contract-tests/**"
@@ -15,6 +16,7 @@ on:
       - main
     paths:
       - ".env.example"
+      - ".github/workflows/pr-cache-cleanup.yml"
       - ".github/workflows/portable.yml"
       - "app/**"
       - "contract-tests/**"

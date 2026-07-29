@@ -7,6 +7,7 @@ POM="$REPOSITORY_ROOT/app/pom.xml"
 EXPECTED_LIBRARIES="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/war-libraries.txt"
 RUNTIME_CACHE_LOCK="$REPOSITORY_ROOT/runtime/portable-runtime-cache.sha256"
 WORKFLOW="$REPOSITORY_ROOT/.github/workflows/portable.yml"
+CACHE_CLEANUP_WORKFLOW="$REPOSITORY_ROOT/.github/workflows/pr-cache-cleanup.yml"
 WAR_FILE=""
 CONTRACT_RESULT_FILE=""
 TEMP_DIRECTORY="$(
@@ -71,6 +72,7 @@ for path in \
   "$EXPECTED_LIBRARIES" \
   "$RUNTIME_CACHE_LOCK" \
   "$WORKFLOW" \
+  "$CACHE_CLEANUP_WORKFLOW" \
   "$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/runtime-manifest.tsv" \
   "$REPOSITORY_ROOT/docs/cp-2c-ee8-maven-datasource.md" \
   "$REPOSITORY_ROOT/scripts/build-cp-2c.sh" \
@@ -80,6 +82,24 @@ for path in \
   [[ -f "$path" ]] ||
     fail "arquivo obrigatório ausente: ${path#"$REPOSITORY_ROOT/"}"
 done
+
+for cleanup_marker in \
+  'types:' \
+  '- closed' \
+  'github.event.pull_request.head.repo.full_name ==' \
+  'github.repository' \
+  'actions: write' \
+  'GH_TOKEN: ${{ github.token }}' \
+  'PR_CACHE_REF: refs/pull/${{ github.event.pull_request.number }}/merge' \
+  'gh cache list' \
+  '--ref "$PR_CACHE_REF"' \
+  'gh cache delete "$cache_id" --confirm'; do
+  grep -Fq -- "$cleanup_marker" "$CACHE_CLEANUP_WORKFLOW" ||
+    fail "limpeza de caches temporários não contém: $cleanup_marker"
+done
+if grep -Fq 'uses: actions/checkout' "$CACHE_CLEANUP_WORKFLOW"; then
+  fail "limpeza de cache não deve executar código do pull request fechado"
+fi
 
 for cache_marker in \
   'uses: actions/cache/restore@v5' \

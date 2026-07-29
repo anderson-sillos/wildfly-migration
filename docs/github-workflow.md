@@ -147,6 +147,12 @@ branch principal quando ela ainda não existe. Como o cache do GitHub é
 imutável, uma mudança real no lock ou no POM exige uma nova entrada; a
 restauração parcial evita baixar novamente o conteúdo ainda válido.
 
+Quando um PR interno é fechado, `.github/workflows/pr-cache-cleanup.yml`
+remove somente as entradas associadas ao seu merge ref. A execução não faz
+checkout do código do PR, recebe `actions: write` apenas no job de limpeza e
+trata `GITHUB_TOKEN` como valor opaco. Assim, os caches temporários aceleram os
+commits do PR sem permanecerem duplicados depois do merge ou fechamento.
+
 Configurações Maven, credenciais, `app/target`, relatórios, evidências, cópias
 extraídas do WildFly e demais resultados continuam sendo recriados em cada
 execução. A separação entre `restore` e `save` segue o fluxo documentado pela

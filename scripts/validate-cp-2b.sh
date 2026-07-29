@@ -249,6 +249,7 @@ for concurrent_workflow in "$STATIC_WORKFLOW" "$WORKFLOW"; do
 done
 for path_marker in \
   '".env.example"' \
+  '".github/workflows/pr-cache-cleanup.yml"' \
   '".github/workflows/portable.yml"' \
   '"app/**"' \
   '"contract-tests/**"' \
