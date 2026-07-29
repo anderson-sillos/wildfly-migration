@@ -1232,7 +1232,7 @@ else
   skip "OpenJDK 8 e checksum (entram no CP-2A)"
 fi
 
-if [[ "$CI_MODE" != true ]] && rank_at_least CP-2B; then
+if rank_at_least CP-2B; then
   check_wildfly "WildFly 26" WILDFLY26_HOME '26.1.3.Final' WILDFLY26_ARCHIVE WILDFLY26_ARCHIVE_SHA256
 else
   skip "WildFly 26 e checksum (entram no CP-2B)"
