@@ -4,6 +4,7 @@ set -euo pipefail
 
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MANIFEST="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/runtime-manifest.tsv"
+RUNTIME_CACHE_LOCK="$REPOSITORY_ROOT/runtime/portable-runtime-cache.sha256"
 EVIDENCE="$REPOSITORY_ROOT/migration/evidence/CP-2B/before-deployment.properties"
 WAR_FILE=""
 CONTRACT_RESULT_FILE=""
@@ -52,6 +53,7 @@ done
 
 for path in \
   "$MANIFEST" \
+  "$RUNTIME_CACHE_LOCK" \
   "$EVIDENCE" \
   "$REPOSITORY_ROOT/migration/evidence/CP-2B/compatibility-observations.tsv" \
   "$REPOSITORY_ROOT/migration/evidence/CP-2B/after.properties" \
@@ -212,6 +214,18 @@ grep -Fxq \
   "$REPOSITORY_ROOT/.env.example" ||
   fail ".env.example não contém o SHA-256 fixado do WildFly 26"
 
+for cache_lock_row in \
+  'da257f161d7f8c6ca5b0e5d9e4090f65ac28c5e398072e68b8ae87988b1d1a2e  OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz' \
+  '80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb  apache-maven-3.9.16-bin.tar.gz' \
+  'aadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f02528ae59  wildfly-26.1.3.Final.tar.gz' \
+  '3ad9ac4b6aae9cd9d3ac1c447465e1ed06019b851b893dd6a8d76ddb6d85bca6  h2-1.4.200.jar'; do
+  grep -Fxq "$cache_lock_row" "$RUNTIME_CACHE_LOCK" ||
+    fail "identidade do cache de runtime não contém: $cache_lock_row"
+done
+if [[ "$(awk 'END { print NR + 0 }' "$RUNTIME_CACHE_LOCK")" -ne 4 ]]; then
+  fail "identidade do cache deve relacionar somente os quatro runtimes usados"
+fi
+
 STATIC_WORKFLOW="$REPOSITORY_ROOT/.github/workflows/validate.yml"
 WORKFLOW="$REPOSITORY_ROOT/.github/workflows/portable.yml"
 for action_marker in \
@@ -230,9 +244,12 @@ for concurrent_workflow in "$STATIC_WORKFLOW" "$WORKFLOW"; do
     fail "workflow não isola concorrência por workflow e referência"
   grep -Fq 'cancel-in-progress: true' "$concurrent_workflow" ||
     fail "workflow não cancela execução obsoleta da mesma referência"
+  grep -Fq 'persist-credentials: false' "$concurrent_workflow" ||
+    fail "checkout não deve persistir o token no runner"
 done
 for path_marker in \
   '".env.example"' \
+  '".github/workflows/pr-cache-cleanup.yml"' \
   '".github/workflows/portable.yml"' \
   '"app/**"' \
   '"contract-tests/**"' \
@@ -246,35 +263,63 @@ if grep -Fq '"docs/**"' "$WORKFLOW"; then
   fail "portable-ci não deve executar por alteração exclusivamente documental"
 fi
 for cache_marker in \
-  'uses: actions/cache@v5' \
-  'path: ${{ runner.temp }}/wildfly-migration-cache/cp-2b/runtime-archives' \
-  'key: cp-2b-runtime-archives-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(' \
-  'runtime/legacy/runtime-manifest.tsv' \
-  'runtime/legacy/portable-runtime-manifest.tsv' \
-  'runtime/phase2/java8-wildfly26/runtime-manifest.tsv' \
+  'uses: actions/cache/restore@v5' \
+  'uses: actions/cache/save@v5' \
+  'path: ${{ runner.temp }}/wildfly-migration-cache/runtime-archives' \
+  "key: runtime-archives-v4-\${{ runner.os }}-\${{ runner.arch }}-\${{ hashFiles('runtime/portable-runtime-cache.sha256') }}" \
+  'runtime-archives-v4-${{ runner.os }}-${{ runner.arch }}-' \
   'path: ~/.m2/repository' \
-  'key: cp-2b-maven-repository-v1-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-${{ hashFiles(' \
+  'key: maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.9.16-${{ hashFiles(' \
+  'maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.9.16-' \
   "hashFiles('app/pom.xml')" \
-  'archives="$RUNNER_TEMP/wildfly-migration-cache/cp-2b/runtime-archives"' \
+  'archives="$RUNNER_TEMP/wildfly-migration-cache/runtime-archives"' \
+  'cache_lock="$GITHUB_WORKSPACE/runtime/portable-runtime-cache.sha256"' \
+  'Removendo arquivo obsoleto do cache restaurado' \
   'Cache validado por SHA-256' \
   'Download validado por SHA-256' \
-  'https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.8.9/apache-maven-3.8.9-bin.tar.gz' \
-  'https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz' \
-  'sha256sum --check'; do
+  'https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz' \
+  'https://archive.apache.org/dist/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz' \
+  'sha256sum --check "$cache_lock"' \
+  'key: ${{ steps.runtime-archive-cache.outputs.cache-primary-key }}' \
+  'key: ${{ steps.maven-dependency-cache.outputs.cache-primary-key }}'; do
   grep -Fq "$cache_marker" "$WORKFLOW" ||
     fail "cache portátil do CP-2B não contém: $cache_marker"
 done
-if [[ "$(grep -Fc 'uses: actions/cache@v5' "$WORKFLOW")" -ne 2 ]]; then
-  fail "portable-ci deve conter exatamente os caches de runtime e Maven"
+if [[ "$(grep -Fc 'uses: actions/cache/restore@v5' "$WORKFLOW")" -ne 2 ]] ||
+   [[ "$(grep -Fc 'uses: actions/cache/save@v5' "$WORKFLOW")" -ne 2 ]]; then
+  fail "portable-ci deve restaurar e salvar exatamente os caches de runtime e Maven"
 fi
-if grep -Fq 'restore-keys:' "$WORKFLOW"; then
-  fail "cache Maven do CP-2B deve usar somente a chave exata"
+if [[ "$(grep -Fc 'restore-keys:' "$WORKFLOW")" -ne 2 ]]; then
+  fail "os dois caches reutilizáveis devem declarar chave parcial"
+fi
+for save_guard in \
+  "github.event_name == 'push'" \
+  "github.ref == 'refs/heads/main'" \
+  "github.event_name == 'pull_request'" \
+  "github.event.pull_request.head.repo.full_name ==" \
+  "github.repository"; do
+  if [[ "$(grep -Fc "$save_guard" "$WORKFLOW")" -ne 2 ]]; then
+    fail "os dois caches não compartilham a proteção de gravação: $save_guard"
+  fi
+done
+if grep -Fq 'uses: actions/cache@v5' "$WORKFLOW"; then
+  fail "política de gravação exige actions separadas de restore e save"
+fi
+if grep -Eq \
+    'key: cp-[0-9]|wildfly-migration-cache/cp-[0-9]' \
+    "$WORKFLOW"; then
+  fail "chave ou caminho de cache não deve depender de checkpoint"
+fi
+if grep -Ei \
+    '^[[:space:]]+(key|path):.*(github\.token|GITHUB_TOKEN|GH_TOKEN|secrets\.)' \
+    "$WORKFLOW"; then
+  fail "token ou secret não pode participar de chave ou caminho de cache"
 fi
 if awk '
   /^[[:space:]]+- name:/ {
     cache_action = 0
   }
-  /uses: actions\/cache@v5/ {
+  /uses: actions\/cache\/(restore|save)@v5/ {
     cache_action = 1
   }
   cache_action &&

@@ -26,6 +26,7 @@ public final class ValidateExternalContracts {
                 && runner.indexOf("--war") >= 0
                 && runner.indexOf("--result") >= 0
                 && runner.indexOf("--commit") >= 0
+                && runner.indexOf("--source-commit") >= 0
                 && runner.indexOf("--runtime") >= 0,
                 "entradas de proveniência da suíte estão incompletas");
         require(runner.indexOf("ci-h2)") >= 0
@@ -51,7 +52,8 @@ public final class ValidateExternalContracts {
             require(runner.indexOf(requiredScenarios[index]) >= 0,
                     "cenário externo ausente: " + requiredScenarios[index]);
         }
-        require(runner.indexOf("\"warSha256\"") >= 0
+        require(runner.indexOf("\"sourceCommit\"") >= 0
+                && runner.indexOf("\"warSha256\"") >= 0
                 && runner.indexOf("\"qualification\"") >= 0,
                 "relatório não vincula qualificação e WAR");
         require(runner.indexOf("\"baseUrl\"") < 0
@@ -66,9 +68,11 @@ public final class ValidateExternalContracts {
                 && smoke.indexOf("--profile \"$PROFILE\"") >= 0,
                 "smoke não chama a mesma suíte para ambos os perfis");
         require(workflow.indexOf(
-                "app/target/contract-results/cp-2b-ci-h2.json") >= 0
+                "--contract-result app/target/contract-results/") >= 0
                 && workflow.indexOf(
-                "name: cp-2b-portable-contract-result") >= 0
+                "-portable-contract-result") >= 0
+                && workflow.indexOf(
+                "path: app/target/contract-results/") >= 0
                 && workflow.indexOf("if-no-files-found: error") >= 0,
                 "CI não preserva o resultado portable-ci");
 

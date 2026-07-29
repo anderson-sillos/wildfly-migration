@@ -4,6 +4,12 @@ O CP-2B troca somente o servidor da aplicação aprovada no CP-2A. Java,
 Maven, dependências, bytecode, namespace `javax.*` e contrato funcional
 permanecem inalterados durante a primeira tentativa.
 
+No CP-2C, o build passa a declarar o Jakarta EE Web Profile 8 como API
+`provided`. A allowlist [`war-libraries.txt`](war-libraries.txt) pertence à
+fase 2 e comprova que essa API do contêiner não é empacotada; as 20 bibliotecas
+da aplicação permanecem iguais nesta alteração. A ferramenta de build passa
+para Apache Maven 3.9.16, executado pelo mesmo Temurin Java 8.
+
 ## Distribuição fixada
 
 - release:
@@ -38,6 +44,10 @@ WILDFLY26_ARCHIVE_SHA256=aadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f
 
 O manifesto desta pasta é a fonte legível por máquina. Os binários e as
 cópias temporárias do servidor não são versionados.
+
+O registro `apache-maven` acrescentado no CP-2C fixa a distribuição oficial,
+licença e checksums da ferramenta de build. Ele não altera o POM para Maven 4:
+`modelVersion` continua em `4.0.0`, o modelo de descritor aceito pelo Maven 3.
 
 ## Primeira tentativa
 

@@ -128,15 +128,19 @@ if ! grep -Fq '[[ "$DB_PROFILE" == "ci-h2" ]]' \
   exit 1
 fi
 
-if ! grep -Eq 'jsp-api\|jstl-api\|h2' \
-    "$REPOSITORY_ROOT/scripts/audit-legacy-war.sh" ||
-   ! grep -Eq 'ojdbc\[\^/\]' \
-    "$REPOSITORY_ROOT/scripts/audit-legacy-war.sh" ||
-   ! grep -Fq 'configuração sensível foi empacotado' \
-    "$REPOSITORY_ROOT/scripts/audit-legacy-war.sh"; then
-  printf 'FALHA: auditoria do WAR não contém todos os bloqueios do CP-1D\n' >&2
-  exit 1
-fi
+for audit_marker in \
+  'jsp-api' \
+  'jstl-api' \
+  '|h2)' \
+  'ojdbc[^/]' \
+  'configuração sensível foi empacotado'; do
+  if ! grep -Fq "$audit_marker" \
+      "$REPOSITORY_ROOT/scripts/audit-legacy-war.sh"; then
+    printf 'FALHA: auditoria do WAR não contém o bloqueio: %s\n' \
+      "$audit_marker" >&2
+    exit 1
+  fi
+done
 
 if git -C "$REPOSITORY_ROOT" ls-files '*.jar' | grep -q .; then
   printf 'FALHA: há driver JAR versionado\n' >&2

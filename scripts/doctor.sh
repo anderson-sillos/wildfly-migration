@@ -181,6 +181,7 @@ check_required_files() {
     ".github/workflows/validate.yml"
     "runtime/legacy/runtime-manifest.tsv"
     "scripts/doctor.sh"
+    "scripts/validate-repository-baseline.sh"
   )
 
   if rank_at_least CP-1C; then
@@ -296,6 +297,24 @@ check_required_files() {
       "migration/steps/CP-2B-wildfly26-pool-name.md"
       "scripts/smoke-wildfly26-datasource.sh"
       "scripts/validate-cp-2b.sh"
+    )
+  fi
+
+  if rank_at_least CP-2C; then
+    required+=(
+      ".github/workflows/pr-cache-cleanup.yml"
+      "docs/cp-2c-ee8-maven-datasource.md"
+      "docs/evidence/CP-2C.md"
+      "migration/evidence/CP-2C/after.properties"
+      "migration/evidence/CP-2C/contract-ci-h2.json"
+      "migration/evidence/CP-2C/contract-oracle.json"
+      "migration/evidence/CP-2C/oracle-persistence.json"
+      "runtime/portable-runtime-cache.sha256"
+      "scripts/build-cp-2c.sh"
+      "scripts/qualify-cp-2c-oracle.sh"
+      "scripts/ValidateCp2cOraclePersistence.java"
+      "scripts/validate-cp-2c-oracle-persistence.sh"
+      "scripts/validate-cp-2c.sh"
     )
   fi
 
@@ -1218,13 +1237,13 @@ else
   skip "OpenJDK 8 e checksum (entram no CP-2A)"
 fi
 
-if [[ "$CI_MODE" != true ]] && rank_at_least CP-2B; then
+if rank_at_least CP-2B; then
   check_wildfly "WildFly 26" WILDFLY26_HOME '26.1.3.Final' WILDFLY26_ARCHIVE WILDFLY26_ARCHIVE_SHA256
 else
   skip "WildFly 26 e checksum (entram no CP-2B)"
 fi
 
-if [[ "$CI_MODE" != true ]] && rank_at_least CP-2C; then
+if rank_at_least CP-2C; then
   check_modern_maven
 else
   skip "Maven 3.9.16 (entra no CP-2C)"

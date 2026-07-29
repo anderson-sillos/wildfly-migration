@@ -900,12 +900,14 @@ if [[ -n "$WAR_FILE" ]]; then
   fi
   contract_correlation="cp1f-contract-$SERVER_PID"
   commit_sha="$(git -C "$REPOSITORY_ROOT" rev-parse HEAD)"
+  source_commit_sha="${MIGRATION_SOURCE_COMMIT:-$commit_sha}"
   if ! "$REPOSITORY_ROOT/contract-tests/run.sh" \
       --base-url "$base_url" \
       --profile "$PROFILE" \
       --war "$WAR_FILE" \
       --result "$contract_result" \
       --commit "$commit_sha" \
+      --source-commit "$source_commit_sha" \
       --runtime "$RUNTIME_IDENTIFIER" \
       --correlation-id "$contract_correlation"; then
     printf 'FALHA: suíte externa de contratos falhou no perfil %s\n' \

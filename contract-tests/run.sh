@@ -8,6 +8,7 @@ PROFILE=""
 WAR_FILE=""
 RESULT_FILE=""
 COMMIT_SHA=""
+SOURCE_COMMIT_SHA=""
 RUNTIME=""
 CORRELATION_ID=""
 TEMP_DIRECTORY=""
@@ -21,6 +22,7 @@ Uso:
     --war ARQUIVO \
     --result ARQUIVO \
     --commit SHA \
+    [--source-commit SHA] \
     --runtime IDENTIFICADOR \
     --correlation-id IDENTIFICADOR
 
@@ -75,6 +77,11 @@ while [[ $# -gt 0 ]]; do
       COMMIT_SHA="$2"
       shift 2
       ;;
+    --source-commit)
+      [[ $# -ge 2 ]] || fail "--source-commit exige um SHA"
+      SOURCE_COMMIT_SHA="$2"
+      shift 2
+      ;;
     --runtime)
       [[ $# -ge 2 ]] || fail "--runtime exige um identificador"
       RUNTIME="$2"
@@ -119,6 +126,9 @@ esac
 [[ -n "$RESULT_FILE" ]] || fail "arquivo de resultado não informado"
 [[ "$COMMIT_SHA" =~ ^[0-9a-f]{7,40}$ ]] ||
   fail "commit deve ser um SHA hexadecimal"
+SOURCE_COMMIT_SHA="${SOURCE_COMMIT_SHA:-$COMMIT_SHA}"
+[[ "$SOURCE_COMMIT_SHA" =~ ^[0-9a-f]{7,40}$ ]] ||
+  fail "commit de origem deve ser um SHA hexadecimal"
 [[ "$RUNTIME" =~ ^[A-Za-z0-9._-]{1,80}$ ]] ||
   fail "identificador de runtime inválido"
 [[ "$CORRELATION_ID" =~ ^[A-Za-z0-9._-]{1,64}$ ]] ||
@@ -367,6 +377,7 @@ RESULT_TEMPORARY="$RESULT_FILE.tmp.$$"
   printf '  "qualification": "%s",\n' "$QUALIFICATION"
   printf '  "profile": "%s",\n' "$PROFILE"
   printf '  "commit": "%s",\n' "$COMMIT_SHA"
+  printf '  "sourceCommit": "%s",\n' "$SOURCE_COMMIT_SHA"
   printf '  "warSha256": "%s",\n' "$WAR_SHA256"
   printf '  "runtime": "%s",\n' "$RUNTIME"
   printf '  "scenarios": {\n'

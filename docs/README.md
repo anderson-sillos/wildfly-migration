@@ -19,6 +19,10 @@ passos.
    tentativa antes da correção, build, contratos e rollback.
 7. [CP-2B — WildFly 26 no Java 8](cp-2b-wildfly26.md): runtime fixado,
    tentativa do WAR anterior sem correção e evolução da configuração.
+8. [CP-2C — EE 8, Maven e datasource](cp-2c-ee8-maven-datasource.md):
+   alinhamento das APIs, ferramenta de build e qualificação da persistência.
+9. [Evidência CP-2C](evidence/CP-2C.md): resultados H2/Oracle, conclusões
+   comprovadas, limites e rollback do checkpoint.
 
 ## Aplicação e arquitetura
 

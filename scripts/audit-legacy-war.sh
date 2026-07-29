@@ -14,6 +14,7 @@ usage() {
   cat <<'USAGE'
 Uso:
   ./scripts/audit-legacy-war.sh --java-home DIRETORIO \
+    [--expected-libraries ARQUIVO] \
     [--expected-bytecode 51|52] [--expected-java-label TEXTO] [WAR]
 USAGE
 }
@@ -39,6 +40,14 @@ while [[ $# -gt 0 ]]; do
         exit 2
       fi
       JAVA_HOME_ARGUMENT="$2"
+      shift 2
+      ;;
+    --expected-libraries)
+      if [[ $# -lt 2 || -z "$2" ]]; then
+        printf 'FALHA: --expected-libraries exige um arquivo\n' >&2
+        exit 2
+      fi
+      EXPECTED_LIBRARIES="$2"
       shift 2
       ;;
     --expected-bytecode)
@@ -107,18 +116,37 @@ awk '
 
 LC_ALL=C sort "$EXPECTED_LIBRARIES" > "$TEMP_DIRECTORY/expected-libraries.txt"
 
+if grep -Eq \
+    '^WEB-INF/lib/(servlet-api|javax\.servlet-api|jakarta\.servlet-api|jsp-api|javax\.servlet\.jsp-api|jakarta\.servlet\.jsp-api|jstl-api|javax\.servlet\.jsp\.jstl-api|jakarta\.servlet\.jsp\.jstl-api|javax\.el-api|jakarta\.el-api|javaee-api|javaee-web-api|jakarta\.jakartaee-api|jakarta\.jakartaee-web-api|h2)-[^/]+\.jar$|^WEB-INF/lib/ojdbc[^/]*\.jar$' \
+    "$TEMP_DIRECTORY/entries.txt"; then
+  printf 'FALHA: API do contêiner ou driver de banco foi empacotado\n' >&2
+  exit 1
+fi
+
 if ! diff -u "$TEMP_DIRECTORY/expected-libraries.txt" \
     "$TEMP_DIRECTORY/actual-libraries.txt"; then
   printf 'FALHA: WEB-INF/lib diverge da allowlist aprovada\n' >&2
   exit 1
 fi
 
-if grep -Eq \
-    '^WEB-INF/lib/(servlet-api|jsp-api|jstl-api|h2)-[^/]+\.jar$|^WEB-INF/lib/ojdbc[^/]*\.jar$' \
-    "$TEMP_DIRECTORY/entries.txt"; then
-  printf 'FALHA: API do contêiner ou driver de banco foi empacotado\n' >&2
-  exit 1
-fi
+mkdir -p "$TEMP_DIRECTORY/embedded"
+(
+  cd "$TEMP_DIRECTORY/embedded"
+  "$JAVA_HOME_ARGUMENT/bin/jar" xf "$WAR_FILE" WEB-INF/lib
+)
+
+while IFS= read -r library; do
+  "$JAVA_HOME_ARGUMENT/bin/jar" tf \
+    "$TEMP_DIRECTORY/embedded/WEB-INF/lib/$library" \
+    >"$TEMP_DIRECTORY/embedded-entries.txt"
+  if grep -Eq \
+      '^(javax|jakarta)/servlet/Servlet\.class$|^(javax|jakarta)/servlet/jsp/JspPage\.class$|^(javax|jakarta)/servlet/jsp/jstl/core/Config\.class$|^(javax|jakarta)/el/ELContext\.class$' \
+      "$TEMP_DIRECTORY/embedded-entries.txt"; then
+    printf 'FALHA: biblioteca empacota classes de API do contêiner: %s\n' \
+      "$library" >&2
+    exit 1
+  fi
+done <"$TEMP_DIRECTORY/actual-libraries.txt"
 
 if grep -Eiq \
     '(^|/)(\.env($|\.)|[^/]+\.(pem|key|p12|pfx|jks|wallet)$|tnsnames\.ora$|sqlnet\.ora$|ojdbc\.properties$)' \
@@ -184,6 +212,6 @@ fi
 war_checksum="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
 library_count="$(wc -l < "$TEMP_DIRECTORY/actual-libraries.txt" | tr -d ' ')"
 
-printf 'OK: WAR legado auditado — %s bibliotecas, bytecode %s (major %s), SHA-256 %s\n' \
+printf 'OK: WAR auditado — %s bibliotecas, bytecode %s (major %s), SHA-256 %s\n' \
   "$library_count" "$EXPECTED_JAVA_LABEL" "$EXPECTED_BYTECODE_MAJOR" \
   "$war_checksum"

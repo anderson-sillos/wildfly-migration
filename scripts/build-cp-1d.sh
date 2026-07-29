@@ -6,15 +6,17 @@ REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPOSITORY_ROOT/.env"
 PROFILE=""
 JAVA_RELEASE="7"
+MAVEN_RELEASE="3.8.9"
 
 usage() {
   cat <<'USAGE'
 Uso:
   ./scripts/build-cp-1d.sh --profile ci-h2|oracle [--java 7|8] \
-    [--env ARQUIVO]
+    [--maven 3.8.9|3.9.16] [--env ARQUIVO]
 
 Valores já exportados no ambiente prevalecem sobre o arquivo informado.
-O padrão 7 preserva o uso histórico. O wrapper build-cp-2a.sh seleciona 8.
+Os padrões Java 7/Maven 3.8.9 preservam o uso histórico. Os wrappers dos
+checkpoints selecionam explicitamente a combinação aprovada.
 USAGE
 }
 
@@ -89,6 +91,14 @@ while [[ $# -gt 0 ]]; do
       JAVA_RELEASE="$2"
       shift 2
       ;;
+    --maven)
+      [[ $# -ge 2 && ( "$2" == "3.8.9" || "$2" == "3.9.16" ) ]] || {
+        printf 'FALHA: --maven exige 3.8.9 ou 3.9.16\n' >&2
+        exit 2
+      }
+      MAVEN_RELEASE="$2"
+      shift 2
+      ;;
     -h|--help)
       usage
       exit 0
@@ -133,6 +143,9 @@ if [[ "$JAVA_RELEASE" == "8" ]]; then
   JAVA_HOME_VALUE="$(configuration_value JAVA8_HOME)"
   EXPECTED_JAVA='Java version: 1.8.0_492'
   MAVEN_OPTIONS='-Dhttps.protocols=TLSv1.2'
+  EXPECTED_LIBRARIES="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/war-libraries.txt"
+else
+  EXPECTED_LIBRARIES="$REPOSITORY_ROOT/runtime/legacy/war-libraries.txt"
 fi
 
 MAVEN_HOME_VALUE="$(configuration_value MAVEN_HOME)"
@@ -144,7 +157,8 @@ if [[ ! -x "$JAVA_HOME_VALUE/bin/java" ||
   exit 1
 fi
 if [[ ! -x "$MAVEN_HOME_VALUE/bin/mvn" ]]; then
-  printf 'FALHA: MAVEN_HOME não aponta para o Maven 3.8.9\n' >&2
+  printf 'FALHA: MAVEN_HOME não aponta para o Maven %s\n' \
+    "$MAVEN_RELEASE" >&2
   exit 1
 fi
 
@@ -152,10 +166,10 @@ maven_version="$(
   JAVA_HOME="$JAVA_HOME_VALUE" PATH="$JAVA_HOME_VALUE/bin:$PATH" \
     "$MAVEN_HOME_VALUE/bin/mvn" --version 2>&1
 )"
-if [[ "$maven_version" != *"Apache Maven 3.8.9"* ||
+if [[ "$maven_version" != *"Apache Maven $MAVEN_RELEASE"* ||
       "$maven_version" != *"$EXPECTED_JAVA"* ]]; then
-  printf 'FALHA: Maven 3.8.9 não está executando com o Java do perfil %s\n' \
-    "$PROFILE" >&2
+  printf 'FALHA: Maven %s não está executando com o Java do perfil %s\n' \
+    "$MAVEN_RELEASE" "$PROFILE" >&2
   exit 1
 fi
 
@@ -171,6 +185,7 @@ MAVEN_OPTS="$MAVEN_OPTIONS" \
 
 "$REPOSITORY_ROOT/scripts/audit-legacy-war.sh" \
   --java-home "$JAVA_HOME_VALUE" \
+  --expected-libraries "$EXPECTED_LIBRARIES" \
   --expected-bytecode "$([[ "$JAVA_RELEASE" == "8" ]] && printf 52 || printf 51)" \
   --expected-java-label "Java $JAVA_RELEASE" \
   "$REPOSITORY_ROOT/app/target/wildfly-migration.war"

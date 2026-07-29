@@ -1,0 +1,44 @@
+name: pr-cache-cleanup
+
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  contents: read
+
+jobs:
+  delete-pr-caches:
+    name: delete-pr-caches
+    if: >-
+      github.event.pull_request.head.repo.full_name ==
+      github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Delete caches scoped to the closed pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_CACHE_REF: refs/pull/${{ github.event.pull_request.number }}/merge
+        run: |
+          set -euo pipefail
+          cache_ids="$(
+            gh cache list \
+              --ref "$PR_CACHE_REF" \
+              --limit 100 \
+              --json id \
+              --jq '.[].id'
+          )"
+          if [[ -z "$cache_ids" ]]; then
+            printf 'Nenhum cache temporário encontrado para %s\n' \
+              "$PR_CACHE_REF"
+            exit 0
+          fi
+          while IFS= read -r cache_id; do
+            [[ -n "$cache_id" ]] || continue
+            gh cache delete "$cache_id" --confirm
+          done <<<"$cache_ids"
