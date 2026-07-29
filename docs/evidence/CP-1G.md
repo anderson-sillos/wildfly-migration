@@ -50,8 +50,64 @@ foram reconciliados sem divergência.
 
 ## Resultados de runtime
 
-As execuções finais `portable-ci` e `oracle-qualified`, o commit revisado e o
-run do GitHub Actions serão registrados nesta seção antes do fechamento do PR.
+Revisão qualificada:
+`ea94065e682193b5581abbb003c2ca0b05d3f188`.
+
+As duas trilhas executaram o mesmo WAR:
+
+| Trilha | JVM e banco | Resultado |
+| --- | --- | --- |
+| `portable-ci` | Zulu OpenJDK 7u352 e H2 1.4.200 | 14/14 cenários aprovados |
+| `oracle-qualified` | Oracle JDK 7u80, `ojdbc7` 12.1.0.2.0 e Oracle 19c RU 19.3 | 14/14 cenários aprovados |
+
+Os relatórios sanitizados locais registraram o mesmo commit, runtime
+`java7-wildfly9.0.2` e WAR SHA-256
+`9dc324fcdb800e5f65ca7f54d42c65fb2ac6edcdda7ebddc023665fb6191edbe`.
+Eles permanecem derivados ignorados em `app/target/`, sem endpoint ou
+credencial.
+
+O diagnóstico aprovou:
+
+- H2: 98 verificações, nenhuma falha ou aviso;
+- Oracle: 97 verificações, nenhuma falha ou aviso;
+- bind em loopback e portas locais `18080`/`19990`;
+- checksums de Java, Maven, WildFly, H2 e `ojdbc7`;
+- ausência de segredo versionado ou empacotado.
+
+O probe H2 executou schema e limpeza idempotentes duas vezes. O probe MyBatis
+executou mappers, aliases, handler e transações. No Oracle, o `verify` confirmou
+depois do smoke o produto 19c, RU `19.3.0.0.0`, objetos permitidos e todos os
+valores canônicos do seed. A limpeza automática removeu somente
+`LAB-SMOKE-*`.
+
+### Correção na captura do RU
+
+A primeira verificação exigiu o RU dentro de
+`DatabaseMetaData.getDatabaseProductVersion()` e produziu um falso negativo.
+A correção preservou a identificação do produto pela metadata JDBC e passou a
+obter o RU exato por `PRODUCT_COMPONENT_VERSION.VERSION_FULL`. A tentativa,
+causa e regressão estão em
+`migration/steps/CP-1G-oracle-ru-detection.md` (`INC-004`).
+
+### Checkout limpo
+
+O commit qualificado foi materializado em worktree detached sob `/tmp`. Usando
+somente a documentação e a configuração externa:
+
+- `doctor CP-1G/ci-h2`: 98 verificações aprovadas;
+- build Maven/Java 7: aprovado;
+- WAR, árvore Maven e manifesto: idênticos ao congelado;
+- WildFly 9/H2 e 14 contratos: aprovados;
+- `git status --short`: vazio; somente `app/target/` ignorado foi produzido.
+
+O isolamento inicial do executor ocultou a autenticação da GitHub CLI e o
+socket Docker no novo diretório. O mesmo `doctor` foi repetido com acesso ao
+host e aprovado, sem mudar configuração nem usar `--ci`. O worktree temporário
+foi removido ao final.
+
+O run do GitHub Actions e o PR serão acrescentados depois da publicação da
+branch. O `CP-1G` só será integrado e marcado quando os checks remotos
+estiverem verdes.
 
 ## Reprodução e rollback
 
