@@ -215,12 +215,12 @@ grep -Fxq \
 WORKFLOW="$REPOSITORY_ROOT/.github/workflows/validate.yml"
 for cache_marker in \
   'uses: actions/cache@v5' \
-  'path: .cache/cp-2b/runtime-archives' \
+  'path: ${{ runner.temp }}/wildfly-migration-cache/cp-2b/runtime-archives' \
   'key: cp-2b-runtime-archives-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(' \
   'runtime/legacy/runtime-manifest.tsv' \
   'runtime/legacy/portable-runtime-manifest.tsv' \
   'runtime/phase2/java8-wildfly26/runtime-manifest.tsv' \
-  'archives="$GITHUB_WORKSPACE/.cache/cp-2b/runtime-archives"' \
+  'archives="$RUNNER_TEMP/wildfly-migration-cache/cp-2b/runtime-archives"' \
   'Cache validado por SHA-256' \
   'sha256sum --check'; do
   grep -Fq "$cache_marker" "$WORKFLOW" ||
@@ -228,6 +228,9 @@ for cache_marker in \
 done
 if grep -Fq 'path: ~/.m2/repository' "$WORKFLOW"; then
   fail "CP-2B não deve ampliar o cache para o repositório Maven"
+fi
+if grep -Fq 'path: .cache/' "$WORKFLOW"; then
+  fail "cache do CP-2B não deve ficar dentro do checkout"
 fi
 
 if [[ -n "$WAR_FILE" ]]; then

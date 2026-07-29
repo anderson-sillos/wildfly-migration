@@ -114,9 +114,10 @@ reprodução fora da máquina que realizou a qualificação Oracle.
 ### Cache do runtime portátil
 
 Os quatro arquivos de distribuição fixados são restaurados por
-`actions/cache@v5` em `.cache/cp-2b/runtime-archives`. A chave inclui sistema
-operacional, arquitetura e o hash dos manifestos que registram Java, Maven,
-WildFly e H2. Qualquer alteração nesses manifestos cria uma chave nova.
+`actions/cache@v5` em uma área específica sob `runner.temp`, fora do checkout
+Git. A chave inclui sistema operacional, arquitetura e o hash dos manifestos
+que registram Java, Maven, WildFly e H2. Qualquer alteração nesses manifestos
+cria uma chave nova.
 
 Um `cache hit` evita somente os downloads externos. Os checksums SHA-256 são
 revalidados em toda execução e a extração, o `doctor`, o build, o WAR, o
