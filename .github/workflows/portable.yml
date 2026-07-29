@@ -42,21 +42,21 @@ jobs:
 
       - name: Restore reusable runtime archive cache
         id: runtime-archive-cache
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
           path: ${{ runner.temp }}/wildfly-migration-cache/runtime-archives
-          key: runtime-archives-v3-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('runtime/legacy/runtime-manifest.tsv', 'runtime/legacy/portable-runtime-manifest.tsv', 'runtime/phase2/java8-wildfly26/runtime-manifest.tsv') }}
+          key: runtime-archives-v4-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('runtime/portable-runtime-cache.sha256') }}
           restore-keys: |
-            runtime-archives-v3-${{ runner.os }}-${{ runner.arch }}-
+            runtime-archives-v4-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Restore reusable Maven dependency cache
         id: maven-dependency-cache
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
           path: ~/.m2/repository
-          key: maven-repository-v2-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-${{ hashFiles('app/pom.xml') }}
+          key: maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-${{ hashFiles('app/pom.xml') }}
           restore-keys: |
-            maven-repository-v2-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-
+            maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-
 
       - name: Download and verify fixed portable runtime
         shell: bash
@@ -64,8 +64,19 @@ jobs:
           set -euo pipefail
           runtime_root="$RUNNER_TEMP/wildfly-migration-cp2b"
           archives="$RUNNER_TEMP/wildfly-migration-cache/runtime-archives"
+          cache_lock="$GITHUB_WORKSPACE/runtime/portable-runtime-cache.sha256"
           tools="$runtime_root/tools"
           install -d -m 0755 "$archives" "$tools"
+
+          while IFS= read -r -d '' cached_path; do
+            cached_name="${cached_path##*/}"
+            if ! awk '{print $2}' "$cache_lock" |
+                grep -Fxq "$cached_name"; then
+              printf 'Removendo arquivo obsoleto do cache restaurado: %s\n' \
+                "$cached_name"
+              rm -f -- "$cached_path"
+            fi
+          done < <(find "$archives" -mindepth 1 -maxdepth 1 -type f -print0)
 
           ensure_archive() {
             local expected_sha256="$1"
@@ -122,13 +133,12 @@ jobs:
             h2-1.4.200.jar \
             https://repo.maven.apache.org/maven2/com/h2database/h2/1.4.200/h2-1.4.200.jar
 
+          (
+            cd "$archives"
+            sha256sum --check "$cache_lock"
+          )
+
           cd "$archives"
-          sha256sum --check <<'CHECKSUMS'
-          da257f161d7f8c6ca5b0e5d9e4090f65ac28c5e398072e68b8ae87988b1d1a2e  OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz
-          3e4c68cdd70f96635e713f36c8fc3ea3182035245d3da2156576710ca0fe4b0c  apache-maven-3.8.9-bin.tar.gz
-          aadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f02528ae59  wildfly-26.1.3.Final.tar.gz
-          3ad9ac4b6aae9cd9d3ac1c447465e1ed06019b851b893dd6a8d76ddb6d85bca6  h2-1.4.200.jar
-          CHECKSUMS
 
           tar -xzf OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz -C "$tools"
           tar -xzf apache-maven-3.8.9-bin.tar.gz -C "$tools"
@@ -189,3 +199,17 @@ jobs:
           name: cp-2b-portable-contract-result
           path: app/target/contract-results/cp-2b-ci-h2.json
           if-no-files-found: error
+
+      - name: Save reusable runtime archive cache
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.runtime-archive-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ runner.temp }}/wildfly-migration-cache/runtime-archives
+          key: ${{ steps.runtime-archive-cache.outputs.cache-primary-key }}
+
+      - name: Save reusable Maven dependency cache
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.maven-dependency-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.m2/repository
+          key: ${{ steps.maven-dependency-cache.outputs.cache-primary-key }}

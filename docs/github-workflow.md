@@ -99,24 +99,51 @@ checkpoint consumidor. Isso evita downloads repetidos entre tarefas que usam
 a mesma combinação:
 
 ```text
-runtime-archives-v3-<sistema>-<arquitetura>-<hash-dos-manifestos>
-maven-repository-v2-<sistema>-<arquitetura>-maven-<versão>-<hash-do-pom>
+runtime-archives-v4-<sistema>-<arquitetura>-<hash-do-lock>
+maven-repository-v3-<sistema>-<arquitetura>-maven-<versão>-<hash-do-pom>
 ```
 
-`v3` e `v2` são versões do formato das respectivas chaves. Elas só devem
+`v4` e `v3` são versões do formato das respectivas chaves. Elas só devem
 mudar quando o layout ou a política do cache se tornar incompatível. O cache
-de runtime usa os manifestos das distribuições aprovadas; o cache Maven usa a
-versão efetiva da ferramenta e `app/pom.xml`.
+de runtime usa somente o conteúdo de
+`runtime/portable-runtime-cache.sha256`: nome e SHA-256 de cada arquivo
+baixado. Alterações de documentação, licença, origem ou escopo nos manifestos
+não invalidam o cache quando os binários permanecem iguais. Os manifestos
+continuam sendo a fonte completa de proveniência; o arquivo `.sha256` é
+somente a identidade mínima do cache.
 
-Cada cache possui uma chave parcial de restauração. Quando apenas um manifesto
-ou o POM muda, o job restaura a entrada compatível mais recente e baixa somente
-o que estiver ausente. Os arquivos de runtime restaurados são sempre
-revalidados pelos SHA-256 aprovados antes do uso.
+Todos os arquivos baixados para montar o runtime portátil — JDK, distribuição
+Maven, WildFly e driver H2, independentemente do tamanho — ficam juntos em uma
+única entrada `runtime-archives`. O repositório local do Maven permanece em
+outra entrada porque seu conteúdo e ciclo de invalidação são diferentes.
 
-Somente arquivos de distribuição externos e `~/.m2/repository` são
-reutilizados. Configurações Maven, credenciais, `app/target`, relatórios,
-evidências, cópias extraídas do WildFly e demais resultados continuam sendo
-recriados em cada execução.
+Cada cache possui uma chave parcial de restauração. Se a chave exata não
+existir, o job reaproveita a entrada compatível anterior, elimina do pacote os
+arquivos que não aparecem mais no lock, revalida por SHA-256 os arquivos ainda
+aprovados e baixa somente o que estiver ausente ou inválido.
+
+Pull requests apenas restauram caches. Uma nova entrada é gravada somente
+depois que todas as validações terminam com sucesso em um `push` para `main`,
+e somente quando não houve correspondência exata da chave. Como o cache do
+GitHub é imutável, uma mudança real no lock ou no POM exige uma nova entrada;
+a restauração parcial evita baixar novamente o conteúdo válido, e a restrição
+à `main` impede uma cópia redundante por branch, atividade ou reexecução de PR.
+
+Configurações Maven, credenciais, `app/target`, relatórios, evidências, cópias
+extraídas do WildFly e demais resultados continuam sendo recriados em cada
+execução. A separação entre `restore` e `save` segue o fluxo documentado pela
+action oficial:
+<https://github.com/actions/cache#using-a-combination-of-restore-and-save-actions>.
+
+Depois de remover todos os caches do repositório, a validação completa segue
+esta sequência:
+
+1. o PR executa com cache frio, baixa e valida todos os arquivos, mas não cria
+   nenhuma entrada;
+2. o primeiro `push` correspondente em `main`, depois de todas as verificações
+   verdes, cria uma entrada `runtime-archives` e uma `maven-repository`;
+3. a reexecução desse workflow em `main` restaura as duas chaves exatas, não
+   repete os downloads dos runtimes e não cria entradas adicionais.
 
 ## Compatibilidade com tokens de instalação
 

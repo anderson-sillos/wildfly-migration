@@ -4,6 +4,7 @@ set -euo pipefail
 
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MANIFEST="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/runtime-manifest.tsv"
+RUNTIME_CACHE_LOCK="$REPOSITORY_ROOT/runtime/portable-runtime-cache.sha256"
 EVIDENCE="$REPOSITORY_ROOT/migration/evidence/CP-2B/before-deployment.properties"
 WAR_FILE=""
 CONTRACT_RESULT_FILE=""
@@ -52,6 +53,7 @@ done
 
 for path in \
   "$MANIFEST" \
+  "$RUNTIME_CACHE_LOCK" \
   "$EVIDENCE" \
   "$REPOSITORY_ROOT/migration/evidence/CP-2B/compatibility-observations.tsv" \
   "$REPOSITORY_ROOT/migration/evidence/CP-2B/after.properties" \
@@ -212,6 +214,18 @@ grep -Fxq \
   "$REPOSITORY_ROOT/.env.example" ||
   fail ".env.example não contém o SHA-256 fixado do WildFly 26"
 
+for cache_lock_row in \
+  'da257f161d7f8c6ca5b0e5d9e4090f65ac28c5e398072e68b8ae87988b1d1a2e  OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz' \
+  '3e4c68cdd70f96635e713f36c8fc3ea3182035245d3da2156576710ca0fe4b0c  apache-maven-3.8.9-bin.tar.gz' \
+  'aadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f02528ae59  wildfly-26.1.3.Final.tar.gz' \
+  '3ad9ac4b6aae9cd9d3ac1c447465e1ed06019b851b893dd6a8d76ddb6d85bca6  h2-1.4.200.jar'; do
+  grep -Fxq "$cache_lock_row" "$RUNTIME_CACHE_LOCK" ||
+    fail "identidade do cache de runtime não contém: $cache_lock_row"
+done
+if [[ "$(awk 'END { print NR + 0 }' "$RUNTIME_CACHE_LOCK")" -ne 4 ]]; then
+  fail "identidade do cache deve relacionar somente os quatro runtimes usados"
+fi
+
 STATIC_WORKFLOW="$REPOSITORY_ROOT/.github/workflows/validate.yml"
 WORKFLOW="$REPOSITORY_ROOT/.github/workflows/portable.yml"
 for action_marker in \
@@ -248,31 +262,42 @@ if grep -Fq '"docs/**"' "$WORKFLOW"; then
   fail "portable-ci não deve executar por alteração exclusivamente documental"
 fi
 for cache_marker in \
-  'uses: actions/cache@v5' \
+  'uses: actions/cache/restore@v5' \
+  'uses: actions/cache/save@v5' \
   'path: ${{ runner.temp }}/wildfly-migration-cache/runtime-archives' \
-  'key: runtime-archives-v3-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(' \
-  'runtime-archives-v3-${{ runner.os }}-${{ runner.arch }}-' \
-  'runtime/legacy/runtime-manifest.tsv' \
-  'runtime/legacy/portable-runtime-manifest.tsv' \
-  'runtime/phase2/java8-wildfly26/runtime-manifest.tsv' \
+  "key: runtime-archives-v4-\${{ runner.os }}-\${{ runner.arch }}-\${{ hashFiles('runtime/portable-runtime-cache.sha256') }}" \
+  'runtime-archives-v4-${{ runner.os }}-${{ runner.arch }}-' \
   'path: ~/.m2/repository' \
-  'key: maven-repository-v2-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-${{ hashFiles(' \
-  'maven-repository-v2-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-' \
+  'key: maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-${{ hashFiles(' \
+  'maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-' \
   "hashFiles('app/pom.xml')" \
   'archives="$RUNNER_TEMP/wildfly-migration-cache/runtime-archives"' \
+  'cache_lock="$GITHUB_WORKSPACE/runtime/portable-runtime-cache.sha256"' \
+  'Removendo arquivo obsoleto do cache restaurado' \
   'Cache validado por SHA-256' \
   'Download validado por SHA-256' \
   'https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.8.9/apache-maven-3.8.9-bin.tar.gz' \
   'https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz' \
-  'sha256sum --check'; do
+  'sha256sum --check "$cache_lock"' \
+  'key: ${{ steps.runtime-archive-cache.outputs.cache-primary-key }}' \
+  'key: ${{ steps.maven-dependency-cache.outputs.cache-primary-key }}'; do
   grep -Fq "$cache_marker" "$WORKFLOW" ||
     fail "cache portátil do CP-2B não contém: $cache_marker"
 done
-if [[ "$(grep -Fc 'uses: actions/cache@v5' "$WORKFLOW")" -ne 2 ]]; then
-  fail "portable-ci deve conter exatamente os caches de runtime e Maven"
+if [[ "$(grep -Fc 'uses: actions/cache/restore@v5' "$WORKFLOW")" -ne 2 ]] ||
+   [[ "$(grep -Fc 'uses: actions/cache/save@v5' "$WORKFLOW")" -ne 2 ]]; then
+  fail "portable-ci deve restaurar e salvar exatamente os caches de runtime e Maven"
 fi
 if [[ "$(grep -Fc 'restore-keys:' "$WORKFLOW")" -ne 2 ]]; then
   fail "os dois caches reutilizáveis devem declarar chave parcial"
+fi
+if [[ "$(grep -Fc \
+    "github.event_name == 'push' && github.ref == 'refs/heads/main'" \
+    "$WORKFLOW")" -ne 2 ]]; then
+  fail "caches novos devem ser gravados somente por push bem-sucedido na main"
+fi
+if grep -Fq 'uses: actions/cache@v5' "$WORKFLOW"; then
+  fail "action combinada não deve gravar cache durante pull requests"
 fi
 if grep -Eq \
     'key: cp-[0-9]|wildfly-migration-cache/cp-[0-9]' \
@@ -288,7 +313,7 @@ if awk '
   /^[[:space:]]+- name:/ {
     cache_action = 0
   }
-  /uses: actions\/cache@v5/ {
+  /uses: actions\/cache\/(restore|save)@v5/ {
     cache_action = 1
   }
   cache_action &&

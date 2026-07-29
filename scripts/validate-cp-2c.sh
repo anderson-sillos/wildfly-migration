@@ -5,6 +5,7 @@ set -euo pipefail
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 POM="$REPOSITORY_ROOT/app/pom.xml"
 EXPECTED_LIBRARIES="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/war-libraries.txt"
+RUNTIME_CACHE_LOCK="$REPOSITORY_ROOT/runtime/portable-runtime-cache.sha256"
 WORKFLOW="$REPOSITORY_ROOT/.github/workflows/portable.yml"
 WAR_FILE=""
 TEMP_DIRECTORY="$(
@@ -57,6 +58,7 @@ done
 for path in \
   "$POM" \
   "$EXPECTED_LIBRARIES" \
+  "$RUNTIME_CACHE_LOCK" \
   "$WORKFLOW" \
   "$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/runtime-manifest.tsv" \
   "$REPOSITORY_ROOT/docs/cp-2c-ee8-maven-datasource.md" \
@@ -68,15 +70,34 @@ for path in \
 done
 
 for cache_marker in \
+  'uses: actions/cache/restore@v5' \
+  'uses: actions/cache/save@v5' \
   'path: ${{ runner.temp }}/wildfly-migration-cache/runtime-archives' \
-  'key: runtime-archives-v3-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(' \
-  'runtime-archives-v3-${{ runner.os }}-${{ runner.arch }}-' \
+  "key: runtime-archives-v4-\${{ runner.os }}-\${{ runner.arch }}-\${{ hashFiles('runtime/portable-runtime-cache.sha256') }}" \
+  'runtime-archives-v4-${{ runner.os }}-${{ runner.arch }}-' \
   'path: ~/.m2/repository' \
-  'key: maven-repository-v2-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-${{ hashFiles(' \
-  'maven-repository-v2-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-'; do
+  'key: maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-${{ hashFiles(' \
+  'maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-' \
+  'key: ${{ steps.runtime-archive-cache.outputs.cache-primary-key }}' \
+  'key: ${{ steps.maven-dependency-cache.outputs.cache-primary-key }}'; do
   grep -Fq "$cache_marker" "$WORKFLOW" ||
     fail "workflow não contém o cache reutilizável: $cache_marker"
 done
+
+if [[ "$(grep -Fc 'uses: actions/cache/restore@v5' "$WORKFLOW")" -ne 2 ]] ||
+   [[ "$(grep -Fc 'uses: actions/cache/save@v5' "$WORKFLOW")" -ne 2 ]]; then
+  fail "workflow deve restaurar e salvar exatamente os caches de runtime e Maven"
+fi
+
+if [[ "$(grep -Fc \
+    "github.event_name == 'push' && github.ref == 'refs/heads/main'" \
+    "$WORKFLOW")" -ne 2 ]]; then
+  fail "caches novos devem ser gravados somente por push bem-sucedido na main"
+fi
+
+if grep -Fq 'uses: actions/cache@v5' "$WORKFLOW"; then
+  fail "action combinada não deve gravar cache durante pull requests"
+fi
 
 if grep -Eq \
     'key: cp-[0-9]|wildfly-migration-cache/cp-[0-9]' \
