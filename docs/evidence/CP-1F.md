@@ -143,6 +143,16 @@ Os dois relatórios registraram o commit
 `a90e419f1b1c13df226583bcacfc82056c77c9fd`, o mesmo checksum de WAR e todos os
 cenários como `passed`.
 
+O GitHub Actions executou novamente a trilha portátil sobre a revisão
+`ad8beec725cc22df718592c6f0518ac2802b459b` no run
+[`30414371295`](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30414371295):
+
+- `repository-baseline`: aprovado em 14 segundos;
+- `portable-ci`: aprovado em 1 minuto e 7 segundos;
+- build, auditoria do WAR, persistência MyBatis, lifecycle H2, contratos e
+  publicação do relatório sanitizado: aprovados;
+- nenhum secret, Oracle JDK, `ojdbc7` ou rota interna foi fornecido ao runner.
+
 ## Rollback
 
 O último estado verde anterior é o commit squash do `CP-1E`, abreviado como
@@ -164,5 +174,3 @@ não é automatizado pelo laboratório.
 - O inventário de patches Oracle `one-off` continua não fornecido.
 - Java 7, WildFly 9, Log4j 1 e as demais bibliotecas históricas são EOL ou
   vulneráveis e permanecem restritos ao laboratório isolado.
-- O resultado remoto do GitHub Actions será registrado depois do push da
-  revisão de fechamento.

@@ -39,7 +39,7 @@ endereços internos nem conteúdo do `.env`.
 - Mudança OpenSpec: `create-java-web-migration-lab`.
 - Checklist:
   `openspec/changes/create-java-web-migration-lab/tasks.md`.
-- Progresso antes do encerramento do checkpoint: 29 de 110 tarefas concluídas.
+- Progresso preparado para integração: 30 de 110 tarefas concluídas.
 - Branch atual: `checkpoint/cp-1f-integrations-contracts`.
 - Pull request: `#12`, `[CP-1F] Integrações e contratos legados`, ainda em
   draft.
@@ -56,9 +56,9 @@ As atividades 1.26 a 1.29 estão concluídas. Elas entregam:
 - logging legado por Log4j 1.2.14;
 - contratos HTTP externos comuns aos perfis H2 e Oracle.
 
-A atividade 1.30 encerra o `CP-1F` e só pode ser marcada depois de registrar as
-evidências finais, atualizar o PR, obter checks verdes e executar o squash
-`checkpoint(CP-1F): add legacy integrations and contracts`.
+A atividade 1.30 está marcada no conteúdo preparado para integração. O
+encerramento se torna efetivo quando o PR produzir o squash
+`checkpoint(CP-1F): add legacy integrations and contracts` no `main`.
 
 ## Validações já aprovadas
 
@@ -105,13 +105,10 @@ compartilhada; não adicionar esse arquivo ao `.gitignore`.
 
 ## Próximas ações
 
-1. Versionar `docs/evidence/CP-1F.md`, esta atualização do handoff e os gates
-   que tornam a evidência obrigatória.
-2. Enviar os commits, atualizar o corpo do PR e aguardar
-   `repository-baseline` e `portable-ci`.
+1. Versionar esta atualização final da evidência, do handoff e do OpenSpec.
+2. Enviar o commit, atualizar o corpo do PR e aguardar os checks finais.
 3. Retirar o PR do draft e executar o squash planejado.
-4. Marcar a tarefa 1.30 como concluída no conteúdo integrado e iniciar o
-   `CP-1G` pela atividade 1.31.
+4. Iniciar o `CP-1G` pela atividade 1.31.
 
 ## Comandos de retomada
 
