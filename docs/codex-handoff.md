@@ -43,8 +43,8 @@ endereços internos nem conteúdo do `.env`.
 - Branch atual: `checkpoint/cp-1f-integrations-contracts`.
 - Pull request: `#12`, `[CP-1F] Integrações e contratos legados`, ainda em
   draft.
-- Base local e remota antes das correções finais:
-  `cc4fa0040e3fffa977092a32e1d2adce43a09006`.
+- Revisão funcional final:
+  `a90e419f1b1c13df226583bcacfc82056c77c9fd`.
 - Último checkpoint integrado no `main`: `CP-1E`, commit abreviado `c85f607`.
 
 As atividades 1.26 a 1.29 estão concluídas. Elas entregam:
@@ -71,8 +71,8 @@ evidências finais, atualizar o PR, obter checks verdes e executar o squash
 - Uma execução local anterior aprovou os mesmos 14 cenários em H2 e Oracle
   sobre o commit `e006eacb8a96df7dc00437ba8c0f1dc808b27b2c`.
 - Sobre a árvore local com as correções finais de logging:
-  - `doctor CP-1F/ci-h2`: 86 verificações OK;
-  - `doctor CP-1F/oracle`: 85 verificações OK;
+  - `doctor CP-1F/ci-h2`: 87 verificações OK;
+  - `doctor CP-1F/oracle`: 86 verificações OK;
   - build Java 7/Maven 3.8.9: aprovado;
   - WAR: 20 bibliotecas e SHA-256
     `9dc324fcdb800e5f65ca7f54d42c65fb2ac6edcdda7ebddc023665fb6191edbe`;
@@ -105,18 +105,12 @@ compartilhada; não adicionar esse arquivo ao `.gitignore`.
 
 ## Próximas ações
 
-1. Criar o commit de implementação do conteúdo já validado. A primeira
-   solicitação de autorização para esse commit foi recusada, portanto o
-   handoff existe na árvore e no índice, mas ainda não integra o histórico Git.
-2. Reexecutar ou vincular os relatórios sanitizados ao hash desse commit e
-   criar `docs/evidence/CP-1F.md` com resultados H2/Oracle separados, commit,
-   checksum do WAR, cenários, validação manual e rollback.
-3. Atualizar este handoff e o corpo do PR com a evidência final.
-4. Versionar somente os arquivos do `CP-1F`, preservando alterações do usuário
-   que não pertencem ao checkpoint.
-5. Enviar o commit, aguardar `repository-baseline` e `portable-ci`, retirar o
-   PR do draft e executar o squash planejado.
-6. Marcar a tarefa 1.30 como concluída no conteúdo integrado e iniciar o
+1. Versionar `docs/evidence/CP-1F.md`, esta atualização do handoff e os gates
+   que tornam a evidência obrigatória.
+2. Enviar os commits, atualizar o corpo do PR e aguardar
+   `repository-baseline` e `portable-ci`.
+3. Retirar o PR do draft e executar o squash planejado.
+4. Marcar a tarefa 1.30 como concluída no conteúdo integrado e iniciar o
    `CP-1G` pela atividade 1.31.
 
 ## Comandos de retomada

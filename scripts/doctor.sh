@@ -223,6 +223,7 @@ check_required_files() {
 
   if rank_at_least CP-1F; then
     required+=(
+      "docs/evidence/CP-1F.md"
       "docs/legacy-upload.md"
       "docs/legacy-xml-import.md"
       "scripts/validate-cp-1f-upload.sh"

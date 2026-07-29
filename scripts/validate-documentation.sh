@@ -10,6 +10,7 @@ required_paths=(
   ".vscode/tasks.json"
   "docs/README.md"
   "docs/codex-handoff.md"
+  "docs/evidence/CP-1F.md"
   "docs/environment-setup.md"
   "docs/legacy-application-runbook.md"
   "docs/legacy-upload.md"
