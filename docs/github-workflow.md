@@ -81,6 +81,18 @@ O CI é separado por finalidade:
   configuração de exemplo, aplicação, contratos, baseline executável,
   runtimes, scripts ou o próprio workflow portátil.
 
+O `repository-baseline` local e remoto usa o mesmo executor versionado. Antes
+de enviar uma alteração, execute:
+
+```bash
+./scripts/validate-repository-baseline.sh
+```
+
+O workflow do GitHub chama diretamente esse arquivo. Não mantenha uma segunda
+lista manual de validadores no workflow ou na documentação. Os validadores de
+checkpoints antigos verificam apenas seus contratos permanentes; o validador
+do checkpoint ativo confere nomes, versões e caminhos que podem evoluir.
+
 Alterações exclusivamente em `docs/`, `openspec/` ou evidências já capturadas
 continuam recebendo a validação estática, mas não recriam Java, Maven, WildFly,
 H2 e o WAR. Uma alteração em `scripts/`, `runtime/`, `contract-tests/`,

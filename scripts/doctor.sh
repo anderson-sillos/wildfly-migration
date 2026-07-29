@@ -181,6 +181,7 @@ check_required_files() {
     ".github/workflows/validate.yml"
     "runtime/legacy/runtime-manifest.tsv"
     "scripts/doctor.sh"
+    "scripts/validate-repository-baseline.sh"
   )
 
   if rank_at_least CP-1C; then

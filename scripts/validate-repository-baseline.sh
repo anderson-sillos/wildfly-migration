@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$REPOSITORY_ROOT"
+
+run_step() {
+  local label="$1"
+  shift
+  printf '\n==> %s\n' "$label"
+  "$@"
+}
+
+shell_files=(
+  scripts/doctor.sh
+  scripts/validate-repository-baseline.sh
+  scripts/validate-cp-1b.sh
+  scripts/audit-legacy-war.sh
+  scripts/build-cp-1c.sh
+  scripts/validate-cp-1c.sh
+  scripts/validate-cp-1d-selection.sh
+  scripts/validate-cp-1d-profiles.sh
+  scripts/validate-cp-1d-h2.sh
+  scripts/validate-cp-1d-datasources.sh
+  scripts/build-cp-1d.sh
+  scripts/smoke-wildfly9-datasource.sh
+  scripts/follow-wildfly9-log.sh
+  scripts/oracle-lab-schema.sh
+  scripts/validate-documentation.sh
+  scripts/validate-cp-1e-persistence.sh
+  scripts/validate-cp-1e-web.sh
+  scripts/validate-cp-1f-upload.sh
+  scripts/validate-cp-1f-xml.sh
+  scripts/validate-cp-1f-discovery-logging.sh
+  scripts/validate-cp-1f-contracts.sh
+  scripts/validate-cp-1g-baseline.sh
+  scripts/build-cp-2a.sh
+  scripts/validate-cp-2a.sh
+  scripts/smoke-wildfly26-datasource.sh
+  scripts/validate-cp-2b.sh
+  scripts/validate-cp-2c.sh
+  contract-tests/run.sh
+)
+
+run_step "Validar sintaxe dos scripts shell" bash -n "${shell_files[@]}"
+run_step "Validar baseline do repositório" ./scripts/doctor.sh CP-1A --ci
+run_step "Validar recursos estáticos do CP-1B" \
+  ./scripts/validate-cp-1b.sh --release
+run_step "Validar recursos estáticos do CP-1C" ./scripts/validate-cp-1c.sh
+run_step "Validar seleção de runtime do CP-1D" \
+  ./scripts/validate-cp-1d-selection.sh
+run_step "Validar perfis e proteções do CP-1D" \
+  ./scripts/validate-cp-1d-profiles.sh
+run_step "Validar scripts H2 do CP-1D" ./scripts/validate-cp-1d-h2.sh
+run_step "Validar perfis de datasource do CP-1D" \
+  ./scripts/validate-cp-1d-datasources.sh
+run_step "Validar persistência do CP-1E" \
+  ./scripts/validate-cp-1e-persistence.sh
+run_step "Validar camada web do CP-1E" ./scripts/validate-cp-1e-web.sh
+run_step "Validar documentação consolidada" \
+  ./scripts/validate-documentation.sh
+run_step "Validar upload legado do CP-1F" \
+  ./scripts/validate-cp-1f-upload.sh
+run_step "Validar importação XML legada do CP-1F" \
+  ./scripts/validate-cp-1f-xml.sh
+run_step "Validar Reflections e Log4j do CP-1F" \
+  ./scripts/validate-cp-1f-discovery-logging.sh
+run_step "Validar contratos externos do CP-1F" \
+  ./scripts/validate-cp-1f-contracts.sh
+run_step "Validar baseline congelado do CP-1G" \
+  ./scripts/validate-cp-1g-baseline.sh
+run_step "Validar transição Java 8 do CP-2A" ./scripts/validate-cp-2a.sh
+run_step "Validar transição WildFly 26 do CP-2B" ./scripts/validate-cp-2b.sh
+run_step "Validar alinhamento Jakarta EE 8 do CP-2C" \
+  ./scripts/validate-cp-2c.sh
+
+printf '\nOK: repository-baseline local e remoto concluído\n'
