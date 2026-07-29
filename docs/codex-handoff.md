@@ -1,6 +1,6 @@
 # Codex handoff
 
-Atualizado em 2026-07-28 durante o checkpoint `CP-1G`.
+Atualizado em 2026-07-29 durante o checkpoint `CP-2A`.
 
 Este documento preserva o contexto operacional necessário para continuar o
 laboratório em outra sessão do Codex. Ele não substitui o OpenSpec, o runbook
@@ -29,70 +29,65 @@ conteúdo do `.env`.
 ## Estado atual
 
 - Mudança OpenSpec: `create-java-web-migration-lab`.
-- Branch: `checkpoint/cp-1g-complete-legacy-baseline`.
-- HEAD qualificado:
-  `ea94065e682193b5581abbb003c2ca0b05d3f188`.
+- Branch: `checkpoint/cp-2a-java8-wildfly9`.
+- Commit de implementação qualificado:
+  `c76f42f4035ac08b13fca478f1d8e375190761b9`.
+- HEAD com evidências:
+  `d4cfef1`.
 - Commits do checkpoint:
-  - `80e8fa1 feat(CP-1G): freeze legacy baseline manifests`;
-  - `ea94065 fix(CP-1G): verify Oracle release update explicitly`.
-- Último squash no `main`: `8ca6b1b`, fechamento do `CP-1F`.
-- Tarefas OpenSpec: 1.31 a 1.35 preparadas para integração; o fechamento de
-  1.35 se torna efetivo com o squash e a tag.
-- Progresso preparado: 35 de 110 tarefas.
+  - `c76f42f feat(CP-2A): run application on Java 8`;
+  - `d4cfef1 test(CP-2A): record Java 8 qualification evidence`.
+- Último squash no `main`: `a7c7b5b`, fechamento do `CP-1G`.
+- Tag pública da fase 1:
+  `migration/01-legacy-baseline`, apontando para `a7c7b5b`.
+- Tarefas OpenSpec 2.1 a 2.4 concluídas; 2.5 aguarda PR, CI e squash.
+- Progresso preparado: 39 de 110 tarefas.
 
-## Entrega preparada
+## Entrega CP-2A preparada
 
-`migration/baselines/01-legacy/` congela:
+O CP-2A executou primeiro o WAR congelado Java 7, bytecode major 51 e SHA-256
+`9dc324fcdb800e5f65ca7f54d42c65fb2ac6edcdda7ebddc023665fb6191edbe`
+no Temurin Java 8/WildFly 9. Os 14 contratos H2 passaram sem recompilação.
 
-- 14 cenários normalizados;
-- estado persistido Oracle e seed `LAB-0001`;
-- sete componentes de runtime/teste;
-- 24 dependências Maven com SHA-256 individual, quatro `provided` e 20 em
-  `WEB-INF/lib`;
-- WAR SHA-256
-  `9dc324fcdb800e5f65ca7f54d42c65fb2ac6edcdda7ebddc023665fb6191edbe`;
-- árvore Maven SHA-256
-  `2bd0439fb193fe3ba416980c3f3de606ae9152ca14a55b5dc5e01c018f9adcd6`.
+As duas incompatibilidades naturais registradas são:
 
-O manifesto histórico do WildFly 9 foi corrigido de Apache-2.0 para
-`LGPL-2.1-only`, conforme `LICENSE.txt` da distribuição efetivamente usada.
-O `ojdbc7` externo foi identificado como 12.1.0.2.0 e fixado por checksum.
+- `INC-005`: Maven Enforcer rejeitava Java 8 pela faixa `[1.7,1.8)`;
+- `INC-006`: WildFly 9 enviava `-XX:MaxPermSize`, removida no Java 8.
 
-O catálogo `migration/incompatibilities.tsv` e
-`migration/incompatibility-template.md` definem a captura desde a fase 2:
-tentativa natural antes da correção, assinatura sanitizada, causa, correção
-mínima, evidências antes/depois, regressão, aplicação real e rollback.
+O estado corrigido:
+
+- usa Eclipse Temurin OpenJDK 8u492-b09, origem, licença e SHA-256 fixados;
+- mantém Maven 3.8.9, WildFly 9.0.2.Final, dependências e `javax.*`;
+- produz WAR bytecode major 52 com SHA-256
+  `bb6caddd16d36028ef8547398634c6e6fbf0de389d7a63b5c5f803a3409a53e4`;
+- preserva as 24 dependências, os 20 JARs e a árvore Maven SHA-256
+  `2bd0439fb193fe3ba416980c3f3de606ae9152ca14a55b5dc5e01c018f9adcd6`;
+- remove `MaxPermSize` somente da cópia temporária do WildFly usada no Java 8.
 
 ## Validações aprovadas
 
-Sobre `ea94065`:
+Sobre `c76f42f`:
 
-- `doctor CP-1G/ci-h2`: 98 OK;
-- `doctor CP-1G/oracle`: 97 OK;
-- todas as validações estáticas CP-1B a CP-1G: aprovadas;
-- build Java 7/Maven 3.8.9 e auditoria: aprovados;
+- `doctor CP-2A/ci-h2`: 107 OK;
+- `doctor CP-2A/oracle`: 106 OK;
+- todas as validações estáticas CP-1B a CP-2A: aprovadas;
+- build Java 8/Maven 3.8.9 e auditoria major 52: aprovados;
 - H2 schema lifecycle e probe MyBatis: aprovados;
-- WildFly 9/H2: 14/14, `portable-ci`;
-- WildFly 9/Oracle: 14/14, `oracle-qualified`;
-- pós-smoke Oracle: produto 19c, RU 19.3, objetos e seed aprovados;
-- reprodução H2 a partir de worktree limpo: aprovada;
-- H2 e Oracle produziram o mesmo WAR e relatórios ligados ao mesmo commit.
-- PR `#14`: workflow `30416762018` aprovado em outro host
-  (`repository-baseline` 14s, `portable-ci` 1m40s), incluindo checksum do WAR e
-  dos 20 JARs empacotados.
-
-A primeira captura do RU tentou usar somente `DatabaseMetaData` e gerou falso
-negativo. `INC-004` registra a correção: produto por metadata JDBC e RU por
-`PRODUCT_COMPONENT_VERSION.VERSION_FULL`.
+- Java 8/WildFly 9/H2: 14/14, `portable-ci`;
+- Java 8/WildFly 9/Oracle: 14/14, `oracle-qualified`;
+- schema Oracle descartável, datasource JNDI, pool e limpeza: aprovados;
+- H2 e Oracle produziram o mesmo WAR e relatórios sanitizados ligados a
+  `c76f42f`;
+- o CI hospedado ainda precisa confirmar o commit do PR.
 
 ## Próximas ações
 
-1. Registrar e enviar a referência do workflow aprovado na evidência.
-2. Retirar o PR `#14` do draft e confirmar os checks finais.
-3. Integrar por squash
-   `checkpoint(CP-1G): complete legacy baseline` e criar a tag imutável
-   `migration/01-legacy-baseline`.
-4. Iniciar `CP-2A` tentando o baseline sem correção no Java 8/WildFly 9.
+1. Enviar a branch e abrir o PR do CP-2A.
+2. Confirmar `repository-baseline` e `portable-ci` no GitHub.
+3. Registrar o workflow aprovado e marcar 2.5.
+4. Integrar por squash
+   `checkpoint(CP-2A): run legacy application on Java 8`.
+5. Iniciar CP-2B tentando o mesmo WAR no Java 8/WildFly 26 antes de corrigir.
 
 ## Comandos de retomada
 
@@ -100,11 +95,14 @@ negativo. `INC-004` registra a correção: produto por metadata JDBC e RU por
 git status --short --branch
 openspec status --change create-java-web-migration-lab --json
 openspec instructions apply --change create-java-web-migration-lab --json
-./scripts/validate-cp-1g-baseline.sh \
+./scripts/doctor.sh CP-2A --profile ci-h2 --env .env
+./scripts/build-cp-2a.sh --profile ci-h2 --env .env
+./scripts/validate-cp-2a.sh \
   --war app/target/wildfly-migration.war \
-  --contract-result app/target/contract-results/ci-h2.json \
-  --contract-result app/target/contract-results/oracle.json
+  --contract-result app/target/contract-results/cp-2a-ci-h2.json \
+  --contract-result app/target/contract-results/cp-2a-oracle.json
 ```
 
-Os relatórios em `app/target/contract-results/` são derivados locais. Somente
-resultados sanitizados podem ser transcritos para `docs/evidence/CP-1G.md`.
+As cópias sanitizadas aprovadas estão em
+`migration/evidence/CP-2A/`. O `.env`, URLs internas e credenciais continuam
+fora do controle de versão.
