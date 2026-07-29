@@ -42,6 +42,8 @@ jobs:
           bash -n scripts/validate-cp-1g-baseline.sh
           bash -n scripts/build-cp-2a.sh
           bash -n scripts/validate-cp-2a.sh
+          bash -n scripts/smoke-wildfly26-datasource.sh
+          bash -n scripts/validate-cp-2b.sh
           bash -n contract-tests/run.sh
 
       - name: Validate repository baseline
@@ -92,6 +94,9 @@ jobs:
       - name: Validate CP-2A Java 8 transition statically
         run: ./scripts/validate-cp-2a.sh
 
+      - name: Validate CP-2B WildFly 26 transition statically
+        run: ./scripts/validate-cp-2b.sh
+
   portable-ci:
     name: portable-ci
     runs-on: ubuntu-latest
@@ -104,7 +109,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          runtime_root="$RUNNER_TEMP/wildfly-migration-cp2a"
+          runtime_root="$RUNNER_TEMP/wildfly-migration-cp2b"
           archives="$runtime_root/archives"
           tools="$runtime_root/tools"
           install -d -m 0755 "$archives" "$tools"
@@ -113,8 +118,8 @@ jobs:
             https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u492-b09/OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz
           curl -fsSLo "$archives/apache-maven-3.8.9-bin.tar.gz" \
             https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz
-          curl -fsSLo "$archives/wildfly-9.0.2.Final.tar.gz" \
-            https://download.jboss.org/wildfly/9.0.2.Final/wildfly-9.0.2.Final.tar.gz
+          curl -fsSLo "$archives/wildfly-26.1.3.Final.tar.gz" \
+            https://github.com/wildfly/wildfly/releases/download/26.1.3.Final/wildfly-26.1.3.Final.tar.gz
           curl -fsSLo "$archives/h2-1.4.200.jar" \
             https://repo.maven.apache.org/maven2/com/h2database/h2/1.4.200/h2-1.4.200.jar
 
@@ -122,16 +127,16 @@ jobs:
           sha256sum --check <<'CHECKSUMS'
           da257f161d7f8c6ca5b0e5d9e4090f65ac28c5e398072e68b8ae87988b1d1a2e  OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz
           3e4c68cdd70f96635e713f36c8fc3ea3182035245d3da2156576710ca0fe4b0c  apache-maven-3.8.9-bin.tar.gz
-          74689569d6e04402abb7d94921c558940725d8065dce21a2d7194fa354249bb6  wildfly-9.0.2.Final.tar.gz
+          aadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f02528ae59  wildfly-26.1.3.Final.tar.gz
           3ad9ac4b6aae9cd9d3ac1c447465e1ed06019b851b893dd6a8d76ddb6d85bca6  h2-1.4.200.jar
           CHECKSUMS
 
           tar -xzf OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz -C "$tools"
           tar -xzf apache-maven-3.8.9-bin.tar.gz -C "$tools"
-          tar -xzf wildfly-9.0.2.Final.tar.gz -C "$tools"
+          tar -xzf wildfly-26.1.3.Final.tar.gz -C "$tools"
 
           {
-            echo "MIGRATION_CHECKPOINT=CP-2A"
+            echo "MIGRATION_CHECKPOINT=CP-2B"
             echo "LAB_BIND_ADDRESS=127.0.0.1"
             echo "WILDFLY_HTTP_PORT=18080"
             echo "WILDFLY_MANAGEMENT_PORT=19990"
@@ -141,15 +146,15 @@ jobs:
             echo "MAVEN_HOME=$tools/apache-maven-3.8.9"
             echo "MAVEN_ARCHIVE=$archives/apache-maven-3.8.9-bin.tar.gz"
             echo "MAVEN_ARCHIVE_SHA256=3e4c68cdd70f96635e713f36c8fc3ea3182035245d3da2156576710ca0fe4b0c"
-            echo "WILDFLY9_HOME=$tools/wildfly-9.0.2.Final"
-            echo "WILDFLY9_ARCHIVE=$archives/wildfly-9.0.2.Final.tar.gz"
-            echo "WILDFLY9_ARCHIVE_SHA256=74689569d6e04402abb7d94921c558940725d8065dce21a2d7194fa354249bb6"
+            echo "WILDFLY26_HOME=$tools/wildfly-26.1.3.Final"
+            echo "WILDFLY26_ARCHIVE=$archives/wildfly-26.1.3.Final.tar.gz"
+            echo "WILDFLY26_ARCHIVE_SHA256=aadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f02528ae59"
             echo "H2_JAR=$archives/h2-1.4.200.jar"
             echo "H2_SHA256=3ad9ac4b6aae9cd9d3ac1c447465e1ed06019b851b893dd6a8d76ddb6d85bca6"
           } >> "$GITHUB_ENV"
 
       - name: Run portable doctor
-        run: ./scripts/doctor.sh CP-2A --profile ci-h2 --ci
+        run: ./scripts/doctor.sh CP-2B --profile ci-h2 --ci
 
       - name: Build and audit portable WAR
         run: ./scripts/build-cp-2a.sh --profile ci-h2
@@ -166,23 +171,22 @@ jobs:
             --java-home "$JAVA8_HOME" \
             --h2-jar "$H2_JAR"
 
-      - name: Smoke WildFly 9 H2 datasource
+      - name: Smoke WildFly 26 H2 datasource
         run: |
-          ./scripts/smoke-wildfly9-datasource.sh \
-            --java 8 \
+          ./scripts/smoke-wildfly26-datasource.sh \
             --profile ci-h2 \
             --war app/target/wildfly-migration.war \
-            --contract-result app/target/contract-results/cp-2a-ci-h2.json
+            --contract-result app/target/contract-results/cp-2b-ci-h2.json
 
       - name: Compare portable result with the frozen baseline
         run: |
-          ./scripts/validate-cp-2a.sh \
+          ./scripts/validate-cp-2b.sh \
             --war app/target/wildfly-migration.war \
-            --contract-result app/target/contract-results/cp-2a-ci-h2.json
+            --contract-result app/target/contract-results/cp-2b-ci-h2.json
 
       - name: Upload sanitized portable contract result
         uses: actions/upload-artifact@v4
         with:
-          name: cp-2a-portable-contract-result
-          path: app/target/contract-results/cp-2a-ci-h2.json
+          name: cp-2b-portable-contract-result
+          path: app/target/contract-results/cp-2b-ci-h2.json
           if-no-files-found: error

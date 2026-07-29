@@ -6,6 +6,7 @@ REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MANIFEST="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/runtime-manifest.tsv"
 EVIDENCE="$REPOSITORY_ROOT/migration/evidence/CP-2B/before-deployment.properties"
 WAR_FILE=""
+CONTRACT_RESULT_FILE=""
 TEMP_DIRECTORY="$(
   mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-cp2b.XXXXXXXX"
 )"
@@ -27,11 +28,27 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if [[ $# -gt 0 ]]; then
-  [[ "$1" == "--war" && $# -eq 2 ]] ||
-    fail "uso: ./scripts/validate-cp-2b.sh [--war ARQUIVO]"
-  WAR_FILE="$2"
-fi
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --war)
+      [[ $# -ge 2 ]] || fail "--war exige um arquivo"
+      WAR_FILE="$2"
+      shift 2
+      ;;
+    --contract-result)
+      [[ $# -ge 2 ]] || fail "--contract-result exige um arquivo"
+      CONTRACT_RESULT_FILE="$2"
+      shift 2
+      ;;
+    -h|--help)
+      printf 'Uso: ./scripts/validate-cp-2b.sh [--war ARQUIVO] [--contract-result ARQUIVO]\n'
+      exit 0
+      ;;
+    *)
+      fail "argumento desconhecido: $1"
+      ;;
+  esac
+done
 
 for path in \
   "$MANIFEST" \
@@ -205,8 +222,35 @@ if [[ -n "$WAR_FILE" ]]; then
     fail "WAR informado não contém bytecode Java 8 major 52"
 fi
 
+if [[ -n "$CONTRACT_RESULT_FILE" ]]; then
+  [[ -f "$CONTRACT_RESULT_FILE" ]] ||
+    fail "resultado de contrato informado não existe"
+  current_commit="$(git -C "$REPOSITORY_ROOT" rev-parse HEAD)"
+  for marker in \
+    '"schema": "wildfly-migration-contract-result/v1"' \
+    '"qualification": "portable-ci"' \
+    '"profile": "ci-h2"' \
+    "\"commit\": \"$current_commit\"" \
+    '"warSha256": "bb6caddd16d36028ef8547398634c6e6fbf0de389d7a63b5c5f803a3409a53e4"' \
+    '"runtime": "java8-wildfly26.1.3"'; do
+    grep -Fq "$marker" "$CONTRACT_RESULT_FILE" ||
+      fail "resultado portátil atual não contém: $marker"
+  done
+  [[ "$(grep -Ec '^[[:space:]]+\"[A-Za-z][A-Za-z0-9]*\": \"passed\",?$' \
+      "$CONTRACT_RESULT_FILE")" == "14" ]] ||
+    fail "resultado portátil atual não contém os 14 cenários aprovados"
+  if grep -Eiq \
+    'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url' \
+    "$CONTRACT_RESULT_FILE"; then
+    fail "resultado portátil atual contém configuração sensível"
+  fi
+fi
+
 printf 'OK: tentativa sem correção do WAR CP-2A no WildFly 26 está registrada'
 if [[ -n "$WAR_FILE" ]]; then
   printf ', WAR aprovado preservado'
+fi
+if [[ -n "$CONTRACT_RESULT_FILE" ]]; then
+  printf ', contratos portáteis atuais aprovados'
 fi
 printf '\n'
