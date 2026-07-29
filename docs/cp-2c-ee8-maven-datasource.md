@@ -94,3 +94,62 @@ Referências oficiais:
 - <https://maven.apache.org/install.html>;
 - <https://maven.apache.org/ref/3.9.16/maven-model/maven.html>;
 - <https://maven.apache.org/docs/3.9.16/release-notes.html>.
+
+## 2.13 — Paridade H2 e qualificação Oracle
+
+As duas trilhas usam o mesmo WAR Java 8/EE 8, os mesmos mappers MyBatis e
+`java:/jdbc/MigrationDS`, mas preservam classificações distintas:
+
+| Trilha | Comprovação |
+| --- | --- |
+| `portable-ci` | fluxo funcional, JNDI, MyBatis e semântica portátil no H2 em memória |
+| `oracle-qualified` | Oracle 19c RU 19.3, `ojdbc7` aprovado, pool do WildFly, commit/rollback MyBatis, round-trip de `TIMESTAMP(6)` e BLOB |
+
+O relatório HTTP cobre os mesmos 14 cenários nos dois perfis. A sonda Oracle
+adicional é externa ao WAR: ela carrega as classes e mappers do WAR atual,
+executa transações MyBatis diretamente com o driver aprovado, provoca uma
+falha depois do `INSERT` para comprovar rollback, compara timestamps e bytes
+do BLOB depois de novas consultas e remove somente seus próprios registros.
+Nenhum relatório contém URL, usuário ou senha.
+
+### H2 portátil
+
+```bash
+./scripts/doctor.sh CP-2C --profile ci-h2 --env .env
+./scripts/build-cp-2c.sh --profile ci-h2 --env .env
+./scripts/smoke-wildfly26-datasource.sh \
+  --profile ci-h2 \
+  --env .env \
+  --war app/target/wildfly-migration.war \
+  --contract-result app/target/contract-results/cp-2c-ci-h2.json
+./scripts/validate-cp-2c.sh \
+  --war app/target/wildfly-migration.war \
+  --contract-result app/target/contract-results/cp-2c-ci-h2.json
+```
+
+Essa execução produz somente `portable-ci`; ela não qualifica comportamento
+específico do Oracle.
+
+### Oracle qualificado
+
+Em uma máquina autorizada na rede interna, com o schema descartável já
+verificado e as variáveis externas no `.env`, execute:
+
+```bash
+./scripts/qualify-cp-2c-oracle.sh --env .env
+```
+
+O wrapper executa `doctor`, verifica o schema `LAB_*`, recompila o WAR com
+Java 8/Maven 3.9.16, testa o datasource e os 14 contratos no WildFly 26,
+executa a sonda específica, vincula ambos os relatórios ao commit e ao
+SHA-256 do WAR e, depois do sucesso, remove os registros `LAB-SMOKE-*`.
+
+Para investigar uma falha, os mesmos passos podem ser executados
+individualmente. O teste específico de persistência é:
+
+```bash
+./scripts/validate-cp-2c-oracle-persistence.sh \
+  --env .env \
+  --war app/target/wildfly-migration.war \
+  --result app/target/contract-results/cp-2c-oracle-persistence.json
+```

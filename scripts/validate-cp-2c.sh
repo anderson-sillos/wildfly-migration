@@ -10,17 +10,20 @@ WORKFLOW="$REPOSITORY_ROOT/.github/workflows/portable.yml"
 CACHE_CLEANUP_WORKFLOW="$REPOSITORY_ROOT/.github/workflows/pr-cache-cleanup.yml"
 WAR_FILE=""
 CONTRACT_RESULT_FILE=""
+ORACLE_PERSISTENCE_RESULT_FILE=""
 TEMP_DIRECTORY="$(
   mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-cp2c.XXXXXXXX"
 )"
 
 usage() {
   cat <<'USAGE'
-Uso: ./scripts/validate-cp-2c.sh [--war ARQUIVO] [--contract-result ARQUIVO]
+Uso: ./scripts/validate-cp-2c.sh [--war ARQUIVO] \
+  [--contract-result ARQUIVO] [--oracle-persistence-result ARQUIVO]
 
 Sem argumentos, valida estaticamente o alinhamento ao Jakarta EE 8.
 Com --war, comprova também a ausência de APIs do contêiner em WEB-INF/lib.
-Com --contract-result, valida o relatório portátil produzido para o mesmo WAR.
+Com --contract-result, valida o relatório H2 ou Oracle produzido para o WAR.
+Com --oracle-persistence-result, valida a sonda específica Oracle 19c.
 USAGE
 }
 
@@ -53,6 +56,12 @@ while [[ $# -gt 0 ]]; do
       CONTRACT_RESULT_FILE="$2"
       shift 2
       ;;
+    --oracle-persistence-result)
+      [[ $# -ge 2 ]] ||
+        fail "--oracle-persistence-result exige um arquivo"
+      ORACLE_PERSISTENCE_RESULT_FILE="$2"
+      shift 2
+      ;;
     -h|--help)
       usage
       exit 0
@@ -63,8 +72,9 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -n "$CONTRACT_RESULT_FILE" && -z "$WAR_FILE" ]]; then
-  fail "--contract-result exige também --war"
+if [[ -n "$CONTRACT_RESULT_FILE$ORACLE_PERSISTENCE_RESULT_FILE" &&
+      -z "$WAR_FILE" ]]; then
+  fail "resultados dinâmicos exigem também --war"
 fi
 
 for path in \
@@ -76,11 +86,30 @@ for path in \
   "$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/runtime-manifest.tsv" \
   "$REPOSITORY_ROOT/docs/cp-2c-ee8-maven-datasource.md" \
   "$REPOSITORY_ROOT/scripts/build-cp-2c.sh" \
+  "$REPOSITORY_ROOT/scripts/qualify-cp-2c-oracle.sh" \
+  "$REPOSITORY_ROOT/scripts/ValidateCp2cOraclePersistence.java" \
+  "$REPOSITORY_ROOT/scripts/validate-cp-2c-oracle-persistence.sh" \
   "$REPOSITORY_ROOT/scripts/doctor.sh" \
   "$REPOSITORY_ROOT/scripts/ValidateApplicationPom.java" \
   "$REPOSITORY_ROOT/scripts/audit-legacy-war.sh"; do
   [[ -f "$path" ]] ||
     fail "arquivo obrigatório ausente: ${path#"$REPOSITORY_ROOT/"}"
+done
+
+for oracle_qualification_marker in \
+  'doctor.sh" \' \
+  'CP-2C --profile oracle' \
+  'oracle-lab-schema.sh" \' \
+  'verify --java 8' \
+  'build-cp-2c.sh" \' \
+  'smoke-wildfly26-datasource.sh" \' \
+  'validate-cp-2c-oracle-persistence.sh" \' \
+  'validate-cp-2c.sh" \' \
+  '--oracle-persistence-result' \
+  'cleanup-smokes --java 8'; do
+  grep -Fq -- "$oracle_qualification_marker" \
+    "$REPOSITORY_ROOT/scripts/qualify-cp-2c-oracle.sh" ||
+    fail "qualificação Oracle não contém: $oracle_qualification_marker"
 done
 
 for cleanup_marker in \
@@ -115,12 +144,14 @@ for cache_marker in \
   'MIGRATION_CHECKPOINT=CP-2C' \
   './scripts/doctor.sh CP-2C --profile ci-h2 --ci' \
   './scripts/build-cp-2c.sh --profile ci-h2' \
+  './scripts/validate-cp-2c-oracle-persistence.sh' \
+  '--compile-only' \
   'https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz' \
   'MAVEN_HOME=$tools/apache-maven-3.9.16' \
   'MAVEN_ARCHIVE_SHA256=80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb' \
   'app/target/contract-results/cp-2c-ci-h2.json' \
   'cp-2c-portable-contract-result'; do
-  grep -Fq "$cache_marker" "$WORKFLOW" ||
+  grep -Fq -- "$cache_marker" "$WORKFLOW" ||
     fail "workflow não contém o cache reutilizável: $cache_marker"
 done
 
@@ -267,24 +298,59 @@ if [[ -n "$CONTRACT_RESULT_FILE" ]]; then
     fail "resultado de contrato informado não existe"
   current_commit="$(git -C "$REPOSITORY_ROOT" rev-parse HEAD)"
   current_war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
+  if grep -Fq '"profile": "ci-h2"' "$CONTRACT_RESULT_FILE"; then
+    expected_qualification='"qualification": "portable-ci"'
+  elif grep -Fq '"profile": "oracle"' "$CONTRACT_RESULT_FILE"; then
+    expected_qualification='"qualification": "oracle-qualified"'
+  else
+    fail "resultado de contrato não identifica perfil conhecido"
+  fi
   for marker in \
     '"schema": "wildfly-migration-contract-result/v1"' \
-    '"qualification": "portable-ci"' \
-    '"profile": "ci-h2"' \
+    "$expected_qualification" \
     "\"commit\": \"$current_commit\"" \
     "\"warSha256\": \"$current_war_sha256\"" \
     '"runtime": "java8-wildfly26.1.3"'; do
     grep -Fq "$marker" "$CONTRACT_RESULT_FILE" ||
-      fail "resultado portátil atual não contém: $marker"
+      fail "resultado de contrato atual não contém: $marker"
   done
   [[ "$(grep -Ec \
       '^[[:space:]]+\"[A-Za-z][A-Za-z0-9]*\": \"passed\",?$' \
       "$CONTRACT_RESULT_FILE")" == "14" ]] ||
-    fail "resultado portátil atual não contém os 14 cenários aprovados"
+    fail "resultado de contrato atual não contém os 14 cenários aprovados"
   if grep -Eiq \
       'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url' \
       "$CONTRACT_RESULT_FILE"; then
-    fail "resultado portátil atual contém configuração sensível"
+    fail "resultado de contrato atual contém configuração sensível"
+  fi
+fi
+
+if [[ -n "$ORACLE_PERSISTENCE_RESULT_FILE" ]]; then
+  [[ -f "$ORACLE_PERSISTENCE_RESULT_FILE" ]] ||
+    fail "resultado de persistência Oracle informado não existe"
+  current_commit="$(git -C "$REPOSITORY_ROOT" rev-parse HEAD)"
+  current_war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
+  for marker in \
+    '"schema": "wildfly-migration-oracle-persistence/v1"' \
+    '"qualification": "oracle-qualified"' \
+    '"profile": "oracle"' \
+    "\"commit\": \"$current_commit\"" \
+    "\"warSha256\": \"$current_war_sha256\"" \
+    '"runtime": "java8-wildfly26.1.3-ee8"' \
+    '"databaseVersion": "19.3.0.0.0"' \
+    '"jdbcDriver": "ojdbc7-12.1.0.2.0"' \
+    '"mybatisCommit": "passed"' \
+    '"mybatisRollback": "passed"' \
+    '"timestampRoundTrip": "passed"' \
+    '"blobRoundTrip": "passed"' \
+    '"transientDataCleanup": "passed"'; do
+    grep -Fq "$marker" "$ORACLE_PERSISTENCE_RESULT_FILE" ||
+      fail "resultado Oracle atual não contém: $marker"
+  done
+  if grep -Eiq \
+      'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url' \
+      "$ORACLE_PERSISTENCE_RESULT_FILE"; then
+    fail "resultado de persistência Oracle contém configuração sensível"
   fi
 fi
 
@@ -293,6 +359,9 @@ if [[ -n "$WAR_FILE" ]]; then
   printf ', sem APIs do contêiner em WEB-INF/lib'
 fi
 if [[ -n "$CONTRACT_RESULT_FILE" ]]; then
-  printf ', contratos portáteis atuais aprovados'
+  printf ', contratos atuais aprovados'
+fi
+if [[ -n "$ORACLE_PERSISTENCE_RESULT_FILE" ]]; then
+  printf ', persistência Oracle específica aprovada'
 fi
 printf '\n'

@@ -300,6 +300,19 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-2C; then
+    required+=(
+      ".github/workflows/pr-cache-cleanup.yml"
+      "docs/cp-2c-ee8-maven-datasource.md"
+      "runtime/portable-runtime-cache.sha256"
+      "scripts/build-cp-2c.sh"
+      "scripts/qualify-cp-2c-oracle.sh"
+      "scripts/ValidateCp2cOraclePersistence.java"
+      "scripts/validate-cp-2c-oracle-persistence.sh"
+      "scripts/validate-cp-2c.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"

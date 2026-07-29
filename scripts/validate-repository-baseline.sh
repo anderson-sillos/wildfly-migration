@@ -27,6 +27,7 @@ shell_files=(
   scripts/smoke-wildfly9-datasource.sh
   scripts/follow-wildfly9-log.sh
   scripts/oracle-lab-schema.sh
+  scripts/qualify-cp-2c-oracle.sh
   scripts/validate-documentation.sh
   scripts/validate-cp-1e-persistence.sh
   scripts/validate-cp-1e-web.sh
@@ -39,6 +40,7 @@ shell_files=(
   scripts/validate-cp-2a.sh
   scripts/smoke-wildfly26-datasource.sh
   scripts/validate-cp-2b.sh
+  scripts/validate-cp-2c-oracle-persistence.sh
   scripts/validate-cp-2c.sh
   contract-tests/run.sh
 )

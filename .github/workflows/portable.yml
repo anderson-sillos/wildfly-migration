@@ -170,6 +170,12 @@ jobs:
       - name: Build and audit portable WAR
         run: ./scripts/build-cp-2c.sh --profile ci-h2
 
+      - name: Compile Oracle persistence probe without credentials
+        run: |
+          ./scripts/validate-cp-2c-oracle-persistence.sh \
+            --compile-only \
+            --war app/target/wildfly-migration.war
+
       - name: Execute MyBatis portable persistence probe
         run: |
           ./scripts/validate-cp-1e-persistence.sh \

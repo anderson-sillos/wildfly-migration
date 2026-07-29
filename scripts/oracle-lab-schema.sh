@@ -6,15 +6,16 @@ REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPOSITORY_ROOT/.env"
 ACTION=""
 JAVA_HOME_ARGUMENT=""
+JAVA_RELEASE="7"
 TEMP_DIRECTORY="$(mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-oracle.XXXXXXXX")"
 
 usage() {
   cat <<'USAGE'
 Uso:
-  ./scripts/oracle-lab-schema.sh inspect [--java-home DIRETORIO] [--env ARQUIVO]
-  ./scripts/oracle-lab-schema.sh apply [--java-home DIRETORIO] [--env ARQUIVO]
-  ./scripts/oracle-lab-schema.sh verify [--java-home DIRETORIO] [--env ARQUIVO]
-  ./scripts/oracle-lab-schema.sh cleanup-smokes [--java-home DIRETORIO] [--env ARQUIVO]
+  ./scripts/oracle-lab-schema.sh inspect [--java 7|8] [--java-home DIRETORIO] [--env ARQUIVO]
+  ./scripts/oracle-lab-schema.sh apply [--java 7|8] [--java-home DIRETORIO] [--env ARQUIVO]
+  ./scripts/oracle-lab-schema.sh verify [--java 7|8] [--java-home DIRETORIO] [--env ARQUIVO]
+  ./scripts/oracle-lab-schema.sh cleanup-smokes [--java 7|8] [--java-home DIRETORIO] [--env ARQUIVO]
 
 inspect é somente leitura. apply executa 001_schema.sql e 002_seed.sql apenas
 depois de aprovar identidade, container, quota, privilégios e objetos existentes.
@@ -114,6 +115,14 @@ while [[ $# -gt 0 ]]; do
       JAVA_HOME_ARGUMENT="$2"
       shift 2
       ;;
+    --java)
+      [[ $# -ge 2 && ( "$2" == "7" || "$2" == "8" ) ]] || {
+        printf 'FALHA: --java exige 7 ou 8\n' >&2
+        exit 2
+      }
+      JAVA_RELEASE="$2"
+      shift 2
+      ;;
     *)
       printf 'FALHA: argumento desconhecido\n' >&2
       usage >&2
@@ -122,7 +131,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-SELECTED_JAVA_HOME="${JAVA_HOME_ARGUMENT:-$(configuration_value JAVA7_HOME)}"
+if [[ "$JAVA_RELEASE" == "8" ]]; then
+  CONFIGURED_JAVA_HOME="$(configuration_value JAVA8_HOME)"
+else
+  CONFIGURED_JAVA_HOME="$(configuration_value JAVA7_HOME)"
+fi
+SELECTED_JAVA_HOME="${JAVA_HOME_ARGUMENT:-$CONFIGURED_JAVA_HOME}"
 OJDBC7_JAR_VALUE="$(configuration_value OJDBC7_JAR)"
 OJDBC7_SHA256_VALUE="$(configuration_value OJDBC7_SHA256)"
 export ORACLE_DB_URL="$(configuration_value ORACLE_DB_URL)"
