@@ -8,6 +8,7 @@ EXPECTED_LIBRARIES="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/war-librarie
 RUNTIME_CACHE_LOCK="$REPOSITORY_ROOT/runtime/portable-runtime-cache.sha256"
 WORKFLOW="$REPOSITORY_ROOT/.github/workflows/portable.yml"
 CACHE_CLEANUP_WORKFLOW="$REPOSITORY_ROOT/.github/workflows/pr-cache-cleanup.yml"
+EVIDENCE_DIRECTORY="$REPOSITORY_ROOT/migration/evidence/CP-2C"
 WAR_FILE=""
 CONTRACT_RESULT_FILE=""
 ORACLE_PERSISTENCE_RESULT_FILE=""
@@ -85,6 +86,11 @@ for path in \
   "$CACHE_CLEANUP_WORKFLOW" \
   "$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/runtime-manifest.tsv" \
   "$REPOSITORY_ROOT/docs/cp-2c-ee8-maven-datasource.md" \
+  "$REPOSITORY_ROOT/docs/evidence/CP-2C.md" \
+  "$EVIDENCE_DIRECTORY/after.properties" \
+  "$EVIDENCE_DIRECTORY/contract-ci-h2.json" \
+  "$EVIDENCE_DIRECTORY/contract-oracle.json" \
+  "$EVIDENCE_DIRECTORY/oracle-persistence.json" \
   "$REPOSITORY_ROOT/scripts/build-cp-2c.sh" \
   "$REPOSITORY_ROOT/scripts/qualify-cp-2c-oracle.sh" \
   "$REPOSITORY_ROOT/scripts/ValidateCp2cOraclePersistence.java" \
@@ -228,6 +234,11 @@ if grep -Fq \
     "$REPOSITORY_ROOT/scripts/doctor.sh"; then
   fail "doctor não pode ignorar Maven 3.9.16 no CI do CP-2C"
 fi
+if grep -Fq \
+    'if [[ "$CI_MODE" != true ]] && rank_at_least CP-2B; then' \
+    "$REPOSITORY_ROOT/scripts/doctor.sh"; then
+  fail "doctor não pode ignorar WildFly 26 no CI do CP-2C"
+fi
 
 expected_maven_row=$'apache-maven\t3.9.16\tapache-maven-3.9.16-bin.tar.gz\thttps://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz\tApache-2.0\t80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb\tsha512:831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6\tmaintained-current-stable\tCP-2C-and-later'
 grep -Fxq "$expected_maven_row" \
@@ -269,6 +280,132 @@ grep -Fq -- \
   '- [x] 2.12 Atualizar a ferramenta de build de Maven 3.8.9 para Maven 3.9.16' \
   "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.12 não está concluída no OpenSpec"
+
+grep -Fq -- \
+  '- [x] 2.13 Validar a paridade portátil em H2 e qualificar no Oracle' \
+  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  fail "tarefa 2.13 não está concluída no OpenSpec"
+
+grep -Fq -- \
+  '- [x] 2.14 Atualizar `doctor`, CI H2, qualificação Oracle e auditoria do WAR' \
+  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  fail "tarefa 2.14 não está concluída no OpenSpec"
+
+evidence_source_commit="$(
+  awk -F= '$1 == "implementation.commit" { print $2 }' \
+    "$EVIDENCE_DIRECTORY/after.properties"
+)"
+evidence_portable_commit="$(
+  awk -F= '$1 == "portable-ci.tested.commit" { print $2 }' \
+    "$EVIDENCE_DIRECTORY/after.properties"
+)"
+evidence_war_sha256="$(
+  awk -F= '$1 == "war.sha256" { print $2 }' \
+    "$EVIDENCE_DIRECTORY/after.properties"
+)"
+[[ "$evidence_source_commit" =~ ^[0-9a-f]{40}$ ]] ||
+  fail "evidência CP-2C não identifica o commit de origem"
+[[ "$evidence_portable_commit" =~ ^[0-9a-f]{40}$ ]] ||
+  fail "evidência CP-2C não identifica o merge testado no CI"
+[[ "$evidence_war_sha256" =~ ^[0-9a-f]{64}$ ]] ||
+  fail "evidência CP-2C não identifica o WAR"
+
+for marker in \
+  'schema=wildfly-migration-evidence/v1' \
+  'checkpoint=CP-2C' \
+  'source.checkpoint=CP-2B' \
+  'source.checkpoint.commit=3c0b80373370494ccccd15ec07be4dae8d51a155' \
+  'war.bytecode.major=52' \
+  'war.web-inf-lib.count=20' \
+  'war.container-api-jars=0' \
+  'target.java=Eclipse-Temurin-1.8.0_492-b09' \
+  'target.wildfly=26.1.3.Final' \
+  'target.maven=3.9.16' \
+  'target.ee=Jakarta-EE-Web-Profile-8.0' \
+  'target.namespace=javax' \
+  'target.api.scope=provided' \
+  'datasource.jndi=java:/jdbc/MigrationDS' \
+  'datasource.pool.test=passed' \
+  'portable-ci.result=passed' \
+  'portable-ci.contract.scenarios=14' \
+  'oracle-qualified.result=passed' \
+  'oracle-qualified.contract.scenarios=14' \
+  'oracle.database.version=19.3.0.0.0' \
+  'oracle.jdbc.driver=ojdbc7-12.1.0.2.0' \
+  'oracle.mybatis.commit=passed' \
+  'oracle.mybatis.rollback=passed' \
+  'oracle.timestamp6.round-trip=passed' \
+  'oracle.blob.round-trip=passed' \
+  'oracle.transient-data.cleanup=passed' \
+  'result=passed'; do
+  grep -Fxq "$marker" "$EVIDENCE_DIRECTORY/after.properties" ||
+    fail "resumo CP-2C não contém: $marker"
+done
+
+for contract_profile in ci-h2 oracle; do
+  contract_evidence="$EVIDENCE_DIRECTORY/contract-$contract_profile.json"
+  if [[ "$contract_profile" == "ci-h2" ]]; then
+    expected_qualification='"qualification": "portable-ci"'
+    expected_tested_commit="$evidence_portable_commit"
+  else
+    expected_qualification='"qualification": "oracle-qualified"'
+    expected_tested_commit="$evidence_source_commit"
+  fi
+  for marker in \
+    '"schema": "wildfly-migration-contract-result/v1"' \
+    "$expected_qualification" \
+    "\"profile\": \"$contract_profile\"" \
+    "\"commit\": \"$expected_tested_commit\"" \
+    "\"sourceCommit\": \"$evidence_source_commit\"" \
+    "\"warSha256\": \"$evidence_war_sha256\"" \
+    '"runtime": "java8-wildfly26.1.3"'; do
+    grep -Fq "$marker" "$contract_evidence" ||
+      fail "contrato versionado $contract_profile não contém: $marker"
+  done
+  [[ "$(grep -Ec \
+      '^[[:space:]]+\"[A-Za-z][A-Za-z0-9]*\": \"passed\",?$' \
+      "$contract_evidence")" == "14" ]] ||
+    fail "contrato versionado $contract_profile não contém 14 cenários"
+done
+
+for marker in \
+  '"schema": "wildfly-migration-oracle-persistence/v1"' \
+  '"qualification": "oracle-qualified"' \
+  '"profile": "oracle"' \
+  "\"commit\": \"$evidence_source_commit\"" \
+  "\"sourceCommit\": \"$evidence_source_commit\"" \
+  "\"warSha256\": \"$evidence_war_sha256\"" \
+  '"runtime": "java8-wildfly26.1.3-ee8"' \
+  '"databaseVersion": "19.3.0.0.0"' \
+  '"jdbcDriver": "ojdbc7-12.1.0.2.0"' \
+  '"mybatisCommit": "passed"' \
+  '"mybatisRollback": "passed"' \
+  '"timestampRoundTrip": "passed"' \
+  '"blobRoundTrip": "passed"' \
+  '"transientDataCleanup": "passed"'; do
+  grep -Fq "$marker" "$EVIDENCE_DIRECTORY/oracle-persistence.json" ||
+    fail "persistência Oracle versionada não contém: $marker"
+done
+
+for documentation_marker in \
+  '## Conclusão comprovada' \
+  '### Limites da conclusão' \
+  '## Rollback' \
+  '30494074305' \
+  '30494074318' \
+  'sourceCommit' \
+  'TIMESTAMP(6)' \
+  'BLOB'; do
+  grep -Fq "$documentation_marker" \
+    "$REPOSITORY_ROOT/docs/evidence/CP-2C.md" ||
+    fail "documentação da evidência não contém: $documentation_marker"
+done
+
+if grep -R -Eiq \
+    'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url' \
+    "$EVIDENCE_DIRECTORY"; then
+  fail "evidência versionada CP-2C contém configuração sensível"
+fi
 
 if [[ -n "$WAR_FILE" ]]; then
   [[ -f "$WAR_FILE" ]] || fail "WAR informado não existe"

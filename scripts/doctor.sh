@@ -304,6 +304,11 @@ check_required_files() {
     required+=(
       ".github/workflows/pr-cache-cleanup.yml"
       "docs/cp-2c-ee8-maven-datasource.md"
+      "docs/evidence/CP-2C.md"
+      "migration/evidence/CP-2C/after.properties"
+      "migration/evidence/CP-2C/contract-ci-h2.json"
+      "migration/evidence/CP-2C/contract-oracle.json"
+      "migration/evidence/CP-2C/oracle-persistence.json"
       "runtime/portable-runtime-cache.sha256"
       "scripts/build-cp-2c.sh"
       "scripts/qualify-cp-2c-oracle.sh"
