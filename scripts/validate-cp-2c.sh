@@ -126,12 +126,15 @@ for cleanup_marker in \
   'actions: write' \
   'GH_TOKEN: ${{ github.token }}' \
   'PR_CACHE_REF: refs/pull/${{ github.event.pull_request.number }}/merge' \
-  'gh cache list' \
+  'gh cache delete --all' \
   '--ref "$PR_CACHE_REF"' \
-  'gh cache delete "$cache_id" --confirm'; do
+  '--succeed-on-no-caches'; do
   grep -Fq -- "$cleanup_marker" "$CACHE_CLEANUP_WORKFLOW" ||
     fail "limpeza de caches temporários não contém: $cleanup_marker"
 done
+if grep -Fq -- '--confirm' "$CACHE_CLEANUP_WORKFLOW"; then
+  fail "limpeza de cache usa a opção --confirm incompatível com o GitHub CLI"
+fi
 if grep -Fq 'uses: actions/checkout' "$CACHE_CLEANUP_WORKFLOW"; then
   fail "limpeza de cache não deve executar código do pull request fechado"
 fi
@@ -179,6 +182,13 @@ if [[ "$(grep -Fc 'uses: actions/cache/restore@v5' "$WORKFLOW")" -ne 2 ]] ||
    [[ "$(grep -Fc 'uses: actions/cache/save@v5' "$WORKFLOW")" -ne 2 ]]; then
   fail "workflow deve restaurar e salvar exatamente os caches de runtime e Maven"
 fi
+
+for cache_hit_guard in \
+  "steps.runtime-archive-cache.outputs.cache-hit != 'true'" \
+  "steps.maven-dependency-cache.outputs.cache-hit != 'true'"; do
+  grep -Fq "$cache_hit_guard" "$WORKFLOW" ||
+    fail "cache exato da main não pode ser duplicado no PR: $cache_hit_guard"
+done
 
 for save_guard in \
   "github.event_name == 'push'" \
