@@ -318,6 +318,22 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-2D; then
+    required+=(
+      "docs/evidence/CP-2D.md"
+      "migration/evidence/CP-2D/contract-ci-h2.json"
+      "migration/evidence/CP-2D/contract-oracle.json"
+      "migration/evidence/CP-2D/oracle-state.json"
+      "migration/evidence/CP-2D/oracle-persistence.json"
+      "migration/evidence/CP-2D/phase2-comparison.json"
+      "scripts/qualify-cp-2d-h2.sh"
+      "scripts/qualify-cp-2d-oracle.sh"
+      "scripts/ValidatePhase2OracleState.java"
+      "scripts/validate-cp-2d-oracle-state.sh"
+      "scripts/validate-cp-2d-phase-comparison.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"

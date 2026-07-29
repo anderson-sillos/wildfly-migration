@@ -1,0 +1,15 @@
+{
+  "schema": "wildfly-migration-phase2-comparison/v1",
+  "checkpoint": "CP-2D",
+  "sourceCommit": "9d21c4be5ea2736162691850d872150f1a4c816f",
+  "baselineTag": "migration/01-legacy-baseline",
+  "baselineWarSha256": "9dc324fcdb800e5f65ca7f54d42c65fb2ac6edcdda7ebddc023665fb6191edbe",
+  "phase2WarSha256": "62c9f723245b4aaebbeef41e63c02974a9f2fc65fc6e8758f956d03ab7f466f2",
+  "scenarioCount": 14,
+  "portableCi": "passed-with-documented-limitations",
+  "oracleQualified": "passed",
+  "oraclePersistedState": "matches-phase1",
+  "baselineUploadMetadata": "46-documented-44-observed",
+  "portableLimitations": "docs/h2-oracle-differences.md",
+  "result": "passed"
+}

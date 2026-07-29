@@ -42,6 +42,10 @@ shell_files=(
   scripts/validate-cp-2b.sh
   scripts/validate-cp-2c-oracle-persistence.sh
   scripts/validate-cp-2c.sh
+  scripts/qualify-cp-2d-h2.sh
+  scripts/qualify-cp-2d-oracle.sh
+  scripts/validate-cp-2d-oracle-state.sh
+  scripts/validate-cp-2d-phase-comparison.sh
   contract-tests/run.sh
 )
 
@@ -76,5 +80,7 @@ run_step "Validar transição Java 8 do CP-2A" ./scripts/validate-cp-2a.sh
 run_step "Validar transição WildFly 26 do CP-2B" ./scripts/validate-cp-2b.sh
 run_step "Validar alinhamento Jakarta EE 8 do CP-2C" \
   ./scripts/validate-cp-2c.sh
+run_step "Validar comparação integral da fase 2" \
+  ./scripts/validate-cp-2d-phase-comparison.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'

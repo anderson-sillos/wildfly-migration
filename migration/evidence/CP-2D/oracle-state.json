@@ -1,0 +1,21 @@
+{
+  "schema": "wildfly-migration-phase2-oracle-state/v1",
+  "qualification": "oracle-qualified",
+  "profile": "oracle",
+  "commit": "9d21c4be5ea2736162691850d872150f1a4c816f",
+  "sourceCommit": "9d21c4be5ea2736162691850d872150f1a4c816f",
+  "warSha256": "62c9f723245b4aaebbeef41e63c02974a9f2fc65fc6e8758f956d03ab7f466f2",
+  "runtime": "java8-wildfly26.1.3-ee8",
+  "databaseVersion": "19.3.0.0.0",
+  "jdbcDriver": "ojdbc7-12.1.0.2.0",
+  "contractUploadBytes": 44,
+  "contractUploadSha256": "8eb0c39e90e87a89c57313d37988ff2a3b67bb43b57ce89956f447a431dc7a3c",
+  "checks": {
+    "schemaObjects": "passed",
+    "seedState": "passed",
+    "contractCreate": "passed",
+    "contractUploadBlob": "passed",
+    "contractXml": "passed",
+    "rejectedState": "passed"
+  }
+}

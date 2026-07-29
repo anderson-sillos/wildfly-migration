@@ -84,7 +84,7 @@
 
 ### Checkpoint CP-2D — Fechamento da ponte
 
-- [ ] 2.16 Executar a suíte completa em H2 e Oracle e comparar respostas, estado persistido oficial e limitações portáteis com a fase 1.
+- [x] 2.16 Executar a suíte completa em H2 e Oracle e comparar respostas, estado persistido oficial e limitações portáteis com a fase 1.
 - [ ] 2.17 Gerar o manifesto da fase 2 com versões, dependências, WAR, runtime, checksums e limitações conhecidas.
 - [ ] 2.18 Documentar um roteiro equivalente para aplicação real, incluindo janela de transição, implantação blue/green, verificações e rollback.
 - [ ] 2.19 Reproduzir a fase 2 a partir de checkout limpo usando somente documentação e configuração externa segura.

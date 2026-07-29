@@ -23,6 +23,8 @@ passos.
    alinhamento das APIs, ferramenta de build e qualificação da persistência.
 9. [Evidência CP-2C](evidence/CP-2C.md): resultados H2/Oracle, conclusões
    comprovadas, limites e rollback do checkpoint.
+10. [Evidência CP-2D](evidence/CP-2D.md): comparação integral dos contratos,
+    estado Oracle oficial e limites da qualificação portátil da fase 2.
 
 ## Aplicação e arquitetura
 
