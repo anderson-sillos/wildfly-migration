@@ -146,6 +146,8 @@ for cache_marker in \
   './scripts/build-cp-2c.sh --profile ci-h2' \
   './scripts/validate-cp-2c-oracle-persistence.sh' \
   '--compile-only' \
+  'MIGRATION_SOURCE_COMMIT: >-' \
+  '${{ github.event.pull_request.head.sha || github.sha }}' \
   'https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz' \
   'MAVEN_HOME=$tools/apache-maven-3.9.16' \
   'MAVEN_ARCHIVE_SHA256=80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb' \
@@ -297,6 +299,7 @@ if [[ -n "$CONTRACT_RESULT_FILE" ]]; then
   [[ -f "$CONTRACT_RESULT_FILE" ]] ||
     fail "resultado de contrato informado não existe"
   current_commit="$(git -C "$REPOSITORY_ROOT" rev-parse HEAD)"
+  source_commit="${MIGRATION_SOURCE_COMMIT:-$current_commit}"
   current_war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
   if grep -Fq '"profile": "ci-h2"' "$CONTRACT_RESULT_FILE"; then
     expected_qualification='"qualification": "portable-ci"'
@@ -309,6 +312,7 @@ if [[ -n "$CONTRACT_RESULT_FILE" ]]; then
     '"schema": "wildfly-migration-contract-result/v1"' \
     "$expected_qualification" \
     "\"commit\": \"$current_commit\"" \
+    "\"sourceCommit\": \"$source_commit\"" \
     "\"warSha256\": \"$current_war_sha256\"" \
     '"runtime": "java8-wildfly26.1.3"'; do
     grep -Fq "$marker" "$CONTRACT_RESULT_FILE" ||
@@ -335,6 +339,7 @@ if [[ -n "$ORACLE_PERSISTENCE_RESULT_FILE" ]]; then
     '"qualification": "oracle-qualified"' \
     '"profile": "oracle"' \
     "\"commit\": \"$current_commit\"" \
+    "\"sourceCommit\": \"$current_commit\"" \
     "\"warSha256\": \"$current_war_sha256\"" \
     '"runtime": "java8-wildfly26.1.3-ee8"' \
     '"databaseVersion": "19.3.0.0.0"' \

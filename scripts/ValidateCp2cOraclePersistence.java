@@ -328,6 +328,7 @@ public final class ValidateCp2cOraclePersistence {
             writer.write("  \"qualification\": \"oracle-qualified\",\n");
             writer.write("  \"profile\": \"oracle\",\n");
             writer.write("  \"commit\": \"" + commit + "\",\n");
+            writer.write("  \"sourceCommit\": \"" + commit + "\",\n");
             writer.write("  \"warSha256\": \"" + warSha256 + "\",\n");
             writer.write("  \"runtime\": \"java8-wildfly26.1.3-ee8\",\n");
             writer.write("  \"databaseVersion\": \""

@@ -15,8 +15,11 @@ Ela cobre:
 - XSD inválido, XXE e expansão de entidades sem persistência parcial.
 
 O mesmo arquivo é chamado pelos perfis `ci-h2` e `oracle`. O resultado JSON
-registra perfil, qualificação, commit, SHA-256 do WAR, runtime e cenários, mas
-omite URL base, host, usuário e credenciais.
+registra perfil, qualificação, commit realmente executado, commit de origem,
+SHA-256 do WAR, runtime e cenários, mas omite URL base, host, usuário e
+credenciais. `--source-commit` é opcional e assume o valor de `--commit`; o CI
+o informa explicitamente porque pull requests executam um commit de merge
+sintético.
 
 Os resultados esperados independentes do perfil estão congelados em
 [`migration/baselines/01-legacy/contract-scenarios.tsv`](../migration/baselines/01-legacy/contract-scenarios.tsv).
@@ -32,6 +35,7 @@ Exemplo com a aplicação já ativa:
   --war app/target/wildfly-migration.war \
   --result app/target/contract-results/ci-h2.json \
   --commit "$(git rev-parse HEAD)" \
+  --source-commit "$(git rev-parse HEAD)" \
   --runtime java7-wildfly9.0.2 \
   --correlation-id contrato-manual-001
 ```

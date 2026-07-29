@@ -191,6 +191,7 @@ for marker in \
   '"qualification": "oracle-qualified"' \
   '"profile": "oracle"' \
   "\"commit\": \"$commit_sha\"" \
+  "\"sourceCommit\": \"$commit_sha\"" \
   "\"warSha256\": \"$war_sha256\"" \
   '"runtime": "java8-wildfly26.1.3-ee8"' \
   '"databaseVersion": "19.3.0.0.0"' \

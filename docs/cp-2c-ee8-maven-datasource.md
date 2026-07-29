@@ -112,6 +112,13 @@ falha depois do `INSERT` para comprovar rollback, compara timestamps e bytes
 do BLOB depois de novas consultas e remove somente seus próprios registros.
 Nenhum relatório contém URL, usuário ou senha.
 
+Em pull requests, o GitHub executa por padrão um commit sintético que combina
+o `main` com a branch. Por isso o relatório registra separadamente `commit`
+(o commit realmente executado pelo runner) e `sourceCommit` (o HEAD da branch).
+Em `push` e na qualificação Oracle local, os dois campos são iguais. A paridade
+H2/Oracle é relacionada por `sourceCommit`, e cada WAR conserva seu próprio
+SHA-256 porque o empacotamento não é presumido reprodutível byte a byte.
+
 ### H2 portátil
 
 ```bash
