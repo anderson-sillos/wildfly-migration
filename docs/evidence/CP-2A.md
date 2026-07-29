@@ -58,8 +58,11 @@ Os relatórios legíveis por máquina estão em
 e
 [`after.properties`](../../migration/evidence/CP-2A/after.properties).
 
-O CI hospedado repetirá somente a trilha `portable-ci` sobre o commit do PR. O
-resultado Oracle acima foi produzido no host autorizado da rede interna.
+O workflow hospedado
+[`30465639289`](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30465639289)
+aprovou `repository-baseline` e a trilha `portable-ci` sobre o commit
+`45caea05e3e6109eacf51dae604f9c9db243cf23`. O resultado Oracle acima foi
+produzido separadamente no host autorizado da rede interna.
 
 ## Conclusão comprovada
 

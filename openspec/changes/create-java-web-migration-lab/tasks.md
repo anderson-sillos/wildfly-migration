@@ -64,7 +64,7 @@
 - [x] 2.2 Capturar incompatibilidades causadas pela mudança Java 7 para Java 8 com sintoma, causa e evidência.
 - [x] 2.3 Ajustar somente o necessário para compilar e executar com Java 8 no WildFly 9, mantendo dependências e namespace `javax`.
 - [x] 2.4 Executar contratos, persistência H2/Oracle e auditoria do WAR e documentar o rollback para o baseline.
-- [ ] 2.5 Encerrar `CP-2A`: validar Java 8/WildFly 9, registrar evidências e integrar o PR pelo commit `checkpoint(CP-2A): run legacy application on Java 8`.
+- [x] 2.5 Encerrar `CP-2A`: validar Java 8/WildFly 9, registrar evidências e integrar o PR pelo commit `checkpoint(CP-2A): run legacy application on Java 8`.
 
 ### Checkpoint CP-2B — Migração para WildFly 26
 

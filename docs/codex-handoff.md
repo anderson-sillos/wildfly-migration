@@ -32,16 +32,19 @@ conteúdo do `.env`.
 - Branch: `checkpoint/cp-2a-java8-wildfly9`.
 - Commit de implementação qualificado:
   `c76f42f4035ac08b13fca478f1d8e375190761b9`.
-- HEAD com evidências:
-  `d4cfef1`.
+- Último commit revalidado pelo CI:
+  `45caea0`.
 - Commits do checkpoint:
   - `c76f42f feat(CP-2A): run application on Java 8`;
-  - `d4cfef1 test(CP-2A): record Java 8 qualification evidence`.
+  - `d4cfef1 test(CP-2A): record Java 8 qualification evidence`;
+  - `ed271a7 docs(CP-2A): update Codex handoff`;
+  - `45caea0 docs(CP-2A): expand checkpoint conclusion`.
 - Último squash no `main`: `a7c7b5b`, fechamento do `CP-1G`.
 - Tag pública da fase 1:
   `migration/01-legacy-baseline`, apontando para `a7c7b5b`.
-- Tarefas OpenSpec 2.1 a 2.4 concluídas; 2.5 aguarda PR, CI e squash.
-- Progresso preparado: 39 de 110 tarefas.
+- Tarefas OpenSpec 2.1 a 2.5 concluídas no conteúdo do PR; o squash efetiva o
+  encerramento no branch principal.
+- Progresso preparado: 40 de 110 tarefas.
 
 ## Entrega CP-2A preparada
 
@@ -81,17 +84,13 @@ Sobre `c76f42f`:
 - H2 e Oracle produziram o mesmo WAR e relatórios sanitizados ligados a
   `c76f42f`;
 - o CI hospedado aprovou `repository-baseline` e `portable-ci` no workflow
-  `30463661064`; a conclusão documental ampliada ainda será revalidada pelo
-  workflow final do PR.
+  `30465639289` sobre a conclusão documental ampliada.
 
 ## Próximas ações
 
-1. Publicar a conclusão documental ampliada no PR 15.
-2. Confirmar novamente `repository-baseline` e `portable-ci` no GitHub.
-3. Registrar o workflow final aprovado e marcar 2.5.
-4. Integrar por squash
+1. Integrar o PR 15 por squash
    `checkpoint(CP-2A): run legacy application on Java 8`.
-5. Iniciar CP-2B tentando o mesmo WAR no Java 8/WildFly 26 antes de corrigir.
+2. Iniciar CP-2B tentando o mesmo WAR no Java 8/WildFly 26 antes de corrigir.
 
 ## Comandos de retomada
 
