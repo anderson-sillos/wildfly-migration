@@ -72,10 +72,55 @@ for path in \
   "$REPOSITORY_ROOT/docs/evidence/CP-2A.md" \
   "$REPOSITORY_ROOT/migration/evidence/CP-2A/before-runtime.properties" \
   "$REPOSITORY_ROOT/migration/evidence/CP-2A/before-build.properties" \
+  "$REPOSITORY_ROOT/migration/evidence/CP-2A/after.properties" \
+  "$REPOSITORY_ROOT/migration/evidence/CP-2A/contract-ci-h2.json" \
+  "$REPOSITORY_ROOT/migration/evidence/CP-2A/contract-oracle.json" \
   "$REPOSITORY_ROOT/migration/steps/CP-2A-java8-toolchain.md" \
   "$REPOSITORY_ROOT/migration/steps/CP-2A-wildfly9-max-perm-size.md"; do
   [[ -f "$path" ]] || fail "arquivo obrigatório ausente: ${path#"$REPOSITORY_ROOT/"}"
 done
+
+grep -Fxq 'war.bytecode.major=52' \
+  "$REPOSITORY_ROOT/migration/evidence/CP-2A/after.properties" ||
+  fail "evidência depois da correção não registra bytecode major 52"
+grep -Fxq 'maven.tree.sha256=2bd0439fb193fe3ba416980c3f3de606ae9152ca14a55b5dc5e01c018f9adcd6' \
+  "$REPOSITORY_ROOT/migration/evidence/CP-2A/after.properties" ||
+  fail "árvore Maven deixou de corresponder ao baseline"
+grep -Fxq 'portable-ci.result=passed' \
+  "$REPOSITORY_ROOT/migration/evidence/CP-2A/after.properties" ||
+  fail "evidência H2 depois da correção não está aprovada"
+grep -Fxq 'oracle-qualified.result=passed' \
+  "$REPOSITORY_ROOT/migration/evidence/CP-2A/after.properties" ||
+  fail "evidência Oracle depois da correção não está aprovada"
+
+for evidence_contract in contract-ci-h2.json contract-oracle.json; do
+  evidence_path="$REPOSITORY_ROOT/migration/evidence/CP-2A/$evidence_contract"
+  grep -Fq '"commit": "c76f42f4035ac08b13fca478f1d8e375190761b9"' \
+    "$evidence_path" ||
+    fail "contrato rastreado não aponta para o commit de implementação"
+  grep -Fq '"warSha256": "bb6caddd16d36028ef8547398634c6e6fbf0de389d7a63b5c5f803a3409a53e4"' \
+    "$evidence_path" ||
+    fail "contrato rastreado não aponta para o WAR aprovado"
+  grep -Fq '"runtime": "java8-wildfly9.0.2"' "$evidence_path" ||
+    fail "contrato rastreado não identifica o runtime CP-2A"
+  if grep -Eiq \
+    'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url' \
+    "$evidence_path"; then
+    fail "contrato rastreado contém configuração sensível"
+  fi
+  evidence_scenario_count="$(
+    grep -Ec '^[[:space:]]+"[A-Za-z][A-Za-z0-9]*": "passed",?$' \
+      "$evidence_path"
+  )"
+  [[ "$evidence_scenario_count" == "14" ]] ||
+    fail "contrato rastreado não contém os 14 cenários"
+done
+grep -Fq '"qualification": "portable-ci"' \
+  "$REPOSITORY_ROOT/migration/evidence/CP-2A/contract-ci-h2.json" ||
+  fail "contrato H2 rastreado perdeu a classificação portable-ci"
+grep -Fq '"qualification": "oracle-qualified"' \
+  "$REPOSITORY_ROOT/migration/evidence/CP-2A/contract-oracle.json" ||
+  fail "contrato Oracle rastreado perdeu a qualificação"
 
 [[ "$(head -n 1 "$MANIFEST")" == \
   $'component\tversion\tarchive\torigin\tlicense\tsha256\tlifecycle\tscope' ]] ||

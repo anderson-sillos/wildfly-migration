@@ -29,14 +29,37 @@ e
 
 ## Correção e verificações
 
-O resultado depois da correção será preenchido antes do fechamento do PR com:
+O código testado foi fixado no commit
+`c76f42f4035ac08b13fca478f1d8e375190761b9`. Os dois perfis produziram o mesmo
+WAR:
 
-- `doctor` nos perfis H2 e Oracle;
-- WAR compilado no Java 8, bytecode major `52`;
-- 20 JARs idênticos ao inventário legado e nenhuma API/driver empacotado;
-- 14 contratos `portable-ci` e 14 contratos `oracle-qualified`;
-- inicialização sem enviar `MaxPermSize` ao Java 8;
-- CI hospedado e rollback documentados.
+- SHA-256:
+  `bb6caddd16d36028ef8547398634c6e6fbf0de389d7a63b5c5f803a3409a53e4`;
+- bytecode Java 8 major `52`;
+- 20 JARs em `WEB-INF/lib`;
+- árvore Maven com as mesmas 24 dependências e SHA-256
+  `2bd0439fb193fe3ba416980c3f3de606ae9152ca14a55b5dc5e01c018f9adcd6`
+  do baseline;
+- nenhuma API Servlet/JSP/JSTL, H2 ou `ojdbc7` empacotado.
+
+O `doctor` aprovou 107 verificações no perfil H2 e 106 no Oracle, sem falha ou
+aviso. O WildFly iniciou sem enviar `MaxPermSize` ao Java 8.
+
+Resultados funcionais sanitizados:
+
+| Trilha | Perfil | Contratos | Resultado |
+| --- | --- | ---: | --- |
+| `portable-ci` | H2 1.4.200 | 14/14 | aprovado |
+| `oracle-qualified` | Oracle 19c RU 19.3 / `ojdbc7` | 14/14 | aprovado |
+
+Os relatórios legíveis por máquina estão em
+[`contract-ci-h2.json`](../../migration/evidence/CP-2A/contract-ci-h2.json),
+[`contract-oracle.json`](../../migration/evidence/CP-2A/contract-oracle.json)
+e
+[`after.properties`](../../migration/evidence/CP-2A/after.properties).
+
+O CI hospedado repetirá somente a trilha `portable-ci` sobre o commit do PR. O
+resultado Oracle acima foi produzido no host autorizado da rede interna.
 
 ## Rollback
 
