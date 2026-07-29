@@ -41,6 +41,13 @@ chegou ao validador descoberto e foi rejeitado por regra de negócio.
 remove em `finally`. O fluxo XML registra os eventos `started`, `accepted`,
 `rejected` com categoria de motivo e `persistence_failure`.
 
+Rejeições funcionais esperadas, como limite excedido, XML inválido ou regra de
+domínio, são registradas sem stack trace. Falhas internas consumidas pela
+fronteira HTTP e falhas de limpeza temporária registram o `Throwable` completo
+uma única vez. Assim, o log preserva stack trace, causas e exceções suprimidas
+sem duplicar a mesma falha em várias camadas. Na inicialização, a causa é
+propagada ao contêiner, que registra a falha de deployment.
+
 Não podem ser registrados:
 
 - corpo XML, conteúdo ou nome de upload;

@@ -197,6 +197,32 @@ O arquivo existe somente enquanto a sessão manual está ativa. Ao pressionar
 `Ctrl+C`, o script encerra o WildFly e remove o runtime temporário junto com o
 `server.log`.
 
+### Iniciar e acompanhar pelo VS Code
+
+Abra a paleta com `Ctrl+Shift+P`, execute `Tasks: Run Task` e selecione:
+
+1. uma das duas opções de inicialização:
+   - `Legado: iniciar aplicação H2 para teste manual`;
+   - `Legado: iniciar aplicação Oracle para teste manual`;
+2. aguarde o terminal mostrar as URLs e informar que a aplicação está ativa;
+3. execute novamente `Tasks: Run Task`;
+4. selecione `Legado: acompanhar log do WildFly`.
+
+A opção H2 executa antes o build Java 7 portátil com `ci-h2`. A opção Oracle
+executa o build Java 7 com `oracle` e exige a rede interna, o Oracle JDK 7u80, o
+`ojdbc7` e as credenciais já configuradas no `.env`. Ambas mantêm o WildFly em
+um terminal dedicado.
+
+A task de log localiza o `server.log` da sessão H2 ou Oracle sem tentar
+adivinhar o identificador temporário e mostra inicialmente as últimas 100
+linhas. Ela falha de forma explícita se nenhuma sessão estiver ativa ou se
+houver mais de uma sessão.
+
+Ao concluir o teste, encerre a task de inicialização com `Ctrl+C`. O WildFly, o
+diretório temporário e, no perfil H2, o banco em memória serão removidos; a task
+de log perceberá a remoção e encerrará em seguida. No Oracle, o schema e os
+pedidos manuais permanecem conforme a política de limpeza documentada.
+
 No perfil `oracle`, o `server.log` é bruto e pode conter host, serviço, usuário
 ou URL interna. Revise e sanitize o conteúdo antes de copiar, anexar ao PR ou
 publicar. Os diagnósticos de falha impressos pelo próprio script continuam

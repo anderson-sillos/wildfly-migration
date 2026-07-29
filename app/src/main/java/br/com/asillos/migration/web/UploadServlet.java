@@ -18,12 +18,16 @@ import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.log4j.Logger;
 
 /**
  * Upload multipart deliberadamente implementado com Commons FileUpload 1.2.2.
  */
 public final class UploadServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+
+    private static final Logger LOGGER =
+            Logger.getLogger(UploadServlet.class);
 
     public static final long MAX_REQUEST_BYTES = 576L * 1024L;
     public static final int MEMORY_THRESHOLD_BYTES = 32 * 1024;
@@ -141,9 +145,7 @@ public final class UploadServlet extends HttpServlet {
                     HttpServletResponse.SC_BAD_REQUEST,
                     exception.getMessage());
         } catch (RuntimeException exception) {
-            getServletContext().log(
-                    "Falha controlada no upload; correlação="
-                    + correlation(request));
+            LOGGER.error("legacy_upload persistence_failure", exception);
             safeError(
                     request,
                     response,
@@ -154,8 +156,9 @@ public final class UploadServlet extends HttpServlet {
                 try {
                     item.delete();
                 } catch (RuntimeException exception) {
-                    getServletContext().log(
-                            "Falha ao limpar item multipart temporário");
+                    LOGGER.warn(
+                            "legacy_upload temporary_cleanup_failure",
+                            exception);
                 }
             }
         }

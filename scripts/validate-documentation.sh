@@ -4,9 +4,12 @@ set -euo pipefail
 
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RUNBOOK="$REPOSITORY_ROOT/docs/legacy-application-runbook.md"
+TASKS_FILE="$REPOSITORY_ROOT/.vscode/tasks.json"
 
 required_paths=(
+  ".vscode/tasks.json"
   "docs/README.md"
+  "docs/codex-handoff.md"
   "docs/environment-setup.md"
   "docs/legacy-application-runbook.md"
   "docs/legacy-upload.md"
@@ -15,6 +18,7 @@ required_paths=(
   "docs/oracle-lab-schema.md"
   "runtime/legacy/README.md"
   "runtime/legacy/profiles/README.md"
+  "scripts/follow-wildfly9-log.sh"
 )
 
 for path in "${required_paths[@]}"; do
@@ -39,15 +43,40 @@ required_runbook_markers=(
   'tail -f --'
   'o `server.log` é bruto'
   'Ctrl+C'
+  'Legado: iniciar aplicação H2 para teste manual'
+  'Legado: iniciar aplicação Oracle para teste manual'
+  'Legado: acompanhar log do WildFly'
   'LAB-SMOKE-*'
   'Upload legado do CP-1F'
   'Importação XML'
   'DROP USER ... CASCADE'
 )
 
+if ! grep -Fq -- '[Codex handoff](codex-handoff.md)' \
+    "$REPOSITORY_ROOT/docs/README.md"; then
+  printf 'FALHA: índice da documentação não referencia o Codex handoff\n' >&2
+  exit 1
+fi
+
 for marker in "${required_runbook_markers[@]}"; do
   if ! grep -Fq -- "$marker" "$RUNBOOK"; then
     printf 'FALHA: runbook não contém o contrato operacional: %s\n' \
+      "$marker" >&2
+    exit 1
+  fi
+done
+
+required_task_markers=(
+  '"label": "Legado: iniciar aplicação H2 para teste manual"'
+  '"command": "${workspaceFolder}/scripts/smoke-wildfly9-datasource.sh"'
+  '"label": "Legado: iniciar aplicação Oracle para teste manual"'
+  '"label": "Legado: acompanhar log do WildFly"'
+  '"command": "${workspaceFolder}/scripts/follow-wildfly9-log.sh"'
+)
+
+for marker in "${required_task_markers[@]}"; do
+  if ! grep -Fq -- "$marker" "$TASKS_FILE"; then
+    printf 'FALHA: tasks do VS Code não contêm o contrato operacional: %s\n' \
       "$marker" >&2
     exit 1
   fi

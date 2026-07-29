@@ -37,11 +37,9 @@ public final class MigrationContextListener
                     "Migration Lab iniciado com datasource "
                     + LegacyBuildMarker.DATASOURCE_JNDI_NAME);
         } catch (RuntimeException exception) {
-            context.log(
-                    "Migration Lab não iniciou: verifique o datasource "
-                    + LegacyBuildMarker.DATASOURCE_JNDI_NAME);
             throw new IllegalStateException(
-                    "Falha controlada ao inicializar a persistência");
+                    "Falha controlada ao inicializar a persistência",
+                    exception);
         }
     }
 

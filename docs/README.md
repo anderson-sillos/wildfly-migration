@@ -37,6 +37,9 @@ Os arquivos em [`docs/evidence/`](evidence/) registram o que foi executado em
 cada checkpoint. Eles não são runbooks ativos e não devem ser usados
 isoladamente para iniciar o ambiente.
 
+O [Codex handoff](codex-handoff.md) preserva o estado da sessão de trabalho,
+as decisões já consolidadas e as próximas ações sem reproduzir segredos locais.
+
 As falhas de migração e suas correções ficam em
 [`migration/steps/`](../migration/steps/). O planejamento executável e os
 critérios normativos permanecem em

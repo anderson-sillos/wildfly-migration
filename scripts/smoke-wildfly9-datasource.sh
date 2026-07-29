@@ -793,6 +793,7 @@ printf 'OK: datasource %s publicou java:/jdbc/MigrationDS e passou no pool em lo
   "$PROFILE"
 
 if [[ "$MANUAL_MODE" == true ]]; then
+  printf '%s\n' "$SERVER_PID" >"$TEMP_DIRECTORY/manual-server.pid"
   printf '\nAplicação legada disponível somente em loopback:\n'
   printf '  Lista:  http://127.0.0.1:%s/wildfly-migration/pedidos\n' \
     "$HTTP_PORT_VALUE"

@@ -42,6 +42,18 @@ public final class ValidateLegacyDiscoveryLogging {
                 repository,
                 "app/src/main/java/br/com/asillos/migration/web/"
                 + "XmlImportServlet.java"));
+        String uploadServlet = read(file(
+                repository,
+                "app/src/main/java/br/com/asillos/migration/web/"
+                + "UploadServlet.java"));
+        String pedidoServlet = read(file(
+                repository,
+                "app/src/main/java/br/com/asillos/migration/web/"
+                + "PedidoServlet.java"));
+        String contextListener = read(file(
+                repository,
+                "app/src/main/java/br/com/asillos/migration/web/"
+                + "MigrationContextListener.java"));
         String logConfiguration = read(file(
                 repository, "app/src/main/resources/log4j.properties"));
         String smoke = read(file(
@@ -90,6 +102,34 @@ public final class ValidateLegacyDiscoveryLogging {
         require(servlet.indexOf("LOGGER.info(xml") < 0
                 && servlet.indexOf("LOGGER.warn(xml") < 0,
                 "conteúdo XML não pode ser registrado");
+        require(callIncludesThrowable(
+                    servlet,
+                    "LOGGER.error(",
+                    "legacy_xml_import persistence_failure")
+                && callIncludesThrowable(
+                    servlet,
+                    "LOGGER.warn(",
+                    "legacy_xml_import temporary_cleanup_failure"),
+                "falhas internas do XML não preservam a exceção");
+        require(callIncludesThrowable(
+                    uploadServlet,
+                    "LOGGER.error(",
+                    "legacy_upload persistence_failure")
+                && callIncludesThrowable(
+                    uploadServlet,
+                    "LOGGER.warn(",
+                    "legacy_upload temporary_cleanup_failure"),
+                "falhas internas do upload não preservam a exceção");
+        require(callIncludesThrowable(
+                    pedidoServlet,
+                    "LOGGER.error(",
+                    "legacy_order persistence_failure"),
+                "falha interna de pedido não preserva a exceção");
+        require(callIncludesThrowable(
+                    contextListener,
+                    "new IllegalStateException(",
+                    "Falha controlada ao inicializar a persistência"),
+                "falha de inicialização não preserva a causa");
         require(logConfiguration.indexOf("org.apache.log4j.ConsoleAppender")
                 >= 0
                 && logConfiguration.indexOf("%X{correlationId}") >= 0,
@@ -105,6 +145,30 @@ public final class ValidateLegacyDiscoveryLogging {
 
         System.out.println(
                 "OK: Reflections e Log4j 1 têm contrato determinístico");
+    }
+
+    private static boolean callIncludesThrowable(
+            String source,
+            String call,
+            String marker) {
+        int offset = 0;
+        while (offset < source.length()) {
+            int callIndex = source.indexOf(call, offset);
+            if (callIndex < 0) {
+                return false;
+            }
+            int callEnd = source.indexOf(");", callIndex);
+            if (callEnd < 0) {
+                return false;
+            }
+            String arguments = source.substring(callIndex, callEnd);
+            if (arguments.indexOf(marker) >= 0
+                    && arguments.indexOf("exception") >= 0) {
+                return true;
+            }
+            offset = callEnd + 2;
+        }
+        return false;
     }
 
     private static File file(File repository, String relativePath) {

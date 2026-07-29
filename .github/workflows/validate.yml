@@ -30,6 +30,7 @@ jobs:
           bash -n scripts/validate-cp-1d-datasources.sh
           bash -n scripts/build-cp-1d.sh
           bash -n scripts/smoke-wildfly9-datasource.sh
+          bash -n scripts/follow-wildfly9-log.sh
           bash -n scripts/oracle-lab-schema.sh
           bash -n scripts/validate-documentation.sh
           bash -n scripts/validate-cp-1e-persistence.sh

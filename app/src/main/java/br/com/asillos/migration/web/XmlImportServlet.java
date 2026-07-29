@@ -158,10 +158,9 @@ public final class XmlImportServlet extends HttpServlet {
                     HttpServletResponse.SC_BAD_REQUEST,
                     exception.getMessage());
         } catch (RuntimeException exception) {
-            LOGGER.error("legacy_xml_import persistence_failure");
-            getServletContext().log(
-                    "Falha controlada na importação XML; correlação="
-                    + correlation(request));
+            LOGGER.error(
+                    "legacy_xml_import persistence_failure",
+                    exception);
             safeError(
                     request,
                     response,
@@ -217,7 +216,8 @@ public final class XmlImportServlet extends HttpServlet {
                     item.delete();
                 } catch (RuntimeException exception) {
                     LOGGER.warn(
-                            "legacy_xml_import temporary_cleanup_failure");
+                            "legacy_xml_import temporary_cleanup_failure",
+                            exception);
                 }
             }
         }
