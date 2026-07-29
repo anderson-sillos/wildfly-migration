@@ -291,6 +291,11 @@ grep -Fq -- \
   "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.14 não está concluída no OpenSpec"
 
+grep -Fq -- \
+  '- [x] 2.15 Encerrar `CP-2C`' \
+  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  fail "tarefa 2.15 não está concluída no OpenSpec"
+
 evidence_source_commit="$(
   awk -F= '$1 == "implementation.commit" { print $2 }' \
     "$EVIDENCE_DIRECTORY/after.properties"
