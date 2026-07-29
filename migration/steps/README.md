@@ -22,4 +22,6 @@ Registros atuais:
 - [`CP-1F-validator-after-xsd.md`](CP-1F-validator-after-xsd.md):
   prova funcional do validador descoberto;
 - [`CP-1F-xmlbeans-xsd-regex.md`](CP-1F-xmlbeans-xsd-regex.md):
-  interpretação histórica de expressão regular pelo XMLBeans.
+  interpretação histórica de expressão regular pelo XMLBeans;
+- [`CP-1G-oracle-ru-detection.md`](CP-1G-oracle-ru-detection.md):
+  separação entre produto JDBC e Release Update observado no banco.

@@ -203,11 +203,21 @@ public final class OracleLabSchema {
         String databaseVersion =
                 connection.getMetaData().getDatabaseProductVersion();
         require(databaseVersion != null
-                && databaseVersion.indexOf("19.3.0.0.0") >= 0,
-                "Oracle Database RU diverge de 19.3.0.0.0");
+                && databaseVersion.indexOf("Oracle Database 19c") >= 0,
+                "produto conectado não é Oracle Database 19c");
 
         Statement statement = connection.createStatement();
         try {
+            ResultSet version = statement.executeQuery(
+                    "SELECT VERSION_FULL FROM PRODUCT_COMPONENT_VERSION "
+                    + "WHERE PRODUCT LIKE 'Oracle Database%'");
+            require(version.next()
+                    && "19.3.0.0.0".equals(version.getString(1)),
+                    "Oracle Database RU diverge de 19.3.0.0.0");
+            require(!version.next(),
+                    "versão Oracle retornou mais de um registro");
+            version.close();
+
             require(count(statement,
                     "SELECT COUNT(*) FROM USER_TABLES "
                     + "WHERE TABLE_NAME IN ('LAB_PEDIDO','LAB_ANEXO')") == 2L,
