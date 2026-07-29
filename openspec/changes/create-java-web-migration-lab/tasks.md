@@ -69,7 +69,7 @@
 ### Checkpoint CP-2B — Migração para WildFly 26
 
 - [x] 2.6 Tentar implantar no WildFly 26.1.3 com Java 8 o mesmo WAR aprovado em `CP-2A` antes de alterar configuração ou código.
-- [ ] 2.7 Capturar incompatibilidades de configuração, datasource, segurança, logging e classloader entre WildFly 9 e 26.1.3.
+- [x] 2.7 Capturar incompatibilidades de configuração, datasource, segurança, logging e classloader entre WildFly 9 e 26.1.3.
 - [ ] 2.8 Provisionar WildFly 26.1.3/Java 8 e migrar sua configuração sem alterar o namespace `javax.*`.
 - [ ] 2.9 Configurar no WildFly 26 os perfis H2 e Oracle, seus drivers, o mesmo JNDI e verificações de saúde sem alterar o contrato funcional do schema.
 - [ ] 2.10 Encerrar `CP-2B`: validar implantação e smoke tests no WildFly 26, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-2B): migrate runtime to WildFly 26`.

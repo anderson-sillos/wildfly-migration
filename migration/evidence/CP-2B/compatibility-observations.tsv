@@ -1,0 +1,6 @@
+area	baseline-wildfly9	target-wildfly26	severity	decision	record
+configuration	MigrationDS-and-default-binding-provisioned	distribution-default-has-only-ExampleDS	blocking	migrate-versioned-runtime-configuration	INC-007
+datasource	java:/jdbc/MigrationDS-available	java:/jdbc/MigrationDS-missing	blocking	provision-same-jndi-and-pool-per-profile	INC-007
+security	loopback-http-required	default-https-listener-generates-temporary-keystore-warning	non-blocking	remove-unused-https-listener-from-temporary-lab-runtime	INC-009
+logging	log4j1-configuration-accepted	log4j1-configuration-accepted-with-WFLYLOG0100	non-blocking-deprecated	preserve-in-CP-2B-and-remove-at-planned-dependency-gate	INC-008
+classloader	CP-2A-contracts-passed	no-linkage-error-before-jndi-failure-not-fully-qualified	pending-regression	do-not-add-libraries-and-revalidate-after-datasource	docs/evidence/CP-2B.md

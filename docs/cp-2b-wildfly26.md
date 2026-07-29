@@ -44,12 +44,25 @@ Consulte a
 [evidência CP-2B](evidence/CP-2B.md) e o cenário
 [`INC-007`](../migration/steps/CP-2B-wildfly26-missing-datasource.md).
 
-## Estado da evolução
+## Classificação antes da correção
 
-A tarefa 2.6 está concluída. A tarefa 2.7 ainda deve classificar, sem antecipar
-correções, os efeitos observados em configuração, datasource, segurança,
-logging e classloader. Depois disso, as tarefas 2.8 e 2.9 provisionarão os dois
-perfis sob o mesmo JNDI.
+A tarefa 2.7 separou os sinais observados:
+
+- `INC-007`, bloqueante: a configuração original não publica
+  `java:/jdbc/MigrationDS`;
+- `INC-008`, não bloqueante: `log4j.properties` ainda é aceito, mas está
+  depreciado; a biblioteca será preservada neste checkpoint e atualizada
+  somente no gate planejado;
+- `INC-009`, não bloqueante: a configuração padrão tenta gerar um keystore
+  HTTPS, embora o laboratório precise somente de HTTP em loopback;
+- classloader: nenhum `ClassNotFoundException`, `NoClassDefFoundError` ou
+  `LinkageError` foi observado; os avisos opcionais de Tiles/Weld não
+  justificam adicionar bibliotecas ao WAR.
+
+A matriz completa está em
+[`compatibility-observations.tsv`](../migration/evidence/CP-2B/compatibility-observations.tsv).
+As tarefas 2.8 e 2.9 deverão resolver `INC-007` e `INC-009` e revalidar o
+classloader depois que a aplicação estiver ativa.
 
 ## Rollback atual
 

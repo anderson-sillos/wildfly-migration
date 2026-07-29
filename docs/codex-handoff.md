@@ -33,8 +33,8 @@ conteúdo do `.env`.
 - Último squash no `main`: `bce4fb9`, fechamento do `CP-2A` pelo PR 15.
 - Tag pública da fase 1:
   `migration/01-legacy-baseline`, apontando para `a7c7b5b`.
-- Tarefas OpenSpec 2.1 a 2.6 concluídas.
-- Progresso preparado: 41 de 110 tarefas.
+- Tarefas OpenSpec 2.1 a 2.7 concluídas.
+- Progresso preparado: 42 de 110 tarefas.
 
 ## CP-2A encerrado
 
@@ -97,15 +97,17 @@ Sobre `c76f42f`:
 - causa natural catalogada como `INC-007`: ausência de
   `java:/jdbc/MigrationDS` na configuração original do WildFly 26;
 - aviso preliminar `WFLYLOG0100`: suporte a `log4j.properties` no deployment
-  está depreciado.
+  está depreciado, catalogado como `INC-008` e adiado para `CP-3B`;
+- `INC-009`: o listener HTTPS padrão tenta gerar um keystore que não faz
+  parte do contrato local e será removido somente da cópia temporária;
+- nenhum erro de linkage foi observado antes da falha JNDI; a matriz exige
+  nova validação do classloader depois da correção.
 
 ## Próximas ações
 
-1. Classificar as observações de configuração, datasource, segurança, logging
-   e classloader e concluir a tarefa 2.7.
-2. Adaptar o runtime temporário e o diagnóstico para Java 8/WildFly 26 sem
+1. Adaptar o runtime temporário e o diagnóstico para Java 8/WildFly 26 sem
    alterar `app/` ou o namespace `javax.*`.
-3. Provisionar H2 e Oracle sob `java:/jdbc/MigrationDS`, executar smokes e
+2. Provisionar H2 e Oracle sob `java:/jdbc/MigrationDS`, executar smokes e
    contratos e resolver `INC-007`.
 
 ## Comandos de retomada

@@ -37,19 +37,21 @@ A aplicação converteu a falha em
 `IllegalStateException: Datasource JNDI do laboratório não está disponível`;
 nenhuma URL, credencial ou endereço Oracle foi registrado.
 
-## Observações preliminares
+## Classificação das incompatibilidades
 
 | Área | Resultado anterior à correção |
 | --- | --- |
-| Configuração | O `standalone.xml` original inicia, mas não contém os recursos do laboratório. |
-| Datasource | Bloqueante: `java:/jdbc/MigrationDS` ausente impede o bootstrap MyBatis. |
-| Segurança | Elytron gerou apenas avisos do keystore temporário padrão; nenhuma falha de segurança da aplicação foi alcançada. |
-| Logging | `WFLYLOG0100`: `log4j.properties` foi aceito, porém seu suporte está depreciado. |
-| Classloader | Tiles alcançou sua inicialização e avisou sobre factories opcionais de portlet; a falha JNDI interrompeu a validação funcional completa. |
+| Configuração | Bloqueante | O `standalone.xml` original inicia, mas contém somente `ExampleDS`; os recursos do laboratório não migram com a troca do binário. |
+| Datasource | Bloqueante, `INC-007` | `java:/jdbc/MigrationDS` ausente impede o bootstrap MyBatis e deixa o deployment `FAILED`. |
+| Segurança | Não bloqueante, `INC-009` | Elytron tenta gerar o keystore HTTPS padrão; a aplicação não possui `security-constraint`, `login-config` ou domínio próprio. O runtime do laboratório removerá o listener HTTPS desnecessário. |
+| Logging | Não bloqueante, `INC-008` | `WFLYLOG0100`: `log4j.properties` foi aceito, porém seu suporte está depreciado. A remoção da biblioteca permanece adiada para o gate de dependências. |
+| Classloader | Nenhuma quebra confirmada | Não houve `ClassNotFoundException`, `NoClassDefFoundError` ou `LinkageError`. Tiles avisou sobre factories opcionais de portlet e Weld sobre ausência de bean archive; não será incluído JAR nem `beans.xml` apenas para silenciar avisos. |
 
-Essa tabela registra o que foi efetivamente observado, mas não encerra a
-tarefa 2.7. A ausência do datasource mascara possíveis problemas posteriores;
-eles serão classificados antes da configuração corretiva.
+A classificação legível por máquina está em
+[`compatibility-observations.tsv`](../../migration/evidence/CP-2B/compatibility-observations.tsv).
+A falha JNDI limita a profundidade da observação do classloader; os contratos
+das tarefas 2.8 e 2.9 deverão confirmar que nenhuma quebra aparece depois da
+ativação do contexto.
 
 ## Evidência legível por máquina
 
