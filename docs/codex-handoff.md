@@ -63,6 +63,8 @@ O estado corrigido:
 - preserva as 24 dependências, os 20 JARs e a árvore Maven SHA-256
   `2bd0439fb193fe3ba416980c3f3de606ae9152ca14a55b5dc5e01c018f9adcd6`;
 - remove `MaxPermSize` somente da cópia temporária do WildFly usada no Java 8.
+- registra a conclusão comprovada no próprio documento de evidência do CP-2A,
+  sem criar um quadro paralelo para checkpoints pendentes.
 
 ## Validações aprovadas
 
@@ -78,13 +80,15 @@ Sobre `c76f42f`:
 - schema Oracle descartável, datasource JNDI, pool e limpeza: aprovados;
 - H2 e Oracle produziram o mesmo WAR e relatórios sanitizados ligados a
   `c76f42f`;
-- o CI hospedado ainda precisa confirmar o commit do PR.
+- o CI hospedado aprovou `repository-baseline` e `portable-ci` no workflow
+  `30463661064`; a conclusão documental ampliada ainda será revalidada pelo
+  workflow final do PR.
 
 ## Próximas ações
 
-1. Enviar a branch e abrir o PR do CP-2A.
-2. Confirmar `repository-baseline` e `portable-ci` no GitHub.
-3. Registrar o workflow aprovado e marcar 2.5.
+1. Publicar a conclusão documental ampliada no PR 15.
+2. Confirmar novamente `repository-baseline` e `portable-ci` no GitHub.
+3. Registrar o workflow final aprovado e marcar 2.5.
 4. Integrar por squash
    `checkpoint(CP-2A): run legacy application on Java 8`.
 5. Iniciar CP-2B tentando o mesmo WAR no Java 8/WildFly 26 antes de corrigir.

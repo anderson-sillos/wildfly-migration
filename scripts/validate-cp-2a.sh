@@ -163,6 +163,22 @@ grep -Fq '<phase2.java.version.range>[1.8,1.9)</phase2.java.version.range>' \
   fail "Enforcer não restringe a família Java 8"
 grep -Fq -- '--java 8' "$REPOSITORY_ROOT/docs/cp-2a-java8-wildfly9.md" ||
   fail "runbook não seleciona Java 8 explicitamente"
+grep -Fq 'Conclusão comprovada' \
+  "$REPOSITORY_ROOT/docs/evidence/CP-2A.md" ||
+  fail "evidência CP-2A não contém a conclusão explicativa"
+for conclusion_marker in \
+  'Compatibilidade binária inicial' \
+  'Recompilação real para Java 8' \
+  'Configuração do runtime' \
+  'Equivalência funcional' \
+  'Qualificação da persistência' \
+  'Isolamento da mudança' \
+  'Síntese' \
+  'Limites da conclusão'; do
+  grep -Fq "$conclusion_marker" \
+    "$REPOSITORY_ROOT/docs/evidence/CP-2A.md" ||
+    fail "conclusão CP-2A não contém: $conclusion_marker"
+done
 grep -Fq 'MaxPermSize' \
   "$REPOSITORY_ROOT/scripts/smoke-wildfly9-datasource.sh" ||
   fail "smoke não contém a regressão da opção removida"
