@@ -133,6 +133,9 @@ if [[ "$JAVA_RELEASE" == "8" ]]; then
   JAVA_HOME_VALUE="$(configuration_value JAVA8_HOME)"
   EXPECTED_JAVA='Java version: 1.8.0_492'
   MAVEN_OPTIONS='-Dhttps.protocols=TLSv1.2'
+  EXPECTED_LIBRARIES="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/war-libraries.txt"
+else
+  EXPECTED_LIBRARIES="$REPOSITORY_ROOT/runtime/legacy/war-libraries.txt"
 fi
 
 MAVEN_HOME_VALUE="$(configuration_value MAVEN_HOME)"
@@ -171,6 +174,7 @@ MAVEN_OPTS="$MAVEN_OPTIONS" \
 
 "$REPOSITORY_ROOT/scripts/audit-legacy-war.sh" \
   --java-home "$JAVA_HOME_VALUE" \
+  --expected-libraries "$EXPECTED_LIBRARIES" \
   --expected-bytecode "$([[ "$JAVA_RELEASE" == "8" ]] && printf 52 || printf 51)" \
   --expected-java-label "Java $JAVA_RELEASE" \
   "$REPOSITORY_ROOT/app/target/wildfly-migration.war"

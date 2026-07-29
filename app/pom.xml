@@ -9,8 +9,8 @@
   <version>1.0.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
-  <name>WildFly Migration Lab — Java 8 on WildFly 9</name>
-  <description>Aplicação Java EE legada recompilada no Java 8 durante o CP-2A.</description>
+  <name>WildFly Migration Lab — Jakarta EE 8 on WildFly 26</name>
+  <description>Aplicação alinhada ao Jakarta EE 8 no Java 8 e WildFly 26 durante o CP-2C.</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,9 +20,7 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <phase2.java.version.range>[1.8,1.9)</phase2.java.version.range>
 
-    <servlet.api.version>2.4</servlet.api.version>
-    <jsp.api.version>2.0</jsp.api.version>
-    <jstl.api.version>1.2</jstl.api.version>
+    <jakarta.ee.web.api.version>8.0.0</jakarta.ee.web.api.version>
     <mybatis.version>3.4.5</mybatis.version>
     <log4j.version>1.2.14</log4j.version>
     <commons.fileupload.version>1.2.2</commons.fileupload.version>
@@ -36,23 +34,14 @@
   </properties>
 
   <dependencies>
-    <!-- APIs fornecidas pelo WildFly; nunca devem entrar em WEB-INF/lib. -->
+    <!--
+      O Jakarta EE 8 ainda usa pacotes javax.*. Esta API é fornecida pelo
+      WildFly 26 e nunca deve entrar em WEB-INF/lib.
+    -->
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>${servlet.api.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>jsp-api</artifactId>
-      <version>${jsp.api.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet.jsp.jstl</groupId>
-      <artifactId>jstl-api</artifactId>
-      <version>${jstl.api.version}</version>
+      <groupId>jakarta.platform</groupId>
+      <artifactId>jakarta.jakartaee-web-api</artifactId>
+      <version>${jakarta.ee.web.api.version}</version>
       <scope>provided</scope>
     </dependency>
 

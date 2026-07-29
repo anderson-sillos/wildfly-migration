@@ -36,7 +36,7 @@ required_paths=(
   "runtime/legacy/war-libraries.txt"
   "scripts/audit-legacy-war.sh"
   "scripts/build-cp-1c.sh"
-  "scripts/ValidateLegacyPom.java"
+  "scripts/ValidateApplicationPom.java"
 )
 
 for path in "${required_paths[@]}"; do
@@ -90,7 +90,7 @@ fi
 
 javac -Xlint:-options -source 1.8 -target 1.8 \
   -d "$TEMP_DIRECTORY" \
-  "$REPOSITORY_ROOT/scripts/ValidateLegacyPom.java"
-java -cp "$TEMP_DIRECTORY" ValidateLegacyPom "$REPOSITORY_ROOT"
+  "$REPOSITORY_ROOT/scripts/ValidateApplicationPom.java"
+java -cp "$TEMP_DIRECTORY" ValidateApplicationPom "$REPOSITORY_ROOT"
 
 printf 'OK: recursos estáticos do CP-1C validados\n'

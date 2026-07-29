@@ -18,6 +18,11 @@ Essas APIs participam da compilação e são rejeitadas se aparecerem em
 e namespace Java EE histórico; “taglib 2.0” é uma versão de descritor, não uma
 dependência Maven adicional.
 
+Essa tabela descreve o estado preservado em `migration/01-legacy-baseline`.
+No CP-2C, o POM ativo substitui as três coordenadas por
+`jakarta.platform:jakarta.jakartaee-web-api:8.0.0` em `provided`. Jakarta EE 8
+ainda usa pacotes `javax.*`; o namespace muda somente na fase 3.
+
 ## Bibliotecas empacotadas deliberadamente
 
 | Coordenada | Versão |

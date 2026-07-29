@@ -14,17 +14,17 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public final class ValidateLegacyPom {
+public final class ValidateApplicationPom {
     private static final String POM_NAMESPACE =
             "http://maven.apache.org/POM/4.0.0";
 
-    private ValidateLegacyPom() {
+    private ValidateApplicationPom() {
     }
 
     public static void main(String[] args) throws Exception {
         if (args.length != 1) {
             throw new IllegalArgumentException(
-                    "uso: ValidateLegacyPom <raiz-do-repositorio>");
+                    "uso: ValidateApplicationPom <raiz-do-repositorio>");
         }
 
         File repository = new File(args[0]);
@@ -42,7 +42,8 @@ public final class ValidateLegacyPom {
                 repository,
                 "runtime/legacy/datasource-contract.properties"));
 
-        System.out.println("OK: POM, WAR e contrato de datasource legado validados");
+        System.out.println(
+                "OK: POM ativo, WAR e contrato de datasource validados");
     }
 
     private static File file(File repository, String relativePath) {
@@ -92,21 +93,17 @@ public final class ValidateLegacyPom {
         }
 
         require("1.8".equals(properties.get("maven.compiler.source")),
-                "source do compilador deve ser 1.8 no CP-2A");
+                "source do compilador deve ser 1.8 na fase 2");
         require("1.8".equals(properties.get("maven.compiler.target")),
-                "target do compilador deve ser 1.8 no CP-2A");
+                "target do compilador deve ser 1.8 na fase 2");
         require("[1.8,1.9)".equals(
                 properties.get("phase2.java.version.range")),
                 "range Java padrão deve exigir a família Java 8");
 
         Map<String, String[]> expected =
                 new LinkedHashMap<String, String[]>();
-        expected.put("javax.servlet:servlet-api",
-                values("2.4", "provided"));
-        expected.put("javax.servlet:jsp-api",
-                values("2.0", "provided"));
-        expected.put("javax.servlet.jsp.jstl:jstl-api",
-                values("1.2", "provided"));
+        expected.put("jakarta.platform:jakarta.jakartaee-web-api",
+                values("8.0.0", "provided"));
         expected.put("org.mybatis:mybatis", values("3.4.5", "compile"));
         expected.put("log4j:log4j", values("1.2.14", "compile"));
         expected.put("commons-fileupload:commons-fileupload",
@@ -165,7 +162,7 @@ public final class ValidateLegacyPom {
 
         require(document.getElementsByTagNameNS(POM_NAMESPACE, "repositories")
                 .getLength() == 0,
-                "repositórios adicionais são proibidos no POM legado");
+                "repositórios adicionais são proibidos no POM da aplicação");
 
         Element build = child(project, "build");
         require("wildfly-migration".equals(text(build, "finalName")),

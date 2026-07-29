@@ -48,6 +48,7 @@ jobs:
           bash -n scripts/validate-cp-2a.sh
           bash -n scripts/smoke-wildfly26-datasource.sh
           bash -n scripts/validate-cp-2b.sh
+          bash -n scripts/validate-cp-2c.sh
           bash -n contract-tests/run.sh
 
       - name: Validate repository baseline
@@ -100,3 +101,6 @@ jobs:
 
       - name: Validate CP-2B WildFly 26 transition statically
         run: ./scripts/validate-cp-2b.sh
+
+      - name: Validate CP-2C Jakarta EE 8 alignment statically
+        run: ./scripts/validate-cp-2c.sh

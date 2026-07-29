@@ -76,7 +76,7 @@
 
 ### Checkpoint CP-2C — EE 8, Maven e datasource
 
-- [ ] 2.11 Alinhar as APIs do build a Jakarta EE 8 com pacotes `javax.*` e escopo `provided`, rejeitando APIs do contêiner em `WEB-INF/lib`.
+- [x] 2.11 Alinhar as APIs do build a Jakarta EE 8 com pacotes `javax.*` e escopo `provided`, rejeitando APIs do contêiner em `WEB-INF/lib`.
 - [ ] 2.12 Atualizar a ferramenta de build de Maven 3.8.9 para Maven 3.9.16 e documentar a diferença entre a versão do Maven e `<modelVersion>4.0.0</modelVersion>`.
 - [ ] 2.13 Validar a paridade portátil em H2 e qualificar no Oracle o datasource, as transações MyBatis, timestamps e LOBs com o driver aprovado para Java 8.
 - [ ] 2.14 Atualizar `doctor`, CI H2, qualificação Oracle e auditoria do WAR para a combinação Java 8/WildFly 26/EE 8.

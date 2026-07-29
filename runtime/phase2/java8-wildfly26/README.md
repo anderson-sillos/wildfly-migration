@@ -4,6 +4,11 @@ O CP-2B troca somente o servidor da aplicação aprovada no CP-2A. Java,
 Maven, dependências, bytecode, namespace `javax.*` e contrato funcional
 permanecem inalterados durante a primeira tentativa.
 
+No CP-2C, o build passa a declarar o Jakarta EE Web Profile 8 como API
+`provided`. A allowlist [`war-libraries.txt`](war-libraries.txt) pertence à
+fase 2 e comprova que essa API do contêiner não é empacotada; as 20 bibliotecas
+da aplicação permanecem iguais nesta alteração.
+
 ## Distribuição fixada
 
 - release:
