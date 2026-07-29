@@ -1,8 +1,36 @@
 # Testes de contrato
 
-Esta área receberá a suíte externa que exercita a aplicação pela interface HTTP
-e pelo estado persistido, sem importar classes internas do WAR.
+`run.sh` exercita uma aplicação já iniciada somente por HTTP e pelo estado
+observável em novas requisições. A suíte não importa classes, mappers ou
+recursos internos do WAR.
 
-A implementação executável começa no CP-1E. Os fixtures estáticos definidos no
-CP-1B ficam em [`fixtures/`](fixtures/) e preservam a fronteira arquitetural
-entre testes de contrato e testes internos de `app/`.
+Ela cobre:
+
+- saúde e correlação;
+- listagem, criação e nova consulta do pedido persistido;
+- preferência em sessão;
+- upload, metadados persistidos e limite HTTP `413`;
+- página multipart e importação XML válida;
+- XML válido no XSD rejeitado pelo validador de status inicial;
+- XSD inválido, XXE e expansão de entidades sem persistência parcial.
+
+O mesmo arquivo é chamado pelos perfis `ci-h2` e `oracle`. O resultado JSON
+registra perfil, qualificação, commit, SHA-256 do WAR, runtime e cenários, mas
+omite URL base, host, usuário e credenciais.
+
+Exemplo com a aplicação já ativa:
+
+```bash
+./contract-tests/run.sh \
+  --base-url http://127.0.0.1:18080/wildfly-migration \
+  --profile ci-h2 \
+  --war app/target/wildfly-migration.war \
+  --result app/target/contract-results/ci-h2.json \
+  --commit "$(git rev-parse HEAD)" \
+  --runtime java7-wildfly9.0.2 \
+  --correlation-id contrato-manual-001
+```
+
+Em Oracle, execute preferencialmente pelo
+`scripts/smoke-wildfly9-datasource.sh`, que garante a limpeza dos pedidos
+`LAB-SMOKE-*`. As fixtures estáticas ficam em [`fixtures/`](fixtures/).

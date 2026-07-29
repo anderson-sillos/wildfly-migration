@@ -3,7 +3,7 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="br.com.asillos.migration.persistence.AnexoMapper">
-  <resultMap id="anexoResult" type="anexo">
+  <resultMap id="anexoMetadataResult" type="anexo">
     <id property="id" column="ID" javaType="java.lang.Long"/>
     <result property="pedidoId" column="PEDIDO_ID"
             javaType="java.lang.Long"/>
@@ -14,15 +14,24 @@
     <result property="sha256" column="SHA256"
             javaType="java.lang.String" jdbcType="CHAR"
             typeHandler="br.com.asillos.migration.persistence.Sha256TypeHandler"/>
-    <result property="conteudo" column="CONTEUDO"
-            javaType="[B" jdbcType="BLOB"/>
     <result property="criadoEm" column="CRIADO_EM"
             javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+  </resultMap>
+
+  <resultMap id="anexoResult" type="anexo"
+             extends="anexoMetadataResult">
+    <result property="conteudo" column="CONTEUDO"
+            javaType="[B" jdbcType="BLOB"/>
   </resultMap>
 
   <sql id="anexoColumns">
     ID, PEDIDO_ID, NOME_ARQUIVO, TIPO_CONTEUDO, TAMANHO_BYTES,
     SHA256, CONTEUDO, CRIADO_EM
+  </sql>
+
+  <sql id="anexoMetadataColumns">
+    ID, PEDIDO_ID, NOME_ARQUIVO, TIPO_CONTEUDO, TAMANHO_BYTES,
+    SHA256, CRIADO_EM
   </sql>
 
   <!-- Somente a obtenção da sequence difere entre os fornecedores. -->
@@ -34,9 +43,9 @@
     SELECT NEXT VALUE FOR LAB_ANEXO_SEQ
   </select>
 
-  <select id="listarPorPedido" resultMap="anexoResult">
+  <select id="listarPorPedido" resultMap="anexoMetadataResult">
     SELECT
-      <include refid="anexoColumns"/>
+      <include refid="anexoMetadataColumns"/>
     FROM LAB_ANEXO
     WHERE PEDIDO_ID = #{pedidoId,jdbcType=DECIMAL}
     ORDER BY ID

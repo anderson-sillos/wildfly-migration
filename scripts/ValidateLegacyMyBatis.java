@@ -13,6 +13,7 @@ import br.com.asillos.migration.domain.Anexo;
 import br.com.asillos.migration.domain.Pedido;
 import br.com.asillos.migration.domain.StatusPedido;
 import br.com.asillos.migration.persistence.AnexoMapper;
+import br.com.asillos.migration.persistence.AnexoRepository;
 import br.com.asillos.migration.persistence.MyBatisTransactionTemplate;
 import br.com.asillos.migration.persistence.PedidoMapper;
 import br.com.asillos.migration.persistence.PedidoRepository;
@@ -180,42 +181,34 @@ public final class ValidateLegacyMyBatis {
         final Pedido pedido = new PedidoRepository(sessionFactory).listar().get(1);
         final byte[] content = new byte[] {0, 1, 2, 3, 127, -1};
         final String digest =
-                "0123456789abcdef0123456789abcdef"
-                + "0123456789abcdef0123456789abcdef";
-        final MyBatisTransactionTemplate transactions =
-                new MyBatisTransactionTemplate(sessionFactory);
+                "479c197f47fc60be5d2d073366e5b3580"
+                + "e0457be226691396351b06b3c6246d6";
+        AnexoRepository repository = new AnexoRepository(sessionFactory);
+        Anexo stored = repository.criar(
+                pedido.getId(),
+                "../probe.bin",
+                "APPLICATION/OCTET-STREAM; charset=UTF-8",
+                content);
 
-        Long id = transactions.execute(new TransactionWork<Long>() {
-            @Override
-            public Long execute(SqlSession session) {
-                AnexoMapper mapper = session.getMapper(AnexoMapper.class);
-                Anexo anexo = new Anexo();
-                anexo.setId(mapper.proximoId());
-                anexo.setPedidoId(pedido.getId());
-                anexo.setNomeArquivo("probe.bin");
-                anexo.setTipoConteudo("application/octet-stream");
-                anexo.setTamanhoBytes(Long.valueOf(content.length));
-                anexo.setSha256(digest);
-                anexo.setConteudo(content);
-                anexo.setCriadoEm(new Date());
-                require(mapper.inserir(anexo) == 1,
-                        "inclusão do anexo não afetou uma linha");
-                return anexo.getId();
-            }
-        });
-
-        final Long anexoId = id;
-        Anexo stored = transactions.execute(new TransactionWork<Anexo>() {
-            @Override
-            public Anexo execute(SqlSession session) {
-                return session.getMapper(AnexoMapper.class)
-                        .buscarPorId(anexoId);
-            }
-        });
+        require("probe.bin".equals(stored.getNomeArquivo()),
+                "nome do anexo não foi normalizado");
+        require("application/octet-stream".equals(stored.getTipoConteudo()),
+                "tipo do anexo não foi normalizado");
         require(stored != null && Arrays.equals(content, stored.getConteudo()),
                 "BLOB do anexo divergiu");
         require(digest.equals(stored.getSha256()),
-                "handler não preservou o SHA-256");
+                "SHA-256 calculado no servidor divergiu");
+        require(Long.valueOf(content.length).equals(stored.getTamanhoBytes()),
+                "tamanho calculado no servidor divergiu");
+
+        List<Anexo> metadata =
+                repository.listarPorPedido(pedido.getId());
+        require(metadata.size() == 1,
+                "listagem de metadados do anexo divergiu");
+        require(metadata.get(0).getConteudo() == null,
+                "listagem de metadados carregou o BLOB");
+        require(repository.buscarPorId(stored.getId()).getConteudo() != null,
+                "consulta completa do anexo não carregou o BLOB");
     }
 
     private static void validateRollback(

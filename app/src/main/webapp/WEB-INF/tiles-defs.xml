@@ -22,6 +22,11 @@
     <put-attribute name="title" value="Detalhe do pedido — WildFly Migration Lab"/>
     <put-attribute name="body" value="/WEB-INF/views/pedidos/detalhe-content.jsp"/>
   </definition>
+  <definition name="pedidos.importacaoXml" extends="migration.base">
+    <put-attribute name="title" value="Importar XML — WildFly Migration Lab"/>
+    <put-attribute name="body"
+                   value="/WEB-INF/views/pedidos/importacao-xml-content.jsp"/>
+  </definition>
   <definition name="migration.erro" extends="migration.base">
     <put-attribute name="title" value="Falha controlada — WildFly Migration Lab"/>
   </definition>

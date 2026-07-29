@@ -1,0 +1,110 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Baseline: validar Java 7 em massa",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/build-cp-1d.sh",
+      "args": [
+        "--profile",
+        "ci-h2",
+        "--env",
+        "${workspaceFolder}/.env"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Baseline: validar Java 7 com Oracle",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/build-cp-1d.sh",
+      "args": [
+        "--profile",
+        "oracle",
+        "--env",
+        "${workspaceFolder}/.env"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Legado: iniciar aplicação H2 para teste manual",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/smoke-wildfly9-datasource.sh",
+      "args": [
+        "--profile",
+        "ci-h2",
+        "--env",
+        "${workspaceFolder}/.env",
+        "--war",
+        "${workspaceFolder}/app/target/wildfly-migration.war",
+        "--manual"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": [
+        "Baseline: validar Java 7 em massa"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true,
+        "clear": true
+      }
+    },
+    {
+      "label": "Legado: iniciar aplicação Oracle para teste manual",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/smoke-wildfly9-datasource.sh",
+      "args": [
+        "--profile",
+        "oracle",
+        "--env",
+        "${workspaceFolder}/.env",
+        "--war",
+        "${workspaceFolder}/app/target/wildfly-migration.war",
+        "--manual"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": [
+        "Baseline: validar Java 7 com Oracle"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true,
+        "clear": true
+      }
+    },
+    {
+      "label": "Legado: acompanhar log do WildFly",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/follow-wildfly9-log.sh",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true,
+        "clear": true
+      }
+    }
+  ]
+}

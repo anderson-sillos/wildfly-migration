@@ -20,6 +20,9 @@ passos.
 - [modelo mínimo do domínio](legacy-domain-model.md);
 - [dependências do WAR legado](legacy-dependencies.md);
 - [persistência MyBatis](mybatis-persistence.md).
+- [upload legado e metadados comparáveis](legacy-upload.md).
+- [importação XML legada](legacy-xml-import.md).
+- [descoberta Reflections e logging Log4j 1](legacy-validation-logging.md).
 
 ## Runtime e banco
 
@@ -33,6 +36,9 @@ passos.
 Os arquivos em [`docs/evidence/`](evidence/) registram o que foi executado em
 cada checkpoint. Eles não são runbooks ativos e não devem ser usados
 isoladamente para iniciar o ambiente.
+
+O [Codex handoff](codex-handoff.md) preserva o estado da sessão de trabalho,
+as decisões já consolidadas e as próximas ações sem reproduzir segredos locais.
 
 As falhas de migração e suas correções ficam em
 [`migration/steps/`](../migration/steps/). O planejamento executável e os

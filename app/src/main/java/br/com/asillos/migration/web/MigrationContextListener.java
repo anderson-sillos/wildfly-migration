@@ -5,6 +5,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import br.com.asillos.migration.LegacyBuildMarker;
+import br.com.asillos.migration.persistence.AnexoRepository;
 import br.com.asillos.migration.persistence.H2SchemaBootstrap;
 import br.com.asillos.migration.persistence.MyBatisBootstrap;
 import br.com.asillos.migration.persistence.PedidoRepository;
@@ -27,23 +28,25 @@ public final class MigrationContextListener
                     ApplicationResources.PEDIDO_REPOSITORY,
                     new PedidoRepository(sessionFactory));
             context.setAttribute(
+                    ApplicationResources.ANEXO_REPOSITORY,
+                    new AnexoRepository(sessionFactory));
+            context.setAttribute(
                     ApplicationResources.STARTED_AT,
                     Long.valueOf(System.currentTimeMillis()));
             context.log(
                     "Migration Lab iniciado com datasource "
                     + LegacyBuildMarker.DATASOURCE_JNDI_NAME);
         } catch (RuntimeException exception) {
-            context.log(
-                    "Migration Lab não iniciou: verifique o datasource "
-                    + LegacyBuildMarker.DATASOURCE_JNDI_NAME);
             throw new IllegalStateException(
-                    "Falha controlada ao inicializar a persistência");
+                    "Falha controlada ao inicializar a persistência",
+                    exception);
         }
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent event) {
         ServletContext context = event.getServletContext();
+        context.removeAttribute(ApplicationResources.ANEXO_REPOSITORY);
         context.removeAttribute(ApplicationResources.PEDIDO_REPOSITORY);
         context.removeAttribute(ApplicationResources.STARTED_AT);
     }

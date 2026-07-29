@@ -6,6 +6,7 @@ REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPOSITORY_ROOT/.env"
 PROFILE=""
 WAR_FILE=""
+CONTRACT_RESULT_FILE=""
 MANUAL_MODE=false
 TEMP_DIRECTORY=""
 RUNTIME_HOME=""
@@ -17,12 +18,13 @@ usage() {
   cat <<'USAGE'
 Uso:
   ./scripts/smoke-wildfly9-datasource.sh --profile ci-h2|oracle \
-    [--env ARQUIVO] [--war ARQUIVO] [--manual]
+    [--env ARQUIVO] [--war ARQUIVO] [--contract-result ARQUIVO] [--manual]
 
 Valores já exportados no ambiente prevalecem sobre o arquivo informado.
 Sem --war, valida somente o datasource. Com --war, valida também o fluxo web.
 Com --manual, mantém a aplicação ativa em loopback até Ctrl+C; exige --war.
 No modo manual, imprime o caminho do log bruto do WildFly.
+Com --contract-result, preserva fora do runtime o relatório JSON sanitizado.
 USAGE
 }
 
@@ -164,6 +166,14 @@ while [[ $# -gt 0 ]]; do
         exit 2
       }
       WAR_FILE="$2"
+      shift 2
+      ;;
+    --contract-result)
+      [[ $# -ge 2 ]] || {
+        printf 'FALHA: --contract-result exige um arquivo\n' >&2
+        exit 2
+      }
+      CONTRACT_RESULT_FILE="$2"
       shift 2
       ;;
     --manual)
@@ -502,7 +512,8 @@ if [[ -n "$WAR_FILE" ]]; then
   if [[ "$PROFILE" == "oracle" ]]; then
     ORACLE_SMOKE_CREATED=true
   fi
-  if ! curl --silent --show-error --fail --location \
+  detail_url=""
+  if ! detail_url="$(curl --silent --show-error --fail --location \
       --cookie-jar "$cookies" \
       --cookie "$cookies" \
       --data-urlencode "numero=$smoke_number" \
@@ -510,11 +521,206 @@ if [[ -n "$WAR_FILE" ]]; then
       --data-urlencode 'descricao=Pedido criado pelo smoke CP-1E' \
       --data-urlencode 'valorTotal=19.75' \
       --output "$body" \
-      "$base_url/pedidos" ||
+      --write-out '%{url_effective}' \
+      "$base_url/pedidos")" ||
      ! grep -Fq 'data-page="pedido-detalhe"' "$body" ||
      ! grep -Fq "$smoke_number" "$body" ||
      ! grep -Fq 'Cliente smoke' "$body"; then
     printf 'FALHA: criação e consulta do pedido não concluíram\n' >&2
+    exit 1
+  fi
+
+  case "$detail_url" in
+    "$base_url"/pedidos/detalhe?id=*)
+      smoke_id="${detail_url##*id=}"
+      smoke_id="${smoke_id%%&*}"
+      ;;
+    *)
+      printf 'FALHA: redirect do pedido não informou o identificador\n' >&2
+      exit 1
+      ;;
+  esac
+  if [[ ! "$smoke_id" =~ ^[1-9][0-9]*$ ]]; then
+    printf 'FALHA: identificador criado não é positivo\n' >&2
+    exit 1
+  fi
+
+  upload_file="$TEMP_DIRECTORY/upload-smoke.txt"
+  printf 'conteúdo portátil do upload CP-1F\n' >"$upload_file"
+  upload_size="$(wc -c <"$upload_file" | tr -d '[:space:]')"
+  upload_sha256="$(sha256sum "$upload_file" | awk '{print $1}')"
+  if ! curl --silent --show-error --fail --location \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --form "arquivo=@$upload_file;filename=../upload-smoke.txt;type=text/plain" \
+      --output "$body" \
+      "$base_url/anexos/upload?pedidoId=$smoke_id" ||
+     ! grep -Fq 'data-upload-status="ok"' "$body" ||
+     ! grep -Fq 'data-anexo-nome="upload-smoke.txt"' "$body" ||
+     ! grep -Fq '>text/plain</td>' "$body" ||
+     ! grep -Fq ">$upload_size</td>" "$body" ||
+     ! grep -Fq "$upload_sha256" "$body"; then
+    printf 'FALHA: upload e metadados comparáveis não concluíram\n' >&2
+    if [[ "$PROFILE" == "oracle" ]]; then
+      tail -n 80 "$TEMP_DIRECTORY/server.log" |
+        sanitize_oracle_output >&2
+    else
+      tail -n 80 "$TEMP_DIRECTORY/server.log" |
+        sed "s#${TEMP_DIRECTORY}#<runtime-temporario>#g" >&2
+    fi
+    exit 1
+  fi
+
+  oversized_file="$TEMP_DIRECTORY/upload-oversized.bin"
+  dd if=/dev/zero of="$oversized_file" \
+    bs=1024 count=512 status=none
+  printf 'x' >>"$oversized_file"
+  oversized_status=""
+  if ! oversized_status="$(curl --silent --show-error \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --form "arquivo=@$oversized_file;filename=oversized.bin;type=application/octet-stream" \
+      --output "$body" \
+      --write-out '%{http_code}' \
+      "$base_url/anexos/upload?pedidoId=$smoke_id")"; then
+    printf 'FALHA: cenário negativo do limite de upload não respondeu\n' >&2
+    exit 1
+  fi
+  if [[ "$oversized_status" != "413" ]] ||
+     ! grep -Fq 'data-page="erro-controlado"' "$body" ||
+     ! grep -Fq 'excede o limite de 512 KiB' "$body"; then
+    printf 'FALHA: arquivo acima do limite não foi rejeitado com HTTP 413\n' >&2
+    exit 1
+  fi
+
+  xml_number="LAB-SMOKE-XML-$(date +%s)-$SERVER_PID"
+  xml_correlation="cp1f-xml-$SERVER_PID"
+  valid_xml="$TEMP_DIRECTORY/pedido-valido.xml"
+  sed "s/XML-0001/$xml_number/" \
+    "$REPOSITORY_ROOT/contract-tests/fixtures/xml/pedido-valido.xml" \
+    >"$valid_xml"
+  if ! curl --silent --show-error --fail \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --output "$body" \
+      "$base_url/pedidos/importar-xml" ||
+     ! grep -Fq 'data-page="pedidos-importacao-xml"' "$body" ||
+     ! grep -Fq 'name="arquivoXml"' "$body"; then
+    printf 'FALHA: formulário de seleção do arquivo XML não foi renderizado\n' >&2
+    exit 1
+  fi
+  xml_detail_url=""
+  if ! xml_detail_url="$(curl --silent --show-error --fail --location \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --header "X-Correlation-ID: $xml_correlation" \
+      --form "arquivoXml=@$valid_xml;type=application/xml" \
+      --output "$body" \
+      --write-out '%{url_effective}' \
+      "$base_url/pedidos/importar-xml")" ||
+     ! grep -Fq 'data-xml-import-status="ok"' "$body" ||
+     ! grep -Fq "$xml_number" "$body" ||
+     ! grep -Fq 'Cliente XML' "$body" ||
+     ! grep -Eq '>349[,.]9(0)?<' "$body"; then
+    printf 'FALHA: importação XML válida não criou pedido equivalente\n' >&2
+    grep -Fq 'data-xml-import-status="ok"' "$body" ||
+      printf 'FALHA: marcador de sucesso XML ausente\n' >&2
+    grep -Fq "$xml_number" "$body" ||
+      printf 'FALHA: número importado ausente no detalhe\n' >&2
+    grep -Fq 'Cliente XML' "$body" ||
+      printf 'FALHA: cliente importado ausente no detalhe\n' >&2
+    grep -Eq '>349[,.]9(0)?<' "$body" ||
+      printf 'FALHA: valor importado ausente no detalhe\n' >&2
+    if [[ "$PROFILE" == "oracle" ]]; then
+      tail -n 80 "$TEMP_DIRECTORY/server.log" |
+        sanitize_oracle_output >&2
+    else
+      tail -n 80 "$TEMP_DIRECTORY/server.log" |
+        sed "s#${TEMP_DIRECTORY}#<runtime-temporario>#g" >&2
+    fi
+    exit 1
+  fi
+  case "$xml_detail_url" in
+    "$base_url"/pedidos/detalhe?id=*"&importacao=ok")
+      ;;
+    *)
+      printf 'FALHA: redirect da importação XML não preservou o contrato\n' >&2
+      exit 1
+      ;;
+  esac
+
+  if ! grep -Fq \
+      'legacy_validator_order=numero-formato,valor-monetario,status-inicial' \
+      "$TEMP_DIRECTORY/server.log" ||
+     ! grep -Fq 'legacy_xml_import accepted' \
+      "$TEMP_DIRECTORY/server.log" ||
+     ! grep -Fq "correlation=$xml_correlation" \
+      "$TEMP_DIRECTORY/server.log"; then
+    printf 'FALHA: descoberta ou correlação do log legado não foi observada\n' >&2
+    exit 1
+  fi
+
+  validator_xml="$REPOSITORY_ROOT/contract-tests/fixtures/xml/"
+  validator_xml="${validator_xml}pedido-invalido-validador.xml"
+  validator_status=""
+  if ! validator_status="$(curl --silent --show-error \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --header "X-Correlation-ID: $xml_correlation" \
+      --header 'Content-Type: application/xml' \
+      --data-binary "@$validator_xml" \
+      --output "$body" \
+      --write-out '%{http_code}' \
+      "$base_url/pedidos/importar-xml")"; then
+    printf 'FALHA: cenário de rejeição pelo validador não respondeu\n' >&2
+    exit 1
+  fi
+  if [[ "$validator_status" != "400" ]] ||
+     ! grep -Fq 'data-page="erro-controlado"' "$body" ||
+     ! grep -Fq 'deve iniciar com status NOVO' "$body" ||
+     ! grep -Fq \
+        'legacy_xml_import rejected reason=domain_validator' \
+        "$TEMP_DIRECTORY/server.log"; then
+    printf 'FALHA: regra descoberta não rejeitou o status inicial inválido\n' >&2
+    exit 1
+  fi
+
+  for hostile_fixture in \
+    pedido-invalido-xsd.xml \
+    pedido-xxe.xml \
+    pedido-entidades-expansivas.xml; do
+    xml_status=""
+    if ! xml_status="$(curl --silent --show-error \
+        --cookie-jar "$cookies" \
+        --cookie "$cookies" \
+        --header 'Content-Type: application/xml' \
+        --data-binary \
+          "@$REPOSITORY_ROOT/contract-tests/fixtures/xml/$hostile_fixture" \
+        --output "$body" \
+        --write-out '%{http_code}' \
+        "$base_url/pedidos/importar-xml")"; then
+      printf 'FALHA: cenário XML negativo não respondeu: %s\n' \
+        "$hostile_fixture" >&2
+      exit 1
+    fi
+    if [[ "$xml_status" != "400" ]] ||
+       ! grep -Fq 'data-page="erro-controlado"' "$body"; then
+      printf 'FALHA: fixture XML deveria ser rejeitada com HTTP 400: %s\n' \
+        "$hostile_fixture" >&2
+      exit 1
+    fi
+  done
+
+  if ! curl --silent --show-error --fail \
+      --cookie-jar "$cookies" \
+      --cookie "$cookies" \
+      --output "$body" \
+      "$base_url/pedidos" ||
+     grep -Fq 'XML INVÁLIDO COM ESPAÇOS' "$body" ||
+     grep -Fq 'XML-VALIDATOR-0001' "$body" ||
+     grep -Fq 'XML-XXE-0001' "$body" ||
+     grep -Fq 'XML-ENTITY-0001' "$body"; then
+    printf 'FALHA: XML rejeitado deixou persistência parcial\n' >&2
     exit 1
   fi
 
@@ -526,6 +732,43 @@ if [[ -n "$WAR_FILE" ]]; then
       "$base_url/preferencia" ||
      ! grep -Fq 'data-display-mode="COMPACTO"' "$body"; then
     printf 'FALHA: preferência não persistiu na HttpSession\n' >&2
+    exit 1
+  fi
+
+  contract_result="$CONTRACT_RESULT_FILE"
+  if [[ -z "$contract_result" ]]; then
+    contract_result="$TEMP_DIRECTORY/contract-result-$PROFILE.json"
+  fi
+  contract_correlation="cp1f-contract-$SERVER_PID"
+  commit_sha="$(git -C "$REPOSITORY_ROOT" rev-parse HEAD)"
+  if ! "$REPOSITORY_ROOT/contract-tests/run.sh" \
+      --base-url "$base_url" \
+      --profile "$PROFILE" \
+      --war "$WAR_FILE" \
+      --result "$contract_result" \
+      --commit "$commit_sha" \
+      --runtime java7-wildfly9.0.2 \
+      --correlation-id "$contract_correlation"; then
+    printf 'FALHA: suíte externa de contratos falhou no perfil %s\n' \
+      "$PROFILE" >&2
+    if [[ "$PROFILE" == "oracle" ]]; then
+      tail -n 80 "$TEMP_DIRECTORY/server.log" |
+        sanitize_oracle_output >&2
+    else
+      tail -n 80 "$TEMP_DIRECTORY/server.log" |
+        sed "s#${TEMP_DIRECTORY}#<runtime-temporario>#g" >&2
+    fi
+    exit 1
+  fi
+  if ! grep -Fq \
+      'legacy_validator_order=numero-formato,valor-monetario,status-inicial' \
+      "$TEMP_DIRECTORY/server.log" ||
+     ! grep -Fq \
+      'legacy_xml_import rejected reason=domain_validator' \
+      "$TEMP_DIRECTORY/server.log" ||
+     ! grep -Fq "correlation=$contract_correlation" \
+      "$TEMP_DIRECTORY/server.log"; then
+    printf 'FALHA: logs da execução externa não preservaram o contrato\n' >&2
     exit 1
   fi
 
@@ -542,7 +785,7 @@ if [[ -n "$WAR_FILE" ]]; then
     ORACLE_SMOKE_CREATED=false
   fi
 
-  printf 'OK: fluxo web %s validou saúde, lista, criação, detalhe, TLD e sessão\n' \
+  printf 'OK: fluxo web %s validou pedidos, sessão, upload e importação XML\n' \
     "$PROFILE"
 fi
 
@@ -550,6 +793,7 @@ printf 'OK: datasource %s publicou java:/jdbc/MigrationDS e passou no pool em lo
   "$PROFILE"
 
 if [[ "$MANUAL_MODE" == true ]]; then
+  printf '%s\n' "$SERVER_PID" >"$TEMP_DIRECTORY/manual-server.pid"
   printf '\nAplicação legada disponível somente em loopback:\n'
   printf '  Lista:  http://127.0.0.1:%s/wildfly-migration/pedidos\n' \
     "$HTTP_PORT_VALUE"

@@ -86,6 +86,7 @@ required_paths=(
   "app/src/main/java/br/com/asillos/migration/persistence/Sha256TypeHandler.java"
   "app/src/main/java/br/com/asillos/migration/persistence/MyBatisBootstrap.java"
   "app/src/main/java/br/com/asillos/migration/persistence/MyBatisTransactionTemplate.java"
+  "app/src/main/java/br/com/asillos/migration/persistence/AnexoRepository.java"
   "app/src/main/java/br/com/asillos/migration/persistence/PedidoRepository.java"
   "app/src/main/resources/mybatis-config.xml"
   "app/src/main/resources/mybatis/PedidoMapper.xml"

@@ -42,11 +42,11 @@
 
 ### Checkpoint CP-1F — Integrações e contratos
 
-- [ ] 1.26 Implementar upload por Commons FileUpload 1.2.2 com limites e metadados comparáveis.
-- [ ] 1.27 Implementar importação XML por XMLBeans 2.3.0 e dom4j 1.6.1, incluindo validação por XSD.
-- [ ] 1.28 Usar Reflections para descoberta de validadores e Log4j 1 para os logs do fluxo legado.
-- [ ] 1.29 Implementar a suíte HTTP externa para listagem, criação, consulta, sessão, upload e importação XML sem importar classes do WAR e reutilizar os mesmos casos nos perfis H2 e Oracle.
-- [ ] 1.30 Encerrar `CP-1F`: executar contratos e cenários negativos em H2 no CI e Oracle na rede interna, registrar resultados separados, evidências sanitizadas e rollback e integrar o PR pelo commit `checkpoint(CP-1F): add legacy integrations and contracts`.
+- [x] 1.26 Implementar upload por Commons FileUpload 1.2.2 com limites e metadados comparáveis.
+- [x] 1.27 Implementar importação XML por XMLBeans 2.3.0 e dom4j 1.6.1, incluindo validação por XSD.
+- [x] 1.28 Usar Reflections para descoberta de validadores e Log4j 1 para os logs do fluxo legado.
+- [x] 1.29 Implementar a suíte HTTP externa para listagem, criação, consulta, sessão, upload e importação XML sem importar classes do WAR e reutilizar os mesmos casos nos perfis H2 e Oracle.
+- [x] 1.30 Encerrar `CP-1F`: executar contratos e cenários negativos em H2 no CI e Oracle na rede interna, registrar resultados separados, evidências sanitizadas e rollback e integrar o PR pelo commit `checkpoint(CP-1F): add legacy integrations and contracts`.
 
 ### Checkpoint CP-1G — Baseline completo
 

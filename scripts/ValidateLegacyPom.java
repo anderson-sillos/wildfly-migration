@@ -111,6 +111,8 @@ public final class ValidateLegacyPom {
         expected.put("log4j:log4j", values("1.2.14", "compile"));
         expected.put("commons-fileupload:commons-fileupload",
                 values("1.2.2", "compile"));
+        expected.put("commons-io:commons-io",
+                values("1.3.2", "compile"));
         expected.put("org.reflections:reflections",
                 values("0.9.10", "compile"));
         expected.put("org.apache.tiles:tiles-api",

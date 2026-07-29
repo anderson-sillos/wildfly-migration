@@ -13,11 +13,16 @@ import javax.servlet.http.HttpServletResponse;
 import br.com.asillos.migration.domain.Pedido;
 import br.com.asillos.migration.persistence.PedidoRepository;
 
+import org.apache.log4j.Logger;
+
 /**
  * Endpoints de listagem, formulário, criação e detalhe de pedidos.
  */
 public final class PedidoServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+
+    private static final Logger LOGGER =
+            Logger.getLogger(PedidoServlet.class);
 
     private static final String LIST_VIEW =
             "/WEB-INF/views/pedidos/lista.jsp";
@@ -73,7 +78,7 @@ public final class PedidoServlet extends HttpServlet {
             exposePreference(request);
             forward(request, response, LIST_VIEW);
         } catch (RuntimeException exception) {
-            persistenceFailure(request, response);
+            persistenceFailure(request, response, exception);
         }
     }
 
@@ -108,10 +113,22 @@ public final class PedidoServlet extends HttpServlet {
                 return;
             }
             request.setAttribute("pedido", pedido);
+            request.setAttribute(
+                    "anexos",
+                    ApplicationResources.anexoRepository(getServletContext())
+                            .listarPorPedido(id));
+            request.setAttribute(
+                    "uploadConcluido",
+                    Boolean.valueOf("ok".equals(
+                            request.getParameter("upload"))));
+            request.setAttribute(
+                    "importacaoConcluida",
+                    Boolean.valueOf("ok".equals(
+                            request.getParameter("importacao"))));
             exposePreference(request);
             forward(request, response, DETAIL_VIEW);
         } catch (RuntimeException exception) {
-            persistenceFailure(request, response);
+            persistenceFailure(request, response, exception);
         }
     }
 
@@ -146,7 +163,7 @@ public final class PedidoServlet extends HttpServlet {
                     pedido,
                     exception.getMessage());
         } catch (RuntimeException exception) {
-            persistenceFailure(request, response);
+            persistenceFailure(request, response, exception);
         }
     }
 
@@ -164,10 +181,10 @@ public final class PedidoServlet extends HttpServlet {
 
     private void persistenceFailure(
             HttpServletRequest request,
-            HttpServletResponse response) throws ServletException, IOException {
-        getServletContext().log(
-                "Falha controlada de persistência; correlação="
-                + correlation(request));
+            HttpServletResponse response,
+            RuntimeException exception)
+            throws ServletException, IOException {
+        LOGGER.error("legacy_order persistence_failure", exception);
         safeError(
                 request,
                 response,

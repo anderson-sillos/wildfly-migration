@@ -25,6 +25,7 @@ dependência Maven adicional.
 | `org.mybatis:mybatis` | 3.4.5 |
 | `log4j:log4j` | 1.2.14 |
 | `commons-fileupload:commons-fileupload` | 1.2.2 |
+| `commons-io:commons-io` | 1.3.2 |
 | `org.reflections:reflections` | 0.9.10 |
 | `org.apache.tiles:tiles-api` | 2.1.4 |
 | `org.apache.tiles:tiles-jsp` | 2.1.4 |
@@ -46,7 +47,8 @@ testar antes de corrigir:
 
 - `commons-fileupload:1.2.2` marca `commons-io:1.3.2` como opcional; por isso
   `commons-io` não entrou automaticamente no WAR, embora classes de FileUpload
-  o referenciem;
+  o referenciem. A falha natural foi reproduzida no primeiro smoke do CP-1F e
+  corrigida declarando exatamente `commons-io:1.3.2`;
 - `tiles-api:2.1.4` fornece apenas a API, não a implementação completa de
   renderização. O problema foi reproduzido no início do CP-1E e corrigido com
   a menor mudança compatível com o legado: `tiles-jsp:2.1.4`, que inclui
@@ -60,6 +62,8 @@ Esses pontos não impediam o WAR estrutural do CP-1C, porque ainda não havia
 fluxo funcional. A correção de Tiles entra somente quando o CP-1E passa a
 renderizar JSPs; a lacuna do FileUpload continua reservada ao fluxo de upload.
 Qualquer correção registra sintoma, causa, menor mudança e impacto no baseline.
+A falha funcional do FileUpload está em
+[`migration/steps/CP-1F-commons-fileupload-commons-io.md`](../migration/steps/CP-1F-commons-fileupload-commons-io.md).
 
 ## Driver Oracle
 

@@ -39,6 +39,14 @@
     <servlet-name>preferencia</servlet-name>
     <servlet-class>br.com.asillos.migration.web.PreferenceServlet</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>upload</servlet-name>
+    <servlet-class>br.com.asillos.migration.web.UploadServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>xmlImport</servlet-name>
+    <servlet-class>br.com.asillos.migration.web.XmlImportServlet</servlet-class>
+  </servlet>
 
   <servlet-mapping>
     <servlet-name>health</servlet-name>
@@ -51,6 +59,14 @@
   <servlet-mapping>
     <servlet-name>preferencia</servlet-name>
     <url-pattern>/preferencia</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>upload</servlet-name>
+    <url-pattern>/anexos/upload</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>xmlImport</servlet-name>
+    <url-pattern>/pedidos/importar-xml</url-pattern>
   </servlet-mapping>
 
   <session-config>

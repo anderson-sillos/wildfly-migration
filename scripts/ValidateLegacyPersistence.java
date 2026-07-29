@@ -188,9 +188,16 @@ public final class ValidateLegacyPersistence {
                 "br.com.asillos.migration.persistence.AnexoMapper",
                 new String[] {"listarPorPedido", "buscarPorId", "inserir"},
                 "LAB_ANEXO_SEQ");
-        Element resultMap = unique(document, "resultMap");
-        require("anexo".equals(resultMap.getAttribute("type")),
-                "resultMap de anexo não usa o alias");
+        Element metadataMap = findByAttribute(
+                document, "resultMap", "id", "anexoMetadataResult");
+        Element resultMap = findByAttribute(
+                document, "resultMap", "id", "anexoResult");
+        require("anexo".equals(metadataMap.getAttribute("type"))
+                && "anexo".equals(resultMap.getAttribute("type")),
+                "resultMaps de anexo não usam o alias");
+        require("anexoMetadataResult".equals(
+                resultMap.getAttribute("extends")),
+                "resultMap completo não estende os metadados");
         findByAttribute(document, "result", "column", "CONTEUDO");
     }
 

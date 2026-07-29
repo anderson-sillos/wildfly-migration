@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pedido xmlns="urn:wildfly-migration:pedido:1">
+  <numero>XML-VALIDATOR-0001</numero>
+  <clienteNome>Cliente validador</clienteNome>
+  <descricao>Documento válido no XSD, rejeitado pela regra de status inicial.</descricao>
+  <valorTotal>10.00</valorTotal>
+  <status>APROVADO</status>
+</pedido>

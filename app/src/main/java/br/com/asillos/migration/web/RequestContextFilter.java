@@ -13,6 +13,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.MDC;
+
 /**
  * Aplica UTF-8 e um identificador de correlação seguro a cada requisição.
  */
@@ -52,7 +54,12 @@ public final class RequestContextFilter implements Filter {
             ((HttpServletResponse) servletResponse).setHeader(
                     CORRELATION_HEADER, correlationId);
         }
-        chain.doFilter(servletRequest, servletResponse);
+        MDC.put("correlationId", correlationId);
+        try {
+            chain.doFilter(servletRequest, servletResponse);
+        } finally {
+            MDC.remove("correlationId");
+        }
     }
 
     @Override

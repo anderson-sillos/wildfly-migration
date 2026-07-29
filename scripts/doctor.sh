@@ -221,6 +221,25 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-1F; then
+    required+=(
+      "docs/evidence/CP-1F.md"
+      "docs/legacy-upload.md"
+      "docs/legacy-xml-import.md"
+      "scripts/validate-cp-1f-upload.sh"
+      "scripts/validate-cp-1f-xml.sh"
+      "scripts/validate-cp-1f-discovery-logging.sh"
+      "scripts/validate-cp-1f-contracts.sh"
+      "app/src/main/java/br/com/asillos/migration/persistence/AnexoRepository.java"
+      "app/src/main/java/br/com/asillos/migration/web/UploadServlet.java"
+      "app/src/main/java/br/com/asillos/migration/integration/xml/LegacyPedidoXmlParser.java"
+      "app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java"
+      "app/src/main/java/br/com/asillos/migration/integration/validation/LegacyValidatorDiscovery.java"
+      "app/src/main/resources/log4j.properties"
+      "contract-tests/run.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"

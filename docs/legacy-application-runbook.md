@@ -6,17 +6,18 @@ explicam versões e decisões; os comandos operacionais ficam aqui.
 
 ## Escopo atual
 
-O CP-1E disponibiliza:
+O CP-1F disponibiliza:
 
 - health check;
 - listagem, criação e detalhe de pedidos;
 - persistência MyBatis pelo datasource `java:/jdbc/MigrationDS`;
 - JSP/JSTL, Tiles 2.1.4 e TLD 2.0;
 - preferência de exibição em `HttpSession`;
+- upload por Commons FileUpload 1.2.2 com limites e metadados SHA-256;
+- importação XML por XMLBeans/dom4j, com XSD e validadores descobertos por
+  Reflections;
+- eventos do fluxo XML em Log4j 1 com correlação;
 - filtro UTF-8 e cabeçalho `X-Correlation-ID`.
-
-Upload, importação XML, Reflections e uso funcional do Log4j entram no CP-1F e
-ainda não fazem parte dos testes manuais.
 
 ## Escolha do perfil
 
@@ -196,6 +197,32 @@ O arquivo existe somente enquanto a sessão manual está ativa. Ao pressionar
 `Ctrl+C`, o script encerra o WildFly e remove o runtime temporário junto com o
 `server.log`.
 
+### Iniciar e acompanhar pelo VS Code
+
+Abra a paleta com `Ctrl+Shift+P`, execute `Tasks: Run Task` e selecione:
+
+1. uma das duas opções de inicialização:
+   - `Legado: iniciar aplicação H2 para teste manual`;
+   - `Legado: iniciar aplicação Oracle para teste manual`;
+2. aguarde o terminal mostrar as URLs e informar que a aplicação está ativa;
+3. execute novamente `Tasks: Run Task`;
+4. selecione `Legado: acompanhar log do WildFly`.
+
+A opção H2 executa antes o build Java 7 portátil com `ci-h2`. A opção Oracle
+executa o build Java 7 com `oracle` e exige a rede interna, o Oracle JDK 7u80, o
+`ojdbc7` e as credenciais já configuradas no `.env`. Ambas mantêm o WildFly em
+um terminal dedicado.
+
+A task de log localiza o `server.log` da sessão H2 ou Oracle sem tentar
+adivinhar o identificador temporário e mostra inicialmente as últimas 100
+linhas. Ela falha de forma explícita se nenhuma sessão estiver ativa ou se
+houver mais de uma sessão.
+
+Ao concluir o teste, encerre a task de inicialização com `Ctrl+C`. O WildFly, o
+diretório temporário e, no perfil H2, o banco em memória serão removidos; a task
+de log perceberá a remoção e encerrará em seguida. No Oracle, o schema e os
+pedidos manuais permanecem conforme a política de limpeza documentada.
+
 No perfil `oracle`, o `server.log` é bruto e pode conter host, serviço, usuário
 ou URL interna. Revise e sanitize o conteúdo antes de copiar, anexar ao PR ou
 publicar. Os diagnósticos de falha impressos pelo próprio script continuam
@@ -238,6 +265,46 @@ No Oracle, use um prefixo identificável para dados manuais, por exemplo
 `MANUAL-`. O stop remove apenas registros automáticos `LAB-SMOKE-*`; pedidos
 criados manualmente permanecem no schema.
 
+### Importação XML
+
+Com o runtime manual ativo, abra
+`http://127.0.0.1:18080/wildfly-migration/pedidos/importar-xml`, selecione uma
+fixture `.xml` com número exclusivo e clique em **Importar pedido**.
+
+Para executar o mesmo caso pela linha de comando, envie uma cópia da fixture
+válida com número exclusivo:
+
+```bash
+sed 's/XML-0001/MANUAL-XML-0001/' \
+  contract-tests/fixtures/xml/pedido-valido.xml |
+  curl --include --location \
+    --header 'Content-Type: application/xml' \
+    --data-binary @- \
+    http://127.0.0.1:18080/wildfly-migration/pedidos/importar-xml
+```
+
+Confirme HTTP final `200`, `data-xml-import-status="ok"` e os valores da
+fixture no detalhe. Se repetir o teste, troque `MANUAL-XML-0001`, pois o número
+do pedido é único e a limpeza automática remove apenas `LAB-SMOKE-*`.
+
+Depois envie `pedido-invalido-validador.xml`,
+`pedido-invalido-xsd.xml`, `pedido-xxe.xml` e
+`pedido-entidades-expansivas.xml` para o mesmo endpoint. Cada documento deve
+retornar HTTP `400`; nenhum número rejeitado pode aparecer na listagem.
+
+A fixture `pedido-invalido-validador.xml` é o caso específico da atividade
+1.28: ela atende ao XSD, mas o validador descoberto por Reflections rejeita o
+status `APROVADO`. No `server.log`, confirme:
+
+```text
+legacy_validator_order=numero-formato,valor-monetario,status-inicial
+legacy_xml_import rejected reason=domain_validator
+```
+
+Confirme também que `XML-VALIDATOR-0001` não aparece na listagem. O contrato
+completo e o limite de 128 KiB estão em
+[Importação XML legada](legacy-xml-import.md).
+
 ### Preferência em sessão
 
 1. Na lista, altere a exibição de `Detalhada` para `Compacta`.
@@ -245,6 +312,18 @@ criados manualmente permanecem no schema.
 3. Confirme que a preferência continua `Compacta`.
 4. Abra uma janela privada para confirmar que uma nova sessão volta ao padrão
    `Detalhada`.
+
+### Upload
+
+1. Abra o detalhe de um pedido.
+2. Na seção `Anexos`, escolha um arquivo de até 512 KiB.
+3. Confirme a mensagem de sucesso após o redirecionamento.
+4. Compare na tabela nome normalizado, tipo, número de bytes e SHA-256.
+5. Tente um arquivo maior que 512 KiB e confirme HTTP `413` com erro controlado.
+
+O fluxo e os limites estão detalhados em
+[Upload legado do CP-1F](legacy-upload.md). Não use dados sensíveis: o
+laboratório persiste o conteúdo integral no BLOB.
 
 ### Erros controlados
 
@@ -330,7 +409,7 @@ evidências do CP-1E; ele não abre uma sessão para exploração pelo navegador
 | datasource não conecta | execute primeiro o smoke sem `--war`; no Oracle, valide a rota interna |
 | `status=DOWN` ou HTTP 503 | confirme schema/seed e `java:/jdbc/MigrationDS` |
 | deploy reclama de `ExampleDS` | confirme que `ci-h2.cli` reaponta `DefaultDataSource` para `MigrationDS` |
-| página JSP/Tiles falha | reconstrua o WAR e confirme as 19 bibliotecas auditadas |
+| página JSP/Tiles ou upload falha | reconstrua o WAR e confirme as 20 bibliotecas auditadas, incluindo `commons-io-1.3.2.jar` |
 
 O script sanitiza diagnósticos Oracle. Não publique logs brutos do WildFly
 antes de revisar a presença de host, serviço, usuário ou URL interna.
@@ -342,5 +421,6 @@ antes de revisar a presença de host, serviço, usuário ou URL interna.
 - [runtime legado e checksums](../runtime/legacy/README.md);
 - [perfis do datasource](../runtime/legacy/profiles/README.md);
 - [persistência MyBatis](mybatis-persistence.md);
+- [upload legado](legacy-upload.md);
 - [diferenças H2/Oracle](h2-oracle-differences.md);
 - [evidência do CP-1E](evidence/CP-1E.md).
