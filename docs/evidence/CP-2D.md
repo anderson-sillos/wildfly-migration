@@ -4,8 +4,9 @@
 
 O checkpoint parte do CP-2C e encerra a fase pública Java 8, WildFly
 26.1.3.Final, Jakarta EE 8 com pacotes `javax.*` e Maven 3.9.16. Esta página
-será completada pelas atividades 2.17 a 2.20 com manifesto, roteiro para a
-aplicação real, reprodução limpa, CI remoto, PR, rollback e tag pública.
+será completada pelas atividades 2.18 a 2.20 com roteiro para a aplicação
+real, reprodução limpa, CI remoto, rollback e tag pública. O PR #18 foi aberto
+como rascunho depois da primeira atividade concluída do checkpoint.
 
 ## Comparação integral com a fase 1 — atividade 2.16
 
@@ -46,3 +47,20 @@ e o BLOB observado no Oracle demonstram 44 bytes em UTF-8. A tag pública e o
 arquivo histórico não foram reescritos. A comparação da fase 2 usa os 44 bytes
 e o conteúdo byte a byte; a divergência é classificada como correção de
 metadado, não como mudança funcional da aplicação.
+
+## Manifesto da fase 2 — atividade 2.17
+
+O [manifesto consolidado](../../migration/baselines/02-java8-wildfly26/)
+congela:
+
+- Temurin OpenJDK 8u492-b09, Maven 3.9.16 e WildFly comunitário 26.1.3.Final;
+- H2 1.4.200 somente para `portable-ci`, `ojdbc7` externo e Oracle 19c RU
+  19.3 para `oracle-qualified`;
+- 21 dependências Maven: a API Jakarta EE Web Profile 8 em `provided` e 20
+  bibliotecas legadas empacotadas;
+- checksum do WAR, da árvore Maven e de cada JAR em `WEB-INF/lib`;
+- 12 limitações conhecidas, cada uma com impacto, disposição e evidência.
+
+O manifesto aponta para o mesmo commit-fonte e WAR usados na comparação da
+atividade 2.16. A tag `migration/02-java8-wildfly26` permanece reservada e só
+será criada no encerramento da atividade 2.20.

@@ -85,7 +85,7 @@
 ### Checkpoint CP-2D — Fechamento da ponte
 
 - [x] 2.16 Executar a suíte completa em H2 e Oracle e comparar respostas, estado persistido oficial e limitações portáteis com a fase 1.
-- [ ] 2.17 Gerar o manifesto da fase 2 com versões, dependências, WAR, runtime, checksums e limitações conhecidas.
+- [x] 2.17 Gerar o manifesto da fase 2 com versões, dependências, WAR, runtime, checksums e limitações conhecidas.
 - [ ] 2.18 Documentar um roteiro equivalente para aplicação real, incluindo janela de transição, implantação blue/green, verificações e rollback.
 - [ ] 2.19 Reproduzir a fase 2 a partir de checkout limpo usando somente documentação e configuração externa segura.
 - [ ] 2.20 Encerrar `CP-2D`: aprovar as evidências `portable-ci` e `oracle-qualified`, integrar o PR pelo commit `checkpoint(CP-2D): complete low-impact modernization` e criar a tag `migration/02-java8-wildfly26`.

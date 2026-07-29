@@ -326,11 +326,17 @@ check_required_files() {
       "migration/evidence/CP-2D/oracle-state.json"
       "migration/evidence/CP-2D/oracle-persistence.json"
       "migration/evidence/CP-2D/phase2-comparison.json"
+      "migration/baselines/02-java8-wildfly26/README.md"
+      "migration/baselines/02-java8-wildfly26/manifest.properties"
+      "migration/baselines/02-java8-wildfly26/components.tsv"
+      "migration/baselines/02-java8-wildfly26/maven-dependencies.tsv"
+      "migration/baselines/02-java8-wildfly26/known-limitations.tsv"
       "scripts/qualify-cp-2d-h2.sh"
       "scripts/qualify-cp-2d-oracle.sh"
       "scripts/ValidatePhase2OracleState.java"
       "scripts/validate-cp-2d-oracle-state.sh"
       "scripts/validate-cp-2d-phase-comparison.sh"
+      "scripts/validate-cp-2d-manifest.sh"
     )
   fi
 
