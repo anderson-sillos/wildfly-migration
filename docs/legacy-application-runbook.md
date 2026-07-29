@@ -399,6 +399,10 @@ manter o servidor ativo:
 O equivalente Oracle usa `--profile oracle`. Esse modo é o utilizado nas
 evidências do CP-1E; ele não abre uma sessão para exploração pelo navegador.
 
+Para fechar ou reproduzir toda a fase 1, execute também a comparação do WAR,
+da árvore Maven e do resultado de contratos descrita em
+[Reprodução do baseline legado](legacy-baseline-reproduction.md).
+
 ## 9. Diagnóstico de falhas
 
 | Sintoma | Verificação |
@@ -423,4 +427,5 @@ antes de revisar a presença de host, serviço, usuário ou URL interna.
 - [persistência MyBatis](mybatis-persistence.md);
 - [upload legado](legacy-upload.md);
 - [diferenças H2/Oracle](h2-oracle-differences.md);
+- [reprodução do baseline legado](legacy-baseline-reproduction.md);
 - [evidência do CP-1E](evidence/CP-1E.md).

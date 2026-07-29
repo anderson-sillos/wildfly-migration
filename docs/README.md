@@ -13,6 +13,8 @@ passos.
    limpeza e solução de problemas.
 3. [Checkpoints](checkpoints.md): entregas incrementais e tags das três fases.
 4. [Fluxo GitHub](github-workflow.md): branches, pull requests, checks e squash.
+5. [Reprodução do baseline legado](legacy-baseline-reproduction.md): checkout
+   limpo, validações H2/Oracle, limpeza e rollback da fase 1.
 
 ## Aplicação e arquitetura
 
@@ -41,6 +43,9 @@ O [Codex handoff](codex-handoff.md) preserva o estado da sessão de trabalho,
 as decisões já consolidadas e as próximas ações sem reproduzir segredos locais.
 
 As falhas de migração e suas correções ficam em
-[`migration/steps/`](../migration/steps/). O planejamento executável e os
-critérios normativos permanecem em
+[`migration/steps/`](../migration/steps/), com índice estruturado em
+[`migration/incompatibilities.tsv`](../migration/incompatibilities.tsv). Os
+valores congelados da fase 1 ficam em
+[`migration/baselines/01-legacy/`](../migration/baselines/01-legacy/). O
+planejamento executável e os critérios normativos permanecem em
 [`openspec/changes/create-java-web-migration-lab/`](../openspec/changes/create-java-web-migration-lab/).

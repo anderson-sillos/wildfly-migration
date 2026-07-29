@@ -1,0 +1,25 @@
+groupId	artifactId	version	scope	relation	packaged	warFile	origin	license	licenseEvidence
+javax.servlet	servlet-api	2.4	provided	direct	false	-	https://repo.maven.apache.org/maven2/javax/servlet/servlet-api/2.4/servlet-api-2.4.jar	Apache-2.0	cabeçalho do source JAR
+javax.servlet	jsp-api	2.0	provided	direct	false	-	https://repo.maven.apache.org/maven2/javax/servlet/jsp-api/2.0/jsp-api-2.0.jar	Apache-2.0	implementação Apache no manifesto
+javax.servlet.jsp.jstl	jstl-api	1.2	provided	direct	false	-	https://repo.maven.apache.org/maven2/javax/servlet/jsp/jstl/jstl-api/1.2/jstl-api-1.2.jar	CDDL-1.0-OR-GPL-2.0-with-classpath-exception	POM pai org.glassfish.web:jstl:1.2
+javax.servlet.jsp	jsp-api	2.1	provided	transitive	false	-	https://repo.maven.apache.org/maven2/javax/servlet/jsp/jsp-api/2.1/jsp-api-2.1.jar	Apache-2.0	implementação Apache no manifesto
+org.mybatis	mybatis	3.4.5	compile	direct	true	mybatis-3.4.5.jar	https://repo.maven.apache.org/maven2/org/mybatis/mybatis/3.4.5/mybatis-3.4.5.jar	Apache-2.0	POM pai e META-INF/LICENSE
+log4j	log4j	1.2.14	compile	direct	true	log4j-1.2.14.jar	https://repo.maven.apache.org/maven2/log4j/log4j/1.2.14/log4j-1.2.14.jar	Apache-2.0	POM e META-INF/LICENSE
+commons-fileupload	commons-fileupload	1.2.2	compile	direct	true	commons-fileupload-1.2.2.jar	https://repo.maven.apache.org/maven2/commons-fileupload/commons-fileupload/1.2.2/commons-fileupload-1.2.2.jar	Apache-2.0	META-INF/LICENSE
+commons-io	commons-io	1.3.2	compile	direct	true	commons-io-1.3.2.jar	https://repo.maven.apache.org/maven2/commons-io/commons-io/1.3.2/commons-io-1.3.2.jar	Apache-2.0	META-INF/LICENSE
+org.reflections	reflections	0.9.10	compile	direct	true	reflections-0.9.10.jar	https://repo.maven.apache.org/maven2/org/reflections/reflections/0.9.10/reflections-0.9.10.jar	WTFPL-OR-BSD-3-Clause	POM do artefato
+com.google.guava	guava	15.0	compile	transitive	true	guava-15.0.jar	https://repo.maven.apache.org/maven2/com/google/guava/guava/15.0/guava-15.0.jar	Apache-2.0	POM pai e Bundle-License
+org.javassist	javassist	3.19.0-GA	compile	transitive	true	javassist-3.19.0-GA.jar	https://repo.maven.apache.org/maven2/org/javassist/javassist/3.19.0-GA/javassist-3.19.0-GA.jar	MPL-1.1-OR-LGPL-2.1-only-OR-Apache-2.0	POM e Bundle-License
+com.google.code.findbugs	annotations	2.0.1	compile	transitive	true	annotations-2.0.1.jar	https://repo.maven.apache.org/maven2/com/google/code/findbugs/annotations/2.0.1/annotations-2.0.1.jar	LGPL-2.1-or-later	POM do artefato
+org.apache.tiles	tiles-api	2.1.4	compile	direct	true	tiles-api-2.1.4.jar	https://repo.maven.apache.org/maven2/org/apache/tiles/tiles-api/2.1.4/tiles-api-2.1.4.jar	Apache-2.0	META-INF/LICENSE e Bundle-License
+commons-logging	commons-logging-api	1.1	compile	transitive	true	commons-logging-api-1.1.jar	https://repo.maven.apache.org/maven2/commons-logging/commons-logging-api/1.1/commons-logging-api-1.1.jar	Apache-2.0	POM e META-INF/LICENSE
+org.apache.tiles	tiles-jsp	2.1.4	compile	direct	true	tiles-jsp-2.1.4.jar	https://repo.maven.apache.org/maven2/org/apache/tiles/tiles-jsp/2.1.4/tiles-jsp-2.1.4.jar	Apache-2.0	META-INF/LICENSE e Bundle-License
+org.apache.tiles	tiles-servlet	2.1.4	compile	transitive	true	tiles-servlet-2.1.4.jar	https://repo.maven.apache.org/maven2/org/apache/tiles/tiles-servlet/2.1.4/tiles-servlet-2.1.4.jar	Apache-2.0	META-INF/LICENSE e Bundle-License
+org.apache.tiles	tiles-core	2.1.4	compile	transitive	true	tiles-core-2.1.4.jar	https://repo.maven.apache.org/maven2/org/apache/tiles/tiles-core/2.1.4/tiles-core-2.1.4.jar	Apache-2.0	META-INF/LICENSE e Bundle-License
+commons-digester	commons-digester	1.8.1	compile	transitive	true	commons-digester-1.8.1.jar	https://repo.maven.apache.org/maven2/commons-digester/commons-digester/1.8.1/commons-digester-1.8.1.jar	Apache-2.0	META-INF/LICENSE e Bundle-License
+commons-beanutils	commons-beanutils	1.8.0	compile	transitive	true	commons-beanutils-1.8.0.jar	https://repo.maven.apache.org/maven2/commons-beanutils/commons-beanutils/1.8.0/commons-beanutils-1.8.0.jar	Apache-2.0	META-INF/LICENSE e Bundle-License
+org.apache.xmlbeans	xmlbeans	2.3.0	compile	direct	true	xmlbeans-2.3.0.jar	https://repo.maven.apache.org/maven2/org/apache/xmlbeans/xmlbeans/2.3.0/xmlbeans-2.3.0.jar	Apache-2.0	POM e LICENSE.txt
+stax	stax-api	1.0.1	compile	transitive	true	stax-api-1.0.1.jar	https://repo.maven.apache.org/maven2/stax/stax-api/1.0.1/stax-api-1.0.1.jar	Apache-2.0	POM do artefato
+xml-apis	xml-apis	1.3.02	compile	direct	true	xml-apis-1.3.02.jar	https://repo.maven.apache.org/maven2/xml-apis/xml-apis/1.3.02/xml-apis-1.3.02.jar	Apache-2.0-AND-W3C-AND-SAX-PD	arquivos license/ do JAR
+org.apache.geronimo.specs	geronimo-stax-api_1.0_spec	1.0	compile	direct	true	geronimo-stax-api_1.0_spec-1.0.jar	https://repo.maven.apache.org/maven2/org/apache/geronimo/specs/geronimo-stax-api_1.0_spec/1.0/geronimo-stax-api_1.0_spec-1.0.jar	Apache-2.0	META-INF/LICENSE
+dom4j	dom4j	1.6.1	compile	direct	true	dom4j-1.6.1.jar	https://repo.maven.apache.org/maven2/dom4j/dom4j/1.6.1/dom4j-1.6.1.jar	BSD-4-Clause	META-INF/LICENSE

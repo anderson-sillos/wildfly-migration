@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -199,6 +200,12 @@ public final class OracleLabSchema {
     }
 
     private static void verify(Connection connection) throws SQLException {
+        String databaseVersion =
+                connection.getMetaData().getDatabaseProductVersion();
+        require(databaseVersion != null
+                && databaseVersion.indexOf("19.3.0.0.0") >= 0,
+                "Oracle Database RU diverge de 19.3.0.0.0");
+
         Statement statement = connection.createStatement();
         try {
             require(count(statement,
@@ -217,6 +224,33 @@ public final class OracleLabSchema {
             validateOwnedObjects(statement);
         } finally {
             statement.close();
+        }
+
+        PreparedStatement seed = connection.prepareStatement(
+                "SELECT CLIENTE_NOME, DESCRICAO, VALOR_TOTAL, STATUS "
+                + "FROM LAB_PEDIDO WHERE NUMERO = ?");
+        try {
+            seed.setString(1, "LAB-0001");
+            ResultSet row = seed.executeQuery();
+            try {
+                require(row.next(), "seed Oracle ausente");
+                require("Cliente de referência".equals(row.getString(1)),
+                        "cliente do seed Oracle divergente");
+                require("Pedido mínimo para validar o baseline".equals(
+                        row.getString(2)),
+                        "descrição do seed Oracle divergente");
+                BigDecimal value = row.getBigDecimal(3);
+                require(value != null
+                        && value.compareTo(new BigDecimal("125.50")) == 0,
+                        "valor do seed Oracle divergente");
+                require("NOVO".equals(row.getString(4)),
+                        "status do seed Oracle divergente");
+                require(!row.next(), "seed Oracle duplicado");
+            } finally {
+                row.close();
+            }
+        } finally {
+            seed.close();
         }
     }
 

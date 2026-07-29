@@ -8,6 +8,10 @@ Zulu OpenJDK 7u352 e H2 1.4.200, fixados separadamente em
 são as autoridades de suas trilhas: um checksum informado localmente nunca
 substitui o valor versionado.
 
+No fechamento da fase 1, os dois manifestos, o `ojdbc7` externo e a instância
+Oracle qualificada são reunidos no
+[`manifesto congelado do baseline`](../../migration/baselines/01-legacy/README.md).
+
 ## Limite de confiança
 
 - O Oracle JDK 7u80 é proprietário, obsoleto e obtido manualmente pelo usuário

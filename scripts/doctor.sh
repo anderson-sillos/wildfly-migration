@@ -240,6 +240,22 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-1G; then
+    required+=(
+      "docs/legacy-baseline-reproduction.md"
+      "docs/evidence/CP-1G.md"
+      "migration/baselines/01-legacy/README.md"
+      "migration/baselines/01-legacy/baseline.properties"
+      "migration/baselines/01-legacy/contract-scenarios.tsv"
+      "migration/baselines/01-legacy/oracle-persisted-state.tsv"
+      "migration/baselines/01-legacy/components.tsv"
+      "migration/baselines/01-legacy/maven-dependencies.tsv"
+      "migration/incompatibilities.tsv"
+      "migration/incompatibility-template.md"
+      "scripts/validate-cp-1g-baseline.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"
@@ -772,6 +788,7 @@ check_ojdbc7() {
   local driver="${OJDBC7_JAR:-}"
   local expected="${OJDBC7_SHA256:-}"
   local actual=""
+  local frozen=""
 
   if [[ -z "$driver" ]]; then
     fail "Oracle JDBC: OJDBC7_JAR não definido"
@@ -788,6 +805,28 @@ check_ojdbc7() {
   if [[ ! "$expected" =~ ^[[:xdigit:]]{64}$ ]]; then
     fail "Oracle JDBC: OJDBC7_SHA256 deve conter 64 caracteres"
     return
+  fi
+
+  if rank_at_least CP-1G; then
+    frozen="$(
+      awk -F '\t' '
+        NR > 1 && $1 == "ojdbc7" {
+          print $5
+          found = 1
+          exit
+        }
+        END {
+          if (!found) {
+            exit 1
+          }
+        }
+      ' migration/baselines/01-legacy/components.tsv 2>/dev/null || true
+    )"
+    if [[ ! "$frozen" =~ ^[[:xdigit:]]{64}$ ]] ||
+       [[ "${expected,,}" != "${frozen,,}" ]]; then
+      fail "Oracle JDBC: checksum diverge do baseline congelado"
+      return
+    fi
   fi
 
   actual="$(sha256sum "$driver" | awk '{print $1}')"
