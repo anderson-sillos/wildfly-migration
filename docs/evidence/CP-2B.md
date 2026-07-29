@@ -111,6 +111,23 @@ publicou `java:/jdbc/MigrationDS`, executou os 14 contratos e preservou o
 relatório sanitizado como artefato do workflow. Essa execução confirma a
 reprodução fora da máquina que realizou a qualificação Oracle.
 
+### Cache do runtime portátil
+
+Os quatro arquivos de distribuição fixados são restaurados por
+`actions/cache@v5` em `.cache/cp-2b/runtime-archives`. A chave inclui sistema
+operacional, arquitetura e o hash dos manifestos que registram Java, Maven,
+WildFly e H2. Qualquer alteração nesses manifestos cria uma chave nova.
+
+Um `cache hit` evita somente os downloads externos. Os checksums SHA-256 são
+revalidados em toda execução e a extração, o `doctor`, o build, o WAR, o
+runtime temporário e os contratos continuam sendo recriados. O cache não
+inclui `app/target`, relatórios, evidências, configuração modificada do
+WildFly, credenciais ou o repositório Maven local.
+
+O cache é uma otimização descartável e não constitui evidência de
+compatibilidade. Em sua ausência ou expiração, o workflow volta a baixar das
+origens registradas e produz o mesmo resultado após validar os checksums.
+
 ## Conclusão comprovada
 
 O CP-2B comprova que o mesmo binário aprovado no CP-2A pode ser executado no

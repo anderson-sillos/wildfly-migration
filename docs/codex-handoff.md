@@ -110,7 +110,10 @@ Sobre `c76f42f`:
   a configuração do WAR sem trocar a biblioteca, preferindo o subsistema de
   logging a uma propriedade global de arquivo externo;
 - PR #16 aberto; a execução GitHub Actions `30475883532` aprovou
-  `repository-baseline` e `portable-ci` no WildFly 26.
+  `repository-baseline` e `portable-ci` no WildFly 26;
+- o fechamento do PR passou a cachear somente os arquivos fixados de Java,
+  Maven, WildFly e H2, com chave derivada dos manifestos e SHA-256 revalidado
+  em toda execução.
 
 ## Próximas ações
 

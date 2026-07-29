@@ -212,6 +212,24 @@ grep -Fxq \
   "$REPOSITORY_ROOT/.env.example" ||
   fail ".env.example não contém o SHA-256 fixado do WildFly 26"
 
+WORKFLOW="$REPOSITORY_ROOT/.github/workflows/validate.yml"
+for cache_marker in \
+  'uses: actions/cache@v5' \
+  'path: .cache/cp-2b/runtime-archives' \
+  'key: cp-2b-runtime-archives-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(' \
+  'runtime/legacy/runtime-manifest.tsv' \
+  'runtime/legacy/portable-runtime-manifest.tsv' \
+  'runtime/phase2/java8-wildfly26/runtime-manifest.tsv' \
+  'archives="$GITHUB_WORKSPACE/.cache/cp-2b/runtime-archives"' \
+  'Cache validado por SHA-256' \
+  'sha256sum --check'; do
+  grep -Fq "$cache_marker" "$WORKFLOW" ||
+    fail "cache portátil do CP-2B não contém: $cache_marker"
+done
+if grep -Fq 'path: ~/.m2/repository' "$WORKFLOW"; then
+  fail "CP-2B não deve ampliar o cache para o repositório Maven"
+fi
+
 if [[ -n "$WAR_FILE" ]]; then
   [[ -f "$WAR_FILE" ]] || fail "WAR informado não existe"
   [[ "$(sha256sum "$WAR_FILE" | awk '{print $1}')" == \
