@@ -10,6 +10,7 @@ SERVER_RELEASE="9"
 WAR_FILE=""
 CONTRACT_RESULT_FILE=""
 MANUAL_MODE=false
+PRESERVE_ORACLE_SMOKES=false
 TEMP_DIRECTORY=""
 RUNTIME_HOME=""
 SERVER_PID=""
@@ -22,13 +23,15 @@ usage() {
 Uso:
   ./scripts/smoke-wildfly9-datasource.sh --profile ci-h2|oracle \
     [--java 7|8] [--server 9|26] [--env ARQUIVO] [--war ARQUIVO] \
-    [--contract-result ARQUIVO] [--manual]
+    [--contract-result ARQUIVO] [--manual] [--preserve-oracle-smokes]
 
 Valores já exportados no ambiente prevalecem sobre o arquivo informado.
 Sem --war, valida somente o datasource. Com --war, valida também o fluxo web.
 Com --manual, mantém a aplicação ativa em loopback até Ctrl+C; exige --war.
 No modo manual, imprime o caminho do log bruto do WildFly.
 Com --contract-result, preserva fora do runtime o relatório JSON sanitizado.
+Com --preserve-oracle-smokes, o perfil Oracle mantém temporariamente apenas
+os dados LAB-SMOKE-* para uma sonda externa; o chamador deve limpá-los.
 O padrão Java 7 preserva a reprodução histórica; CP-2A deve informar --java 8.
 O argumento --server 26 é usado pelo wrapper do CP-2B e exige Java 8.
 USAGE
@@ -225,6 +228,10 @@ while [[ $# -gt 0 ]]; do
       MANUAL_MODE=true
       shift
       ;;
+    --preserve-oracle-smokes)
+      PRESERVE_ORACLE_SMOKES=true
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -245,6 +252,13 @@ case "$PROFILE" in
     exit 2
     ;;
 esac
+
+if [[ "$PRESERVE_ORACLE_SMOKES" == true &&
+      ( "$PROFILE" != "oracle" || -z "$WAR_FILE" ||
+        "$MANUAL_MODE" == true ) ]]; then
+  printf 'FALHA: --preserve-oracle-smokes exige perfil oracle, WAR e modo não manual\n' >&2
+  exit 2
+fi
 
 if [[ "$MANUAL_MODE" == true && -z "$WAR_FILE" ]]; then
   printf 'FALHA: --manual exige --war\n' >&2
@@ -942,17 +956,22 @@ if [[ -n "$WAR_FILE" ]]; then
   fi
 
   if [[ "$PROFILE" == "oracle" ]]; then
-    if ! ORACLE_DB_URL="$ORACLE_DB_URL_VALUE" \
-        ORACLE_DB_USER="$ORACLE_DB_USER_VALUE" \
-        ORACLE_DB_PASSWORD="$ORACLE_DB_PASSWORD_VALUE" \
-        "$REPOSITORY_ROOT/scripts/oracle-lab-schema.sh" \
-          cleanup-smokes --java-home "$SELECTED_JAVA_HOME" \
-          --env "$ENV_FILE" \
-          >"$TEMP_DIRECTORY/cleanup.out" 2>&1; then
-      printf 'FALHA: dados transitórios do smoke Oracle não foram limpos\n' >&2
-      exit 1
+    if [[ "$PRESERVE_ORACLE_SMOKES" == true ]]; then
+      ORACLE_SMOKE_CREATED=false
+      printf 'OK: dados LAB-SMOKE-* preservados temporariamente para comparação\n'
+    else
+      if ! ORACLE_DB_URL="$ORACLE_DB_URL_VALUE" \
+          ORACLE_DB_USER="$ORACLE_DB_USER_VALUE" \
+          ORACLE_DB_PASSWORD="$ORACLE_DB_PASSWORD_VALUE" \
+          "$REPOSITORY_ROOT/scripts/oracle-lab-schema.sh" \
+            cleanup-smokes --java-home "$SELECTED_JAVA_HOME" \
+            --env "$ENV_FILE" \
+            >"$TEMP_DIRECTORY/cleanup.out" 2>&1; then
+        printf 'FALHA: dados transitórios do smoke Oracle não foram limpos\n' >&2
+        exit 1
+      fi
+      ORACLE_SMOKE_CREATED=false
     fi
-    ORACLE_SMOKE_CREATED=false
   fi
 
   printf 'OK: fluxo web %s validou pedidos, sessão, upload e importação XML\n' \
