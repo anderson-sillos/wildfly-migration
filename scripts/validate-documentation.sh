@@ -18,6 +18,8 @@ required_paths=(
   "docs/legacy-xml-import.md"
   "docs/legacy-validation-logging.md"
   "docs/oracle-lab-schema.md"
+  "docs/cp-2a-java8-wildfly9.md"
+  "docs/evidence/CP-2A.md"
   "runtime/legacy/README.md"
   "runtime/legacy/profiles/README.md"
   "scripts/follow-wildfly9-log.sh"
@@ -70,11 +72,12 @@ for marker in "${required_runbook_markers[@]}"; do
 done
 
 required_task_markers=(
-  '"label": "Legado: iniciar aplicação H2 para teste manual"'
+  '"label": "CP-2A: iniciar aplicação Java 8 com H2"'
   '"command": "${workspaceFolder}/scripts/smoke-wildfly9-datasource.sh"'
-  '"label": "Legado: iniciar aplicação Oracle para teste manual"'
-  '"label": "Legado: acompanhar log do WildFly"'
+  '"label": "CP-2A: iniciar aplicação Java 8 com Oracle"'
+  '"label": "CP-2A: acompanhar log do WildFly 9"'
   '"command": "${workspaceFolder}/scripts/follow-wildfly9-log.sh"'
+  '"8"'
 )
 
 for marker in "${required_task_markers[@]}"; do
@@ -88,7 +91,8 @@ done
 for reference in \
   'docs/legacy-application-runbook.md' \
   'docs/README.md' \
-  'docs/legacy-baseline-reproduction.md'; do
+  'docs/legacy-baseline-reproduction.md' \
+  'docs/cp-2a-java8-wildfly9.md'; do
   if ! grep -Fq "$reference" "$REPOSITORY_ROOT/README.md"; then
     printf 'FALHA: README principal não aponta para %s\n' "$reference" >&2
     exit 1
@@ -127,6 +131,7 @@ help_output="$(
   "$REPOSITORY_ROOT/scripts/smoke-wildfly9-datasource.sh" --help
 )"
 if [[ "$help_output" != *"--manual"* ||
+      "$help_output" != *"--java 7|8"* ||
       "$help_output" != *"mantém a aplicação ativa"* ||
       "$help_output" != *"caminho do log bruto"* ]]; then
   printf 'FALHA: ajuda do runtime não documenta o modo manual\n' >&2

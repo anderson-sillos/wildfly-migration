@@ -5,6 +5,7 @@ set -euo pipefail
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPOSITORY_ROOT/.env"
 PROFILE=""
+JAVA_RELEASE="7"
 WAR_FILE=""
 CONTRACT_RESULT_FILE=""
 MANUAL_MODE=false
@@ -13,18 +14,21 @@ RUNTIME_HOME=""
 SERVER_PID=""
 SERVER_STARTED=false
 ORACLE_SMOKE_CREATED=false
+RUNTIME_IDENTIFIER="java7-wildfly9.0.2"
 
 usage() {
   cat <<'USAGE'
 Uso:
   ./scripts/smoke-wildfly9-datasource.sh --profile ci-h2|oracle \
-    [--env ARQUIVO] [--war ARQUIVO] [--contract-result ARQUIVO] [--manual]
+    [--java 7|8] [--env ARQUIVO] [--war ARQUIVO] \
+    [--contract-result ARQUIVO] [--manual]
 
 Valores já exportados no ambiente prevalecem sobre o arquivo informado.
 Sem --war, valida somente o datasource. Com --war, valida também o fluxo web.
 Com --manual, mantém a aplicação ativa em loopback até Ctrl+C; exige --war.
 No modo manual, imprime o caminho do log bruto do WildFly.
 Com --contract-result, preserva fora do runtime o relatório JSON sanitizado.
+O padrão Java 7 preserva a reprodução histórica; CP-2A deve informar --java 8.
 USAGE
 }
 
@@ -73,6 +77,28 @@ configuration_value() {
   fi
 }
 
+phase2_manifest_field() {
+  local field="$1"
+  awk -F '\t' -v wanted_field="$field" '
+    NR == 1 {
+      for (column = 1; column <= NF; column++) {
+        header[$column] = column
+      }
+      next
+    }
+    $1 == "temurin-openjdk" {
+      print $header[wanted_field]
+      found = 1
+      exit
+    }
+    END {
+      if (!found) {
+        exit 1
+      }
+    }
+  ' "$REPOSITORY_ROOT/runtime/phase2/java8-wildfly9/runtime-manifest.tsv"
+}
+
 sanitize_oracle_output() {
   local line sanitized
 
@@ -106,7 +132,8 @@ cleanup() {
     ORACLE_DB_USER="$ORACLE_DB_USER_VALUE" \
     ORACLE_DB_PASSWORD="$ORACLE_DB_PASSWORD_VALUE" \
       "$REPOSITORY_ROOT/scripts/oracle-lab-schema.sh" \
-        cleanup-smokes --env "$ENV_FILE" >/dev/null 2>&1 || true
+        cleanup-smokes --java-home "$SELECTED_JAVA_HOME" \
+        --env "$ENV_FILE" >/dev/null 2>&1 || true
     ORACLE_SMOKE_CREATED=false
   fi
 
@@ -158,6 +185,14 @@ while [[ $# -gt 0 ]]; do
         exit 2
       }
       ENV_FILE="$2"
+      shift 2
+      ;;
+    --java)
+      [[ $# -ge 2 && ( "$2" == "7" || "$2" == "8" ) ]] || {
+        printf 'FALHA: --java exige 7 ou 8\n' >&2
+        exit 2
+      }
+      JAVA_RELEASE="$2"
       shift 2
       ;;
     --war)
@@ -258,11 +293,44 @@ if [[ "$HTTP_PORT_VALUE" == "$MANAGEMENT_PORT_VALUE" ]]; then
   exit 1
 fi
 
-if [[ "$PROFILE" == "ci-h2" ]]; then
+if [[ "$JAVA_RELEASE" == "8" ]]; then
+  SELECTED_JAVA_HOME="$(configuration_value JAVA8_HOME)"
+  java8_archive="$(configuration_value JAVA8_ARCHIVE)"
+  java8_configured_checksum="$(configuration_value JAVA8_ARCHIVE_SHA256)"
+  java8_expected_archive="$(phase2_manifest_field archive)"
+  java8_expected_checksum="$(phase2_manifest_field sha256)"
+  java8_actual_checksum=""
+  java8_version_output=""
+
+  if [[ ! -x "$SELECTED_JAVA_HOME/bin/java" ||
+        ! -f "$java8_archive" ]]; then
+    printf 'FALHA: JAVA8_HOME e JAVA8_ARCHIVE são obrigatórios com --java 8\n' >&2
+    exit 1
+  fi
+  java8_actual_checksum="$(sha256sum "$java8_archive" | awk '{print $1}')"
+  if [[ "$(basename "$java8_archive")" != "$java8_expected_archive" ]] ||
+     [[ "${java8_configured_checksum,,}" != "${java8_expected_checksum,,}" ]] ||
+     [[ "$java8_actual_checksum" != "$java8_expected_checksum" ]]; then
+    printf 'FALHA: arquivo ou checksum do Java 8 diverge do manifesto CP-2A\n' >&2
+    exit 1
+  fi
+  java8_version_output="$("$SELECTED_JAVA_HOME/bin/java" -version 2>&1)"
+  if [[ "$java8_version_output" != *'openjdk version "1.8.0_492"'* ||
+        "$java8_version_output" != *"(Temurin)"* ]]; then
+    printf 'FALHA: Eclipse Temurin OpenJDK 8u492-b09 não foi detectado\n' >&2
+    exit 1
+  fi
+  RUNTIME_IDENTIFIER="java8-wildfly9.0.2"
+elif [[ "$PROFILE" == "ci-h2" ]]; then
   SELECTED_JAVA_HOME="$(configuration_value JAVA7_PORTABLE_HOME)"
+else
+  SELECTED_JAVA_HOME="$(configuration_value JAVA7_HOME)"
+fi
+
+if [[ "$PROFILE" == "ci-h2" ]]; then
   H2_JAR_VALUE="$(configuration_value H2_JAR)"
   if [[ ! -x "$SELECTED_JAVA_HOME/bin/java" || ! -f "$H2_JAR_VALUE" ]]; then
-    printf 'FALHA: Java portátil e H2 são obrigatórios para ci-h2\n' >&2
+    printf 'FALHA: Java selecionado e H2 são obrigatórios para ci-h2\n' >&2
     exit 1
   fi
   expected_driver_checksum="$(
@@ -276,7 +344,6 @@ if [[ "$PROFILE" == "ci-h2" ]]; then
   fi
   PROFILE_FILE="$REPOSITORY_ROOT/runtime/legacy/profiles/ci-h2.cli"
 else
-  SELECTED_JAVA_HOME="$(configuration_value JAVA7_HOME)"
   OJDBC7_JAR_VALUE="$(configuration_value OJDBC7_JAR)"
   OJDBC7_SHA256_VALUE="$(configuration_value OJDBC7_SHA256)"
   ORACLE_DB_URL_VALUE="$(configuration_value ORACLE_DB_URL)"
@@ -288,7 +355,7 @@ else
         -z "$ORACLE_DB_URL_VALUE" ||
         -z "$ORACLE_DB_USER_VALUE" ||
         -z "$ORACLE_DB_PASSWORD_VALUE" ]]; then
-    printf 'FALHA: Java 7u80, ojdbc7 e configuração Oracle são obrigatórios\n' >&2
+    printf 'FALHA: Java selecionado, ojdbc7 e configuração Oracle são obrigatórios\n' >&2
     exit 1
   fi
   actual_ojdbc7_checksum="$(
@@ -307,6 +374,12 @@ RUNTIME_HOME="$TEMP_DIRECTORY/wildfly-9.0.2.Final"
 install -d -m 0755 "$RUNTIME_HOME"
 cp -a "$WILDFLY9_HOME_VALUE/." "$RUNTIME_HOME/"
 install -d -m 0755 "$RUNTIME_HOME/standalone/log"
+
+if [[ "$JAVA_RELEASE" == "8" ]]; then
+  sed -i -E \
+    's/[[:space:]]+-XX:MaxPermSize=[^"[:space:]]+//g' \
+    "$RUNTIME_HOME/bin/standalone.conf"
+fi
 
 if [[ "$PROFILE" == "ci-h2" ]]; then
   module_directory="$RUNTIME_HOME/modules/com/h2database/h2/cp1d/main"
@@ -376,6 +449,12 @@ if [[ "$ready" != true ]]; then
   else
     printf 'Log do WildFly indisponível para diagnóstico sanitizado\n' >&2
   fi
+  exit 1
+fi
+
+if [[ "$JAVA_RELEASE" == "8" ]] &&
+   grep -Fq 'ignoring option MaxPermSize' "$TEMP_DIRECTORY/server.log"; then
+  printf 'FALHA: opção MaxPermSize removida ainda foi enviada ao Java 8\n' >&2
   exit 1
 fi
 
@@ -747,7 +826,7 @@ if [[ -n "$WAR_FILE" ]]; then
       --war "$WAR_FILE" \
       --result "$contract_result" \
       --commit "$commit_sha" \
-      --runtime java7-wildfly9.0.2 \
+      --runtime "$RUNTIME_IDENTIFIER" \
       --correlation-id "$contract_correlation"; then
     printf 'FALHA: suíte externa de contratos falhou no perfil %s\n' \
       "$PROFILE" >&2
@@ -777,7 +856,8 @@ if [[ -n "$WAR_FILE" ]]; then
         ORACLE_DB_USER="$ORACLE_DB_USER_VALUE" \
         ORACLE_DB_PASSWORD="$ORACLE_DB_PASSWORD_VALUE" \
         "$REPOSITORY_ROOT/scripts/oracle-lab-schema.sh" \
-          cleanup-smokes --env "$ENV_FILE" \
+          cleanup-smokes --java-home "$SELECTED_JAVA_HOME" \
+          --env "$ENV_FILE" \
           >"$TEMP_DIRECTORY/cleanup.out" 2>&1; then
       printf 'FALHA: dados transitórios do smoke Oracle não foram limpos\n' >&2
       exit 1

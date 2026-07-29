@@ -6,10 +6,16 @@ REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EXPECTED_LIBRARIES="$REPOSITORY_ROOT/runtime/legacy/war-libraries.txt"
 WAR_FILE="$REPOSITORY_ROOT/app/target/wildfly-migration.war"
 JAVA_HOME_ARGUMENT=""
+EXPECTED_BYTECODE_MAJOR="51"
+EXPECTED_JAVA_LABEL="Java 7"
 TEMP_DIRECTORY="$(mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-war-audit.XXXXXXXX")"
 
 usage() {
-  printf 'Uso: ./scripts/audit-legacy-war.sh --java-home DIRETORIO [WAR]\n'
+  cat <<'USAGE'
+Uso:
+  ./scripts/audit-legacy-war.sh --java-home DIRETORIO \
+    [--expected-bytecode 51|52] [--expected-java-label TEXTO] [WAR]
+USAGE
 }
 
 cleanup() {
@@ -33,6 +39,22 @@ while [[ $# -gt 0 ]]; do
         exit 2
       fi
       JAVA_HOME_ARGUMENT="$2"
+      shift 2
+      ;;
+    --expected-bytecode)
+      if [[ $# -lt 2 || ( "$2" != "51" && "$2" != "52" ) ]]; then
+        printf 'FALHA: --expected-bytecode exige 51 ou 52\n' >&2
+        exit 2
+      fi
+      EXPECTED_BYTECODE_MAJOR="$2"
+      shift 2
+      ;;
+    --expected-java-label)
+      if [[ $# -lt 2 || -z "$2" ]]; then
+        printf 'FALHA: --expected-java-label exige um texto\n' >&2
+        exit 2
+      fi
+      EXPECTED_JAVA_LABEL="$2"
       shift 2
       ;;
     -h|--help)
@@ -124,8 +146,9 @@ done
 if ! "$JAVA_HOME_ARGUMENT/bin/javap" -verbose \
     -classpath "$TEMP_DIRECTORY/WEB-INF/classes" \
     br.com.asillos.migration.LegacyBuildMarker |
-    grep -Fq 'major version: 51'; then
-  printf 'FALHA: bytecode do marcador não é Java 7 (major 51)\n' >&2
+    grep -Fq "major version: $EXPECTED_BYTECODE_MAJOR"; then
+  printf 'FALHA: bytecode do marcador não é %s (major %s)\n' \
+    "$EXPECTED_JAVA_LABEL" "$EXPECTED_BYTECODE_MAJOR" >&2
   exit 1
 fi
 
@@ -161,5 +184,6 @@ fi
 war_checksum="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
 library_count="$(wc -l < "$TEMP_DIRECTORY/actual-libraries.txt" | tr -d ' ')"
 
-printf 'OK: WAR legado auditado — %s bibliotecas, bytecode Java 7, SHA-256 %s\n' \
-  "$library_count" "$war_checksum"
+printf 'OK: WAR legado auditado — %s bibliotecas, bytecode %s (major %s), SHA-256 %s\n' \
+  "$library_count" "$EXPECTED_JAVA_LABEL" "$EXPECTED_BYTECODE_MAJOR" \
+  "$war_checksum"

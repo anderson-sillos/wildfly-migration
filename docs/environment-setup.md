@@ -13,7 +13,8 @@ em máquina descartável, container ou VM isolada e sem bind em interface públi
 | Docker Engine/Compose ou equivalente | Versão estável suportada | Pacote oficial | Engine open source; confira os termos do produto escolhido |
 | Java 7 histórico | Oracle JDK 7u80 | Download manual externo | Proprietário, EOL e não redistribuível pelo projeto |
 | Java 7 portátil | Zulu 7.56.0.11 CA / OpenJDK 7u352 | Arquivo oficial Azul | OpenJDK, redistribuível, EOL e exclusivo de `portable-ci` |
-| Java 8/17/21/25 | Eclipse Temurin/OpenJDK | Pacote ou arquivo oficial | OpenJDK, open source |
+| Java 8 | Eclipse Temurin OpenJDK 8u492-b09 | Arquivo oficial fixado no CP-2A | OpenJDK, open source |
+| Java 17/21/25 | Eclipse Temurin/OpenJDK | Pacote ou arquivo oficial a fixar no gate correspondente | OpenJDK, open source |
 | Maven legado | 3.8.9 | Arquivo histórico oficial Apache | Open source e EOL; última versão disponível compatível com Java 7 |
 | Maven moderno | 3.9.16 | Arquivo oficial Apache | Open source; requer JDK 8+ para executar |
 | WildFly | 9.0.2, 26.1.3 e 41.0.0.Final | Arquivo da comunidade | WildFly comunitário open source |
@@ -28,6 +29,8 @@ Fontes oficiais:
 - autenticação da GitHub CLI: <https://cli.github.com/manual/gh_auth_login>
 - Docker Engine: <https://docs.docker.com/engine/install/>
 - Eclipse Temurin: <https://adoptium.net/installation>
+- Temurin 8u492-b09 Linux x64:
+  <https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u492-b09/OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz>
 - licença OpenJDK: <https://openjdk.org/legal/>
 - Oracle JDK 7u80: <https://www.oracle.com/java/technologies/javase/javase7-archive-downloads.html>
 - Azul Metadata API: <https://api.azul.com/metadata/v1/zulu/packages/f436b3cb-0115-4814-b7fa-e180747bd68f>
@@ -59,7 +62,7 @@ combinação abaixo; o `doctor` marca os componentes futuros como `NÃO EXIGIDO`
 | Perfil `ci-h2` a partir do CP-1D | H2 1.4.200 | JAR oficial como módulo do WildFly, nunca como dependência do WAR |
 | CP-1D e seguintes enquanto legado | Driver `ojdbc7` aprovado | Fornecido externamente; não versionar |
 | CP-1D e checkpoints com persistência | Acesso ao Oracle Database 19c existente | URL, usuário e senha ou wallet fornecidos pelo DBA |
-| CP-2A e CP-2B | Eclipse Temurin/OpenJDK 8 | A versão exata será fixada ao iniciar o CP-2A |
+| CP-2A e CP-2B | Eclipse Temurin OpenJDK 8u492-b09 | `OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz`, URL e digest fixados no manifesto |
 | CP-2B a CP-3D | WildFly 26.1.3.Final | Distribuição EE 8 `wildfly-26.1.3.Final.tar.gz` |
 | CP-2C e seguintes | Apache Maven 3.9.16 | Distribuição binária oficial |
 | CP-3A a CP-3D | Eclipse Temurin/OpenJDK 17 | A build exata será fixada no CP-3A |
@@ -77,7 +80,7 @@ checksum quando entrar no respectivo checkpoint.
 
 | Componente | Fonte oficial |
 | --- | --- |
-| Temurin/OpenJDK 8, 17, 21 e 25 | <https://adoptium.net/temurin/releases/> |
+| Temurin/OpenJDK 17, 21 e 25 | <https://adoptium.net/temurin/releases/> |
 | WildFly 26.1.3.Final EE 8 | <https://github.com/wildfly/wildfly/releases/download/26.1.3.Final/wildfly-26.1.3.Final.tar.gz> |
 | Maven 3.9.16 | <https://maven.apache.org/download.cgi> |
 | WildFly 41.0.0.Final | <https://github.com/wildfly/wildfly/releases/download/41.0.0.Final/wildfly-41.0.0.Final.tar.gz> |
@@ -249,18 +252,25 @@ específico é
 
 ### OpenJDK 8, 17, 21 e 25
 
-Use uma distribuição baseada em OpenJDK, preferencialmente Eclipse Temurin, via
-pacote ou arquivo oficial. A página de releases permite selecionar versão,
-sistema, arquitetura e JDK; todos os arquivos oferecem checksum SHA-256.
-Mantenha cada JDK em diretório próprio e configure `JAVA8_HOME`, `JAVA17_HOME`,
-`JAVA21_HOME` e `JAVA25_HOME`, com seus arquivos e digests correspondentes.
+O CP-2A fixa Eclipse Temurin OpenJDK `8u492-b09`. Baixe exatamente
+`OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz` da
+[URL versionada oficial](https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u492-b09/OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz)
+e valide SHA-256
+`da257f161d7f8c6ca5b0e5d9e4090f65ac28c5e398072e68b8ae87988b1d1a2e`.
+O [manifesto do CP-2A](../runtime/phase2/java8-wildfly9/runtime-manifest.tsv)
+registra origem e licença.
+
+Para Java 17, 21 e 25, use uma distribuição baseada em OpenJDK,
+preferencialmente Eclipse Temurin, mas fixe a build somente no gate
+correspondente. Mantenha cada JDK em diretório próprio e configure seus arquivos
+e digests correspondentes.
 
 O destino final será fixado em uma build OpenJDK 25 aprovada. Oracle JDK não
 será aceito nesse gate.
 
 ### VS Code no baseline Java 7
 
-O build Maven continua sendo a fonte de verdade do baseline. Para que o
+Na tag do baseline, o build Maven continua sendo a fonte de verdade. Para que o
 diagnóstico do editor também aceite `source` e `target` 1.7, use a extensão
 Language Support for Java by Red Hat exatamente na versão `1.32.0`. A partir da
 versão `1.33.0`, a plataforma do servidor de linguagem deixou de compilar
@@ -276,13 +286,11 @@ code --install-extension redhat.java@1.32.0 --force
 code --list-extensions --show-versions | grep '^redhat\.java@'
 ```
 
-O resultado esperado é `redhat.java@1.32.0`. Ao instalar uma versão específica,
-mantenha desabilitada a atualização automática dessa extensão até o `CP-2A`,
-quando o código passar a Java 8. O workspace já relaciona `JavaSE-1.7` ao Zulu
-7 portátil e `JavaSE-1.8` ao OpenJDK 8 em `.vscode/settings.json`; adapte apenas
-os caminhos locais se o host usar diretórios diferentes. O servidor de
-linguagem inicia com o JRE 17 incorporado à extensão, enquanto a compilação do
-projeto usa o JDK 7 configurado. Esses runtimes têm responsabilidades distintas.
+O resultado esperado na reprodução da tag é `redhat.java@1.32.0`. No CP-2A, o
+código já usa Java 8 e a restrição histórica da extensão deixa de ser
+necessária. O workspace relaciona `JavaSE-1.7` ao Zulu 7 portátil e define
+`JavaSE-1.8` no Temurin 8u492 como padrão em `.vscode/settings.json`; adapte
+apenas os caminhos locais se o host usar diretórios diferentes.
 
 Depois da troca de versão, abra a paleta de comandos e execute, nesta ordem:
 
@@ -291,14 +299,14 @@ Depois da troca de versão, abra a paleta de comandos e execute, nesta ordem:
 3. confirme o reinício e a remoção do cache solicitados pelo comando.
 
 Para validar todos os arquivos de uma vez, pressione `Ctrl+Shift+B` e execute a
-tarefa padrão `Baseline: validar Java 7 em massa`. Ela chama o build completo
-com o perfil `ci-h2`, Java 7 e Maven 3.8.9. Os comandos `Java: Force Java
+tarefa padrão `CP-2A: validar Java 8 em massa`. Ela chama o build completo
+com o perfil `ci-h2`, Java 8 e Maven 3.8.9. Os comandos `Java: Force Java
 Compilation` ou `Java Projects: Rebuild All` podem atualizar os marcadores do
 editor, mas não substituem este build:
 
 ```bash
-./scripts/doctor.sh CP-1F --profile ci-h2 --env .env
-./scripts/build-cp-1d.sh --profile ci-h2 --env .env
+./scripts/doctor.sh CP-2A --profile ci-h2 --env .env
+./scripts/build-cp-2a.sh --profile ci-h2 --env .env
 ```
 
 Referências: [histórico de versões do VS Code Java][vscode-java-changelog] e
@@ -327,8 +335,8 @@ MAVEN_ARCHIVE=/opt/migration-lab/archives/apache-maven-3.8.9-bin.tar.gz
 MAVEN_ARCHIVE_SHA256=3e4c68cdd70f96635e713f36c8fc3ea3182035245d3da2156576710ca0fe4b0c
 ```
 
-O `doctor` executa essa instalação explicitamente com `JAVA7_HOME` e rejeita
-outra versão do Maven ou da JVM.
+Até a tag da fase 1, o `doctor` executa essa instalação com Java 7. No CP-2A e
+CP-2B, o mesmo Maven 3.8.9 executa com o Temurin Java 8 fixado.
 
 Para construir e auditar o WAR do CP-1C:
 
@@ -428,6 +436,10 @@ A partir do CP-1D, selecione explicitamente uma das duas trilhas:
 | `ci-h2` | Zulu Java 7 portátil, Maven 3.8.9, WildFly 9 e H2 fixados | Oracle JDK, truststore externo, `ojdbc7` e qualquer segredo Oracle | `portable-ci` |
 | `oracle` | Oracle JDK 7u80, truststore, Maven 3.8.9, WildFly 9, `ojdbc7`, URL, usuário e senha | Zulu Java 7 e H2 | `oracle-qualified`, depois da suíte interna |
 
+No CP-2A, os dois perfis passam a exigir o mesmo Temurin Java 8u492 e WildFly
+9. O perfil `ci-h2` acrescenta H2; o perfil `oracle` acrescenta `ojdbc7` e a
+configuração externa do Oracle 19c.
+
 O perfil não é armazenado no `.env`. A partir do `CP-1D`, todo comando
 aplicável exige `--profile ci-h2` ou `--profile oracle` explicitamente.
 O modo `--ci` é não interativo e recusa o perfil `oracle`, impedindo que o
@@ -436,12 +448,16 @@ workflow hospedado dependa de rota ou credenciais internas.
 ```bash
 ./scripts/doctor.sh CP-1E --profile ci-h2 --env .env
 ./scripts/doctor.sh CP-1E --profile oracle --env .env
+./scripts/doctor.sh CP-2A --profile ci-h2 --env .env
+./scripts/doctor.sh CP-2A --profile oracle --env .env
 ```
 
 Build, preparação do schema, inicialização, URLs, testes manuais, stop e
 limpeza estão consolidados no
 [runbook da aplicação legada](legacy-application-runbook.md). Esta página
 permanece como fonte para instalação, versões e variáveis.
+Para o estado atual, use o
+[runbook do CP-2A](cp-2a-java8-wildfly9.md).
 
 O GitHub Actions executa somente a trilha `ci-h2`. A execução Oracle deve
 ocorrer em um host autorizado na rede interna e com

@@ -2,9 +2,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Baseline: validar Java 7 em massa",
+      "label": "CP-2A: validar Java 8 em massa",
       "type": "shell",
-      "command": "${workspaceFolder}/scripts/build-cp-1d.sh",
+      "command": "${workspaceFolder}/scripts/build-cp-2a.sh",
       "args": [
         "--profile",
         "ci-h2",
@@ -21,9 +21,9 @@
       "problemMatcher": []
     },
     {
-      "label": "Baseline: validar Java 7 com Oracle",
+      "label": "CP-2A: validar Java 8 com Oracle",
       "type": "shell",
-      "command": "${workspaceFolder}/scripts/build-cp-1d.sh",
+      "command": "${workspaceFolder}/scripts/build-cp-2a.sh",
       "args": [
         "--profile",
         "oracle",
@@ -36,10 +36,12 @@
       "problemMatcher": []
     },
     {
-      "label": "Legado: iniciar aplicação H2 para teste manual",
+      "label": "CP-2A: iniciar aplicação Java 8 com H2",
       "type": "shell",
       "command": "${workspaceFolder}/scripts/smoke-wildfly9-datasource.sh",
       "args": [
+        "--java",
+        "8",
         "--profile",
         "ci-h2",
         "--env",
@@ -52,7 +54,7 @@
         "cwd": "${workspaceFolder}"
       },
       "dependsOn": [
-        "Baseline: validar Java 7 em massa"
+        "CP-2A: validar Java 8 em massa"
       ],
       "dependsOrder": "sequence",
       "problemMatcher": [],
@@ -64,10 +66,12 @@
       }
     },
     {
-      "label": "Legado: iniciar aplicação Oracle para teste manual",
+      "label": "CP-2A: iniciar aplicação Java 8 com Oracle",
       "type": "shell",
       "command": "${workspaceFolder}/scripts/smoke-wildfly9-datasource.sh",
       "args": [
+        "--java",
+        "8",
         "--profile",
         "oracle",
         "--env",
@@ -80,7 +84,7 @@
         "cwd": "${workspaceFolder}"
       },
       "dependsOn": [
-        "Baseline: validar Java 7 com Oracle"
+        "CP-2A: validar Java 8 com Oracle"
       ],
       "dependsOrder": "sequence",
       "problemMatcher": [],
@@ -92,7 +96,7 @@
       }
     },
     {
-      "label": "Legado: acompanhar log do WildFly",
+      "label": "CP-2A: acompanhar log do WildFly 9",
       "type": "shell",
       "command": "${workspaceFolder}/scripts/follow-wildfly9-log.sh",
       "options": {

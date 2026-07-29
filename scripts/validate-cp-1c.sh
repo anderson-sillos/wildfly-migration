@@ -88,7 +88,7 @@ if grep -Eq \
   exit 1
 fi
 
-javac -Xlint:-options -source 1.7 -target 1.7 \
+javac -Xlint:-options -source 1.8 -target 1.8 \
   -d "$TEMP_DIRECTORY" \
   "$REPOSITORY_ROOT/scripts/ValidateLegacyPom.java"
 java -cp "$TEMP_DIRECTORY" ValidateLegacyPom "$REPOSITORY_ROOT"

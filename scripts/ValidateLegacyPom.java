@@ -91,13 +91,13 @@ public final class ValidateLegacyPom {
             }
         }
 
-        require("1.7".equals(properties.get("maven.compiler.source")),
-                "source do compilador deve ser 1.7");
-        require("1.7".equals(properties.get("maven.compiler.target")),
-                "target do compilador deve ser 1.7");
-        require("[1.7.0-80]".equals(
-                properties.get("legacy.java.version.range")),
-                "range Java padrão deve preservar Oracle JDK 7u80");
+        require("1.8".equals(properties.get("maven.compiler.source")),
+                "source do compilador deve ser 1.8 no CP-2A");
+        require("1.8".equals(properties.get("maven.compiler.target")),
+                "target do compilador deve ser 1.8 no CP-2A");
+        require("[1.8,1.9)".equals(
+                properties.get("phase2.java.version.range")),
+                "range Java padrão deve exigir a família Java 8");
 
         Map<String, String[]> expected =
                 new LinkedHashMap<String, String[]>();
@@ -202,7 +202,7 @@ public final class ValidateLegacyPom {
                         uniqueDescendant(plugin, "requireJavaVersion");
                 require("[3.8.9]".equals(text(requireMaven, "version")),
                         "Enforcer deve exigir exatamente Maven 3.8.9");
-                require("${legacy.java.version.range}".equals(
+                require("${phase2.java.version.range}".equals(
                         text(requireJava, "version")),
                         "Enforcer deve usar o range Java selecionado pelo perfil");
             }
@@ -212,8 +212,8 @@ public final class ValidateLegacyPom {
 
         Map<String, String> expectedProfiles =
                 new LinkedHashMap<String, String>();
-        expectedProfiles.put("oracle", "[1.7.0-80]");
-        expectedProfiles.put("ci-h2", "[1.7,1.8)");
+        expectedProfiles.put("oracle", "[1.8,1.9)");
+        expectedProfiles.put("ci-h2", "[1.8,1.9)");
 
         Element profiles = child(project, "profiles");
         NodeList profileNodes = profiles.getChildNodes();
@@ -232,7 +232,7 @@ public final class ValidateLegacyPom {
                     "perfil Maven inesperado: " + profileId);
             Element profileProperties = child(profile, "properties");
             require(expectedRange.equals(
-                    text(profileProperties, "legacy.java.version.range")),
+                    text(profileProperties, "phase2.java.version.range")),
                     "range Java divergente no perfil " + profileId);
         }
         require(profileCount == expectedProfiles.size(),
