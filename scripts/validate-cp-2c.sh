@@ -121,14 +121,19 @@ if [[ "$(grep -Fc 'uses: actions/cache/restore@v5' "$WORKFLOW")" -ne 2 ]] ||
   fail "workflow deve restaurar e salvar exatamente os caches de runtime e Maven"
 fi
 
-if [[ "$(grep -Fc \
-    "github.event_name == 'push' && github.ref == 'refs/heads/main'" \
-    "$WORKFLOW")" -ne 2 ]]; then
-  fail "caches novos devem ser gravados somente por push bem-sucedido na main"
-fi
+for save_guard in \
+  "github.event_name == 'push'" \
+  "github.ref == 'refs/heads/main'" \
+  "github.event_name == 'pull_request'" \
+  "github.event.pull_request.head.repo.full_name ==" \
+  "github.repository"; do
+  if [[ "$(grep -Fc "$save_guard" "$WORKFLOW")" -ne 2 ]]; then
+    fail "os dois caches não compartilham a proteção de gravação: $save_guard"
+  fi
+done
 
 if grep -Fq 'uses: actions/cache@v5' "$WORKFLOW"; then
-  fail "action combinada não deve gravar cache durante pull requests"
+  fail "política de gravação exige actions separadas de restore e save"
 fi
 
 if grep -Eq \

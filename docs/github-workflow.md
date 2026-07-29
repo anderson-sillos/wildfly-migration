@@ -134,12 +134,18 @@ existir, o job reaproveita a entrada compatível anterior, elimina do pacote os
 arquivos que não aparecem mais no lock, revalida por SHA-256 os arquivos ainda
 aprovados e baixa somente o que estiver ausente ou inválido.
 
-Pull requests apenas restauram caches. Uma nova entrada é gravada somente
-depois que todas as validações terminam com sucesso em um `push` para `main`,
-e somente quando não houve correspondência exata da chave. Como o cache do
-GitHub é imutável, uma mudança real no lock ou no POM exige uma nova entrada;
-a restauração parcial evita baixar novamente o conteúdo válido, e a restrição
-à `main` impede uma cópia redundante por branch, atividade ou reexecução de PR.
+Depois que todas as validações do job terminam com sucesso, um pull request
+originado no próprio repositório grava as entradas que ainda não tiveram
+correspondência exata. O GitHub associa essas entradas ao merge ref do PR,
+`refs/pull/<número>/merge`; por isso, novos commits e reexecuções do mesmo PR
+podem restaurá-las, mas a `main`, outros PRs e branches irmãs não podem.
+Pull requests de forks permanecem somente leitura pela condição que compara o
+repositório de origem com `github.repository`.
+
+Um `push` bem-sucedido para `main` cria separadamente a entrada canônica da
+branch principal quando ela ainda não existe. Como o cache do GitHub é
+imutável, uma mudança real no lock ou no POM exige uma nova entrada; a
+restauração parcial evita baixar novamente o conteúdo ainda válido.
 
 Configurações Maven, credenciais, `app/target`, relatórios, evidências, cópias
 extraídas do WildFly e demais resultados continuam sendo recriados em cada
@@ -150,12 +156,18 @@ action oficial:
 Depois de remover todos os caches do repositório, a validação completa segue
 esta sequência:
 
-1. o PR executa com cache frio, baixa e valida todos os arquivos, mas não cria
-   nenhuma entrada;
-2. o primeiro `push` correspondente em `main`, depois de todas as verificações
-   verdes, cria uma entrada `runtime-archives` e uma `maven-repository`;
-3. a reexecução desse workflow em `main` restaura as duas chaves exatas, não
-   repete os downloads dos runtimes e não cria entradas adicionais.
+1. o primeiro commit do PR executa com cache frio, baixa e valida todos os
+   arquivos e, somente depois do sucesso integral, grava uma entrada
+   `runtime-archives` e uma `maven-repository` isoladas no PR;
+2. o commit ou a reexecução seguinte do mesmo PR restaura as duas chaves,
+   revalida os runtimes e não cria entradas adicionais quando o match é exato;
+3. depois do merge, o primeiro `push` correspondente em `main` cria as duas
+   entradas canônicas da branch principal;
+4. execuções seguintes na `main` ou em novos PRs restauram as entradas da
+   branch principal enquanto as chaves permanecerem compatíveis.
+
+Essa política segue o escopo oficial de cache por branch e merge ref:
+<https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching#restrictions-for-accessing-a-cache>.
 
 ## Compatibilidade com tokens de instalação
 

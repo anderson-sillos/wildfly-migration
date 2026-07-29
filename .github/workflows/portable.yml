@@ -201,14 +201,32 @@ jobs:
           if-no-files-found: error
 
       - name: Save reusable runtime archive cache
-        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.runtime-archive-cache.outputs.cache-hit != 'true'
+        if: >-
+          success() &&
+          steps.runtime-archive-cache.outputs.cache-hit != 'true' &&
+          (
+            (github.event_name == 'push' &&
+             github.ref == 'refs/heads/main') ||
+            (github.event_name == 'pull_request' &&
+             github.event.pull_request.head.repo.full_name ==
+             github.repository)
+          )
         uses: actions/cache/save@v5
         with:
           path: ${{ runner.temp }}/wildfly-migration-cache/runtime-archives
           key: ${{ steps.runtime-archive-cache.outputs.cache-primary-key }}
 
       - name: Save reusable Maven dependency cache
-        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.maven-dependency-cache.outputs.cache-hit != 'true'
+        if: >-
+          success() &&
+          steps.maven-dependency-cache.outputs.cache-hit != 'true' &&
+          (
+            (github.event_name == 'push' &&
+             github.ref == 'refs/heads/main') ||
+            (github.event_name == 'pull_request' &&
+             github.event.pull_request.head.repo.full_name ==
+             github.repository)
+          )
         uses: actions/cache/save@v5
         with:
           path: ~/.m2/repository
