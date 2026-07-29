@@ -113,14 +113,14 @@
         <version>3.0.0-M3</version>
         <executions>
           <execution>
-            <id>enforce-legacy-toolchain</id>
+            <id>enforce-phase2-toolchain</id>
             <goals>
               <goal>enforce</goal>
             </goals>
             <configuration>
               <rules>
                 <requireMavenVersion>
-                  <version>[3.8.9]</version>
+                  <version>[3.9.16]</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
                   <version>${phase2.java.version.range}</version>

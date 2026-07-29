@@ -79,6 +79,8 @@ public final class ValidateApplicationPom {
         require("project".equals(project.getLocalName()), "raiz do POM inválida");
         require(POM_NAMESPACE.equals(project.getNamespaceURI()),
                 "namespace do POM inválido");
+        require("4.0.0".equals(text(project, "modelVersion")),
+                "modelVersion do POM deve permanecer em 4.0.0");
         require("war".equals(text(project, "packaging")),
                 "packaging deve ser war");
 
@@ -197,8 +199,8 @@ public final class ValidateApplicationPom {
                         uniqueDescendant(plugin, "requireMavenVersion");
                 Element requireJava =
                         uniqueDescendant(plugin, "requireJavaVersion");
-                require("[3.8.9]".equals(text(requireMaven, "version")),
-                        "Enforcer deve exigir exatamente Maven 3.8.9");
+                require("[3.9.16]".equals(text(requireMaven, "version")),
+                        "Enforcer deve exigir exatamente Maven 3.9.16");
                 require("${phase2.java.version.range}".equals(
                         text(requireJava, "version")),
                         "Enforcer deve usar o range Java selecionado pelo perfil");

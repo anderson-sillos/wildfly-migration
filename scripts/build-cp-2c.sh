@@ -5,4 +5,4 @@ set -euo pipefail
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 exec "$REPOSITORY_ROOT/scripts/build-cp-1d.sh" \
-  --java 8 --maven 3.8.9 "$@"
+  --java 8 --maven 3.9.16 "$@"

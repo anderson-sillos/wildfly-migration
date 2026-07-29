@@ -56,12 +56,31 @@ done
 for path in \
   "$POM" \
   "$EXPECTED_LIBRARIES" \
+  "$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/runtime-manifest.tsv" \
   "$REPOSITORY_ROOT/docs/cp-2c-ee8-maven-datasource.md" \
+  "$REPOSITORY_ROOT/scripts/build-cp-2c.sh" \
   "$REPOSITORY_ROOT/scripts/ValidateApplicationPom.java" \
   "$REPOSITORY_ROOT/scripts/audit-legacy-war.sh"; do
   [[ -f "$path" ]] ||
     fail "arquivo obrigatório ausente: ${path#"$REPOSITORY_ROOT/"}"
 done
+
+for marker in \
+  '<modelVersion>4.0.0</modelVersion>' \
+  '<id>enforce-phase2-toolchain</id>' \
+  '<version>[3.9.16]</version>'; do
+  grep -Fq "$marker" "$POM" ||
+    fail "POM não contém o contrato Maven do CP-2C: $marker"
+done
+
+grep -Fq -- '--java 8 --maven 3.9.16' \
+  "$REPOSITORY_ROOT/scripts/build-cp-2c.sh" ||
+  fail "wrapper CP-2C não fixa Java 8 e Maven 3.9.16"
+
+expected_maven_row=$'apache-maven\t3.9.16\tapache-maven-3.9.16-bin.tar.gz\thttps://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz\tApache-2.0\t80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb\tsha512:831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6\tmaintained-current-stable\tCP-2C-and-later'
+grep -Fxq "$expected_maven_row" \
+  "$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/runtime-manifest.tsv" ||
+  fail "manifesto da fase 2 não fixa a distribuição Maven 3.9.16 aprovada"
 
 for marker in \
   '<jakarta.ee.web.api.version>8.0.0</jakarta.ee.web.api.version>' \
@@ -94,6 +113,11 @@ grep -Fq -- \
   "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.11 não está concluída no OpenSpec"
 
+grep -Fq -- \
+  '- [x] 2.12 Atualizar a ferramenta de build de Maven 3.8.9 para Maven 3.9.16' \
+  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  fail "tarefa 2.12 não está concluída no OpenSpec"
+
 if [[ -n "$WAR_FILE" ]]; then
   [[ -f "$WAR_FILE" ]] || fail "WAR informado não existe"
   unzip -Z1 "$WAR_FILE" >"$TEMP_DIRECTORY/war-entries.txt"
@@ -119,7 +143,7 @@ if [[ -n "$WAR_FILE" ]]; then
     fail "WEB-INF/lib diverge da allowlist da fase 2"
 fi
 
-printf 'OK: build alinhado ao Jakarta EE Web Profile 8 em provided'
+printf 'OK: build alinhado ao Jakarta EE Web Profile 8 e Maven 3.9.16'
 if [[ -n "$WAR_FILE" ]]; then
   printf ', sem APIs do contêiner em WEB-INF/lib'
 fi

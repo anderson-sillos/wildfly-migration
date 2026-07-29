@@ -30,13 +30,9 @@ Referências oficiais:
 
 ### Verificação
 
-Durante a tarefa 2.11, Maven continua na versão 3.8.9 para que a atualização
-da API não seja misturada com a troca da ferramenta de build prevista na
-tarefa 2.12.
-
 ```bash
 ./scripts/validate-cp-2c.sh
-./scripts/build-cp-2a.sh --profile ci-h2 --env .env
+./scripts/build-cp-2c.sh --profile ci-h2 --env .env
 ./scripts/validate-cp-2c.sh \
   --war app/target/wildfly-migration.war
 ```
@@ -47,3 +43,46 @@ para rejeitar classes de Servlet, JSP, JSTL ou EL fornecidas pelo contêiner.
 
 Esta alteração não atualiza as bibliotecas legadas, não muda o contrato HTTP,
 não altera o datasource e não comprova ainda a paridade H2/Oracle do CP-2C.
+
+## 2.12 — Maven 3.9.16
+
+O build ativo passa de Maven 3.8.9 para 3.9.16. A distribuição oficial está
+fixada no manifesto da fase 2 com:
+
+- origem:
+  <https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz>;
+- tamanho: `9278065` bytes;
+- SHA-256:
+  `80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb`;
+- SHA-512 publicado:
+  `831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6`;
+- licença: Apache License 2.0.
+
+O wrapper `build-cp-2c.sh` seleciona explicitamente Java 8 e Maven 3.9.16.
+O Enforcer do POM também exige exatamente `[3.9.16]`, impedindo um sucesso
+acidental com outra instalação.
+
+### Maven 3.9.16 não é `modelVersion` 4.0.0
+
+São dois contratos independentes:
+
+| Campo | Significado no laboratório |
+| --- | --- |
+| `Apache Maven 3.9.16` | versão da ferramenta que lê o POM e executa o build |
+| `<modelVersion>4.0.0</modelVersion>` | versão do modelo do descritor de projeto; único valor suportado pelo Maven 3 |
+
+Portanto, manter `modelVersion` em `4.0.0` não seleciona Maven 4. O Maven 4
+continua fora deste gate.
+
+Na passagem de 3.8.x para 3.9.x, as notas oficiais alertam principalmente
+para o transporte HTTP nativo, dependências internas antes injetadas
+implicitamente em plugins e validações adicionais de plugins. O `clean verify`
+do laboratório é a prova de compatibilidade dos plugins realmente usados; uma
+aprovação aqui não generaliza essa conclusão para todos os plugins de uma
+aplicação real.
+
+Referências oficiais:
+
+- <https://maven.apache.org/install.html>;
+- <https://maven.apache.org/ref/3.9.16/maven-model/maven.html>;
+- <https://maven.apache.org/docs/3.9.16/release-notes.html>.

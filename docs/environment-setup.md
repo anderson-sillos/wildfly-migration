@@ -35,7 +35,8 @@ Fontes oficiais:
 - Oracle JDK 7u80: <https://www.oracle.com/java/technologies/javase/javase7-archive-downloads.html>
 - Azul Metadata API: <https://api.azul.com/metadata/v1/zulu/packages/f436b3cb-0115-4814-b7fa-e180747bd68f>
 - termos do Azul Zulu: <https://www.azul.com/products/core/openjdk-terms-of-use/>
-- Maven 3.9.16: <https://maven.apache.org/download.cgi>
+- Maven 3.9.16:
+  <https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz>
 - Maven 3.8.9: <https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.8.9/>; fallback em <https://archive.apache.org/dist/maven/maven-3/3.8.9/binaries/>
 - WildFly comunitário: <https://www.wildfly.org/downloads/>
 - Oracle Database 19c: <https://www.oracle.com/database/technologies/oracle-database-software-downloads.html>
@@ -82,7 +83,7 @@ checksum quando entrar no respectivo checkpoint.
 | --- | --- |
 | Temurin/OpenJDK 17, 21 e 25 | <https://adoptium.net/temurin/releases/> |
 | WildFly 26.1.3.Final EE 8 | <https://github.com/wildfly/wildfly/releases/download/26.1.3.Final/wildfly-26.1.3.Final.tar.gz> |
-| Maven 3.9.16 | <https://maven.apache.org/download.cgi> |
+| Maven 3.9.16 | <https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz> |
 | WildFly 41.0.0.Final | <https://github.com/wildfly/wildfly/releases/download/41.0.0.Final/wildfly-41.0.0.Final.tar.gz> |
 | Oracle JDBC | <https://www.oracle.com/database/technologies/appdev/jdbc-downloads.html> |
 
@@ -356,22 +357,60 @@ de Java 7.
 
 ### Maven 3.9.16 a partir do CP-2C
 
-Maven 3.9.16 é a versão GA aprovada pelo plano. Ele requer JDK 8 ou superior para
-executar e se torna obrigatório no CP-2C, depois da saída do Java 7. Baixe o
-arquivo binário e o `.sha512` oficiais, valide-os e extraia externamente:
+Maven 3.9.16 é a versão estável aprovada pelo plano. Ele requer JDK 8 ou
+superior para executar e se torna obrigatório no CP-2C, depois da saída do
+Java 7. Use os endereços oficiais exatos:
 
-```bash
-sha512sum -c apache-maven-3.9.16-bin.tar.gz.sha512
+```text
+https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz
+https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz.sha512
 ```
 
-Configure `MAVEN_HOME` e confirme:
+O arquivo `.sha512` publicado contém somente o digest, sem o nome do arquivo;
+por isso, não deve ser passado diretamente a `sha512sum -c`. Compare o valor
+publicado com o calculado e confira também o SHA-256 fixado pelo laboratório:
 
 ```bash
-/opt/migration-lab/tools/apache-maven-3.9.16/bin/mvn --version
+maven_published_sha512="$(
+  tr -d '[:space:]' \
+    < apache-maven-3.9.16-bin.tar.gz.sha512
+)"
+maven_actual_sha512="$(
+  sha512sum apache-maven-3.9.16-bin.tar.gz | awk '{print $1}'
+)"
+test "$maven_published_sha512" = "$maven_actual_sha512"
+printf '%s  %s\n' \
+  '80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb' \
+  'apache-maven-3.9.16-bin.tar.gz' | sha256sum -c -
+tar -xzf apache-maven-3.9.16-bin.tar.gz \
+  -C /opt/migration-lab/tools
 ```
 
-O número `4.0.0` em `<modelVersion>` de um `pom.xml` é o modelo do POM e não
-significa que Maven 4 esteja sendo usado.
+Configure no `.env` ignorado:
+
+```dotenv
+MAVEN_HOME=/opt/migration-lab/tools/apache-maven-3.9.16
+MAVEN_ARCHIVE=/opt/migration-lab/archives/apache-maven-3.9.16-bin.tar.gz
+MAVEN_ARCHIVE_SHA256=80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb
+```
+
+Confirme a combinação efetiva:
+
+```bash
+JAVA_HOME=/opt/migration-lab/tools/jdk8u492-b09 \
+  /opt/migration-lab/tools/apache-maven-3.9.16/bin/mvn --version
+```
+
+`Apache Maven 3.9.16` é a versão do executável que interpreta o projeto.
+Já `<modelVersion>4.0.0</modelVersion>` declara a versão do modelo do descritor
+`pom.xml`; é o único valor aceito pelo Maven 3 e não significa que Maven 4
+esteja sendo usado. Referências oficiais: [instalação do Maven][maven-install],
+[modelo Maven 3.9.16][maven-model] e
+[notas de migração do Maven 3.9.16][maven-release-notes].
+
+[maven-install]: https://maven.apache.org/install.html
+[maven-model]: https://maven.apache.org/ref/3.9.16/maven-model/maven.html
+[maven-release-notes]: https://maven.apache.org/docs/3.9.16/release-notes.html
 
 ## 6. WildFly comunitário
 
