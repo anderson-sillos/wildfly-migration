@@ -230,6 +230,8 @@ for concurrent_workflow in "$STATIC_WORKFLOW" "$WORKFLOW"; do
     fail "workflow não isola concorrência por workflow e referência"
   grep -Fq 'cancel-in-progress: true' "$concurrent_workflow" ||
     fail "workflow não cancela execução obsoleta da mesma referência"
+  grep -Fq 'persist-credentials: false' "$concurrent_workflow" ||
+    fail "checkout não deve persistir o token no runner"
 done
 for path_marker in \
   '".env.example"' \
@@ -247,15 +249,17 @@ if grep -Fq '"docs/**"' "$WORKFLOW"; then
 fi
 for cache_marker in \
   'uses: actions/cache@v5' \
-  'path: ${{ runner.temp }}/wildfly-migration-cache/cp-2b/runtime-archives' \
-  'key: cp-2b-runtime-archives-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(' \
+  'path: ${{ runner.temp }}/wildfly-migration-cache/runtime-archives' \
+  'key: runtime-archives-v3-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(' \
+  'runtime-archives-v3-${{ runner.os }}-${{ runner.arch }}-' \
   'runtime/legacy/runtime-manifest.tsv' \
   'runtime/legacy/portable-runtime-manifest.tsv' \
   'runtime/phase2/java8-wildfly26/runtime-manifest.tsv' \
   'path: ~/.m2/repository' \
-  'key: cp-2b-maven-repository-v1-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-${{ hashFiles(' \
+  'key: maven-repository-v2-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-${{ hashFiles(' \
+  'maven-repository-v2-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-' \
   "hashFiles('app/pom.xml')" \
-  'archives="$RUNNER_TEMP/wildfly-migration-cache/cp-2b/runtime-archives"' \
+  'archives="$RUNNER_TEMP/wildfly-migration-cache/runtime-archives"' \
   'Cache validado por SHA-256' \
   'Download validado por SHA-256' \
   'https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.8.9/apache-maven-3.8.9-bin.tar.gz' \
@@ -267,8 +271,18 @@ done
 if [[ "$(grep -Fc 'uses: actions/cache@v5' "$WORKFLOW")" -ne 2 ]]; then
   fail "portable-ci deve conter exatamente os caches de runtime e Maven"
 fi
-if grep -Fq 'restore-keys:' "$WORKFLOW"; then
-  fail "cache Maven do CP-2B deve usar somente a chave exata"
+if [[ "$(grep -Fc 'restore-keys:' "$WORKFLOW")" -ne 2 ]]; then
+  fail "os dois caches reutilizáveis devem declarar chave parcial"
+fi
+if grep -Eq \
+    'key: cp-[0-9]|wildfly-migration-cache/cp-[0-9]' \
+    "$WORKFLOW"; then
+  fail "chave ou caminho de cache não deve depender de checkpoint"
+fi
+if grep -Ei \
+    '^[[:space:]]+(key|path):.*(github\.token|GITHUB_TOKEN|GH_TOKEN|secrets\.)' \
+    "$WORKFLOW"; then
+  fail "token ou secret não pode participar de chave ou caminho de cache"
 fi
 if awk '
   /^[[:space:]]+- name:/ {

@@ -5,6 +5,7 @@ set -euo pipefail
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 POM="$REPOSITORY_ROOT/app/pom.xml"
 EXPECTED_LIBRARIES="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/war-libraries.txt"
+WORKFLOW="$REPOSITORY_ROOT/.github/workflows/portable.yml"
 WAR_FILE=""
 TEMP_DIRECTORY="$(
   mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-cp2c.XXXXXXXX"
@@ -56,6 +57,7 @@ done
 for path in \
   "$POM" \
   "$EXPECTED_LIBRARIES" \
+  "$WORKFLOW" \
   "$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/runtime-manifest.tsv" \
   "$REPOSITORY_ROOT/docs/cp-2c-ee8-maven-datasource.md" \
   "$REPOSITORY_ROOT/scripts/build-cp-2c.sh" \
@@ -63,6 +65,36 @@ for path in \
   "$REPOSITORY_ROOT/scripts/audit-legacy-war.sh"; do
   [[ -f "$path" ]] ||
     fail "arquivo obrigatório ausente: ${path#"$REPOSITORY_ROOT/"}"
+done
+
+for cache_marker in \
+  'path: ${{ runner.temp }}/wildfly-migration-cache/runtime-archives' \
+  'key: runtime-archives-v3-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(' \
+  'runtime-archives-v3-${{ runner.os }}-${{ runner.arch }}-' \
+  'path: ~/.m2/repository' \
+  'key: maven-repository-v2-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-${{ hashFiles(' \
+  'maven-repository-v2-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-'; do
+  grep -Fq "$cache_marker" "$WORKFLOW" ||
+    fail "workflow não contém o cache reutilizável: $cache_marker"
+done
+
+if grep -Eq \
+    'key: cp-[0-9]|wildfly-migration-cache/cp-[0-9]' \
+    "$WORKFLOW"; then
+  fail "chave ou caminho de cache não deve depender de checkpoint"
+fi
+
+if grep -Ei \
+    '^[[:space:]]+(key|path):.*(github\.token|GITHUB_TOKEN|GH_TOKEN|secrets\.)' \
+    "$WORKFLOW"; then
+  fail "token ou secret não pode participar de chave ou caminho de cache"
+fi
+
+for token_workflow in \
+  "$REPOSITORY_ROOT/.github/workflows/validate.yml" \
+  "$WORKFLOW"; do
+  grep -Fq 'persist-credentials: false' "$token_workflow" ||
+    fail "checkout deve tratar o token como credencial efêmera"
 done
 
 for marker in \

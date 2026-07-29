@@ -91,3 +91,53 @@ Os dois workflows agrupam execuções pelo nome do workflow e pela referência
 Git. Quando um novo commit chega ao mesmo PR, a execução anterior ainda em
 andamento é cancelada. Isso não cancela validações de outros PRs nem mistura
 `repository-baseline` com `portable-ci`.
+
+## Reutilização dos caches
+
+As chaves de cache identificam o conteúdo reutilizável, não a atividade ou o
+checkpoint consumidor. Isso evita downloads repetidos entre tarefas que usam
+a mesma combinação:
+
+```text
+runtime-archives-v3-<sistema>-<arquitetura>-<hash-dos-manifestos>
+maven-repository-v2-<sistema>-<arquitetura>-maven-<versão>-<hash-do-pom>
+```
+
+`v3` e `v2` são versões do formato das respectivas chaves. Elas só devem
+mudar quando o layout ou a política do cache se tornar incompatível. O cache
+de runtime usa os manifestos das distribuições aprovadas; o cache Maven usa a
+versão efetiva da ferramenta e `app/pom.xml`.
+
+Cada cache possui uma chave parcial de restauração. Quando apenas um manifesto
+ou o POM muda, o job restaura a entrada compatível mais recente e baixa somente
+o que estiver ausente. Os arquivos de runtime restaurados são sempre
+revalidados pelos SHA-256 aprovados antes do uso.
+
+Somente arquivos de distribuição externos e `~/.m2/repository` são
+reutilizados. Configurações Maven, credenciais, `app/target`, relatórios,
+evidências, cópias extraídas do WildFly e demais resultados continuam sendo
+recriados em cada execução.
+
+## Compatibilidade com tokens de instalação
+
+O GitHub anunciou que tokens de instalação de GitHub Apps, incluindo o
+`GITHUB_TOKEN` do Actions, passarão a poder usar o formato stateless `ghs_`,
+com aproximadamente 520 caracteres e dois pontos internos:
+<https://github.blog/changelog/2026-05-15-github-app-installation-tokens-per-request-override-header/>.
+
+Os workflows deste projeto não criam tokens de instalação, não inspecionam
+prefixo ou quantidade de pontos e não fazem suposição sobre tamanho. O token é
+tratado como valor opaco pelas actions oficiais, com permissão mínima
+`contents: read`. Como nenhum passo posterior executa `git push`, os checkouts
+usam `persist-credentials: false`.
+
+Tokens também não podem participar de chave, caminho ou conteúdo dos caches.
+Os caches contêm somente distribuições públicas verificadas por checksum e o
+repositório local de dependências Maven.
+
+O header temporário `X-GitHub-Stateless-S2S-Token` só se aplica à chamada que
+cria um token para uma instalação de GitHub App. Como o projeto não possui
+essa integração, adicionar o header ao workflow não testaria o `GITHUB_TOKEN`
+fornecido pelo próprio Actions. Se uma GitHub App for introduzida futuramente,
+ela deverá testar os formatos `enabled` e `disabled`, aceitar pelo menos 520
+caracteres e remover o override depois da validação recomendada pelo GitHub.

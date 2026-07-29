@@ -37,27 +37,33 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
-      - name: Restore fixed runtime archive cache
+      - name: Restore reusable runtime archive cache
         id: runtime-archive-cache
         uses: actions/cache@v5
         with:
-          path: ${{ runner.temp }}/wildfly-migration-cache/cp-2b/runtime-archives
-          key: cp-2b-runtime-archives-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('runtime/legacy/runtime-manifest.tsv', 'runtime/legacy/portable-runtime-manifest.tsv', 'runtime/phase2/java8-wildfly26/runtime-manifest.tsv') }}
+          path: ${{ runner.temp }}/wildfly-migration-cache/runtime-archives
+          key: runtime-archives-v3-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('runtime/legacy/runtime-manifest.tsv', 'runtime/legacy/portable-runtime-manifest.tsv', 'runtime/phase2/java8-wildfly26/runtime-manifest.tsv') }}
+          restore-keys: |
+            runtime-archives-v3-${{ runner.os }}-${{ runner.arch }}-
 
-      - name: Restore exact Maven dependency cache
+      - name: Restore reusable Maven dependency cache
         id: maven-dependency-cache
         uses: actions/cache@v5
         with:
           path: ~/.m2/repository
-          key: cp-2b-maven-repository-v1-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-${{ hashFiles('app/pom.xml') }}
+          key: maven-repository-v2-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-${{ hashFiles('app/pom.xml') }}
+          restore-keys: |
+            maven-repository-v2-${{ runner.os }}-${{ runner.arch }}-maven-3.8.9-
 
       - name: Download and verify fixed portable runtime
         shell: bash
         run: |
           set -euo pipefail
           runtime_root="$RUNNER_TEMP/wildfly-migration-cp2b"
-          archives="$RUNNER_TEMP/wildfly-migration-cache/cp-2b/runtime-archives"
+          archives="$RUNNER_TEMP/wildfly-migration-cache/runtime-archives"
           tools="$runtime_root/tools"
           install -d -m 0755 "$archives" "$tools"
 
