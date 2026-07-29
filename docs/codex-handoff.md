@@ -36,9 +36,9 @@ conteúdo do `.env`.
   - `80e8fa1 feat(CP-1G): freeze legacy baseline manifests`;
   - `ea94065 fix(CP-1G): verify Oracle release update explicitly`.
 - Último squash no `main`: `8ca6b1b`, fechamento do `CP-1F`.
-- Tarefas OpenSpec: 1.31 a 1.34 concluídas; 1.35 permanece aberta até PR,
-  CI, squash e tag.
-- Progresso: 34 de 110 tarefas.
+- Tarefas OpenSpec: 1.31 a 1.35 preparadas para integração; o fechamento de
+  1.35 se torna efetivo com o squash e a tag.
+- Progresso preparado: 35 de 110 tarefas.
 
 ## Entrega preparada
 
@@ -77,6 +77,9 @@ Sobre `ea94065`:
 - pós-smoke Oracle: produto 19c, RU 19.3, objetos e seed aprovados;
 - reprodução H2 a partir de worktree limpo: aprovada;
 - H2 e Oracle produziram o mesmo WAR e relatórios ligados ao mesmo commit.
+- PR `#14`: workflow `30416762018` aprovado em outro host
+  (`repository-baseline` 14s, `portable-ci` 1m40s), incluindo checksum do WAR e
+  dos 20 JARs empacotados.
 
 A primeira captura do RU tentou usar somente `DatabaseMetaData` e gerou falso
 negativo. `INC-004` registra a correção: produto por metadata JDBC e RU por
@@ -84,14 +87,12 @@ negativo. `INC-004` registra a correção: produto por metadata JDBC e RU por
 
 ## Próximas ações
 
-1. Registrar a consolidação da evidência, handoff e tarefas em commit.
-2. Enviar a branch e abrir o PR do `CP-1G`.
-3. Aguardar `repository-baseline` e `portable-ci`; atualizar a evidência com o
-   run.
-4. Se tudo permanecer verde, marcar 1.35, integrar por squash
+1. Registrar e enviar a referência do workflow aprovado na evidência.
+2. Retirar o PR `#14` do draft e confirmar os checks finais.
+3. Integrar por squash
    `checkpoint(CP-1G): complete legacy baseline` e criar a tag imutável
    `migration/01-legacy-baseline`.
-5. Iniciar `CP-2A` tentando o baseline sem correção no Java 8/WildFly 9.
+4. Iniciar `CP-2A` tentando o baseline sem correção no Java 8/WildFly 9.
 
 ## Comandos de retomada
 

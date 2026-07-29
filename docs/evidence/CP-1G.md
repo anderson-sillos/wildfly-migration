@@ -105,9 +105,23 @@ socket Docker no novo diretório. O mesmo `doctor` foi repetido com acesso ao
 host e aprovado, sem mudar configuração nem usar `--ci`. O worktree temporário
 foi removido ao final.
 
-O run do GitHub Actions e o PR serão acrescentados depois da publicação da
-branch. O `CP-1G` só será integrado e marcado quando os checks remotos
-estiverem verdes.
+O pull request
+[`#14`](https://github.com/anderson-sillos/wildfly-migration/pull/14)
+executou o workflow
+[`30416762018`](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30416762018)
+sobre a revisão `5316b62` em um runner hospedado diferente do host local:
+
+- `repository-baseline`: aprovado em 14 segundos;
+- `portable-ci`: aprovado em 1 minuto e 40 segundos;
+- download e checksums do runtime portátil: aprovados;
+- build e WAR SHA-256 congelado: aprovados;
+- checksums individuais dos 20 JARs extraídos de `WEB-INF/lib`: aprovados;
+- probe MyBatis, lifecycle H2, WildFly 9 e 14 contratos: aprovados;
+- relatório sanitizado publicado como artefato do workflow.
+
+Essa execução comprova a reprodutibilidade do WAR em outra máquina. Uma
+divergência futura deve falhar no gate e ser diagnosticada por artefato; os
+checksums não devem ser atualizados apenas para aceitar o resultado.
 
 ## Reprodução e rollback
 
