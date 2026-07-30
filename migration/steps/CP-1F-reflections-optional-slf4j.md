@@ -22,9 +22,12 @@ Não empacotar outro backend. O smoke comprova no runtime real:
 ## Orientação para a migração real
 
 Audite dependências opcionais e módulos implícitos antes de trocar o servidor.
-No gate Java 17/WildFly 26, reexecute o contrato com Reflections atualizado. No
-destino Jakarta, substitua a varredura por registro explícito e remova Log4j 1
-e qualquer ponte temporária.
+No gate Java 17/WildFly 26, atualize Reflections para 0.10.2 e reexecute o
+contrato legado. Depois da migração de namespace no Java 21/WildFly 41, use o
+`ServletContainerInitializer` com `@HandlesTypes(Validator.class)` da atividade
+`3.33` do `CP-3G` para substituir Reflections atrás de uma fachada própria, sem
+biblioteca externa de descoberta. Remova também Log4j 1 e qualquer ponte
+temporária na tarefa `3.34`.
 
 ## Rollback
 

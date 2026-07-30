@@ -93,12 +93,39 @@ Na fase 3, a aplicação SHALL substituir a linha Commons FileUpload mantida tem
 - **WHEN** o tamanho da requisição ou do arquivo excede o limite
 - **THEN** a aplicação rejeita o upload e remove arquivos temporários associados
 
+### Requirement: Descoberta moderna de validadores
+A aplicação moderna SHALL substituir Reflections pelo mecanismo padrão Jakarta Servlet `ServletContainerInitializer` com `@HandlesTypes(Validator.class)`, SHALL encapsular o mecanismo por uma fachada própria e SHALL descobrir automaticamente classes concretas anotadas com `@Validator` que implementem o contrato de validação, sem biblioteca externa de descoberta e sem exigir manutenção manual de um registro central.
+
+#### Scenario: Validator empacotado na aplicação
+- **WHEN** uma classe concreta com `@Validator` e o contrato de validação está incluída no WAR
+- **THEN** a fachada a descobre automaticamente e preserva a ordenação determinística definida pelo contrato
+
+#### Scenario: Classes não elegíveis
+- **WHEN** o classpath contém uma interface, classe abstrata ou classe anotada que não implementa o contrato de validação
+- **THEN** ela não é disponibilizada como validator executável
+
+#### Scenario: Conteúdo do WAR
+- **WHEN** validators elegíveis estão em `WEB-INF/classes` ou em uma dependência aprovada de `WEB-INF/lib`
+- **THEN** o SCI fornece à fachada o conjunto esperado no classloader do WildFly 41
+
+#### Scenario: JAR interno do SCI
+- **WHEN** o conteúdo de `WEB-INF/lib` é auditado
+- **THEN** o JAR interno do projeto contém `@Validator`, o contrato de validação, a fachada/registro, a implementação de `ServletContainerInitializer` e o arquivo `META-INF/services/jakarta.servlet.ServletContainerInitializer`, sem exigir que as implementações concretas dos validators residam nesse JAR
+
+#### Scenario: Encapsulamento do mecanismo
+- **WHEN** o mecanismo de descoberta é invocado pelo fluxo de importação
+- **THEN** o código de negócio depende da fachada do projeto e não da API Servlet ou de detalhe específico do WildFly
+
 ### Requirement: Dependências modernas
-O checkpoint final SHALL usar MyBatis 3.5.19, XMLBeans 5.3.0 e dom4j 2.2.0 e MUST excluir Log4j 1 ou sua ponte temporária, Commons FileUpload 1, Reflections, Tiles, `xml-apis`, Geronimo StAX e `ojdbc7`.
+O checkpoint final SHALL usar MyBatis 3.5.19, XMLBeans 5.3.0 e dom4j 2.2.0, SHALL usar somente o JAR interno do SCI como infraestrutura de descoberta e MUST excluir Log4j 1 ou sua ponte temporária, Commons FileUpload 1, Reflections, bibliotecas externas de scanning de classes, Tiles, `xml-apis`, Geronimo StAX e `ojdbc7`.
 
 #### Scenario: Verificação de dependências proibidas
 - **WHEN** a árvore de dependências e o WAR moderno são auditados
 - **THEN** nenhuma dependência proibida direta, transitiva ou empacotada é encontrada
+
+#### Scenario: Infraestrutura de descoberta divergente
+- **WHEN** a árvore Maven contém Reflections ou outra biblioteca externa de scanning, ou o JAR interno não contém o descritor de serviço e a implementação SCI esperados
+- **THEN** a auditoria falha e identifica a dependência ou o conteúdo divergente
 
 #### Scenario: Mapeamentos MyBatis preservados
 - **WHEN** os testes de persistência modernos são executados
@@ -120,7 +147,7 @@ A aplicação moderna SHALL regenerar os tipos XMLBeans a partir do XSD mantido 
 - **THEN** o pedido é importado com os mesmos dados do baseline
 
 ### Requirement: Logging controlado pelo contêiner
-Na fase 3, a aplicação SHALL remover qualquer ponte temporária introduzida no gate Java 17 e registrar eventos pelo mecanismo integrado ao WildFly sem empacotar Log4j 1 ou um backend concorrente no WAR.
+Na fase 3, a aplicação SHALL remover qualquer ponte temporária introduzida no gate Java 17 e registrar eventos pelo mecanismo integrado ao WildFly sem empacotar Log4j 1 ou um backend concorrente no WAR. A configuração final do MyBatis SHALL definir `logImpl` explicitamente como `SLF4J`, sem depender de autodetecção.
 
 #### Scenario: Correlação de logs
 - **WHEN** uma requisição atravessa filtro, servlet e persistência
@@ -128,7 +155,11 @@ Na fase 3, a aplicação SHALL remover qualquer ponte temporária introduzida no
 
 #### Scenario: Configuração do MyBatis
 - **WHEN** o MyBatis emite mensagens de diagnóstico
-- **THEN** elas são encaminhadas ao logging selecionado para o WildFly sem usar `org.apache.ibatis.logging.log4j.Log4jImpl`
+- **THEN** elas são encaminhadas pela fachada SLF4J ao logging administrado pelo WildFly, sem usar `org.apache.ibatis.logging.log4j.Log4jImpl` e sem backend de logging empacotado no WAR
+
+#### Scenario: Autodetecção desabilitada
+- **WHEN** a configuração final e o conteúdo do WAR são auditados
+- **THEN** `logImpl=SLF4J` está definido explicitamente e nenhuma alteração de bibliotecas ou módulos pode selecionar silenciosamente outra implementação de logging do MyBatis
 
 ### Requirement: Checkpoint final imutável
 O laboratório SHALL preservar o estado aprovado da fase 3 como `migration/03-final`, relacionando-o aos dois checkpoints públicos anteriores e às evidências dos gates internos da mesma árvore de código.

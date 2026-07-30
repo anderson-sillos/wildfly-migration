@@ -17,7 +17,8 @@ import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 
 /**
- * Descoberta legada isolada para futura substituição por registro explícito.
+ * Descoberta legada isolada para futura substituição pelo SCI padrão,
+ * encapsulado por uma fachada própria.
  */
 public final class LegacyValidatorDiscovery {
     private static final String PACKAGE =
