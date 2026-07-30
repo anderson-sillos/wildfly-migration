@@ -1,12 +1,12 @@
 # Evidência CP-2D — Fechamento da modernização de baixo impacto
 
-## Escopo em construção
+## Escopo
 
 O checkpoint parte do CP-2C e encerra a fase pública Java 8, WildFly
 26.1.3.Final, Jakarta EE 8 com pacotes `javax.*` e Maven 3.9.16. Esta página
-será completada pelas atividades 2.19 e 2.20 com reprodução limpa, CI remoto,
-rollback e tag pública. O PR #18 foi aberto
-como rascunho depois da primeira atividade concluída do checkpoint.
+foi fechado pelas atividades 2.19 e 2.20 com reprodução limpa, CI remoto,
+qualificação Oracle, rollback e tag pública. O PR #18 foi aberto como rascunho
+depois da primeira atividade concluída do checkpoint.
 
 ## Comparação integral com a fase 1 — atividade 2.16
 
@@ -121,3 +121,55 @@ O
 [relatório sanitizado](../../migration/evidence/CP-2D/reproduction-oracle.json)
 classifica a execução como `oracle-qualified`, registra H2 e Oracle no mesmo
 checkout e comprova que a configuração externa não foi versionada.
+
+## Encerramento do CP-2D — atividade 2.20
+
+O commit-candidato
+`62586c5ec56360b349f81e39188ad5d684707857` foi qualificado nas duas
+fronteiras sem alteração de aplicação entre elas.
+
+No GitHub Actions, a execução `30505567749` terminou com sucesso em 53
+segundos. O artefato `cp-2d-portable-evidence` registra:
+
+- merge ref `9c94ce42f60d143d8e87484bc00cfcad25ad4329`;
+- `sourceCommit` igual ao commit-candidato;
+- os 14 contratos H2 aprovados como `portable-ci`;
+- WAR SHA-256
+  `62c9f723245b4aaebbeef41e63c02974a9f2fc65fc6e8758f956d03ab7f466f2`;
+- árvore Maven SHA-256
+  `8ad318314d7f5b97bfd0ec4d00c38dc1512584fe1cdad4c04ae11d3999b0c2ca`.
+
+Os caches de runtime e Maven foram hits exatos das entradas canônicas da
+`main`. Java, Maven, WildFly e H2 foram novamente verificados por SHA-256, os
+passos de gravação foram ignorados e a auditoria encontrou zero entradas no
+merge ref da PR #18.
+
+Na rede interna, o mesmo commit-candidato passou novamente primeiro em H2 e
+depois no Oracle 19c RU 19.3. Os 14 contratos, o estado persistido oficial,
+commit e rollback MyBatis, `TIMESTAMP(6)`, BLOB e a limpeza dos registros
+transitórios foram aprovados como `oracle-qualified`.
+
+O
+[resumo estruturado](../../migration/evidence/CP-2D/closure.properties)
+vincula as duas qualificações ao mesmo fonte e aos mesmos checksums. A PR #18
+é integrada por squash com o assunto
+`checkpoint(CP-2D): complete low-impact modernization`; a tag
+`migration/02-java8-wildfly26` identifica o resultado público da fase.
+
+## Conclusão comprovada da fase 2
+
+A fase 2 comprova que a aplicação legada pode avançar para Java 8, WildFly
+comunitário 26.1.3.Final, Jakarta EE Web Profile 8 em `javax.*` e Maven
+3.9.16 sem reescrita funcional e preservando os 14 contratos observáveis e o
+estado Oracle de referência.
+
+Essa é uma ponte de baixo impacto, não o destino mantido do projeto. As 12
+limitações congeladas continuam válidas, incluindo bibliotecas EOL,
+`ojdbc7`, namespace `javax`, Java 8 e WildFly 26 fora da linha atual. H2
+continua sendo apenas `portable-ci`; somente a execução Oracle autoriza
+`oracle-qualified`.
+
+O rollback operacional retorna tráfego e runtime ao estado Blue validado. No
+laboratório, materialize `migration/01-legacy-baseline`. Não restaure o banco
+cegamente, não altere a tag publicada e não descarte evidências ou alterações
+locais desconhecidas.
