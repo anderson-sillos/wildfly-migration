@@ -10,6 +10,12 @@ do checkout.
 Durante a revisão do CP-2D, use o commit exato do PR. Depois do encerramento da
 fase, use somente a tag imutável `migration/02-java8-wildfly26`.
 
+A execução de referência da atividade 2.19 partiu do commit
+`b3d6d38ce87ebadc04a20d674a900afee44463c8` em um segundo clone temporário,
+sem arquivos derivados. Seu
+[relatório sanitizado](../migration/evidence/CP-2D/reproduction-oracle.json)
+registra a aprovação H2 e Oracle sem dados de conexão.
+
 ## 1. Criar o checkout
 
 ```bash

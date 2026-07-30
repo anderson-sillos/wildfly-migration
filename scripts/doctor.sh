@@ -333,6 +333,7 @@ check_required_files() {
       "migration/evidence/CP-2D/oracle-state.json"
       "migration/evidence/CP-2D/oracle-persistence.json"
       "migration/evidence/CP-2D/phase2-comparison.json"
+      "migration/evidence/CP-2D/reproduction-oracle.json"
       "migration/baselines/02-java8-wildfly26/README.md"
       "migration/baselines/02-java8-wildfly26/manifest.properties"
       "migration/baselines/02-java8-wildfly26/components.tsv"
@@ -345,6 +346,7 @@ check_required_files() {
       "scripts/validate-cp-2d-phase-comparison.sh"
       "scripts/validate-cp-2d-manifest.sh"
       "scripts/validate-cp-2d-real-runbook.sh"
+      "scripts/validate-cp-2d-reproduction.sh"
       "scripts/reproduce-cp-2d.sh"
     )
   fi

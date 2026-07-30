@@ -48,6 +48,7 @@ shell_files=(
   scripts/validate-cp-2d-phase-comparison.sh
   scripts/validate-cp-2d-manifest.sh
   scripts/validate-cp-2d-real-runbook.sh
+  scripts/validate-cp-2d-reproduction.sh
   scripts/reproduce-cp-2d.sh
   contract-tests/run.sh
 )
@@ -89,5 +90,7 @@ run_step "Validar manifesto da fase 2" \
   ./scripts/validate-cp-2d-manifest.sh
 run_step "Validar roteiro da fase 2 para aplicação real" \
   ./scripts/validate-cp-2d-real-runbook.sh
+run_step "Validar reprodução limpa da fase 2" \
+  ./scripts/validate-cp-2d-reproduction.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'

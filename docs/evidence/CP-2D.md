@@ -88,3 +88,36 @@ O documento define:
 Cada comando do laboratório é relacionado a um controle equivalente da
 aplicação real, preservando a distinção entre H2 `portable-ci` e a
 qualificação Oracle na rede autorizada.
+
+## Reprodução limpa — atividade 2.19
+
+O commit `b3d6d38ce87ebadc04a20d674a900afee44463c8` foi materializado em
+um segundo clone temporário, com `HEAD` destacado, status Git vazio e sem
+`app/target/`. A única entrada local foi o caminho para o `.env` externo já
+protegido e ignorado; nenhum valor, runtime, driver ou credencial foi copiado
+para o clone.
+
+O primeiro clone revelou que o qualificador dependia indevidamente de
+`user.name`, `user.email`, autenticação GitHub e Docker, embora nenhum deles
+participe do build ou do runtime direto. O modo `--non-interactive` removeu
+essa dependência oculta. A prova foi então reiniciada em outro clone novo, sem
+reaproveitar os derivados da tentativa.
+
+Na execução válida:
+
+- o baseline estrutural completo passou;
+- o Maven criou o WAR sem exigir diretórios de teste vazios ou `.gitkeep`;
+- os 14 contratos passaram primeiro no H2 e depois no Oracle;
+- schema, seed, commit, rollback, `TIMESTAMP(6)`, BLOB e estado oficial Oracle
+  passaram;
+- os registros transitórios `LAB-SMOKE-*` foram removidos;
+- o WAR manteve SHA-256
+  `62c9f723245b4aaebbeef41e63c02974a9f2fc65fc6e8758f956d03ab7f466f2`;
+- a árvore Maven manteve SHA-256
+  `8ad318314d7f5b97bfd0ec4d00c38dc1512584fe1cdad4c04ae11d3999b0c2ca`;
+- o status Git permaneceu vazio antes e depois.
+
+O
+[relatório sanitizado](../../migration/evidence/CP-2D/reproduction-oracle.json)
+classifica a execução como `oracle-qualified`, registra H2 e Oracle no mesmo
+checkout e comprova que a configuração externa não foi versionada.

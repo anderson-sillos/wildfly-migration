@@ -1,0 +1,17 @@
+{
+  "schema": "wildfly-migration-phase2-reproduction/v1",
+  "checkpoint": "CP-2D",
+  "sourceCommit": "b3d6d38ce87ebadc04a20d674a900afee44463c8",
+  "warSha256": "62c9f723245b4aaebbeef41e63c02974a9f2fc65fc6e8758f956d03ab7f466f2",
+  "mavenTreeSha256": "8ad318314d7f5b97bfd0ec4d00c38dc1512584fe1cdad4c04ae11d3999b0c2ca",
+  "requestedProfile": "oracle",
+  "executedProfiles": ["ci-h2", "oracle"],
+  "qualification": "oracle-qualified",
+  "cleanCheckoutBefore": "passed",
+  "cleanCheckoutAfter": "passed",
+  "contractScenarios": 14,
+  "portableCi": "passed",
+  "oracleQualified": "passed",
+  "externalConfiguration": "used-without-versioning",
+  "result": "passed"
+}
