@@ -20,15 +20,21 @@ não são sinônimos. Por exemplo, o WildFly 41 recomenda Java 25 e é fortement
 testado nesse JDK, mas a declaração publicada de compatibilidade Jakarta EE 11
 é para Java 17 e Java 21.
 
+Na geração EE 8, a mudança de nome também não representa uma mudança de
+namespace: Java EE 8 e Jakarta EE 8 oferecem APIs idênticas em pacotes
+`javax.*`. Portanto, uma linha cuja certificação publicada é “Jakarta EE 8”
+continua compatível, no nível dessas APIs, com aplicações Java EE 8. A ruptura
+de namespace para `jakarta.*` acontece depois, a partir do Jakarta EE 9.
+
 ## Quadro revisado
 
-| WildFly | Situação comunitária¹ | Java 7 | Java 8 | Java 11 | Java 17 | Java 21 | Java 25 | Plataforma padrão² |
+| WildFly | Situação comunitária¹ | Java 7 | Java 8 | Java 11 | Java 17 | Java 21 | Java 25 | Plataforma padrão e compatibilidade de aplicação² |
 |---|---|---:|---:|---:|---:|---:|---:|---|
 | 8–9 | Histórica | Sim | Sim | N/Q | N/Q | N/Q | N/Q | Java EE 7 |
 | 10–13 | Histórica | Não | Sim | N/Q | N/Q | N/Q | N/Q | Java EE 7; EE 8 disponível em modo de prévia no 13 |
 | 14 | Histórica | Não | Sim | N/Q | N/Q | N/Q | N/Q | Java EE 8 |
 | 15–24 | Histórica | Não | Sim | Rec. | N/Q³ | N/Q | N/Q | Java EE 8; também Jakarta EE 8 a partir do 17.0.1 |
-| 25–26.1 | Histórica | Não | Sim | Sim | Sim | N/Q | N/Q | Jakarta EE 8 |
+| 25–26.1 | Histórica | Não | Sim | Sim | Sim | N/Q | N/Q | **Java EE 8 / Jakarta EE 8** (APIs `javax.*`)⁶ |
 | 27–29 | Histórica | Não | Não | Sim | Rec. | N/Q | N/Q | Jakarta EE 10 |
 | 30–31 | Histórica | Não | Não | Sim | Rec. | Aval. | N/Q | Jakarta EE 10 |
 | 32 | Histórica | Não | Não | Sim | Sim | Rec.⁴ | N/Q | Jakarta EE 10 |
@@ -56,6 +62,29 @@ testado nesse JDK, mas a declaração publicada de compatibilidade Jakarta EE 11
 5. WildFly 40 e 41 recomendam Java 25 e executam bem em Java 17, 21 e 25.
    Entretanto, a declaração Jakarta EE 11 publicada cobre Java 17 e 21, não
    Java 25.
+6. Para o WildFly 26.1, o nome formal da certificação publicada é Jakarta EE 8
+   Full Platform e Web Profile. Isso **não exclui Java EE 8**: Jakarta EE 8
+   preserva as mesmas APIs `javax.*` de Java EE 8, e o próprio projeto WildFly
+   esclarece que essa mudança de nome não introduz incompatibilidade de runtime
+   para aplicações Java EE 8.
+
+### O que foi comprovado no WildFly 26.1
+
+Há duas comprovações complementares, que não devem ser confundidas:
+
+1. **Projeto WildFly:** a distribuição padrão 26.1 é certificada como Jakarta
+   EE 8 Full Platform e Web Profile e suporta execução nos JDKs 8, 11 e 17.
+   Como Jakarta EE 8 mantém as APIs Java EE 8 em `javax.*`, aplicações Java EE
+   8 permanecem compatíveis no nível dessas APIs.
+2. **Atividade 3.1 do laboratório:** o WAR imutável da fase 2, compilado para
+   Java 8 e baseado em EE 8/`javax.*`, foi implantado sem correção no Java
+   17/WildFly 26.1.3 e aprovou os 14 contratos H2. Isso comprova a
+   compatibilidade de execução portátil **desta aplicação**, sem substituir a
+   certificação da plataforma nem qualificar o comportamento Oracle.
+
+A atividade 3.2 ampliou a evidência ao recompilar os mesmos fontes para Java 17
+e aprovar novamente os 14 contratos. Consulte a
+[evidência do CP-3A](evidence/CP-3A.md) para os limites exatos.
 
 ## Aplicação no roteiro do laboratório
 
@@ -63,8 +92,9 @@ O quadro explica os três pontos usados no projeto:
 
 1. o baseline reproduz WildFly 9 com Java 7, combinação que forma o ponto
    inicial explícito da matriz;
-2. a ponte de baixo impacto usa WildFly 26.1.3 com Java 8 e depois reaproveita
-   o mesmo servidor no gate Java 17;
+2. a ponte de baixo impacto usa WildFly 26.1.3 com Java 8, mantendo a aplicação
+   Java EE 8 sobre a plataforma Jakarta EE 8 de APIs `javax.*`, e depois
+   reaproveita o mesmo servidor no gate Java 17;
 3. o destino entra no WildFly 41 com Java 21 para isolar a migração Jakarta EE
    11 e troca somente a JVM para Java 25 no gate final.
 
@@ -84,9 +114,10 @@ checksums e critérios de validação.
 - [WildFly 14: certificação Java EE 8](https://www.wildfly.org/news/2018/08/30/WildFly-14-is-released/);
 - [WildFly 15: início da recomendação de Java 11](https://www.wildfly.org/news/2018/12/13/WildFly-15-is-released/);
 - [WildFly 17.0.1: certificação Jakarta EE 8](https://www.wildfly.org/news/2019/09/12/WildFly-is-Jakarta-EE-8-Certified/);
+- [WildFly 18: Java EE 8, Jakarta EE 8 e APIs idênticas](https://www.wildfly.org/news/2019/10/03/WildFly-18-is-released/);
 - [WildFly 24: Java 8/11 e limite da distribuição padrão no Java 17](https://www.wildfly.org/news/2021/06/17/WildFly-24-is-released/);
 - [WildFly 25: suporte a Java 8, 11 e 17](https://www.wildfly.org/news/2021/10/05/WildFly-25-is-released/);
-- [WildFly 26.1: última linha com Java 8 e Jakarta EE 8](https://www.wildfly.org/news/2022/04/14/WildFly-26-1-is-released/);
+- [WildFly 26.1: Jakarta EE 8 e suporte aos JDKs 8/11/17](https://www.wildfly.org/news/2022/04/14/WildFly-26-1-is-released/);
 - [WildFly 27: Java 11/17 e Jakarta EE 10](https://www.wildfly.org/news/2022/11/09/WildFly-27-Final-is-released/);
 - [WildFly 30: Java 21 em avaliação e Core Profile](https://www.wildfly.org/news/2023/10/18/WildFly-30-is-released/);
 - [WildFly 32: Java 21 recomendado](https://www.wildfly.org/news/2024/04/25/WildFly-32-is-released/);

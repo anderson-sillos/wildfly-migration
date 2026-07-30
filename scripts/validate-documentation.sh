@@ -133,9 +133,12 @@ required_compatibility_markers=(
   '| WildFly | Situação comunitária¹ | Java 7 | Java 8 |'
   '| 8–9 | Histórica |'
   '| 10–13 | Histórica | Não | Sim |'
+  '**Java EE 8 / Jakarta EE 8** (APIs `javax.*`)⁶'
   '| 41 | **Atual** |'
   'Java 25'
   'não são sinônimos'
+  'Atividade 3.1 do laboratório'
+  '[evidência do CP-3A](evidence/CP-3A.md)'
   'do JBoss EAP'
   'https://www.wildfly.org/news/2026/07/16/WildFly-41-is-released/'
 )
