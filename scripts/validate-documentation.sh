@@ -19,6 +19,7 @@ required_paths=(
   "docs/legacy-validation-logging.md"
   "docs/oracle-lab-schema.md"
   "docs/cp-2a-java8-wildfly9.md"
+  "docs/wildfly-java-compatibility.md"
   "docs/evidence/CP-2A.md"
   "runtime/legacy/README.md"
   "runtime/legacy/profiles/README.md"
@@ -126,6 +127,30 @@ for marker in "${required_baseline_markers[@]}"; do
     exit 1
   fi
 done
+
+COMPATIBILITY_REFERENCE="$REPOSITORY_ROOT/docs/wildfly-java-compatibility.md"
+required_compatibility_markers=(
+  '| 8–9 | Histórica |'
+  '| 41 | **Atual** |'
+  'Java 25'
+  'não são sinônimos'
+  'do JBoss EAP'
+  'https://www.wildfly.org/news/2026/07/16/WildFly-41-is-released/'
+)
+
+for marker in "${required_compatibility_markers[@]}"; do
+  if ! grep -Fq -- "$marker" "$COMPATIBILITY_REFERENCE"; then
+    printf 'FALHA: referência WildFly/Java não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+if ! grep -Fq -- \
+    '[Evolução WildFly × Java SE](wildfly-java-compatibility.md)' \
+    "$REPOSITORY_ROOT/docs/README.md"; then
+  printf 'FALHA: índice não aponta para a referência WildFly/Java\n' >&2
+  exit 1
+fi
 
 help_output="$(
   "$REPOSITORY_ROOT/scripts/smoke-wildfly9-datasource.sh" --help

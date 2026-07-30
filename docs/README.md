@@ -31,6 +31,9 @@ passos.
     configuração externa segura e qualificação H2/Oracle.
 13. [Evidência CP-3A](evidence/CP-3A.md): tentativa do WAR imutável da fase 2
     no Java 17/WildFly 26 antes de qualquer correção.
+14. [Evolução WildFly × Java SE](wildfly-java-compatibility.md): matriz
+    histórica revisada, distinção entre runtime e certificação Jakarta EE e
+    relação com os gates do laboratório.
 
 ## Aplicação e arquitetura
 
@@ -47,6 +50,7 @@ passos.
 - [Runtime legado externo](../runtime/legacy/README.md);
 - [Runtime Java 8/WildFly 9 do CP-2A](../runtime/phase2/java8-wildfly9/README.md);
 - [Runtime Java 8/WildFly 26 do CP-2B](../runtime/phase2/java8-wildfly26/README.md);
+- [evolução da compatibilidade WildFly × Java SE](wildfly-java-compatibility.md);
 - [seleção Java 7/H2 do CP-1D](cp-1d-runtime-selection.md);
 - [diferenças H2/Oracle](h2-oracle-differences.md);
 - [aprovação do schema Oracle](oracle-lab-schema.md).
