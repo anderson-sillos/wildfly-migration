@@ -49,6 +49,11 @@ O registro `apache-maven` acrescentado no CP-2C fixa a distribuição oficial,
 licença e checksums da ferramenta de build. Ele não altera o POM para Maven 4:
 `modelVersion` continua em `4.0.0`, o modelo de descritor aceito pelo Maven 3.
 
+O CP-2D agrega runtime, dependências, WAR e limitações no
+[manifesto consolidado da fase 2](../../../migration/baselines/02-java8-wildfly26/).
+Este arquivo de runtime continua sendo a autoridade específica para os
+arquivos distribuídos de Java, Maven e WildFly.
+
 ## Primeira tentativa
 
 O WAR aprovado no CP-2A foi copiado sem modificação para uma base temporária

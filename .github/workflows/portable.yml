@@ -67,7 +67,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          runtime_root="$RUNNER_TEMP/wildfly-migration-cp2c"
+          runtime_root="$RUNNER_TEMP/wildfly-migration-cp2d"
           archives="$RUNNER_TEMP/wildfly-migration-cache/runtime-archives"
           cache_lock="$GITHUB_WORKSPACE/runtime/portable-runtime-cache.sha256"
           tools="$runtime_root/tools"
@@ -150,7 +150,7 @@ jobs:
           tar -xzf wildfly-26.1.3.Final.tar.gz -C "$tools"
 
           {
-            echo "MIGRATION_CHECKPOINT=CP-2C"
+            echo "MIGRATION_CHECKPOINT=CP-2D"
             echo "LAB_BIND_ADDRESS=127.0.0.1"
             echo "WILDFLY_HTTP_PORT=18080"
             echo "WILDFLY_MANAGEMENT_PORT=19990"
@@ -168,14 +168,17 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Run portable doctor
-        run: ./scripts/doctor.sh CP-2C --profile ci-h2 --ci
+        run: ./scripts/doctor.sh CP-2D --profile ci-h2 --ci
 
       - name: Build and audit portable WAR
         run: ./scripts/build-cp-2c.sh --profile ci-h2
 
-      - name: Compile Oracle persistence probe without credentials
+      - name: Compile Oracle probes without credentials
         run: |
           ./scripts/validate-cp-2c-oracle-persistence.sh \
+            --compile-only \
+            --war app/target/wildfly-migration.war
+          ./scripts/validate-cp-2d-oracle-state.sh \
             --compile-only \
             --war app/target/wildfly-migration.war
 
@@ -196,20 +199,28 @@ jobs:
           ./scripts/smoke-wildfly26-datasource.sh \
             --profile ci-h2 \
             --war app/target/wildfly-migration.war \
-            --contract-result app/target/contract-results/cp-2c-ci-h2.json
+            --contract-result app/target/contract-results/cp-2d-ci-h2.json
 
-      - name: Compare portable result with the frozen baseline
+      - name: Compare portable phase 2 result with the frozen baseline
         run: |
           ./scripts/validate-cp-2c.sh \
             --war app/target/wildfly-migration.war \
-            --contract-result app/target/contract-results/cp-2c-ci-h2.json
+            --contract-result app/target/contract-results/cp-2d-ci-h2.json
+          ./scripts/validate-cp-2d-phase-comparison.sh \
+            --war app/target/wildfly-migration.war \
+            --contract-result app/target/contract-results/cp-2d-ci-h2.json
+          ./scripts/validate-cp-2d-manifest.sh \
+            --war app/target/wildfly-migration.war
 
-      - name: Upload sanitized portable contract result
+      - name: Upload sanitized portable phase 2 evidence
         uses: actions/upload-artifact@v6
         with:
-          name: cp-2c-portable-contract-result
-          path: app/target/contract-results/cp-2c-ci-h2.json
+          name: cp-2d-portable-evidence
+          path: |
+            app/target/contract-results/cp-2d-ci-h2.json
+            app/target/dependency-tree.txt
           if-no-files-found: error
+          retention-days: 14
 
       - name: Save reusable runtime archive cache
         if: >-

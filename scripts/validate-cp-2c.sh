@@ -126,12 +126,15 @@ for cleanup_marker in \
   'actions: write' \
   'GH_TOKEN: ${{ github.token }}' \
   'PR_CACHE_REF: refs/pull/${{ github.event.pull_request.number }}/merge' \
-  'gh cache list' \
+  'gh cache delete --all' \
   '--ref "$PR_CACHE_REF"' \
-  'gh cache delete "$cache_id" --confirm'; do
+  '--succeed-on-no-caches'; do
   grep -Fq -- "$cleanup_marker" "$CACHE_CLEANUP_WORKFLOW" ||
     fail "limpeza de caches temporários não contém: $cleanup_marker"
 done
+if grep -Fq -- '--confirm' "$CACHE_CLEANUP_WORKFLOW"; then
+  fail "limpeza de cache usa a opção --confirm incompatível com o GitHub CLI"
+fi
 if grep -Fq 'uses: actions/checkout' "$CACHE_CLEANUP_WORKFLOW"; then
   fail "limpeza de cache não deve executar código do pull request fechado"
 fi
@@ -147,18 +150,21 @@ for cache_marker in \
   'maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.9.16-' \
   'key: ${{ steps.runtime-archive-cache.outputs.cache-primary-key }}' \
   'key: ${{ steps.maven-dependency-cache.outputs.cache-primary-key }}' \
-  'MIGRATION_CHECKPOINT=CP-2C' \
-  './scripts/doctor.sh CP-2C --profile ci-h2 --ci' \
+  'MIGRATION_CHECKPOINT=CP-2D' \
+  './scripts/doctor.sh CP-2D --profile ci-h2 --ci' \
   './scripts/build-cp-2c.sh --profile ci-h2' \
   './scripts/validate-cp-2c-oracle-persistence.sh' \
+  './scripts/validate-cp-2d-oracle-state.sh' \
   '--compile-only' \
+  './scripts/validate-cp-2d-phase-comparison.sh' \
+  './scripts/validate-cp-2d-manifest.sh' \
   'MIGRATION_SOURCE_COMMIT: >-' \
   '${{ github.event.pull_request.head.sha || github.sha }}' \
   'https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz' \
   'MAVEN_HOME=$tools/apache-maven-3.9.16' \
   'MAVEN_ARCHIVE_SHA256=80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb' \
-  'app/target/contract-results/cp-2c-ci-h2.json' \
-  'cp-2c-portable-contract-result'; do
+  'app/target/contract-results/cp-2d-ci-h2.json' \
+  'cp-2d-portable-evidence'; do
   grep -Fq -- "$cache_marker" "$WORKFLOW" ||
     fail "workflow não contém o cache reutilizável: $cache_marker"
 done
@@ -179,6 +185,13 @@ if [[ "$(grep -Fc 'uses: actions/cache/restore@v5' "$WORKFLOW")" -ne 2 ]] ||
    [[ "$(grep -Fc 'uses: actions/cache/save@v5' "$WORKFLOW")" -ne 2 ]]; then
   fail "workflow deve restaurar e salvar exatamente os caches de runtime e Maven"
 fi
+
+for cache_hit_guard in \
+  "steps.runtime-archive-cache.outputs.cache-hit != 'true'" \
+  "steps.maven-dependency-cache.outputs.cache-hit != 'true'"; do
+  grep -Fq "$cache_hit_guard" "$WORKFLOW" ||
+    fail "cache exato da main não pode ser duplicado no PR: $cache_hit_guard"
+done
 
 for save_guard in \
   "github.event_name == 'push'" \

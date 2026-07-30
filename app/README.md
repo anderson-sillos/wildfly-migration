@@ -13,8 +13,8 @@ não por cópias da aplicação em outros diretórios.
 | `src/main/resources/` | recursos empacotados e configurações da aplicação |
 | `src/main/webapp/` | JSPs, conteúdo web e descritores |
 | `src/main/webapp/WEB-INF/` | conteúdo protegido e descritores do WAR |
-| `src/test/java/` | testes internos da aplicação |
-| `src/test/resources/` | recursos dos testes internos |
+| `src/test/java/` | testes internos, criado quando houver casos versionados |
+| `src/test/resources/` | recursos de teste, criado quando houver conteúdo |
 
 O CP-1C adicionou o `pom.xml` e o descritor Servlet 2.4. O CP-1D estabeleceu os
 perfis de datasource e o CP-1E iniciou o domínio e os mappers. A tag
@@ -34,6 +34,10 @@ ou o commit do checkpoint correspondente e siga o runbook congelado.
 
 Nenhum JAR manual, driver Oracle, runtime ou arquivo gerado em `target/` deve
 ser versionado.
+
+Diretórios Maven vazios não usam `.gitkeep`: `src/test/java/` e
+`src/test/resources/` passarão a existir no repositório quando receberem seus
+primeiros arquivos de teste.
 
 A configuração, o limite transacional e a pequena divergência de sequences
 entre os bancos estão em

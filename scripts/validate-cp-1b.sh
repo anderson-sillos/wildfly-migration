@@ -33,8 +33,6 @@ required_paths=(
   "app/src/main/java"
   "app/src/main/resources"
   "app/src/main/webapp/WEB-INF"
-  "app/src/test/java"
-  "app/src/test/resources"
   "contract-tests/fixtures"
   "runtime/legacy/runtime-manifest.tsv"
   "migration/steps"

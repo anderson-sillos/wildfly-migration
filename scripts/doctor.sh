@@ -11,6 +11,7 @@ PHASE2_JAVA8_RUNTIME_MANIFEST="runtime/phase2/java8-wildfly9/runtime-manifest.ts
 DB_PROFILE_ARGUMENT=""
 DB_PROFILE=""
 CI_MODE=false
+NON_INTERACTIVE_MODE=false
 PASS_COUNT=0
 FAIL_COUNT=0
 WARN_COUNT=0
@@ -19,7 +20,8 @@ SKIP_COUNT=0
 usage() {
   cat <<'USAGE'
 Uso:
-  ./scripts/doctor.sh [CHECKPOINT] [--profile PERFIL] [--env ARQUIVO] [--ci]
+  ./scripts/doctor.sh [CHECKPOINT] [--profile PERFIL] [--env ARQUIVO] \
+    [--ci|--non-interactive]
 
 Exemplos:
   ./scripts/doctor.sh CP-1A
@@ -32,6 +34,9 @@ Opções:
   --profile PERFIL  Obrigatório a partir do CP-1D; use ci-h2 ou oracle.
   --env ARQUIVO  Carrega pares simples NOME=VALOR sem executar o arquivo.
   --ci           Modo não interativo; a partir do CP-1D aceita somente ci-h2.
+  --non-interactive
+                 Ignora identidade Git, autenticação GitHub e containers,
+                 que não participam da reprodução local; permite Oracle.
   -h, --help     Mostra esta ajuda.
 USAGE
 }
@@ -318,6 +323,35 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-2D; then
+    required+=(
+      "docs/evidence/CP-2D.md"
+      "docs/phase2-reproduction.md"
+      "docs/phase2-real-application-migration-runbook.md"
+      "migration/evidence/CP-2D/contract-ci-h2.json"
+      "migration/evidence/CP-2D/contract-oracle.json"
+      "migration/evidence/CP-2D/oracle-state.json"
+      "migration/evidence/CP-2D/oracle-persistence.json"
+      "migration/evidence/CP-2D/phase2-comparison.json"
+      "migration/evidence/CP-2D/reproduction-oracle.json"
+      "migration/baselines/02-java8-wildfly26/README.md"
+      "migration/baselines/02-java8-wildfly26/manifest.properties"
+      "migration/baselines/02-java8-wildfly26/components.tsv"
+      "migration/baselines/02-java8-wildfly26/maven-dependencies.tsv"
+      "migration/baselines/02-java8-wildfly26/known-limitations.tsv"
+      "scripts/qualify-cp-2d-h2.sh"
+      "scripts/qualify-cp-2d-oracle.sh"
+      "scripts/ValidatePhase2OracleState.java"
+      "scripts/validate-cp-2d-oracle-state.sh"
+      "scripts/validate-cp-2d-phase-comparison.sh"
+      "scripts/validate-cp-2d-manifest.sh"
+      "scripts/validate-cp-2d-real-runbook.sh"
+      "scripts/validate-cp-2d-reproduction.sh"
+      "scripts/validate-cp-2d-closure.sh"
+      "scripts/reproduce-cp-2d.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"
@@ -353,9 +387,9 @@ check_repository() {
     fail "remote origin não configurado"
   fi
 
-  if [[ "$CI_MODE" == true ]]; then
-    skip "identidade Git local (execução em CI)"
-    skip "autenticação interativa da GitHub CLI (execução em CI)"
+  if [[ "$CI_MODE" == true || "$NON_INTERACTIVE_MODE" == true ]]; then
+    skip "identidade Git local (execução não interativa)"
+    skip "autenticação interativa da GitHub CLI (execução não interativa)"
   else
     if [[ -n "$(git config --get user.name 2>/dev/null || true)" ]]; then
       pass "user.name do Git configurado"
@@ -1089,6 +1123,10 @@ while [[ $# -gt 0 ]]; do
       CI_MODE=true
       shift
       ;;
+    --non-interactive)
+      NON_INTERACTIVE_MODE=true
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -1155,8 +1193,8 @@ check_repository
 check_sensitive_paths
 
 if rank_at_least CP-1B; then
-  if [[ "$CI_MODE" == true ]]; then
-    skip "runtime de containers (perfil portátil usa runtime direto no CI)"
+  if [[ "$CI_MODE" == true || "$NON_INTERACTIVE_MODE" == true ]]; then
+    skip "runtime de containers (reprodução usa runtime externo direto)"
   else
     check_container_runtime
   fi

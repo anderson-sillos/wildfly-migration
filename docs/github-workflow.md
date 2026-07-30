@@ -142,6 +142,13 @@ podem restaurá-las, mas a `main`, outros PRs e branches irmãs não podem.
 Pull requests de forks permanecem somente leitura pela condição que compara o
 repositório de origem com `github.repository`.
 
+Quando a correspondência exata vem da `main`, os arquivos são restaurados no
+runner efêmero, mas `cache-hit` vale `true` e os passos de gravação são
+ignorados. Portanto, o GitHub não cria uma cópia persistente da mesma chave no
+merge ref do PR. Uma entrada restrita ao PR só é gravada quando não existe
+correspondência exata, por exemplo depois de uma mudança real no lock ou no
+POM.
+
 Um `push` bem-sucedido para `main` cria separadamente a entrada canônica da
 branch principal quando ela ainda não existe. Como o cache do GitHub é
 imutável, uma mudança real no lock ou no POM exige uma nova entrada; a
@@ -150,8 +157,11 @@ restauração parcial evita baixar novamente o conteúdo ainda válido.
 Quando um PR interno é fechado, `.github/workflows/pr-cache-cleanup.yml`
 remove somente as entradas associadas ao seu merge ref. A execução não faz
 checkout do código do PR, recebe `actions: write` apenas no job de limpeza e
-trata `GITHUB_TOKEN` como valor opaco. Assim, os caches temporários aceleram os
-commits do PR sem permanecerem duplicados depois do merge ou fechamento.
+trata `GITHUB_TOKEN` como valor opaco. A remoção usa `gh cache delete --all`
+com o `--ref` exato do PR e `--succeed-on-no-caches`; ela não depende de
+confirmação interativa nem falha quando o PR não possui caches. Assim, os
+caches temporários aceleram os commits do PR sem permanecerem duplicados
+depois do merge ou fechamento.
 
 Configurações Maven, credenciais, `app/target`, relatórios, evidências, cópias
 extraídas do WildFly e demais resultados continuam sendo recriados em cada
@@ -169,7 +179,9 @@ esta sequência:
    revalida os runtimes e não cria entradas adicionais quando o match é exato;
 3. depois do merge, o primeiro `push` correspondente em `main` cria as duas
    entradas canônicas da branch principal;
-4. execuções seguintes na `main` ou em novos PRs restauram as entradas da
+4. o workflow de fechamento remove as duas entradas do merge ref do PR sem
+   alterar os caches canônicos da `main`;
+5. execuções seguintes na `main` ou em novos PRs restauram as entradas da
    branch principal enquanto as chaves permanecerem compatíveis.
 
 Essa política segue o escopo oficial de cache por branch e merge ref:
