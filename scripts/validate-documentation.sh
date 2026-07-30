@@ -130,16 +130,20 @@ done
 
 COMPATIBILITY_REFERENCE="$REPOSITORY_ROOT/docs/wildfly-java-compatibility.md"
 required_compatibility_markers=(
-  '| WildFly | Situação comunitária¹ | Java 7 | Java 8 |'
-  '| 8–9 | Histórica |'
-  '| 10–13 | Histórica | Não | Sim |'
-  '**Java EE 8 / Jakarta EE 8** (APIs `javax.*`)⁶'
-  '| 41 | **Atual** |'
+  '**LTS**: *Long-Term Support* (suporte de longo prazo)'
+  '**EOL**: *End of Life* (fim do ciclo de vida)'
+  '| Java SE | Distribuição de referência | Situação | Disponibilidade de atualizações |'
+  '| WildFly | Estado em 30/07/2026 | EOL formal publicado |'
+  '| WildFly | Java 7 | Java 8 | Java 11 | Java 17 | Java 21 | Java 25 |'
+  '| 8–9 | Sim | Sim |'
+  '| 10–13 | Não | Sim |'
+  '**Java EE 8 / Jakarta EE 8** (APIs `javax.*`)'
+  '| 41 | Não | Não | Não | Sim | Sim | Rec.⁵ |'
   'Java 25'
-  'não são sinônimos'
+  'A indicação do JDK para executar o servidor e a declaração formal de'
   'Atividade 3.1 do laboratório'
   '[evidência do CP-3A](evidence/CP-3A.md)'
-  'do JBoss EAP'
+  'O projeto WildFly não publica uma matriz formal de EOL'
   'https://www.wildfly.org/news/2026/07/16/WildFly-41-is-released/'
 )
 
