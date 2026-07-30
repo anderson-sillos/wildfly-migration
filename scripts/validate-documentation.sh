@@ -10,6 +10,7 @@ required_paths=(
   ".vscode/tasks.json"
   "docs/README.md"
   "docs/codex-handoff.md"
+  "docs/cp-3a-dependency-matrix.md"
   "docs/evidence/CP-1F.md"
   "docs/environment-setup.md"
   "docs/legacy-application-runbook.md"
@@ -158,6 +159,38 @@ if ! grep -Fq -- \
     '[Evolução WildFly × Java SE](wildfly-java-compatibility.md)' \
     "$REPOSITORY_ROOT/docs/README.md"; then
   printf 'FALHA: índice não aponta para a referência WildFly/Java\n' >&2
+  exit 1
+fi
+
+DEPENDENCY_MATRIX="$REPOSITORY_ROOT/docs/cp-3a-dependency-matrix.md"
+required_dependency_matrix_markers=(
+  'org.mybatis:mybatis:3.5.19'
+  'org.slf4j:log4j-over-slf4j:1.7.36'
+  'commons-fileupload:commons-fileupload:1.6.0'
+  'org.reflections:reflections:0.10.2'
+  'org.apache.xmlbeans:xmlbeans:5.3.0'
+  'org.dom4j:dom4j:2.2.0'
+  'com.oracle.database.jdbc:ojdbc17:23.26.2.0.0'
+  'ServletContainerInitializer'
+  'módulo `java.xml`'
+  'Nenhuma versão desta página é aplicada antecipadamente ao POM'
+)
+
+for marker in "${required_dependency_matrix_markers[@]}"; do
+  if ! grep -Fq -- "$marker" "$DEPENDENCY_MATRIX"; then
+    printf 'FALHA: matriz de dependências do CP-3A não contém: %s\n' \
+      "$marker" >&2
+    exit 1
+  fi
+done
+
+if ! grep -Fq -- \
+    '[Matriz de dependências do CP-3A](cp-3a-dependency-matrix.md)' \
+    "$REPOSITORY_ROOT/docs/README.md" ||
+   ! grep -Fq -- \
+    '[matriz de modernização](../cp-3a-dependency-matrix.md)' \
+    "$REPOSITORY_ROOT/docs/evidence/CP-3A.md"; then
+  printf 'FALHA: índice/evidência não aponta para a matriz do CP-3A\n' >&2
   exit 1
 fi
 

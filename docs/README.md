@@ -34,12 +34,15 @@ passos.
 14. [Evolução WildFly × Java SE](wildfly-java-compatibility.md): matriz
     histórica revisada, distinção entre runtime e certificação Jakarta EE e
     relação com os gates do laboratório.
+15. [Matriz de dependências do CP-3A](cp-3a-dependency-matrix.md): candidatos
+    para Java 17/EE 8, transitivas, impacto, decisão e sequência de aplicação.
 
 ## Aplicação e arquitetura
 
 - [Estrutura do repositório](repository-layout.md);
 - [modelo mínimo do domínio](legacy-domain-model.md);
 - [dependências do WAR legado](legacy-dependencies.md);
+- [matriz de modernização das dependências no CP-3A](cp-3a-dependency-matrix.md);
 - [persistência MyBatis](mybatis-persistence.md).
 - [upload legado e metadados comparáveis](legacy-upload.md).
 - [importação XML legada](legacy-xml-import.md).

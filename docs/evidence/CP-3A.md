@@ -125,15 +125,45 @@ contratos portáteis. Para o escopo exercitado, nenhuma correção de código ou
 troca de biblioteca foi necessária; as únicas barreiras eram proteções do
 processo de build e verificação.
 
-Essa conclusão ainda não representa o encerramento do CP-3A. A configuração
-Java 17 ainda não é o padrão do POM/CI, a matriz de compatibilidade das
-dependências ainda será produzida, o H2 será revisado e a trilha Oracle
-permanece pendente.
+Essa conclusão ainda não representa o encerramento do CP-3A. Naquele ponto, a
+configuração Java 17 ainda não era o padrão do POM/CI, a matriz de
+compatibilidade das dependências ainda não havia sido produzida, o H2
+precisava ser revisado e a trilha Oracle permanecia pendente.
 
 As evidências adicionais estão em
 `migration/evidence/CP-3A/before-build.properties`,
 `migration/evidence/CP-3A/after-build.properties` e
 `migration/evidence/CP-3A/contract-after-ci-h2.json`.
+
+## Matriz de dependências — atividade 3.3
+
+A [matriz de modernização](../cp-3a-dependency-matrix.md) confronta cada
+dependência direta da fase 2 e seu módulo Oracle externo com:
+
+- versão ou mecanismo candidato;
+- requisito de Java e compatibilidade com o gate EE 8/`javax`;
+- mudanças diretas e transitivas esperadas;
+- impacto, decisão, atividade de aplicação e destino final.
+
+A análise decidiu atualizar MyBatis, a linha `javax` do FileUpload,
+Reflections, XMLBeans, dom4j e o driver Oracle; remover Log4j 1 e as APIs XML
+duplicadas; e manter Tiles 2.1.4 somente como exceção temporária. Também
+registrou as duas transições deliberadas: ponte Log4j sobre SLF4J apenas
+enquanto existirem imports antigos e Reflections 0.10.2 apenas até a descoberta
+por `ServletContainerInitializer`.
+
+### Conclusão comprovada da atividade 3.3
+
+As versões candidatas e o efeito esperado sobre todas as 20 bibliotecas do WAR
+da fase 2 estão rastreáveis antes da primeira atualização. A decisão não se
+baseia somente em “compilar no Java 17”: separa suporte publicado,
+compatibilidade EE, riscos de classloader, logging, XML, empacotamento e
+transitivas.
+
+Esta atividade é documental e não altera POM, código, runtime nem WAR. Portanto,
+o resultado executável comprovado em 3.2 permanece inalterado e cada hipótese
+da matriz ainda precisa ser confirmada na atividade que aplica a respectiva
+troca.
 
 ## Rollback
 
