@@ -52,6 +52,7 @@ shell_files=(
   scripts/validate-cp-2d-reproduction.sh
   scripts/validate-cp-2d-closure.sh
   scripts/reproduce-cp-2d.sh
+  scripts/build-cp-3a.sh
   scripts/validate-cp-3a.sh
   contract-tests/run.sh
 )
