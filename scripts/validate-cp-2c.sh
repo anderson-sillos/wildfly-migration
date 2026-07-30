@@ -150,18 +150,21 @@ for cache_marker in \
   'maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.9.16-' \
   'key: ${{ steps.runtime-archive-cache.outputs.cache-primary-key }}' \
   'key: ${{ steps.maven-dependency-cache.outputs.cache-primary-key }}' \
-  'MIGRATION_CHECKPOINT=CP-2C' \
-  './scripts/doctor.sh CP-2C --profile ci-h2 --ci' \
+  'MIGRATION_CHECKPOINT=CP-2D' \
+  './scripts/doctor.sh CP-2D --profile ci-h2 --ci' \
   './scripts/build-cp-2c.sh --profile ci-h2' \
   './scripts/validate-cp-2c-oracle-persistence.sh' \
+  './scripts/validate-cp-2d-oracle-state.sh' \
   '--compile-only' \
+  './scripts/validate-cp-2d-phase-comparison.sh' \
+  './scripts/validate-cp-2d-manifest.sh' \
   'MIGRATION_SOURCE_COMMIT: >-' \
   '${{ github.event.pull_request.head.sha || github.sha }}' \
   'https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz' \
   'MAVEN_HOME=$tools/apache-maven-3.9.16' \
   'MAVEN_ARCHIVE_SHA256=80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb' \
-  'app/target/contract-results/cp-2c-ci-h2.json' \
-  'cp-2c-portable-contract-result'; do
+  'app/target/contract-results/cp-2d-ci-h2.json' \
+  'cp-2d-portable-evidence'; do
   grep -Fq -- "$cache_marker" "$WORKFLOW" ||
     fail "workflow não contém o cache reutilizável: $cache_marker"
 done

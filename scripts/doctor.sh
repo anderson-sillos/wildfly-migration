@@ -347,6 +347,7 @@ check_required_files() {
       "scripts/validate-cp-2d-manifest.sh"
       "scripts/validate-cp-2d-real-runbook.sh"
       "scripts/validate-cp-2d-reproduction.sh"
+      "scripts/validate-cp-2d-closure.sh"
       "scripts/reproduce-cp-2d.sh"
     )
   fi
