@@ -124,10 +124,22 @@ não invalidam o cache quando os binários permanecem iguais. Os manifestos
 continuam sendo a fonte completa de proveniência; o arquivo `.sha256` é
 somente a identidade mínima do cache.
 
+As origens de download ficam em
+`runtime/portable-runtime-sources.tsv`. O script
+`scripts/prepare-portable-runtime-cache.sh` verifica que todo arquivo do lock
+possui ao menos uma origem HTTPS e que nenhuma origem referencia um arquivo
+fora do lock. Portanto, adicionar um runtime não exige copiar a lógica de
+download para o workflow: registre nome e checksum no lock e uma ou mais
+origens no índice. A validação estática executada localmente e no GitHub acusa
+qualquer divergência entre os dois arquivos.
+
 Todos os arquivos baixados para montar o runtime portátil — JDK, distribuição
 Maven, WildFly e driver H2, independentemente do tamanho — ficam juntos em uma
 única entrada `runtime-archives`. O repositório local do Maven permanece em
 outra entrada porque seu conteúdo e ciclo de invalidação são diferentes.
+O lock inclui também o Temurin 17 usado a partir do CP-3A; o arquivo é
+reutilizado pelo cache desde já, mas só será extraído pelo workflow quando a
+trilha Java 17 passar a ser executada.
 
 Cada cache possui uma chave parcial de restauração. Se a chave exata não
 existir, o job reaproveita a entrada compatível anterior, elimina do pacote os

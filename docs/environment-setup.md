@@ -66,7 +66,7 @@ combinação abaixo; o `doctor` marca os componentes futuros como `NÃO EXIGIDO`
 | CP-2A e CP-2B | Eclipse Temurin OpenJDK 8u492-b09 | `OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz`, URL e digest fixados no manifesto |
 | CP-2B a CP-3D | WildFly 26.1.3.Final | Distribuição EE 8 `wildfly-26.1.3.Final.tar.gz` |
 | CP-2C e seguintes | Apache Maven 3.9.16 | Distribuição binária oficial |
-| CP-3A a CP-3D | Eclipse Temurin/OpenJDK 17 | A build exata será fixada no CP-3A |
+| CP-3A a CP-3D | Eclipse Temurin OpenJDK 17.0.20+8 | `OpenJDK17U-jdk_x64_linux_hotspot_17.0.20_8.tar.gz`, URL e digest fixados no cache portátil |
 | CP-3E a CP-3I | Eclipse Temurin/OpenJDK 21 e WildFly 41.0.0.Final | Builds exatas fixadas no CP-3E |
 | CP-3H e seguintes | `com.oracle.database.jdbc:ojdbc17:23.26.2.0.0` | Provisionado no WildFly, fora do WAR |
 | CP-3J e CP-3K | Eclipse Temurin/OpenJDK 25 e WildFly 41.0.0.Final | Destino final exclusivamente open source |
@@ -81,7 +81,8 @@ checksum quando entrar no respectivo checkpoint.
 
 | Componente | Fonte oficial |
 | --- | --- |
-| Temurin/OpenJDK 17, 21 e 25 | <https://adoptium.net/temurin/releases/> |
+| Temurin OpenJDK 17.0.20+8 | <https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20%2B8/OpenJDK17U-jdk_x64_linux_hotspot_17.0.20_8.tar.gz> |
+| Temurin/OpenJDK 21 e 25 | <https://adoptium.net/temurin/releases/> |
 | WildFly 26.1.3.Final EE 8 | <https://github.com/wildfly/wildfly/releases/download/26.1.3.Final/wildfly-26.1.3.Final.tar.gz> |
 | Maven 3.9.16 | <https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz> |
 | WildFly 41.0.0.Final | <https://github.com/wildfly/wildfly/releases/download/41.0.0.Final/wildfly-41.0.0.Final.tar.gz> |

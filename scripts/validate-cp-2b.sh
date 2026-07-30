@@ -5,6 +5,7 @@ set -euo pipefail
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MANIFEST="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/runtime-manifest.tsv"
 RUNTIME_CACHE_LOCK="$REPOSITORY_ROOT/runtime/portable-runtime-cache.sha256"
+RUNTIME_CACHE_SOURCES="$REPOSITORY_ROOT/runtime/portable-runtime-sources.tsv"
 EVIDENCE="$REPOSITORY_ROOT/migration/evidence/CP-2B/before-deployment.properties"
 WAR_FILE=""
 CONTRACT_RESULT_FILE=""
@@ -54,6 +55,7 @@ done
 for path in \
   "$MANIFEST" \
   "$RUNTIME_CACHE_LOCK" \
+  "$RUNTIME_CACHE_SOURCES" \
   "$EVIDENCE" \
   "$REPOSITORY_ROOT/migration/evidence/CP-2B/compatibility-observations.tsv" \
   "$REPOSITORY_ROOT/migration/evidence/CP-2B/after.properties" \
@@ -222,9 +224,6 @@ for cache_lock_row in \
   grep -Fxq "$cache_lock_row" "$RUNTIME_CACHE_LOCK" ||
     fail "identidade do cache de runtime não contém: $cache_lock_row"
 done
-if [[ "$(awk 'END { print NR + 0 }' "$RUNTIME_CACHE_LOCK")" -ne 4 ]]; then
-  fail "identidade do cache deve relacionar somente os quatro runtimes usados"
-fi
 
 STATIC_WORKFLOW="$REPOSITORY_ROOT/.github/workflows/validate.yml"
 WORKFLOW="$REPOSITORY_ROOT/.github/workflows/portable.yml"
@@ -274,16 +273,21 @@ for cache_marker in \
   "hashFiles('app/pom.xml')" \
   'archives="$RUNNER_TEMP/wildfly-migration-cache/runtime-archives"' \
   'cache_lock="$GITHUB_WORKSPACE/runtime/portable-runtime-cache.sha256"' \
-  'Removendo arquivo obsoleto do cache restaurado' \
-  'Cache validado por SHA-256' \
-  'Download validado por SHA-256' \
-  'https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz' \
-  'https://archive.apache.org/dist/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz' \
-  'sha256sum --check "$cache_lock"' \
+  'runtime_sources="$GITHUB_WORKSPACE/runtime/portable-runtime-sources.tsv"' \
+  './scripts/prepare-portable-runtime-cache.sh \' \
+  '--archives-dir "$archives" \' \
+  '--lock "$cache_lock" \' \
+  '--sources "$runtime_sources"' \
   'key: ${{ steps.runtime-archive-cache.outputs.cache-primary-key }}' \
   'key: ${{ steps.maven-dependency-cache.outputs.cache-primary-key }}'; do
-  grep -Fq "$cache_marker" "$WORKFLOW" ||
+  grep -Fq -- "$cache_marker" "$WORKFLOW" ||
     fail "cache portátil do CP-2B não contém: $cache_marker"
+done
+for source_marker in \
+  'apache-maven-3.9.16-bin.tar.gz	https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz' \
+  'apache-maven-3.9.16-bin.tar.gz	https://archive.apache.org/dist/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz'; do
+  grep -Fq -- "$source_marker" "$RUNTIME_CACHE_SOURCES" ||
+    fail "índice de origens do cache não contém: $source_marker"
 done
 if [[ "$(grep -Fc 'uses: actions/cache/restore@v5' "$WORKFLOW")" -ne 2 ]] ||
    [[ "$(grep -Fc 'uses: actions/cache/save@v5' "$WORKFLOW")" -ne 2 ]]; then

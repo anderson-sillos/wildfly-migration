@@ -14,6 +14,7 @@ run_step() {
 
 shell_files=(
   scripts/doctor.sh
+  scripts/prepare-portable-runtime-cache.sh
   scripts/validate-repository-baseline.sh
   scripts/validate-cp-1b.sh
   scripts/audit-legacy-war.sh
@@ -56,6 +57,8 @@ shell_files=(
 
 run_step "Validar sintaxe dos scripts shell" bash -n "${shell_files[@]}"
 run_step "Validar baseline do repositório" ./scripts/doctor.sh CP-1A --ci
+run_step "Validar identidade e origens do cache portátil" \
+  ./scripts/prepare-portable-runtime-cache.sh --validate-only
 run_step "Validar recursos estáticos do CP-1B" \
   ./scripts/validate-cp-1b.sh --release
 run_step "Validar recursos estáticos do CP-1C" ./scripts/validate-cp-1c.sh

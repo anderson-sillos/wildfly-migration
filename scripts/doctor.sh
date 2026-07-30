@@ -1288,13 +1288,13 @@ else
 fi
 
 if [[ "$CI_MODE" != true ]] && rank_at_least CP-3A; then
-  check_java "OpenJDK 17" JAVA17_HOME 'version \"17' JAVA17_ARCHIVE JAVA17_ARCHIVE_SHA256
+  check_java "OpenJDK 17" JAVA17_HOME 'version "17' JAVA17_ARCHIVE JAVA17_ARCHIVE_SHA256
 else
   skip "OpenJDK 17 e checksum (entram no CP-3A)"
 fi
 
 if [[ "$CI_MODE" != true ]] && rank_at_least CP-3E; then
-  check_java "OpenJDK 21" JAVA21_HOME 'version \"21' JAVA21_ARCHIVE JAVA21_ARCHIVE_SHA256
+  check_java "OpenJDK 21" JAVA21_HOME 'version "21' JAVA21_ARCHIVE JAVA21_ARCHIVE_SHA256
   check_wildfly "WildFly 41" WILDFLY41_HOME '41.0.0.Final' WILDFLY41_ARCHIVE WILDFLY41_ARCHIVE_SHA256
 else
   skip "OpenJDK 21 e checksum (entram no CP-3E)"
@@ -1302,7 +1302,7 @@ else
 fi
 
 if [[ "$CI_MODE" != true ]] && rank_at_least CP-3J; then
-  check_java "OpenJDK 25" JAVA25_HOME 'version \"25' JAVA25_ARCHIVE JAVA25_ARCHIVE_SHA256
+  check_java "OpenJDK 25" JAVA25_HOME 'version "25' JAVA25_ARCHIVE JAVA25_ARCHIVE_SHA256
 else
   skip "OpenJDK 25 e checksum (entram no CP-3J)"
 fi

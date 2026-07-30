@@ -70,78 +70,14 @@ jobs:
           runtime_root="$RUNNER_TEMP/wildfly-migration-cp2d"
           archives="$RUNNER_TEMP/wildfly-migration-cache/runtime-archives"
           cache_lock="$GITHUB_WORKSPACE/runtime/portable-runtime-cache.sha256"
+          runtime_sources="$GITHUB_WORKSPACE/runtime/portable-runtime-sources.tsv"
           tools="$runtime_root/tools"
           install -d -m 0755 "$archives" "$tools"
 
-          while IFS= read -r -d '' cached_path; do
-            cached_name="${cached_path##*/}"
-            if ! awk '{print $2}' "$cache_lock" |
-                grep -Fxq "$cached_name"; then
-              printf 'Removendo arquivo obsoleto do cache restaurado: %s\n' \
-                "$cached_name"
-              rm -f -- "$cached_path"
-            fi
-          done < <(find "$archives" -mindepth 1 -maxdepth 1 -type f -print0)
-
-          ensure_archive() {
-            local expected_sha256="$1"
-            local archive_name="$2"
-            local archive_path="$archives/$archive_name"
-            local partial_path="${archive_path}.part"
-            local origin
-            shift 2
-
-            if [[ -f "$archive_path" ]] &&
-               printf '%s  %s\n' "$expected_sha256" "$archive_path" |
-                 sha256sum --check --status; then
-              printf 'Cache validado por SHA-256: %s\n' "$archive_name"
-              return
-            fi
-
-            rm -f -- "$partial_path"
-            for origin in "$@"; do
-              printf 'Baixando da origem registrada: %s\n' "$archive_name"
-              printf 'Origem: %s\n' "$origin"
-              if curl --retry 3 --retry-all-errors \
-                  -fsSLo "$partial_path" "$origin" &&
-                 printf '%s  %s\n' "$expected_sha256" "$partial_path" |
-                   sha256sum --check --status; then
-                mv -f -- "$partial_path" "$archive_path"
-                printf 'Download validado por SHA-256: %s\n' "$archive_name"
-                return
-              fi
-              printf 'Origem indisponível ou conteúdo inválido: %s\n' \
-                "$origin" >&2
-              rm -f -- "$partial_path"
-            done
-
-            printf 'FALHA: nenhuma origem produziu o arquivo aprovado: %s\n' \
-              "$archive_name" >&2
-            return 1
-          }
-
-          ensure_archive \
-            da257f161d7f8c6ca5b0e5d9e4090f65ac28c5e398072e68b8ae87988b1d1a2e \
-            OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz \
-            https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u492-b09/OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz
-          ensure_archive \
-            80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb \
-            apache-maven-3.9.16-bin.tar.gz \
-            https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz \
-            https://archive.apache.org/dist/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz
-          ensure_archive \
-            aadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f02528ae59 \
-            wildfly-26.1.3.Final.tar.gz \
-            https://github.com/wildfly/wildfly/releases/download/26.1.3.Final/wildfly-26.1.3.Final.tar.gz
-          ensure_archive \
-            3ad9ac4b6aae9cd9d3ac1c447465e1ed06019b851b893dd6a8d76ddb6d85bca6 \
-            h2-1.4.200.jar \
-            https://repo.maven.apache.org/maven2/com/h2database/h2/1.4.200/h2-1.4.200.jar
-
-          (
-            cd "$archives"
-            sha256sum --check "$cache_lock"
-          )
+          ./scripts/prepare-portable-runtime-cache.sh \
+            --archives-dir "$archives" \
+            --lock "$cache_lock" \
+            --sources "$runtime_sources"
 
           cd "$archives"
 
