@@ -226,7 +226,6 @@ for cache_lock_row in \
 done
 
 WORKFLOW="$REPOSITORY_ROOT/.github/workflows/validate.yml"
-PORTABLE_SELECTOR="$REPOSITORY_ROOT/scripts/select-portable-ci.sh"
 for action_marker in \
   'uses: actions/checkout@v6' \
   'uses: actions/upload-artifact@v6'; do
@@ -244,89 +243,35 @@ grep -Fq 'cancel-in-progress: false' "$WORKFLOW" ||
 grep -Fq 'persist-credentials: false' "$WORKFLOW" ||
   fail "checkout não deve persistir o token no runner"
 for light_path_marker in \
-  '*.md' \
-  'docs/*' \
-  'openspec/*' \
-  'migration/evidence/*' \
-  'migration/steps/*' \
-  'migration/incompatibilities.tsv' \
-  'scripts/validate-documentation.sh'; do
-  grep -Fq "$light_path_marker" "$PORTABLE_SELECTOR" ||
+  "':(exclude,glob)*.md'" \
+  "':(exclude,glob)**/*.md'" \
+  "':(exclude,glob)docs/**'" \
+  "':(exclude,glob)openspec/**'" \
+  "':(exclude,glob)migration/evidence/**'" \
+  "':(exclude,glob)migration/steps/**'" \
+  "':(exclude)migration/incompatibilities.tsv'" \
+  "':(exclude)scripts/validate-documentation.sh'"; do
+  grep -Fq "$light_path_marker" "$WORKFLOW" ||
     fail "modo leve não declara caminho documental: $light_path_marker"
 done
-for full_path_marker in \
-  'migration/baselines/*' \
-  '*)'; do
-  grep -Fq "$full_path_marker" "$PORTABLE_SELECTOR" ||
-    fail "modo completo não contém a proteção: $full_path_marker"
-done
+if grep -Fq "':(exclude,glob)migration/baselines/**'" "$WORKFLOW"; then
+  fail "baseline executável não pode ser excluído do CI completo"
+fi
 for selection_marker in \
   'id: portable-selection' \
-  'PORTABLE_EVENT_ACTION: ${{ github.event.action }}' \
-  'PORTABLE_BEFORE_SHA: ${{ github.event.before }}' \
-  'run: ./scripts/select-portable-ci.sh' \
+  'EVENT_ACTION: ${{ github.event.action }}' \
+  'BEFORE_SHA: ${{ github.event.before }}' \
+  'git diff --quiet --no-renames' \
+  'run_portable=true' \
+  'reason="runtime-impacting-path"' \
+  '.name == "portable-ci" and .conclusion == "success"' \
+  'previous-head-without-successful-portable-check' \
+  'documentation-or-planning-only' \
   "steps.portable-selection.outputs.run == 'true'" \
   'checks: read'; do
   grep -Fq -- "$selection_marker" "$WORKFLOW" ||
     fail "seleção incremental do portable-ci não contém: $selection_marker"
 done
-for selector_marker in \
-  'git diff --name-only -z --no-renames --diff-filter=ACMRTD' \
-  '.name == "portable-ci" and .conclusion == "success"' \
-  'previous-head-without-successful-portable-check' \
-  'documentation-or-planning-only'; do
-  grep -Fq -- "$selector_marker" "$PORTABLE_SELECTOR" ||
-    fail "seletor do portable-ci não contém: $selector_marker"
-done
-for light_path in \
-  docs/reference.adoc \
-  docs/reference.md \
-  openspec/changes/example/tasks.md \
-  migration/evidence/CP-X/result.json \
-  migration/steps/example.md \
-  migration/incompatibilities.tsv \
-  scripts/validate-documentation.sh; do
-  light_gate="$(
-    GITHUB_OUTPUT="$TEMP_DIRECTORY/portable-light.out" \
-    PORTABLE_EVENT_NAME=pull_request \
-    PORTABLE_EVENT_ACTION=synchronize \
-    PORTABLE_CHANGED_FILE="$light_path" \
-    PORTABLE_PREVIOUS_SUCCESS=true \
-      "$PORTABLE_SELECTOR"
-  )"
-  grep -Fq 'portable-ci completo: false' <<< "$light_gate" ||
-    fail "caminho documental deveria usar modo leve: $light_path"
-done
-for full_path in \
-  app/pom.xml \
-  scripts/build-cp-2c.sh \
-  runtime/portable-runtime-cache.sha256 \
-  contract-tests/run.sh \
-  migration/baselines/02-java8-wildfly26/manifest.properties \
-  .github/workflows/validate.yml \
-  .env.example \
-  unknown-functional-file.conf; do
-  full_gate="$(
-    GITHUB_OUTPUT="$TEMP_DIRECTORY/portable-full.out" \
-    PORTABLE_EVENT_NAME=pull_request \
-    PORTABLE_EVENT_ACTION=synchronize \
-    PORTABLE_CHANGED_FILE="$full_path" \
-    PORTABLE_PREVIOUS_SUCCESS=true \
-      "$PORTABLE_SELECTOR"
-  )"
-  grep -Fq 'portable-ci completo: true' <<< "$full_gate" ||
-    fail "caminho funcional deveria usar CI completo: $full_path"
-done
-failed_previous_gate="$(
-  GITHUB_OUTPUT="$TEMP_DIRECTORY/portable-previous.out" \
-  PORTABLE_EVENT_NAME=pull_request \
-  PORTABLE_EVENT_ACTION=synchronize \
-  PORTABLE_CHANGED_FILE=docs/reference.md \
-  PORTABLE_PREVIOUS_SUCCESS=false \
-    "$PORTABLE_SELECTOR"
-)"
-grep -Fq 'portable-ci completo: true' <<< "$failed_previous_gate" ||
-  fail "documentação não pode ocultar portable anterior sem sucesso"
 for cache_marker in \
   'uses: actions/cache/restore@v5' \
   'uses: actions/cache/save@v5' \

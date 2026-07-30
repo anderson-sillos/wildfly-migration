@@ -120,9 +120,9 @@ Sobre `c76f42f`:
 - `checkout` e `upload-artifact` foram atualizadas para v6; com
   `actions/cache@v5`, as três actions do workflow usam Node 24.
 - o CI foi consolidado em `.github/workflows/validate.yml`, preservando os
-  jobs independentes `repository-baseline` e `portable-ci`; a decisão
-  incremental fica em script testável e PRs exclusivamente documentais não
-  recriam o runtime;
+  jobs independentes `repository-baseline` e `portable-ci`; uma única etapa
+  baseada em `git diff` mantém PRs exclusivamente documentais sem recriar o
+  runtime;
 - o workflow portátil passou a cachear somente `~/.m2/repository`, com chave
   exata baseada em SO, arquitetura, Maven 3.8.9 e `app/pom.xml`, sem
   `restore-keys`, `settings.xml`, resultados ou credenciais;

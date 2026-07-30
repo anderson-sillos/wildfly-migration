@@ -46,13 +46,69 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          PORTABLE_EVENT_NAME: ${{ github.event_name }}
-          PORTABLE_EVENT_ACTION: ${{ github.event.action }}
-          PORTABLE_BEFORE_SHA: ${{ github.event.before }}
-          PORTABLE_AFTER_SHA: ${{ github.event.after }}
-          PORTABLE_PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          PORTABLE_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: ./scripts/select-portable-ci.sh
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.event.after }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "pull_request" &&
+                "$EVENT_ACTION" == "synchronize" ]]; then
+            comparison_base="$BEFORE_SHA"
+            comparison_head="$AFTER_SHA"
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            comparison_base="$PR_BASE_SHA"
+            comparison_head="$PR_HEAD_SHA"
+          else
+            comparison_base="$BEFORE_SHA"
+            comparison_head="$AFTER_SHA"
+          fi
+
+          git diff --name-only --no-renames \
+            "$comparison_base" "$comparison_head" -- || true
+
+          run_portable=true
+          reason="runtime-impacting-path"
+          if git cat-file -e "${comparison_base}^{commit}" 2>/dev/null &&
+             git cat-file -e "${comparison_head}^{commit}" 2>/dev/null &&
+             git diff --quiet --no-renames \
+               "$comparison_base" "$comparison_head" -- \
+               . \
+               ':(exclude,glob)*.md' \
+               ':(exclude,glob)**/*.md' \
+               ':(exclude,glob)docs/**' \
+               ':(exclude,glob)openspec/**' \
+               ':(exclude,glob)migration/evidence/**' \
+               ':(exclude,glob)migration/steps/**' \
+               ':(exclude)migration/incompatibilities.tsv' \
+               ':(exclude)scripts/validate-documentation.sh'; then
+            previous_success=true
+            if [[ "$EVENT_NAME" == "pull_request" &&
+                  "$EVENT_ACTION" == "synchronize" ]]; then
+              previous_success=false
+              if result="$(
+                gh api \
+                  "repos/$GITHUB_REPOSITORY/commits/$BEFORE_SHA/check-runs" \
+                  --jq 'any(.check_runs[]; .name == "portable-ci" and .conclusion == "success")'
+              )" && [[ "$result" == "true" ]]; then
+                previous_success=true
+              fi
+            fi
+
+            if [[ "$previous_success" == "true" ]]; then
+              run_portable=false
+              reason="documentation-or-planning-only"
+            else
+              reason="previous-head-without-successful-portable-check"
+            fi
+          fi
+
+          echo "run=$run_portable" >> "$GITHUB_OUTPUT"
+          echo "reason=$reason" >> "$GITHUB_OUTPUT"
+          echo "portable-ci completo: $run_portable ($reason)"
 
       - name: Keep the portable check lightweight
         if: steps.portable-selection.outputs.run != 'true'

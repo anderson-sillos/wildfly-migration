@@ -118,10 +118,11 @@ cancelada ou reprovada, a nova entrega executa a trilha completa. O token do
 GitHub é tratado como valor opaco pela CLI, sem suposição sobre prefixo ou
 tamanho.
 
-Essa decisão fica integralmente em `scripts/select-portable-ci.sh`. O workflow
-apenas fornece os dados do evento e consome a saída `run`, enquanto os casos
-“documentação após sucesso”, “documentação após resultado ausente ou falho”,
-“código da aplicação” e “baseline executável” são testados localmente.
+A decisão fica em uma única etapa do próprio workflow. Ela usa `git diff` com
+exclusões explícitas para os caminhos documentais e considera todo caminho não
+classificado como funcional. O validador local confere a presença da lista
+leve, do fallback completo e da proteção pelo resultado anterior; não existe
+um segundo script com outra implementação da regra.
 
 O workflow agrupa execuções pelo nome e pela referência Git e usa
 `cancel-in-progress: false`. Um novo commit no mesmo PR aguarda a execução em
