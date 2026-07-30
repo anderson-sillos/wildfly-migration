@@ -11,6 +11,7 @@ PHASE2_JAVA8_RUNTIME_MANIFEST="runtime/phase2/java8-wildfly9/runtime-manifest.ts
 DB_PROFILE_ARGUMENT=""
 DB_PROFILE=""
 CI_MODE=false
+NON_INTERACTIVE_MODE=false
 PASS_COUNT=0
 FAIL_COUNT=0
 WARN_COUNT=0
@@ -19,7 +20,8 @@ SKIP_COUNT=0
 usage() {
   cat <<'USAGE'
 Uso:
-  ./scripts/doctor.sh [CHECKPOINT] [--profile PERFIL] [--env ARQUIVO] [--ci]
+  ./scripts/doctor.sh [CHECKPOINT] [--profile PERFIL] [--env ARQUIVO] \
+    [--ci|--non-interactive]
 
 Exemplos:
   ./scripts/doctor.sh CP-1A
@@ -32,6 +34,9 @@ Opções:
   --profile PERFIL  Obrigatório a partir do CP-1D; use ci-h2 ou oracle.
   --env ARQUIVO  Carrega pares simples NOME=VALOR sem executar o arquivo.
   --ci           Modo não interativo; a partir do CP-1D aceita somente ci-h2.
+  --non-interactive
+                 Ignora identidade Git, autenticação GitHub e containers,
+                 que não participam da reprodução local; permite Oracle.
   -h, --help     Mostra esta ajuda.
 USAGE
 }
@@ -379,9 +384,9 @@ check_repository() {
     fail "remote origin não configurado"
   fi
 
-  if [[ "$CI_MODE" == true ]]; then
-    skip "identidade Git local (execução em CI)"
-    skip "autenticação interativa da GitHub CLI (execução em CI)"
+  if [[ "$CI_MODE" == true || "$NON_INTERACTIVE_MODE" == true ]]; then
+    skip "identidade Git local (execução não interativa)"
+    skip "autenticação interativa da GitHub CLI (execução não interativa)"
   else
     if [[ -n "$(git config --get user.name 2>/dev/null || true)" ]]; then
       pass "user.name do Git configurado"
@@ -1115,6 +1120,10 @@ while [[ $# -gt 0 ]]; do
       CI_MODE=true
       shift
       ;;
+    --non-interactive)
+      NON_INTERACTIVE_MODE=true
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -1181,8 +1190,8 @@ check_repository
 check_sensitive_paths
 
 if rank_at_least CP-1B; then
-  if [[ "$CI_MODE" == true ]]; then
-    skip "runtime de containers (perfil portátil usa runtime direto no CI)"
+  if [[ "$CI_MODE" == true || "$NON_INTERACTIVE_MODE" == true ]]; then
+    skip "runtime de containers (reprodução usa runtime externo direto)"
   else
     check_container_runtime
   fi

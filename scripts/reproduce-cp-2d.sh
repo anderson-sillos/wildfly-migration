@@ -70,13 +70,15 @@ initial_status="$(
 "$REPOSITORY_ROOT/scripts/validate-repository-baseline.sh"
 "$REPOSITORY_ROOT/scripts/qualify-cp-2d-h2.sh" \
   --env "$ENV_FILE" \
-  --result-directory "$RESULT_DIRECTORY"
+  --result-directory "$RESULT_DIRECTORY" \
+  --non-interactive
 
 oracle_qualification="not-executed"
 if [[ "$PROFILE" == "oracle" ]]; then
   "$REPOSITORY_ROOT/scripts/qualify-cp-2d-oracle.sh" \
     --env "$ENV_FILE" \
-    --result-directory "$RESULT_DIRECTORY"
+    --result-directory "$RESULT_DIRECTORY" \
+    --non-interactive
   oracle_qualification="passed"
 fi
 

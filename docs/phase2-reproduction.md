@@ -79,7 +79,8 @@ O executor:
 
 1. recusa alterações rastreáveis no checkout;
 2. executa a mesma validação-base local e remota;
-3. diagnostica Java, Maven, WildFly e H2;
+3. diagnostica Java, Maven, WildFly e H2 sem exigir identidade Git,
+   autenticação GitHub ou Docker, pois esses itens não participam da execução;
 4. cria o WAR e a árvore Maven a partir do fonte;
 5. provisiona uma cópia temporária do WildFly em loopback;
 6. executa os 14 contratos;

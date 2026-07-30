@@ -5,12 +5,13 @@ set -euo pipefail
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPOSITORY_ROOT/.env"
 RESULT_DIRECTORY="$REPOSITORY_ROOT/app/target/contract-results"
+NON_INTERACTIVE=false
 
 usage() {
   cat <<'USAGE'
 Uso:
   ./scripts/qualify-cp-2d-h2.sh \
-    [--env ARQUIVO] [--result-directory DIRETORIO]
+    [--env ARQUIVO] [--result-directory DIRETORIO] [--non-interactive]
 
 Executa a comparação portátil completa da fase 2 com os 14 contratos
 congelados na fase 1. O resultado H2 não qualifica comportamento Oracle.
@@ -35,6 +36,10 @@ while [[ $# -gt 0 ]]; do
       RESULT_DIRECTORY="$2"
       shift 2
       ;;
+    --non-interactive)
+      NON_INTERACTIVE=true
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -49,8 +54,11 @@ done
 WAR_FILE="$REPOSITORY_ROOT/app/target/wildfly-migration.war"
 CONTRACT_RESULT="$RESULT_DIRECTORY/cp-2d-ci-h2.json"
 
-"$REPOSITORY_ROOT/scripts/doctor.sh" \
-  CP-2D --profile ci-h2 --env "$ENV_FILE"
+doctor_arguments=(CP-2D --profile ci-h2 --env "$ENV_FILE")
+if [[ "$NON_INTERACTIVE" == true ]]; then
+  doctor_arguments+=(--non-interactive)
+fi
+"$REPOSITORY_ROOT/scripts/doctor.sh" "${doctor_arguments[@]}"
 "$REPOSITORY_ROOT/scripts/build-cp-2c.sh" \
   --profile ci-h2 --env "$ENV_FILE"
 "$REPOSITORY_ROOT/scripts/smoke-wildfly26-datasource.sh" \

@@ -6,6 +6,7 @@ REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPOSITORY_ROOT/.env"
 RESULT_DIRECTORY="$REPOSITORY_ROOT/app/target/contract-results"
 CLEANUP_REQUIRED=false
+NON_INTERACTIVE=false
 TEMP_DIRECTORY="$(
   mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-cp2d-oracle.XXXXXXXX"
 )"
@@ -14,7 +15,7 @@ usage() {
   cat <<'USAGE'
 Uso:
   ./scripts/qualify-cp-2d-oracle.sh \
-    [--env ARQUIVO] [--result-directory DIRETORIO]
+    [--env ARQUIVO] [--result-directory DIRETORIO] [--non-interactive]
 
 Executa os 14 contratos no Oracle, compara o estado persistido oficial com a
 fase 1, repete as sondas MyBatis/rollback/timestamp/BLOB e remove somente os
@@ -58,6 +59,10 @@ while [[ $# -gt 0 ]]; do
       RESULT_DIRECTORY="$2"
       shift 2
       ;;
+    --non-interactive)
+      NON_INTERACTIVE=true
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -83,8 +88,11 @@ SUMMARY_RESULT="$RESULT_DIRECTORY/cp-2d-phase-comparison.json"
 PORTABLE_CONTRACT_BACKUP="$TEMP_DIRECTORY/cp-2d-ci-h2.json"
 cp "$PORTABLE_CONTRACT_RESULT" "$PORTABLE_CONTRACT_BACKUP"
 
-"$REPOSITORY_ROOT/scripts/doctor.sh" \
-  CP-2D --profile oracle --env "$ENV_FILE"
+doctor_arguments=(CP-2D --profile oracle --env "$ENV_FILE")
+if [[ "$NON_INTERACTIVE" == true ]]; then
+  doctor_arguments+=(--non-interactive)
+fi
+"$REPOSITORY_ROOT/scripts/doctor.sh" "${doctor_arguments[@]}"
 "$REPOSITORY_ROOT/scripts/oracle-lab-schema.sh" \
   verify --java 8 --env "$ENV_FILE"
 "$REPOSITORY_ROOT/scripts/oracle-lab-schema.sh" \
