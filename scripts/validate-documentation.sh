@@ -130,7 +130,9 @@ done
 
 COMPATIBILITY_REFERENCE="$REPOSITORY_ROOT/docs/wildfly-java-compatibility.md"
 required_compatibility_markers=(
+  '| WildFly | Situação comunitária¹ | Java 7 | Java 8 |'
   '| 8–9 | Histórica |'
+  '| 10–13 | Histórica | Não | Sim |'
   '| 41 | **Atual** |'
   'Java 25'
   'não são sinônimos'

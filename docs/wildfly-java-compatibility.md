@@ -22,21 +22,21 @@ testado nesse JDK, mas a declaração publicada de compatibilidade Jakarta EE 11
 
 ## Quadro revisado
 
-| WildFly | Situação comunitária¹ | Java 8 | Java 11 | Java 17 | Java 21 | Java 25 | Plataforma padrão² |
-|---|---|---:|---:|---:|---:|---:|---|
-| 8–9 | Histórica | Sim | N/Q | N/Q | N/Q | N/Q | Java EE 7 |
-| 10–13 | Histórica | Sim | N/Q | N/Q | N/Q | N/Q | Java EE 7; EE 8 disponível em modo de prévia no 13 |
-| 14 | Histórica | Sim | N/Q | N/Q | N/Q | N/Q | Java EE 8 |
-| 15–24 | Histórica | Sim | Rec. | N/Q³ | N/Q | N/Q | Java EE 8; também Jakarta EE 8 a partir do 17.0.1 |
-| 25–26.1 | Histórica | Sim | Sim | Sim | N/Q | N/Q | Jakarta EE 8 |
-| 27–29 | Histórica | Não | Sim | Rec. | N/Q | N/Q | Jakarta EE 10 |
-| 30–31 | Histórica | Não | Sim | Rec. | Aval. | N/Q | Jakarta EE 10 |
-| 32 | Histórica | Não | Sim | Sim | Rec.⁴ | N/Q | Jakarta EE 10 |
-| 33–34 | Histórica | Não | Sim | Sim | Rec. | N/Q | Jakarta EE 10 |
-| 35–37 | Histórica | Não | Não | Sim | Rec. | N/Q | Jakarta EE 10 |
-| 38–39 | Histórica | Não | Não | Sim | Rec. | Aval. | Jakarta EE 10 |
-| 40 | Histórica | Não | Não | Sim | Sim | Rec.⁵ | Jakarta EE 11; variante EE 10 temporária |
-| 41 | **Atual** | Não | Não | Sim | Sim | Rec.⁵ | Jakarta EE 11; variante EE 10 temporária |
+| WildFly | Situação comunitária¹ | Java 7 | Java 8 | Java 11 | Java 17 | Java 21 | Java 25 | Plataforma padrão² |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| 8–9 | Histórica | Sim | Sim | N/Q | N/Q | N/Q | N/Q | Java EE 7 |
+| 10–13 | Histórica | Não | Sim | N/Q | N/Q | N/Q | N/Q | Java EE 7; EE 8 disponível em modo de prévia no 13 |
+| 14 | Histórica | Não | Sim | N/Q | N/Q | N/Q | N/Q | Java EE 8 |
+| 15–24 | Histórica | Não | Sim | Rec. | N/Q³ | N/Q | N/Q | Java EE 8; também Jakarta EE 8 a partir do 17.0.1 |
+| 25–26.1 | Histórica | Não | Sim | Sim | Sim | N/Q | N/Q | Jakarta EE 8 |
+| 27–29 | Histórica | Não | Não | Sim | Rec. | N/Q | N/Q | Jakarta EE 10 |
+| 30–31 | Histórica | Não | Não | Sim | Rec. | Aval. | N/Q | Jakarta EE 10 |
+| 32 | Histórica | Não | Não | Sim | Sim | Rec.⁴ | N/Q | Jakarta EE 10 |
+| 33–34 | Histórica | Não | Não | Sim | Sim | Rec. | N/Q | Jakarta EE 10 |
+| 35–37 | Histórica | Não | Não | Não | Sim | Rec. | N/Q | Jakarta EE 10 |
+| 38–39 | Histórica | Não | Não | Não | Sim | Rec. | Aval. | Jakarta EE 10 |
+| 40 | Histórica | Não | Não | Não | Sim | Sim | Rec.⁵ | Jakarta EE 11; variante EE 10 temporária |
+| 41 | **Atual** | Não | Não | Não | Sim | Sim | Rec.⁵ | Jakarta EE 11; variante EE 10 temporária |
 
 1. **Situação comunitária:** “histórica” indica que uma versão mais nova já a
    substituiu e que não há uma linha regular de manutenção de longo prazo
@@ -61,8 +61,8 @@ testado nesse JDK, mas a declaração publicada de compatibilidade Jakarta EE 11
 
 O quadro explica os três pontos usados no projeto:
 
-1. o baseline reproduz WildFly 9 com Java 7; Java 7 não foi acrescentado como
-   coluna porque o quadro solicitado começa no Java 8;
+1. o baseline reproduz WildFly 9 com Java 7, combinação que forma o ponto
+   inicial explícito da matriz;
 2. a ponte de baixo impacto usa WildFly 26.1.3 com Java 8 e depois reaproveita
    o mesmo servidor no gate Java 17;
 3. o destino entra no WildFly 41 com Java 21 para isolar a migração Jakarta EE
@@ -79,6 +79,7 @@ checksums e critérios de validação.
 - [Downloads oficiais: WildFly 41 é a versão atual](https://www.wildfly.org/downloads/);
 - [WildFly 8: Java EE 7 e compatibilidade com Java 8](https://www.wildfly.org/news/2014/02/12/WildFly-8-Final-is-released/);
 - [WildFly 9: Java EE 7](https://www.wildfly.org/news/2015/07/02/WildFly-9-Final-is-released/);
+- [WildFly 10: Java 7 descontinuado e Java 8 como requisito](https://www.wildfly.org/news/2016/01/30/WildFly-10-Final-is-now-available/);
 - [WildFly 13: Java EE 7 padrão e EE 8 em modo de prévia](https://www.wildfly.org/news/2018/05/31/WildFly-13-Baker-s-Dozen-is-released/);
 - [WildFly 14: certificação Java EE 8](https://www.wildfly.org/news/2018/08/30/WildFly-14-is-released/);
 - [WildFly 15: início da recomendação de Java 11](https://www.wildfly.org/news/2018/12/13/WildFly-15-is-released/);
