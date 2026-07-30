@@ -77,9 +77,10 @@ O CI é separado por finalidade:
 
 - `.github/workflows/validate.yml` executa `repository-baseline` em todo pull
   request e em todo push para `main`;
-- `.github/workflows/portable.yml` executa `portable-ci` somente quando mudam
-  configuração de exemplo, aplicação, contratos, baseline executável,
-  runtimes, scripts ou o próprio workflow portátil.
+- `.github/workflows/portable.yml` publica o check `portable-ci` em toda entrega,
+  mas só monta o ambiente e executa a trilha H2 completa quando o delta do push
+  atual muda configuração de exemplo, aplicação, contratos, baseline
+  executável, runtimes, scripts funcionais ou o próprio workflow portátil.
 
 O `repository-baseline` local e remoto usa o mesmo executor versionado. Antes
 de enviar uma alteração, execute:
@@ -93,11 +94,21 @@ lista manual de validadores no workflow ou na documentação. Os validadores de
 checkpoints antigos verificam apenas seus contratos permanentes; o validador
 do checkpoint ativo confere nomes, versões e caminhos que podem evoluir.
 
-Alterações exclusivamente em `docs/`, `openspec/` ou evidências já capturadas
-continuam recebendo a validação estática, mas não recriam Java, Maven, WildFly,
-H2 e o WAR. Uma alteração em `scripts/`, `runtime/`, `contract-tests/`,
-`migration/baselines/`, `app/`, `.env.example` ou no workflow portátil sempre
-executa a trilha H2 completa.
+Alterações exclusivamente em `docs/`, `openspec/`, evidências já capturadas ou
+no validador estático da documentação continuam recebendo
+`repository-baseline`. O check `portable-ci` conclui em modo leve, sem restaurar
+caches, recriar Java, Maven, WildFly, H2 ou o WAR. Uma alteração em scripts
+funcionais, `runtime/`, `contract-tests/`, `migration/baselines/`, `app/`,
+`.env.example` ou no workflow portátil executa a trilha H2 completa.
+
+No evento `synchronize` de um pull request, a seleção compara o `before` e o
+`after` fornecidos pelo GitHub, em vez do diff acumulado do PR contra `main`.
+Isso evita repetir o runtime por um commit documental feito depois de uma
+mudança funcional. O modo leve só é aceito quando o SHA anterior já possui um
+check `portable-ci` aprovado. Se a execução anterior estiver pendente,
+cancelada ou reprovada, a nova entrega executa a trilha completa. O token do
+GitHub é tratado como valor opaco pela CLI, sem suposição sobre prefixo ou
+tamanho.
 
 Os dois workflows agrupam execuções pelo nome do workflow e pela referência
 Git. Quando um novo commit chega ao mesmo PR, a execução anterior ainda em
