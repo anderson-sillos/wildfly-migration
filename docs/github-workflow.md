@@ -136,6 +136,26 @@ commits adicionais podem substituir uma execução que ainda não começou. Por
 isso a verificação do último SHA continua obrigatória e escolhe o CI completo
 sempre que não encontra um `portable-ci` aprovado.
 
+### Auditoria da consolidação
+
+Em 30/07/2026, o commit `321e65b9dfed050412ecf4dbaed21ca61313d763`
+validou a versão consolidada no
+[run `30591562923`](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30591562923):
+
+- o único workflow `validation` publicou os jobs separados
+  `repository-baseline` e `portable-ci`;
+- a alteração do próprio workflow selecionou corretamente o CI completo;
+- `repository-baseline` concluiu em 13 segundos e `portable-ci` em 48
+  segundos;
+- os caches exatos de runtime e Maven foram restaurados, sem gerar cópias;
+- build, sondas, H2, WildFly 26 e os 14 contratos foram aprovados;
+- o artefato sanitizado de evidências foi publicado.
+
+A entrega exclusivamente documental que registra esta auditoria é o teste de
+aceitação do modo leve: ela deve executar a seleção e
+`repository-baseline`, sem restaurar caches, montar runtime, compilar,
+iniciar WildFly ou publicar artefato.
+
 ## Reutilização dos caches
 
 As chaves de cache identificam o conteúdo reutilizável, não a atividade ou o

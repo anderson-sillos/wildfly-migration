@@ -123,6 +123,8 @@ Sobre `c76f42f`:
   jobs independentes `repository-baseline` e `portable-ci`; uma única etapa
   baseada em `git diff` mantém PRs exclusivamente documentais sem recriar o
   runtime;
+- o run `30591562923` aprovou a consolidação com o fluxo completo, caches
+  restaurados e 14 contratos, sem cancelar a execução iniciada;
 - o workflow portátil passou a cachear somente `~/.m2/repository`, com chave
   exata baseada em SO, arquitetura, Maven 3.8.9 e `app/pom.xml`, sem
   `restore-keys`, `settings.xml`, resultados ou credenciais;
