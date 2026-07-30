@@ -4,8 +4,8 @@
 
 O checkpoint parte do CP-2C e encerra a fase pública Java 8, WildFly
 26.1.3.Final, Jakarta EE 8 com pacotes `javax.*` e Maven 3.9.16. Esta página
-será completada pelas atividades 2.18 a 2.20 com roteiro para a aplicação
-real, reprodução limpa, CI remoto, rollback e tag pública. O PR #18 foi aberto
+será completada pelas atividades 2.19 e 2.20 com reprodução limpa, CI remoto,
+rollback e tag pública. O PR #18 foi aberto
 como rascunho depois da primeira atividade concluída do checkpoint.
 
 ## Comparação integral com a fase 1 — atividade 2.16
@@ -64,3 +64,27 @@ congela:
 O manifesto aponta para o mesmo commit-fonte e WAR usados na comparação da
 atividade 2.16. A tag `migration/02-java8-wildfly26` permanece reservada e só
 será criada no encerramento da atividade 2.20.
+
+## Roteiro para aplicação real — atividade 2.18
+
+O
+[roteiro blue/green](../phase2-real-application-migration-runbook.md)
+traduz a sequência do laboratório para uma mudança operacional controlada.
+Ele não recomenda executar os scripts do laboratório diretamente em produção.
+
+O documento define:
+
+- inventário e baseline obrigatórios antes da janela;
+- Green independente e Blue preservado, sem atualização in-place;
+- condições para compartilhar o schema Oracle e quiescência de escrita como
+  padrão do corte;
+- cronograma de T-30 dias até a revisão no próximo dia útil;
+- gates de artefato, runtime, datasource, contratos, Oracle, integrações,
+  segurança, observabilidade e rollback;
+- decisão go/no-go com aceites de aplicação, plataforma, DBA e negócio;
+- rollback separado entre tráfego/runtime e recuperação de dados, proibindo
+  restauração cega do banco.
+
+Cada comando do laboratório é relacionado a um controle equivalente da
+aplicação real, preservando a distinção entre H2 `portable-ci` e a
+qualificação Oracle na rede autorizada.
