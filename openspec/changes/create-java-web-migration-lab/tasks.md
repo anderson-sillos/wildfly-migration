@@ -94,7 +94,7 @@
 
 ### Checkpoint CP-3A — Entrada no Java 17
 
-- [ ] 3.1 Materializar `migration/02-java8-wildfly26` e tentar executar a aplicação com Java 17 no WildFly 26.1.3 antes de atualizar bibliotecas.
+- [x] 3.1 Materializar `migration/02-java8-wildfly26` e tentar executar a aplicação com Java 17 no WildFly 26.1.3 antes de atualizar bibliotecas.
 - [ ] 3.2 Capturar e corrigir somente incompatibilidades necessárias ao Java 17 e reexecutar os contratos antes de modernizar dependências.
 - [ ] 3.3 Produzir a matriz de cada dependência legada com versão candidata, suporte a Java 17, compatibilidade EE 8/`javax`, transitivas, impacto e decisão.
 - [ ] 3.4 Atualizar runtime, versão H2 de teste, documentação e `doctor` para a combinação Java 17/WildFly 26, preservando o perfil Oracle separado.

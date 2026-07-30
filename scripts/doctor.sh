@@ -352,6 +352,17 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-3A; then
+    required+=(
+      "docs/evidence/CP-3A.md"
+      "migration/evidence/CP-3A/before-runtime.properties"
+      "migration/evidence/CP-3A/contract-before-ci-h2.json"
+      "runtime/portable-runtime-sources.tsv"
+      "scripts/prepare-portable-runtime-cache.sh"
+      "scripts/validate-cp-3a.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"

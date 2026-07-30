@@ -29,6 +29,8 @@ passos.
     janela de transição, implantação blue/green, go/no-go e rollback.
 12. [Reprodução da fase 2](phase2-reproduction.md): checkout limpo,
     configuração externa segura e qualificação H2/Oracle.
+13. [Evidência CP-3A](evidence/CP-3A.md): tentativa do WAR imutável da fase 2
+    no Java 17/WildFly 26 antes de qualquer correção.
 
 ## Aplicação e arquitetura
 

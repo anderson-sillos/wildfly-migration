@@ -52,6 +52,7 @@ shell_files=(
   scripts/validate-cp-2d-reproduction.sh
   scripts/validate-cp-2d-closure.sh
   scripts/reproduce-cp-2d.sh
+  scripts/validate-cp-3a.sh
   contract-tests/run.sh
 )
 
@@ -98,5 +99,7 @@ run_step "Validar reprodução limpa da fase 2" \
   ./scripts/validate-cp-2d-reproduction.sh
 run_step "Validar candidato de encerramento da fase 2" \
   ./scripts/validate-cp-2d-closure.sh
+run_step "Validar tentativa inicial do CP-3A no Java 17" \
+  ./scripts/validate-cp-3a.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'
