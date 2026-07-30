@@ -2,27 +2,9 @@ name: portable-ci
 
 on:
   pull_request:
-    paths:
-      - ".env.example"
-      - ".github/workflows/pr-cache-cleanup.yml"
-      - ".github/workflows/portable.yml"
-      - "app/**"
-      - "contract-tests/**"
-      - "migration/baselines/**"
-      - "runtime/**"
-      - "scripts/**"
   push:
     branches:
       - main
-    paths:
-      - ".env.example"
-      - ".github/workflows/pr-cache-cleanup.yml"
-      - ".github/workflows/portable.yml"
-      - "app/**"
-      - "contract-tests/**"
-      - "migration/baselines/**"
-      - "runtime/**"
-      - "scripts/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -30,6 +12,7 @@ concurrency:
 
 permissions:
   contents: read
+  checks: read
 
 jobs:
   portable-ci:
@@ -43,10 +26,100 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          fetch-depth: 0
           persist-credentials: false
+
+      - name: Detect runtime impact in the current delivery
+        id: portable-impact
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          EVENT_BEFORE: ${{ github.event.before }}
+          EVENT_AFTER: ${{ github.event.after }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "pull_request" &&
+                "$EVENT_ACTION" == "synchronize" ]]; then
+            comparison_base="$EVENT_BEFORE"
+            comparison_head="$EVENT_AFTER"
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            comparison_base="$PR_BASE_SHA"
+            comparison_head="$PR_HEAD_SHA"
+          else
+            comparison_base="$EVENT_BEFORE"
+            comparison_head="${EVENT_AFTER:-$MIGRATION_SOURCE_COMMIT}"
+          fi
+
+          ./scripts/detect-portable-change.sh \
+            --base "$comparison_base" \
+            --head "$comparison_head" \
+            --output "$GITHUB_OUTPUT"
+
+      - name: Verify the previous portable result for a documentation-only push
+        id: previous-portable
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.action == 'synchronize' &&
+          steps.portable-impact.outputs.runtime_changed != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIOUS_HEAD_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          previous_success=false
+
+          if result="$(
+            gh api \
+              "repos/$GITHUB_REPOSITORY/commits/$PREVIOUS_HEAD_SHA/check-runs" \
+              --jq 'any(.check_runs[]; .name == "portable-ci" and .conclusion == "success")'
+          )" && [[ "$result" == "true" ]]; then
+            previous_success=true
+          fi
+
+          echo "success=$previous_success" >> "$GITHUB_OUTPUT"
+
+      - name: Select portable validation depth
+        id: portable-selection
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          RUNTIME_CHANGED: ${{ steps.portable-impact.outputs.runtime_changed }}
+          PREVIOUS_PORTABLE_SUCCESS: ${{ steps.previous-portable.outputs.success }}
+        run: |
+          set -euo pipefail
+          run_portable=true
+          reason="runtime-impacting-path"
+
+          if [[ "$RUNTIME_CHANGED" != "true" ]]; then
+            if [[ "$EVENT_NAME" == "pull_request" &&
+                  "$EVENT_ACTION" == "synchronize" &&
+                  "$PREVIOUS_PORTABLE_SUCCESS" != "true" ]]; then
+              reason="previous-head-without-successful-portable-check"
+            else
+              run_portable=false
+              reason="documentation-or-planning-only"
+            fi
+          fi
+
+          echo "run=$run_portable" >> "$GITHUB_OUTPUT"
+          echo "reason=$reason" >> "$GITHUB_OUTPUT"
+          echo "portable-ci completo: $run_portable ($reason)"
+
+      - name: Keep the portable check lightweight
+        if: steps.portable-selection.outputs.run != 'true'
+        run: >-
+          echo "Alteração sem impacto no runtime e revisão anterior aprovada;
+          repository-baseline cobre a validação documental."
 
       - name: Restore reusable runtime archive cache
         id: runtime-archive-cache
+        if: steps.portable-selection.outputs.run == 'true'
         uses: actions/cache/restore@v5
         with:
           path: ${{ runner.temp }}/wildfly-migration-cache/runtime-archives
@@ -56,6 +129,7 @@ jobs:
 
       - name: Restore reusable Maven dependency cache
         id: maven-dependency-cache
+        if: steps.portable-selection.outputs.run == 'true'
         uses: actions/cache/restore@v5
         with:
           path: ~/.m2/repository
@@ -64,6 +138,7 @@ jobs:
             maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.9.16-
 
       - name: Download and verify fixed portable runtime
+        if: steps.portable-selection.outputs.run == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -104,12 +179,15 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Run portable doctor
+        if: steps.portable-selection.outputs.run == 'true'
         run: ./scripts/doctor.sh CP-2D --profile ci-h2 --ci
 
       - name: Build and audit portable WAR
+        if: steps.portable-selection.outputs.run == 'true'
         run: ./scripts/build-cp-2c.sh --profile ci-h2
 
       - name: Compile Oracle probes without credentials
+        if: steps.portable-selection.outputs.run == 'true'
         run: |
           ./scripts/validate-cp-2c-oracle-persistence.sh \
             --compile-only \
@@ -119,18 +197,21 @@ jobs:
             --war app/target/wildfly-migration.war
 
       - name: Execute MyBatis portable persistence probe
+        if: steps.portable-selection.outputs.run == 'true'
         run: |
           ./scripts/validate-cp-1e-persistence.sh \
             --java-home "$JAVA8_HOME" \
             --h2-jar "$H2_JAR"
 
       - name: Execute H2 schema lifecycle
+        if: steps.portable-selection.outputs.run == 'true'
         run: |
           ./scripts/validate-cp-1d-h2.sh \
             --java-home "$JAVA8_HOME" \
             --h2-jar "$H2_JAR"
 
       - name: Smoke WildFly 26 H2 datasource
+        if: steps.portable-selection.outputs.run == 'true'
         run: |
           ./scripts/smoke-wildfly26-datasource.sh \
             --profile ci-h2 \
@@ -138,6 +219,7 @@ jobs:
             --contract-result app/target/contract-results/cp-2d-ci-h2.json
 
       - name: Compare portable phase 2 result with the frozen baseline
+        if: steps.portable-selection.outputs.run == 'true'
         run: |
           ./scripts/validate-cp-2c.sh \
             --war app/target/wildfly-migration.war \
@@ -149,6 +231,7 @@ jobs:
             --war app/target/wildfly-migration.war
 
       - name: Upload sanitized portable phase 2 evidence
+        if: steps.portable-selection.outputs.run == 'true'
         uses: actions/upload-artifact@v6
         with:
           name: cp-2d-portable-evidence
@@ -161,6 +244,7 @@ jobs:
       - name: Save reusable runtime archive cache
         if: >-
           success() &&
+          steps.portable-selection.outputs.run == 'true' &&
           steps.runtime-archive-cache.outputs.cache-hit != 'true' &&
           (
             (github.event_name == 'push' &&
@@ -177,6 +261,7 @@ jobs:
       - name: Save reusable Maven dependency cache
         if: >-
           success() &&
+          steps.portable-selection.outputs.run == 'true' &&
           steps.maven-dependency-cache.outputs.cache-hit != 'true' &&
           (
             (github.event_name == 'push' &&

@@ -205,6 +205,7 @@ check_required_files() {
       "docs/cp-1d-runtime-selection.md"
       "docs/evidence/CP-1D.md"
       "runtime/legacy/portable-runtime-manifest.tsv"
+      "scripts/detect-portable-change.sh"
       "scripts/validate-cp-1d-selection.sh"
       "scripts/validate-cp-1d-profiles.sh"
       "scripts/validate-cp-1d-h2.sh"

@@ -14,6 +14,7 @@ run_step() {
 
 shell_files=(
   scripts/doctor.sh
+  scripts/detect-portable-change.sh
   scripts/prepare-portable-runtime-cache.sh
   scripts/validate-repository-baseline.sh
   scripts/validate-cp-1b.sh

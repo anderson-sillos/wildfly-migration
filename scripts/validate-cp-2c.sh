@@ -197,13 +197,16 @@ for cache_hit_guard in \
     fail "cache exato da main não pode ser duplicado no PR: $cache_hit_guard"
 done
 
+cache_save_section="$(
+  sed -n '/- name: Save reusable runtime archive cache/,$p' "$WORKFLOW"
+)"
 for save_guard in \
   "github.event_name == 'push'" \
   "github.ref == 'refs/heads/main'" \
   "github.event_name == 'pull_request'" \
   "github.event.pull_request.head.repo.full_name ==" \
   "github.repository"; do
-  if [[ "$(grep -Fc "$save_guard" "$WORKFLOW")" -ne 2 ]]; then
+  if [[ "$(grep -Fc "$save_guard" <<< "$cache_save_section")" -ne 2 ]]; then
     fail "os dois caches não compartilham a proteção de gravação: $save_guard"
   fi
 done

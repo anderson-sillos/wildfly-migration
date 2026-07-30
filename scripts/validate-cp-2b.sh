@@ -227,6 +227,7 @@ done
 
 STATIC_WORKFLOW="$REPOSITORY_ROOT/.github/workflows/validate.yml"
 WORKFLOW="$REPOSITORY_ROOT/.github/workflows/portable.yml"
+PORTABLE_CHANGE_DETECTOR="$REPOSITORY_ROOT/scripts/detect-portable-change.sh"
 for action_marker in \
   'uses: actions/checkout@v6' \
   'uses: actions/upload-artifact@v6'; do
@@ -247,20 +248,45 @@ for concurrent_workflow in "$STATIC_WORKFLOW" "$WORKFLOW"; do
     fail "checkout não deve persistir o token no runner"
 done
 for path_marker in \
-  '".env.example"' \
-  '".github/workflows/pr-cache-cleanup.yml"' \
-  '".github/workflows/portable.yml"' \
-  '"app/**"' \
-  '"contract-tests/**"' \
-  '"migration/baselines/**"' \
-  '"runtime/**"' \
-  '"scripts/**"'; do
-  grep -Fq "$path_marker" "$WORKFLOW" ||
+  '.env.example' \
+  '.github/workflows/pr-cache-cleanup.yml' \
+  '.github/workflows/portable.yml' \
+  'app/*' \
+  'contract-tests/*' \
+  'migration/baselines/*' \
+  'runtime/*' \
+  'scripts/*'; do
+  grep -Fq "$path_marker" "$PORTABLE_CHANGE_DETECTOR" ||
     fail "portable-ci não declara caminho aplicável: $path_marker"
 done
-if grep -Fq '"docs/**"' "$WORKFLOW"; then
+if grep -Fq 'docs/*' "$PORTABLE_CHANGE_DETECTOR"; then
   fail "portable-ci não deve executar por alteração exclusivamente documental"
 fi
+for selection_marker in \
+  'id: portable-impact' \
+  './scripts/detect-portable-change.sh \' \
+  'github.event.action == '\''synchronize'\''' \
+  'id: previous-portable' \
+  '.name == "portable-ci" and .conclusion == "success"' \
+  'id: portable-selection' \
+  "steps.portable-selection.outputs.run == 'true'" \
+  'checks: read'; do
+  grep -Fq -- "$selection_marker" "$WORKFLOW" ||
+    fail "seleção incremental do portable-ci não contém: $selection_marker"
+done
+documentation_selection="$(
+  "$PORTABLE_CHANGE_DETECTOR" \
+    --changed-file docs/reference.md \
+    --changed-file openspec/changes/example/tasks.md \
+    --changed-file scripts/validate-documentation.sh
+)"
+grep -Fq 'runtime_changed=false' <<< "$documentation_selection" ||
+  fail "alteração documental não deve selecionar o portable-ci completo"
+runtime_selection="$(
+  "$PORTABLE_CHANGE_DETECTOR" --changed-file app/pom.xml
+)"
+grep -Fq 'runtime_changed=true' <<< "$runtime_selection" ||
+  fail "alteração da aplicação deve selecionar o portable-ci completo"
 for cache_marker in \
   'uses: actions/cache/restore@v5' \
   'uses: actions/cache/save@v5' \
@@ -296,13 +322,16 @@ fi
 if [[ "$(grep -Fc 'restore-keys:' "$WORKFLOW")" -ne 2 ]]; then
   fail "os dois caches reutilizáveis devem declarar chave parcial"
 fi
+cache_save_section="$(
+  sed -n '/- name: Save reusable runtime archive cache/,$p' "$WORKFLOW"
+)"
 for save_guard in \
   "github.event_name == 'push'" \
   "github.ref == 'refs/heads/main'" \
   "github.event_name == 'pull_request'" \
   "github.event.pull_request.head.repo.full_name ==" \
   "github.repository"; do
-  if [[ "$(grep -Fc "$save_guard" "$WORKFLOW")" -ne 2 ]]; then
+  if [[ "$(grep -Fc "$save_guard" <<< "$cache_save_section")" -ne 2 ]]; then
     fail "os dois caches não compartilham a proteção de gravação: $save_guard"
   fi
 done
