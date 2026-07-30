@@ -321,6 +321,7 @@ check_required_files() {
   if rank_at_least CP-2D; then
     required+=(
       "docs/evidence/CP-2D.md"
+      "docs/phase2-reproduction.md"
       "docs/phase2-real-application-migration-runbook.md"
       "migration/evidence/CP-2D/contract-ci-h2.json"
       "migration/evidence/CP-2D/contract-oracle.json"
@@ -339,6 +340,7 @@ check_required_files() {
       "scripts/validate-cp-2d-phase-comparison.sh"
       "scripts/validate-cp-2d-manifest.sh"
       "scripts/validate-cp-2d-real-runbook.sh"
+      "scripts/reproduce-cp-2d.sh"
     )
   fi
 

@@ -48,6 +48,7 @@ shell_files=(
   scripts/validate-cp-2d-phase-comparison.sh
   scripts/validate-cp-2d-manifest.sh
   scripts/validate-cp-2d-real-runbook.sh
+  scripts/reproduce-cp-2d.sh
   contract-tests/run.sh
 )
 
