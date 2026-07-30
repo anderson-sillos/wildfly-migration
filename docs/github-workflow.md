@@ -71,16 +71,22 @@ Cada PR deve:
 Somente os finais das três fases públicas recebem tags. Gates Java 17 e Java 21
 da fase 3 ficam identificados por commits e manifestos, sem tags públicas.
 
-## Workflows de validação
+## Workflow de validação
 
-O CI é separado por finalidade:
+`.github/workflows/validate.yml` concentra os dois jobs, que continuam
+independentes e paralelos:
 
-- `.github/workflows/validate.yml` executa `repository-baseline` em todo pull
-  request e em todo push para `main`;
-- `.github/workflows/portable.yml` publica o check `portable-ci` em toda entrega,
-  mas só monta o ambiente e executa a trilha H2 completa quando o delta do push
-  atual muda configuração de exemplo, aplicação, contratos, baseline
-  executável, runtimes, scripts funcionais ou o próprio workflow portátil.
+- `repository-baseline` executa a validação estática em todo pull request e em
+  todo push para `main`;
+- `portable-ci` publica seu próprio check em toda entrega, mas só monta o
+  ambiente e executa a trilha H2 completa quando o delta do push atual muda
+  configuração de exemplo, aplicação, contratos, baseline executável,
+  runtimes, scripts funcionais ou o próprio workflow.
+
+A separação histórica em `validate.yml` e `portable.yml` não era necessária
+para conservar os dois checks. A consolidação mantém isolamento por job,
+execução paralela e diagnóstico separado, mas elimina eventos, permissões e
+concorrência duplicados em dois arquivos.
 
 O `repository-baseline` local e remoto usa o mesmo executor versionado. Antes
 de enviar uma alteração, execute:
@@ -94,12 +100,14 @@ lista manual de validadores no workflow ou na documentação. Os validadores de
 checkpoints antigos verificam apenas seus contratos permanentes; o validador
 do checkpoint ativo confere nomes, versões e caminhos que podem evoluir.
 
-Alterações exclusivamente em `docs/`, `openspec/`, evidências já capturadas ou
-no validador estático da documentação continuam recebendo
-`repository-baseline`. O check `portable-ci` conclui em modo leve, sem restaurar
-caches, recriar Java, Maven, WildFly, H2 ou o WAR. Uma alteração em scripts
-funcionais, `runtime/`, `contract-tests/`, `migration/baselines/`, `app/`,
-`.env.example` ou no workflow portátil executa a trilha H2 completa.
+Alterações exclusivamente em arquivos `*.md`, `docs/`, `openspec/`,
+`migration/evidence/`, `migration/steps/`, no catálogo de incompatibilidades
+ou no validador estático da documentação continuam recebendo
+`repository-baseline`. O check `portable-ci` conclui em modo leve, sem
+restaurar caches, recriar Java, Maven, WildFly, H2 ou o WAR. Uma alteração em
+scripts funcionais, `runtime/`, `contract-tests/`, `migration/baselines/`,
+`app/`, `.env.example`, no workflow de validação ou em um caminho ainda não
+classificado executa a trilha H2 completa.
 
 No evento `synchronize` de um pull request, a seleção compara o `before` e o
 `after` fornecidos pelo GitHub, em vez do diff acumulado do PR contra `main`.
@@ -110,10 +118,22 @@ cancelada ou reprovada, a nova entrega executa a trilha completa. O token do
 GitHub é tratado como valor opaco pela CLI, sem suposição sobre prefixo ou
 tamanho.
 
-Os dois workflows agrupam execuções pelo nome do workflow e pela referência
-Git. Quando um novo commit chega ao mesmo PR, a execução anterior ainda em
-andamento é cancelada. Isso não cancela validações de outros PRs nem mistura
-`repository-baseline` com `portable-ci`.
+Essa decisão fica integralmente em `scripts/select-portable-ci.sh`. O workflow
+apenas fornece os dados do evento e consome a saída `run`, enquanto os casos
+“documentação após sucesso”, “documentação após resultado ausente ou falho”,
+“código da aplicação” e “baseline executável” são testados localmente.
+
+O workflow agrupa execuções pelo nome e pela referência Git e usa
+`cancel-in-progress: false`. Um novo commit no mesmo PR aguarda a execução em
+andamento, preservando a evidência funcional do SHA anterior. Depois, a
+verificação desse resultado decide entre o modo leve e o CI completo para o
+novo SHA. Execuções de outros PRs não entram nessa fila; os dois jobs do mesmo
+commit permanecem identificados separadamente.
+
+O GitHub conserva no máximo uma execução pendente por grupo de concorrência;
+commits adicionais podem substituir uma execução que ainda não começou. Por
+isso a verificação do último SHA continua obrigatória e escolhe o CI completo
+sempre que não encontra um `portable-ci` aprovado.
 
 ## Reutilização dos caches
 

@@ -225,9 +225,8 @@ for cache_lock_row in \
     fail "identidade do cache de runtime não contém: $cache_lock_row"
 done
 
-STATIC_WORKFLOW="$REPOSITORY_ROOT/.github/workflows/validate.yml"
-WORKFLOW="$REPOSITORY_ROOT/.github/workflows/portable.yml"
-PORTABLE_CHANGE_DETECTOR="$REPOSITORY_ROOT/scripts/detect-portable-change.sh"
+WORKFLOW="$REPOSITORY_ROOT/.github/workflows/validate.yml"
+PORTABLE_SELECTOR="$REPOSITORY_ROOT/scripts/select-portable-ci.sh"
 for action_marker in \
   'uses: actions/checkout@v6' \
   'uses: actions/upload-artifact@v6'; do
@@ -235,58 +234,99 @@ for action_marker in \
     fail "workflow do CP-2B não usa a action Node 24: $action_marker"
 done
 if grep -Eq 'uses: actions/(checkout|upload-artifact)@v4' \
-    "$STATIC_WORKFLOW" "$WORKFLOW"; then
+    "$WORKFLOW"; then
   fail "workflow do CP-2B não deve usar actions baseadas em Node 20"
 fi
-for concurrent_workflow in "$STATIC_WORKFLOW" "$WORKFLOW"; do
-  grep -Fq 'group: ${{ github.workflow }}-${{ github.ref }}' \
-    "$concurrent_workflow" ||
-    fail "workflow não isola concorrência por workflow e referência"
-  grep -Fq 'cancel-in-progress: true' "$concurrent_workflow" ||
-    fail "workflow não cancela execução obsoleta da mesma referência"
-  grep -Fq 'persist-credentials: false' "$concurrent_workflow" ||
-    fail "checkout não deve persistir o token no runner"
+grep -Fq 'group: ${{ github.workflow }}-${{ github.ref }}' "$WORKFLOW" ||
+  fail "workflow não isola concorrência por workflow e referência"
+grep -Fq 'cancel-in-progress: false' "$WORKFLOW" ||
+  fail "workflow não deve cancelar uma validação funcional em andamento"
+grep -Fq 'persist-credentials: false' "$WORKFLOW" ||
+  fail "checkout não deve persistir o token no runner"
+for light_path_marker in \
+  '*.md' \
+  'docs/*' \
+  'openspec/*' \
+  'migration/evidence/*' \
+  'migration/steps/*' \
+  'migration/incompatibilities.tsv' \
+  'scripts/validate-documentation.sh'; do
+  grep -Fq "$light_path_marker" "$PORTABLE_SELECTOR" ||
+    fail "modo leve não declara caminho documental: $light_path_marker"
 done
-for path_marker in \
-  '.env.example' \
-  '.github/workflows/pr-cache-cleanup.yml' \
-  '.github/workflows/portable.yml' \
-  'app/*' \
-  'contract-tests/*' \
+for full_path_marker in \
   'migration/baselines/*' \
-  'runtime/*' \
-  'scripts/*'; do
-  grep -Fq "$path_marker" "$PORTABLE_CHANGE_DETECTOR" ||
-    fail "portable-ci não declara caminho aplicável: $path_marker"
+  '*)'; do
+  grep -Fq "$full_path_marker" "$PORTABLE_SELECTOR" ||
+    fail "modo completo não contém a proteção: $full_path_marker"
 done
-if grep -Fq 'docs/*' "$PORTABLE_CHANGE_DETECTOR"; then
-  fail "portable-ci não deve executar por alteração exclusivamente documental"
-fi
 for selection_marker in \
-  'id: portable-impact' \
-  './scripts/detect-portable-change.sh \' \
-  'github.event.action == '\''synchronize'\''' \
-  'id: previous-portable' \
-  '.name == "portable-ci" and .conclusion == "success"' \
   'id: portable-selection' \
+  'PORTABLE_EVENT_ACTION: ${{ github.event.action }}' \
+  'PORTABLE_BEFORE_SHA: ${{ github.event.before }}' \
+  'run: ./scripts/select-portable-ci.sh' \
   "steps.portable-selection.outputs.run == 'true'" \
   'checks: read'; do
   grep -Fq -- "$selection_marker" "$WORKFLOW" ||
     fail "seleção incremental do portable-ci não contém: $selection_marker"
 done
-documentation_selection="$(
-  "$PORTABLE_CHANGE_DETECTOR" \
-    --changed-file docs/reference.md \
-    --changed-file openspec/changes/example/tasks.md \
-    --changed-file scripts/validate-documentation.sh
+for selector_marker in \
+  'git diff --name-only -z --no-renames --diff-filter=ACMRTD' \
+  '.name == "portable-ci" and .conclusion == "success"' \
+  'previous-head-without-successful-portable-check' \
+  'documentation-or-planning-only'; do
+  grep -Fq -- "$selector_marker" "$PORTABLE_SELECTOR" ||
+    fail "seletor do portable-ci não contém: $selector_marker"
+done
+for light_path in \
+  docs/reference.adoc \
+  docs/reference.md \
+  openspec/changes/example/tasks.md \
+  migration/evidence/CP-X/result.json \
+  migration/steps/example.md \
+  migration/incompatibilities.tsv \
+  scripts/validate-documentation.sh; do
+  light_gate="$(
+    GITHUB_OUTPUT="$TEMP_DIRECTORY/portable-light.out" \
+    PORTABLE_EVENT_NAME=pull_request \
+    PORTABLE_EVENT_ACTION=synchronize \
+    PORTABLE_CHANGED_FILE="$light_path" \
+    PORTABLE_PREVIOUS_SUCCESS=true \
+      "$PORTABLE_SELECTOR"
+  )"
+  grep -Fq 'portable-ci completo: false' <<< "$light_gate" ||
+    fail "caminho documental deveria usar modo leve: $light_path"
+done
+for full_path in \
+  app/pom.xml \
+  scripts/build-cp-2c.sh \
+  runtime/portable-runtime-cache.sha256 \
+  contract-tests/run.sh \
+  migration/baselines/02-java8-wildfly26/manifest.properties \
+  .github/workflows/validate.yml \
+  .env.example \
+  unknown-functional-file.conf; do
+  full_gate="$(
+    GITHUB_OUTPUT="$TEMP_DIRECTORY/portable-full.out" \
+    PORTABLE_EVENT_NAME=pull_request \
+    PORTABLE_EVENT_ACTION=synchronize \
+    PORTABLE_CHANGED_FILE="$full_path" \
+    PORTABLE_PREVIOUS_SUCCESS=true \
+      "$PORTABLE_SELECTOR"
+  )"
+  grep -Fq 'portable-ci completo: true' <<< "$full_gate" ||
+    fail "caminho funcional deveria usar CI completo: $full_path"
+done
+failed_previous_gate="$(
+  GITHUB_OUTPUT="$TEMP_DIRECTORY/portable-previous.out" \
+  PORTABLE_EVENT_NAME=pull_request \
+  PORTABLE_EVENT_ACTION=synchronize \
+  PORTABLE_CHANGED_FILE=docs/reference.md \
+  PORTABLE_PREVIOUS_SUCCESS=false \
+    "$PORTABLE_SELECTOR"
 )"
-grep -Fq 'runtime_changed=false' <<< "$documentation_selection" ||
-  fail "alteração documental não deve selecionar o portable-ci completo"
-runtime_selection="$(
-  "$PORTABLE_CHANGE_DETECTOR" --changed-file app/pom.xml
-)"
-grep -Fq 'runtime_changed=true' <<< "$runtime_selection" ||
-  fail "alteração da aplicação deve selecionar o portable-ci completo"
+grep -Fq 'portable-ci completo: true' <<< "$failed_previous_gate" ||
+  fail "documentação não pode ocultar portable anterior sem sucesso"
 for cache_marker in \
   'uses: actions/cache/restore@v5' \
   'uses: actions/cache/save@v5' \

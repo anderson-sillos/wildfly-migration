@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-WORKFLOW="$REPOSITORY_ROOT/.github/workflows/portable.yml"
+WORKFLOW="$REPOSITORY_ROOT/.github/workflows/validate.yml"
 TASKS="$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md"
 EVIDENCE_DOCUMENT="$REPOSITORY_ROOT/docs/evidence/CP-2D.md"
 CLOSURE="$REPOSITORY_ROOT/migration/evidence/CP-2D/closure.properties"
