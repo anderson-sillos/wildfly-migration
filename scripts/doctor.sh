@@ -355,9 +355,15 @@ check_required_files() {
   if rank_at_least CP-3A; then
     required+=(
       "docs/evidence/CP-3A.md"
+      "migration/evidence/CP-3A/after-build.properties"
+      "migration/evidence/CP-3A/before-build.properties"
       "migration/evidence/CP-3A/before-runtime.properties"
+      "migration/evidence/CP-3A/contract-after-ci-h2.json"
       "migration/evidence/CP-3A/contract-before-ci-h2.json"
+      "migration/steps/CP-3A-java17-bytecode-audit.md"
+      "migration/steps/CP-3A-java17-toolchain.md"
       "runtime/portable-runtime-sources.tsv"
+      "scripts/build-cp-3a.sh"
       "scripts/prepare-portable-runtime-cache.sh"
       "scripts/validate-cp-3a.sh"
     )

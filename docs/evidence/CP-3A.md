@@ -23,8 +23,8 @@ Os resultados reproduziram exatamente o manifesto aprovado:
 - bytecode Java 8, major `52`;
 - 20 bibliotecas em `WEB-INF/lib`.
 
-Nenhum fonte, POM, descritor, biblioteca ou byte do WAR foi alterado para a
-tentativa.
+Nenhum arquivo-fonte, POM, descritor, biblioteca ou byte do WAR foi alterado
+para a tentativa.
 
 ## Tentativa no runtime seguinte
 
@@ -78,9 +78,68 @@ As evidências legíveis por máquina estão em
 `migration/evidence/CP-3A/before-runtime.properties` e
 `migration/evidence/CP-3A/contract-before-ci-h2.json`.
 
+## Recompilação no Java 17 — atividade 3.2
+
+A tentativa natural de executar o Maven 3.9.16 no Temurin 17 falhou antes do
+compilador, porque o Enforcer ainda aceitava somente `[1.8,1.9)`. Depois de
+liberar essa política no wrapper, os 32 arquivos-fonte compilaram sem
+alteração. O
+Maven empacotou o WAR, mas o auditor do laboratório falhou porque sua lista
+fechada aceitava somente bytecode major `51` ou `52`.
+
+As duas incompatibilidades foram catalogadas como `INC-011` e `INC-012`. As
+correções ficaram restritas ao harness:
+
+- `scripts/build-cp-3a.sh` seleciona Java 17 e Maven 3.9.16;
+- o wrapper compartilhado sobrepõe temporariamente faixa do Enforcer,
+  `source=17` e `target=17` pela linha de comando;
+- a auditoria passa a reconhecer explicitamente major `61`.
+
+Nenhum fonte da aplicação, POM, descritor, versão ou escopo de dependência foi
+alterado. O POM permanece Java 8 por padrão até a promoção coordenada prevista
+na atividade 3.4. Essa escolha preserva, durante as atividades 3.1 a 3.3, a
+reprodução byte a byte do WAR da fase 2 pelo caminho
+`scripts/build-cp-2c.sh`.
+
+O commit de implementação `fa87f1d8f6c74e1be1f7d978ada04ea743b7e551`
+produziu:
+
+- WAR Java 17, major `61`, SHA-256
+  `afc4d98594c3cf7113018f78fab4e4be6b7c0202bbe5cbd9b5e1db8390cbc294`;
+- os mesmos 20 JARs em `WEB-INF/lib`;
+- a mesma árvore de 21 dependências, SHA-256
+  `8ad318314d7f5b97bfd0ec4d00c38dc1512584fe1cdad4c04ae11d3999b0c2ca`;
+- os 14 contratos H2 aprovados no Java 17/WildFly 26.
+
+O log não apresentou erro de classloader, encapsulamento forte ou versão de
+classe. Permaneceram somente avisos já conhecidos do baseline, incluindo
+`INC-008` para Log4j 1, e o aviso de API obsoleta no código de descoberta que
+será tratado junto da atualização do Reflections.
+
+### Conclusão comprovada da atividade 3.2
+
+O projeto não está apenas executando um binário Java 8 em uma JVM mais nova:
+os mesmos fontes foram efetivamente recompilados para Java 17, gerando
+bytecode major `61`, implantados no WildFly 26 e aprovados pelos mesmos 14
+contratos portáteis. Para o escopo exercitado, nenhuma correção de código ou
+troca de biblioteca foi necessária; as únicas barreiras eram proteções do
+processo de build e verificação.
+
+Essa conclusão ainda não representa o encerramento do CP-3A. A configuração
+Java 17 ainda não é o padrão do POM/CI, a matriz de compatibilidade das
+dependências ainda será produzida, o H2 será revisado e a trilha Oracle
+permanece pendente.
+
+As evidências adicionais estão em
+`migration/evidence/CP-3A/before-build.properties`,
+`migration/evidence/CP-3A/after-build.properties` e
+`migration/evidence/CP-3A/contract-after-ci-h2.json`.
+
 ## Rollback
 
 A tentativa usa somente um worktree destacado, uma cópia temporária do
 WildFly e H2 em memória. O rollback consiste em encerrar o runtime temporário e
 remover o worktree criado para a tag. A branch, a instalação externa do
-WildFly, o WAR aprovado e o schema Oracle não são alterados.
+WildFly, o WAR aprovado e o schema Oracle não são alterados. Para a atividade
+3.2, execute novamente `scripts/build-cp-2c.sh`: como o POM padrão permanece em
+Java 8, o WAR congelado da fase 2 volta a ser produzido sem reversão de fonte.
