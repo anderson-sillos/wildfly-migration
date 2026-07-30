@@ -60,19 +60,13 @@ redundant_placeholders=(
   "app/src/main/java/.gitkeep"
   "app/src/main/resources/.gitkeep"
   "app/src/main/webapp/WEB-INF/.gitkeep"
+  "app/src/test/java/.gitkeep"
+  "app/src/test/resources/.gitkeep"
 )
 
 for path in "${redundant_placeholders[@]}"; do
   if [[ -e "$REPOSITORY_ROOT/$path" ]]; then
     printf 'FALHA: placeholder redundante ainda existe: %s\n' "$path" >&2
-    exit 1
-  fi
-done
-
-for path in app/src/test/java/.gitkeep app/src/test/resources/.gitkeep; do
-  if [[ ! -f "$REPOSITORY_ROOT/$path" ]]; then
-    printf 'FALHA: placeholder necessário para diretório vazio ausente: %s\n' \
-      "$path" >&2
     exit 1
   fi
 done
