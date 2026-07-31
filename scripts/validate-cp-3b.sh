@@ -325,6 +325,34 @@ if grep -Fq -- \
   validate_logging_result \
     "$REPOSITORY_ROOT/migration/evidence/CP-3B/logging-oracle.json" \
     oracle-qualified oracle
+
+  h2_logging_evidence="$REPOSITORY_ROOT/migration/evidence/CP-3B/logging-ci-h2.json"
+  oracle_logging_evidence="$REPOSITORY_ROOT/migration/evidence/CP-3B/logging-oracle.json"
+  h2_logging_source_commit="$(
+    sed -n 's/.*"sourceCommit": "\([^"]*\)".*/\1/p' \
+      "$h2_logging_evidence"
+  )"
+  oracle_logging_source_commit="$(
+    sed -n 's/.*"sourceCommit": "\([^"]*\)".*/\1/p' \
+      "$oracle_logging_evidence"
+  )"
+  h2_logging_war_sha256="$(
+    sed -n 's/.*"warSha256": "\([^"]*\)".*/\1/p' \
+      "$h2_logging_evidence"
+  )"
+  oracle_logging_war_sha256="$(
+    sed -n 's/.*"warSha256": "\([^"]*\)".*/\1/p' \
+      "$oracle_logging_evidence"
+  )"
+  [[ "$h2_logging_source_commit" =~ ^[0-9a-f]{40}$ &&
+     "$h2_logging_source_commit" == "$oracle_logging_source_commit" ]] ||
+    fail "evidências de logging H2 e Oracle não usam o mesmo commit-fonte"
+  [[ "$h2_logging_war_sha256" =~ ^[0-9a-f]{64}$ &&
+     "$h2_logging_war_sha256" == "$oracle_logging_war_sha256" ]] ||
+    fail "evidências de logging H2 e Oracle não usam o mesmo WAR"
+  git -C "$REPOSITORY_ROOT" cat-file -e \
+    "${h2_logging_source_commit}^{commit}" 2>/dev/null ||
+    fail "commit-fonte das evidências de logging não existe"
 fi
 
 if [[ -n "$WAR_FILE" ]]; then

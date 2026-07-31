@@ -267,6 +267,22 @@ for marker in \
   fi
 done
 
+for marker in \
+  'c9a4ee17b3548e57bd3c5cc499051e34eeebcf9c' \
+  '4f6eb8c63b1e7abb9d0c89c1020251686240b98d4901ce2150cc85262442d335' \
+  'Log4j 1 pode ser retirado' \
+  '22 dependências Maven' \
+  'o mesmo MDC' \
+  '57d6e7630ef42a85b15e16aeb126a5027c67950d' \
+  '3.34 removerá'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/evidence/CP-3B.md"; then
+    printf 'FALHA: evidência CP-3B de logging não contém: %s\n' \
+      "$marker" >&2
+    exit 1
+  fi
+done
+
 help_output="$(
   "$REPOSITORY_ROOT/scripts/smoke-wildfly9-datasource.sh" --help
 )"

@@ -392,6 +392,8 @@ check_required_files() {
       "app/src/main/webapp/WEB-INF/jboss-deployment-structure.xml"
       "migration/evidence/CP-3B/mybatis-ci-h2.json"
       "migration/evidence/CP-3B/mybatis-oracle.json"
+      "migration/evidence/CP-3B/logging-ci-h2.json"
+      "migration/evidence/CP-3B/logging-oracle.json"
       "migration/steps/CP-3B-mybatis-3.5.19.md"
       "migration/steps/CP-3B-log4j-over-slf4j.md"
       "runtime/phase3/java17-wildfly26/war-libraries.txt"

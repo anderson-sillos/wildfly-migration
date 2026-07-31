@@ -25,6 +25,7 @@ retirada do componente EOL da reescrita das chamadas.
 
 ## Rollback
 
-Voltar ao commit verde da atividade 3.6 restaura `log4j-1.2.14.jar`,
+Voltar ao commit verde da atividade 3.6
+`57d6e7630ef42a85b15e16aeb126a5027c67950d` restaura `log4j-1.2.14.jar`,
 `log4j.properties` e a allowlist anterior. A correção não altera schema nem
 dados persistentes.

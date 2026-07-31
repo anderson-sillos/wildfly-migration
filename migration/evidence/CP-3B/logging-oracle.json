@@ -1,0 +1,20 @@
+{
+  "schema": "wildfly-migration-logging-compatibility/v1",
+  "qualification": "oracle-qualified",
+  "profile": "oracle",
+  "sourceCommit": "c9a4ee17b3548e57bd3c5cc499051e34eeebcf9c",
+  "warSha256": "4f6eb8c63b1e7abb9d0c89c1020251686240b98d4901ce2150cc85262442d335",
+  "runtime": "java17-wildfly26.1.3",
+  "bridge": "log4j-over-slf4j-1.7.36",
+  "backend": "wildfly-jboss-logmanager",
+  "checks": {
+    "log4j1ArtifactAbsent": "passed",
+    "bridgePresent": "passed",
+    "serverSlf4jApi": "passed",
+    "mdcCorrelation": "passed",
+    "loggerCategory": "passed",
+    "throwableStackTrace": "passed",
+    "deprecatedConfigurationWarningAbsent": "passed",
+    "backendConflictAbsent": "passed"
+  }
+}
