@@ -64,11 +64,23 @@ A fixture `pedido-invalido-validador.xml` também deve produzir HTTP `400` e o
 evento `legacy_xml_import rejected reason=domain_validator`, com a mesma
 correlação da requisição e sem persistência parcial.
 
+## Evolução no CP-3B
+
+O contrato acima permanece ativo depois da retirada de Log4j 1. A atividade
+3.7 troca o artefato EOL por `log4j-over-slf4j` 1.7.36 e encaminha os eventos
+ao JBoss LogManager do WildFly 26. O código ainda usa temporariamente
+`org.apache.log4j.Logger` e `MDC`, o que permite medir a troca com alteração
+mínima na aplicação.
+
+`log4j.properties` deixa o WAR. Categoria, nível, formatter e MDC passam para
+os perfis reproduzíveis do servidor. O mecanismo e a sonda de exceção estão
+descritos em [Ponte temporária de logging](cp-3b-logging-bridge.md).
+
 ## Acoplamento transitivo observado
 
 Reflections 0.9.10 declara `slf4j-api` 1.6.1 como dependência opcional. O WAR
 não empacota SLF4J; no WildFly 9 a API é disponibilizada implicitamente pelo
 subsistema de logging. Isso cria um acoplamento de classloader que precisa ser
-revalidado em cada troca de servidor. A fase final remove Reflections e Log4j
-1, adota o SCI padrão sem biblioteca externa de descoberta e não adiciona outro
-backend concorrente ao WAR.
+revalidado em cada troca de servidor. A fase final remove Reflections e a
+ponte temporária, adota o SCI padrão sem biblioteca externa de descoberta e
+não adiciona outro backend concorrente ao WAR.

@@ -243,7 +243,6 @@ check_required_files() {
       "app/src/main/java/br/com/asillos/migration/integration/xml/LegacyPedidoXmlParser.java"
       "app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java"
       "app/src/main/java/br/com/asillos/migration/integration/validation/LegacyValidatorDiscovery.java"
-      "app/src/main/resources/log4j.properties"
       "contract-tests/run.sh"
     )
   fi
@@ -388,10 +387,13 @@ check_required_files() {
   if rank_at_least CP-3B; then
     required+=(
       "docs/cp-3b-core-dependencies.md"
+      "docs/cp-3b-logging-bridge.md"
       "docs/evidence/CP-3B.md"
+      "app/src/main/webapp/WEB-INF/jboss-deployment-structure.xml"
       "migration/evidence/CP-3B/mybatis-ci-h2.json"
       "migration/evidence/CP-3B/mybatis-oracle.json"
       "migration/steps/CP-3B-mybatis-3.5.19.md"
+      "migration/steps/CP-3B-log4j-over-slf4j.md"
       "runtime/phase3/java17-wildfly26/war-libraries.txt"
       "scripts/build-cp-3b.sh"
       "scripts/qualify-cp-3b-h2.sh"

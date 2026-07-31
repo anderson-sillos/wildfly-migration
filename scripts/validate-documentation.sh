@@ -13,6 +13,7 @@ required_paths=(
   "docs/cp-3a-java17-runtime.md"
   "docs/cp-3a-dependency-matrix.md"
   "docs/cp-3b-core-dependencies.md"
+  "docs/cp-3b-logging-bridge.md"
   "docs/evidence/CP-3B.md"
   "docs/evidence/CP-1F.md"
   "docs/environment-setup.md"
@@ -245,6 +246,23 @@ for marker in \
   if ! grep -Fq -- "$marker" \
       "$REPOSITORY_ROOT/docs/evidence/CP-3B.md"; then
     printf 'FALHA: evidência CP-3B não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'log4j-over-slf4j 1.7.36 no WAR' \
+  'slf4j-api 1.7.36 fornecida pelo WildFly' \
+  'org.apache.log4j' \
+  'jboss-deployment-structure.xml' \
+  'WFLYLOG0100' \
+  'stack trace do MyBatis' \
+  'atividade 3.34'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3b-logging-bridge.md" \
+      "$REPOSITORY_ROOT/migration/steps/CP-3B-log4j-over-slf4j.md"; then
+    printf 'FALHA: documentação da ponte de logging não contém: %s\n' \
+      "$marker" >&2
     exit 1
   fi
 done

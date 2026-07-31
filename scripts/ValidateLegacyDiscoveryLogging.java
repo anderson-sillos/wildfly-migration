@@ -54,8 +54,23 @@ public final class ValidateLegacyDiscoveryLogging {
                 repository,
                 "app/src/main/java/br/com/asillos/migration/web/"
                 + "MigrationContextListener.java"));
-        String logConfiguration = read(file(
-                repository, "app/src/main/resources/log4j.properties"));
+        File logConfigurationFile = new File(
+                repository, "app/src/main/resources/log4j.properties");
+        boolean bridgeActive = !logConfigurationFile.isFile();
+        String logConfiguration = bridgeActive
+                ? ""
+                : read(logConfigurationFile);
+        String pom = read(file(repository, "app/pom.xml"));
+        String deploymentStructure = read(file(
+                repository,
+                "app/src/main/webapp/WEB-INF/"
+                + "jboss-deployment-structure.xml"));
+        String h2Profile = read(file(
+                repository,
+                "runtime/phase3/java17-wildfly26/profiles/ci-h2.cli"));
+        String oracleProfile = read(file(
+                repository,
+                "runtime/phase3/java17-wildfly26/profiles/oracle.cli"));
         String smoke = read(file(
                 repository, "scripts/smoke-wildfly9-datasource.sh"));
 
@@ -91,7 +106,7 @@ public final class ValidateLegacyDiscoveryLogging {
                 "MDC.put(\"correlationId\", correlationId)") >= 0
                 && filter.indexOf("MDC.remove(\"correlationId\")") >= 0
                 && filter.indexOf("finally") >= 0,
-                "correlação Log4j não é limpa em finally");
+                "correlação de logging não é limpa em finally");
         require(servlet.indexOf(
                 "legacy_xml_import accepted") >= 0
                 && servlet.indexOf(
@@ -130,10 +145,15 @@ public final class ValidateLegacyDiscoveryLogging {
                     "new IllegalStateException(",
                     "Falha controlada ao inicializar a persistência"),
                 "falha de inicialização não preserva a causa");
-        require(logConfiguration.indexOf("org.apache.log4j.ConsoleAppender")
-                >= 0
-                && logConfiguration.indexOf("%X{correlationId}") >= 0,
-                "appender ou correlação do Log4j 1 ausente");
+        if (bridgeActive) {
+            validateBridge(
+                    pom, deploymentStructure, h2Profile, oracleProfile);
+        } else {
+            require(logConfiguration.indexOf(
+                    "org.apache.log4j.ConsoleAppender") >= 0
+                    && logConfiguration.indexOf("%X{correlationId}") >= 0,
+                    "appender ou correlação do Log4j 1 ausente");
+        }
         require(smoke.indexOf(
                 "legacy_validator_order=numero-formato,"
                 + "valor-monetario,status-inicial")
@@ -143,8 +163,44 @@ public final class ValidateLegacyDiscoveryLogging {
                 && smoke.indexOf("correlation=$xml_correlation") >= 0,
                 "smoke não congela descoberta, regra e correlação");
 
-        System.out.println(
-                "OK: Reflections e Log4j 1 têm contrato determinístico");
+        System.out.println(bridgeActive
+                ? "OK: Reflections e ponte Log4j sobre SLF4J têm contrato"
+                  + " determinístico"
+                : "OK: Reflections e Log4j 1 têm contrato determinístico");
+    }
+
+    private static void validateBridge(
+            String pom,
+            String deploymentStructure,
+            String h2Profile,
+            String oracleProfile) {
+        require(pom.indexOf("<artifactId>log4j-over-slf4j</artifactId>")
+                >= 0
+                && pom.indexOf("<slf4j.version>1.7.36</slf4j.version>")
+                >= 0,
+                "ponte Log4j sobre SLF4J 1.7.36 ausente");
+        require(pom.indexOf("<groupId>log4j</groupId>") < 0
+                && pom.indexOf("<artifactId>log4j</artifactId>") < 0,
+                "Log4j 1 ainda está declarado no POM");
+        require(pom.indexOf("<artifactId>slf4j-api</artifactId>") >= 0
+                && pom.indexOf("<scope>provided</scope>") >= 0,
+                "SLF4J fornecido pelo servidor não está documentado no POM");
+        require(deploymentStructure.indexOf(
+                "<module name=\"org.apache.log4j\"/>") >= 0,
+                "módulo Log4j 1 depreciado do WildFly não foi excluído");
+        validateLoggingProfile(h2Profile, "H2");
+        validateLoggingProfile(oracleProfile, "Oracle");
+    }
+
+    private static void validateLoggingProfile(
+            String profile, String profileName) {
+        require(profile.indexOf(
+                "pattern-formatter=MIGRATION_PATTERN") >= 0
+                && profile.indexOf("%X{correlationId}") >= 0
+                && profile.indexOf(
+                        "logger=br.com.asillos.migration") >= 0,
+                "perfil " + profileName
+                + " não configura categoria e correlação no WildFly");
     }
 
     private static boolean callIncludesThrowable(

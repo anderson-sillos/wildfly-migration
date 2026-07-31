@@ -10,6 +10,7 @@ SERVER_RELEASE="9"
 WAR_FILE=""
 CONTRACT_RESULT_FILE=""
 DIAGNOSTIC_LOG_FILE=""
+LOGGING_RESULT_FILE=""
 MANUAL_MODE=false
 PRESERVE_ORACLE_SMOKES=false
 TEMP_DIRECTORY=""
@@ -25,6 +26,7 @@ Uso:
   ./scripts/smoke-wildfly9-datasource.sh --profile ci-h2|oracle \
     [--java 7|8|17] [--server 9|26] [--env ARQUIVO] [--war ARQUIVO] \
     [--contract-result ARQUIVO] [--diagnostic-log ARQUIVO] \
+    [--logging-result ARQUIVO] \
     [--manual] [--preserve-oracle-smokes]
 
 Valores já exportados no ambiente prevalecem sobre o arquivo informado.
@@ -33,6 +35,8 @@ Com --manual, mantém a aplicação ativa em loopback até Ctrl+C; exige --war.
 No modo manual, imprime o caminho do log bruto do WildFly.
 Com --contract-result, preserva fora do runtime o relatório JSON sanitizado.
 Com --diagnostic-log, preserva uma cópia sanitizada do log do servidor.
+Com --logging-result, valida a ponte Log4j sobre SLF4J no WildFly 26/Java 17
+e preserva um relatório JSON sanitizado.
 Com --preserve-oracle-smokes, o perfil Oracle mantém temporariamente apenas
 os dados LAB-SMOKE-* para uma sonda externa; o chamador deve limpá-los.
 O padrão Java 7 preserva a reprodução histórica; CP-2A deve informar --java 8.
@@ -253,6 +257,14 @@ while [[ $# -gt 0 ]]; do
       DIAGNOSTIC_LOG_FILE="$2"
       shift 2
       ;;
+    --logging-result)
+      [[ $# -ge 2 ]] || {
+        printf 'FALHA: --logging-result exige um arquivo\n' >&2
+        exit 2
+      }
+      LOGGING_RESULT_FILE="$2"
+      shift 2
+      ;;
     --manual)
       MANUAL_MODE=true
       shift
@@ -294,6 +306,13 @@ if [[ "$MANUAL_MODE" == true && -z "$WAR_FILE" ]]; then
   exit 2
 fi
 
+if [[ -n "$LOGGING_RESULT_FILE" &&
+      ( -z "$WAR_FILE" || "$SERVER_RELEASE" != "26" ||
+        "$JAVA_RELEASE" != "17" || "$MANUAL_MODE" == true ) ]]; then
+  printf 'FALHA: --logging-result exige WAR, WildFly 26, Java 17 e modo não manual\n' >&2
+  exit 2
+fi
+
 if [[ "$SERVER_RELEASE" == "26" &&
       "$JAVA_RELEASE" != "8" &&
       "$JAVA_RELEASE" != "17" ]]; then
@@ -308,6 +327,11 @@ if [[ -n "$WAR_FILE" ]]; then
   fi
   if ! command -v curl >/dev/null 2>&1; then
     printf 'FALHA: curl é obrigatório para o smoke web\n' >&2
+    exit 1
+  fi
+  if [[ -n "$LOGGING_RESULT_FILE" ]] &&
+     ! command -v unzip >/dev/null 2>&1; then
+    printf 'FALHA: unzip é obrigatório para validar o logging do WAR\n' >&2
     exit 1
   fi
   WAR_FILE="$(cd "$(dirname "$WAR_FILE")" && pwd)/$(basename "$WAR_FILE")"
@@ -1034,6 +1058,100 @@ if [[ -n "$WAR_FILE" ]]; then
       "$TEMP_DIRECTORY/server.log"; then
     printf 'FALHA: logs da execução externa não preservaram o contrato\n' >&2
     exit 1
+  fi
+
+  if [[ -n "$LOGGING_RESULT_FILE" ]]; then
+    logging_correlation="cp3b-logging-$SERVER_PID"
+    logging_status="$(
+      curl --silent --show-error \
+        --cookie-jar "$cookies" \
+        --cookie "$cookies" \
+        --header "X-Correlation-ID: $logging_correlation" \
+        --data-urlencode "numero=$smoke_number" \
+        --data-urlencode 'clienteNome=Cliente logging' \
+        --data-urlencode 'descricao=Falha controlada da ponte de logging' \
+        --data-urlencode 'valorTotal=19.75' \
+        --output "$body" \
+        --write-out '%{http_code}' \
+        "$base_url/pedidos"
+    )"
+    if [[ "$logging_status" != "503" ]] ||
+       ! grep -Fq 'data-page="erro-controlado"' "$body"; then
+      printf 'FALHA: sonda de exceção do logging não produziu HTTP 503\n' >&2
+      exit 1
+    fi
+
+    logging_observed=false
+    for unused in $(seq 1 10); do
+      if grep -Fq 'legacy_order persistence_failure' \
+          "$TEMP_DIRECTORY/server.log" &&
+         grep -Fq "correlation=$logging_correlation" \
+          "$TEMP_DIRECTORY/server.log" &&
+         grep -Fq \
+          '[br.com.asillos.migration.web.PedidoServlet]' \
+          "$TEMP_DIRECTORY/server.log" &&
+         grep -Fq 'org.apache.ibatis.exceptions.PersistenceException' \
+          "$TEMP_DIRECTORY/server.log" &&
+         grep -Fq 'Caused by:' "$TEMP_DIRECTORY/server.log"; then
+        logging_observed=true
+        break
+      fi
+      sleep 1
+    done
+    if [[ "$logging_observed" != true ]]; then
+      printf 'FALHA: categoria, MDC ou stack trace não chegaram ao server.log\n' >&2
+      exit 1
+    fi
+    if grep -Eq \
+        'WFLYLOG0100|log4j:WARN|SLF4J: Failed to load class|SLF4J: Class path contains multiple SLF4J bindings' \
+        "$TEMP_DIRECTORY/server.log"; then
+      printf 'FALHA: runtime registrou configuração Log4j depreciada ou conflito SLF4J\n' >&2
+      exit 1
+    fi
+
+    unzip -Z1 "$WAR_FILE" >"$TEMP_DIRECTORY/logging-war-entries.txt"
+    if [[ "$(grep -Ec \
+        '^WEB-INF/lib/log4j-over-slf4j-1\.7\.36\.jar$' \
+        "$TEMP_DIRECTORY/logging-war-entries.txt")" != "1" ]] ||
+       grep -Eq \
+        '^WEB-INF/lib/(log4j-1|slf4j-api|slf4j-simple|slf4j-log4j12|logback-classic|log4j-core)[^/]*\.jar$' \
+        "$TEMP_DIRECTORY/logging-war-entries.txt" ||
+       grep -Fq 'WEB-INF/classes/log4j.properties' \
+        "$TEMP_DIRECTORY/logging-war-entries.txt" ||
+       ! grep -Fq 'WEB-INF/jboss-deployment-structure.xml' \
+        "$TEMP_DIRECTORY/logging-war-entries.txt"; then
+      printf 'FALHA: WAR não preserva o isolamento da ponte de logging\n' >&2
+      exit 1
+    fi
+
+    logging_qualification="portable-ci"
+    if [[ "$PROFILE" == "oracle" ]]; then
+      logging_qualification="oracle-qualified"
+    fi
+    logging_war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
+    install -d -m 0755 "$(dirname "$LOGGING_RESULT_FILE")"
+    {
+      printf '{\n'
+      printf '  "schema": "wildfly-migration-logging-compatibility/v1",\n'
+      printf '  "qualification": "%s",\n' "$logging_qualification"
+      printf '  "profile": "%s",\n' "$PROFILE"
+      printf '  "sourceCommit": "%s",\n' "$source_commit_sha"
+      printf '  "warSha256": "%s",\n' "$logging_war_sha256"
+      printf '  "runtime": "%s",\n' "$RUNTIME_IDENTIFIER"
+      printf '  "bridge": "log4j-over-slf4j-1.7.36",\n'
+      printf '  "backend": "wildfly-jboss-logmanager",\n'
+      printf '  "checks": {\n'
+      printf '    "log4j1ArtifactAbsent": "passed",\n'
+      printf '    "bridgePresent": "passed",\n'
+      printf '    "serverSlf4jApi": "passed",\n'
+      printf '    "mdcCorrelation": "passed",\n'
+      printf '    "loggerCategory": "passed",\n'
+      printf '    "throwableStackTrace": "passed",\n'
+      printf '    "deprecatedConfigurationWarningAbsent": "passed",\n'
+      printf '    "backendConflictAbsent": "passed"\n'
+      printf '  }\n'
+      printf '}\n'
+    } >"$LOGGING_RESULT_FILE"
   fi
 
   if [[ "$SERVER_RELEASE" == "26" ]] &&

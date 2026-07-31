@@ -8,9 +8,9 @@ separada.
 ## Atividade 3.6 — MyBatis 3.5.19
 
 A primeira alteração troca somente `org.mybatis:mybatis:3.4.5` por
-`org.mybatis:mybatis:3.5.19`. Log4j, Commons FileUpload e Reflections mantêm as
-versões do CP-3A para que seus efeitos sejam avaliados nas atividades 3.7,
-3.8 e 3.9.
+`org.mybatis:mybatis:3.5.19`. Commons FileUpload e Reflections mantêm as
+versões do CP-3A para que seus efeitos sejam avaliados nas atividades 3.8 e
+3.9.
 
 O gate Java 17 possui sua própria allowlist de `WEB-INF/lib`. Assim, a
 allowlist imutável da fase 2 continua exigindo `mybatis-3.4.5.jar`, enquanto o
@@ -51,6 +51,22 @@ valida mappers, aliases, type handlers, reflexão, commit, rollback,
 
 Os relatórios não contêm URL, usuário ou senha. O resultado Oracle é
 `oracle-qualified`.
+
+## Atividade 3.7 — logging administrado pelo WildFly
+
+Log4j 1.2.14 e `log4j.properties` saem do WAR. Como etapa de menor impacto, os
+imports antigos usam `log4j-over-slf4j` 1.7.36; a API SLF4J e o backend JBoss
+LogManager são fornecidos pelo WildFly 26. O
+[documento da ponte](cp-3b-logging-bridge.md) explica o fluxo, o isolamento do
+classloader e os limites da solução.
+
+As mesmas qualificações H2 e Oracle também produzem:
+
+- `app/target/contract-results/cp-3b-logging-ci-h2.json`;
+- `app/target/contract-results/cp-3b-logging-oracle.json`.
+
+Esses relatórios comprovam categoria, MDC, exceção completa e ausência do
+aviso de configuração Log4j depreciada ou backend concorrente.
 
 ## Rollback
 

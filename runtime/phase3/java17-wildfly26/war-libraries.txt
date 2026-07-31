@@ -8,7 +8,7 @@ dom4j-1.6.1.jar
 geronimo-stax-api_1.0_spec-1.0.jar
 guava-15.0.jar
 javassist-3.19.0-GA.jar
-log4j-1.2.14.jar
+log4j-over-slf4j-1.7.36.jar
 mybatis-3.5.19.jar
 reflections-0.9.10.jar
 stax-api-1.0.1.jar

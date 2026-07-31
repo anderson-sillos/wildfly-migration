@@ -7,8 +7,10 @@ TASKS_FILE="$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/task
 WAR_FILE=""
 H2_RESULT_FILE=""
 H2_CONTRACT_FILE=""
+H2_LOGGING_RESULT_FILE=""
 ORACLE_RESULT_FILE=""
 ORACLE_CONTRACT_FILE=""
+ORACLE_LOGGING_RESULT_FILE=""
 TEMP_DIRECTORY="$(
   mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-cp3b.XXXXXXXX"
 )"
@@ -19,7 +21,9 @@ Uso:
   ./scripts/validate-cp-3b.sh
   ./scripts/validate-cp-3b.sh --war ARQUIVO \
     [--h2-result ARQUIVO] [--h2-contract ARQUIVO] \
-    [--oracle-result ARQUIVO] [--oracle-contract ARQUIVO]
+    [--h2-logging-result ARQUIVO] \
+    [--oracle-result ARQUIVO] [--oracle-contract ARQUIVO] \
+    [--oracle-logging-result ARQUIVO]
 
 Sem argumentos, valida a estrutura versionada do CP-3B. Os resultados
 dinâmicos são opcionais durante o desenvolvimento e obrigatórios nas
@@ -61,6 +65,11 @@ while [[ $# -gt 0 ]]; do
       H2_CONTRACT_FILE="$2"
       shift 2
       ;;
+    --h2-logging-result)
+      [[ $# -ge 2 ]] || fail "--h2-logging-result exige um arquivo"
+      H2_LOGGING_RESULT_FILE="$2"
+      shift 2
+      ;;
     --oracle-result)
       [[ $# -ge 2 ]] || fail "--oracle-result exige um arquivo"
       ORACLE_RESULT_FILE="$2"
@@ -69,6 +78,11 @@ while [[ $# -gt 0 ]]; do
     --oracle-contract)
       [[ $# -ge 2 ]] || fail "--oracle-contract exige um arquivo"
       ORACLE_CONTRACT_FILE="$2"
+      shift 2
+      ;;
+    --oracle-logging-result)
+      [[ $# -ge 2 ]] || fail "--oracle-logging-result exige um arquivo"
+      ORACLE_LOGGING_RESULT_FILE="$2"
       shift 2
       ;;
     -h|--help)
@@ -86,7 +100,10 @@ required_paths=(
   "docs/cp-3b-core-dependencies.md"
   "docs/evidence/CP-3B.md"
   "docs/mybatis-persistence.md"
+  "docs/cp-3b-logging-bridge.md"
   "migration/steps/CP-3B-mybatis-3.5.19.md"
+  "migration/steps/CP-3B-log4j-over-slf4j.md"
+  "app/src/main/webapp/WEB-INF/jboss-deployment-structure.xml"
   "runtime/phase2/java8-wildfly26/war-libraries.txt"
   "runtime/phase3/java17-wildfly26/war-libraries.txt"
   "scripts/build-cp-3b.sh"
@@ -117,6 +134,63 @@ grep -Fxq 'mybatis-3.4.5.jar' "$phase2_allowlist" ||
 if grep -Fq 'mybatis-3.5.19.jar' "$phase2_allowlist"; then
   fail "MyBatis novo foi atribuído retroativamente à fase 2"
 fi
+
+grep -Fq '<slf4j.version>1.7.36</slf4j.version>' \
+  "$REPOSITORY_ROOT/app/pom.xml" ||
+  fail "POM não fixa a ponte SLF4J 1.7.36"
+grep -Fq '<artifactId>log4j-over-slf4j</artifactId>' \
+  "$REPOSITORY_ROOT/app/pom.xml" ||
+  fail "POM não declara log4j-over-slf4j"
+grep -Fq '<artifactId>slf4j-api</artifactId>' \
+  "$REPOSITORY_ROOT/app/pom.xml" ||
+  fail "POM não declara a API SLF4J fornecida pelo WildFly"
+if grep -Fq '<groupId>log4j</groupId>' "$REPOSITORY_ROOT/app/pom.xml" ||
+   grep -Fq '<artifactId>log4j</artifactId>' \
+     "$REPOSITORY_ROOT/app/pom.xml"; then
+  fail "POM ainda declara Log4j 1"
+fi
+[[ ! -e "$REPOSITORY_ROOT/app/src/main/resources/log4j.properties" ]] ||
+  fail "log4j.properties não pode permanecer no WAR do CP-3B"
+grep -Fq '<module name="org.apache.log4j"/>' \
+  "$REPOSITORY_ROOT/app/src/main/webapp/WEB-INF/jboss-deployment-structure.xml" ||
+  fail "deployment não exclui o módulo Log4j 1 depreciado do WildFly"
+
+[[ "$(grep -Ec '^log4j-over-slf4j-[^/]+\.jar$' \
+  "$current_allowlist")" == "1" ]] ||
+  fail "allowlist Java 17 deve conter exatamente uma ponte Log4j"
+grep -Fxq 'log4j-over-slf4j-1.7.36.jar' "$current_allowlist" ||
+  fail "allowlist Java 17 não contém a ponte 1.7.36"
+if grep -Eq \
+    '^(log4j-1|slf4j-api|slf4j-simple|slf4j-log4j12|logback-classic|log4j-core)[^/]*\.jar$' \
+    "$current_allowlist"; then
+  fail "allowlist Java 17 contém Log4j 1, API fornecida ou backend concorrente"
+fi
+grep -Fxq 'log4j-1.2.14.jar' "$phase2_allowlist" ||
+  fail "allowlist histórica da fase 2 perdeu Log4j 1.2.14"
+if grep -Fq 'log4j-over-slf4j' "$phase2_allowlist"; then
+  fail "ponte de logging foi atribuída retroativamente à fase 2"
+fi
+
+for profile in ci-h2 oracle; do
+  profile_file="$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/profiles/$profile.cli"
+  for marker in \
+    'pattern-formatter=MIGRATION_PATTERN' \
+    '%X{correlationId}' \
+    'logger=br.com.asillos.migration'; do
+    grep -Fq "$marker" "$profile_file" ||
+      fail "perfil $profile não contém configuração de logging: $marker"
+  done
+done
+
+for source in \
+  app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java \
+  app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java \
+  app/src/main/java/br/com/asillos/migration/web/UploadServlet.java \
+  app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java \
+  app/src/main/java/br/com/asillos/migration/integration/xml/LegacyPedidoXmlParser.java; do
+  grep -Fq 'org.apache.log4j' "$REPOSITORY_ROOT/$source" ||
+    fail "ponte deixou de ser necessária antes da atividade 3.34: $source"
+done
 
 for marker in \
   'MyBatis 3.5.19' \
@@ -169,6 +243,34 @@ validate_contract_result() {
     fail "contrato não contém os 14 cenários aprovados"
 }
 
+validate_logging_result() {
+  local file="$1"
+  local qualification="$2"
+  local profile="$3"
+  [[ -f "$file" ]] || fail "resultado de logging ausente: $file"
+  for marker in \
+    '"schema": "wildfly-migration-logging-compatibility/v1"' \
+    "\"qualification\": \"$qualification\"" \
+    "\"profile\": \"$profile\"" \
+    '"bridge": "log4j-over-slf4j-1.7.36"' \
+    '"backend": "wildfly-jboss-logmanager"' \
+    '"log4j1ArtifactAbsent": "passed"' \
+    '"bridgePresent": "passed"' \
+    '"serverSlf4jApi": "passed"' \
+    '"mdcCorrelation": "passed"' \
+    '"loggerCategory": "passed"' \
+    '"throwableStackTrace": "passed"' \
+    '"deprecatedConfigurationWarningAbsent": "passed"' \
+    '"backendConflictAbsent": "passed"'; do
+    grep -Fq "$marker" "$file" ||
+      fail "resultado de logging não contém: $marker"
+  done
+  if grep -Eiq \
+      'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url' "$file"; then
+    fail "resultado de logging contém configuração sensível"
+  fi
+}
+
 if grep -Fq -- \
     '- [x] 3.6 Atualizar MyBatis para 3.5.19' "$TASKS_FILE"; then
   for evidence in \
@@ -209,6 +311,22 @@ if grep -Fq -- \
     fail "commit-fonte das evidências MyBatis não existe"
 fi
 
+if grep -Fq -- \
+    '- [x] 3.7 Remover `log4j:log4j`' "$TASKS_FILE"; then
+  for evidence in \
+    "migration/evidence/CP-3B/logging-ci-h2.json" \
+    "migration/evidence/CP-3B/logging-oracle.json"; do
+    [[ -f "$REPOSITORY_ROOT/$evidence" ]] ||
+      fail "evidência obrigatória da atividade 3.7 ausente: $evidence"
+  done
+  validate_logging_result \
+    "$REPOSITORY_ROOT/migration/evidence/CP-3B/logging-ci-h2.json" \
+    portable-ci ci-h2
+  validate_logging_result \
+    "$REPOSITORY_ROOT/migration/evidence/CP-3B/logging-oracle.json" \
+    oracle-qualified oracle
+fi
+
 if [[ -n "$WAR_FILE" ]]; then
   [[ -f "$WAR_FILE" ]] || fail "WAR informado não existe"
   unzip -Z1 "$WAR_FILE" >"$TEMP_DIRECTORY/war-entries.txt"
@@ -221,6 +339,21 @@ if [[ -n "$WAR_FILE" ]]; then
   if grep -Fq 'WEB-INF/lib/mybatis-3.4.5.jar' \
       "$TEMP_DIRECTORY/war-entries.txt"; then
     fail "WAR ainda contém MyBatis 3.4.5"
+  fi
+  grep -Fxq 'WEB-INF/lib/log4j-over-slf4j-1.7.36.jar' \
+    "$TEMP_DIRECTORY/war-entries.txt" ||
+    fail "WAR não contém a ponte Log4j sobre SLF4J"
+  if grep -Eq \
+      '^WEB-INF/lib/(log4j-1|slf4j-api|slf4j-simple|slf4j-log4j12|logback-classic|log4j-core)[^/]*\.jar$' \
+      "$TEMP_DIRECTORY/war-entries.txt"; then
+    fail "WAR contém Log4j 1, API fornecida ou backend concorrente"
+  fi
+  grep -Fxq 'WEB-INF/jboss-deployment-structure.xml' \
+    "$TEMP_DIRECTORY/war-entries.txt" ||
+    fail "WAR não contém isolamento do módulo Log4j 1"
+  if grep -Fq 'WEB-INF/classes/log4j.properties' \
+      "$TEMP_DIRECTORY/war-entries.txt"; then
+    fail "WAR ainda contém log4j.properties"
   fi
   war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
 else
@@ -239,6 +372,14 @@ if [[ -n "$H2_CONTRACT_FILE" ]]; then
   grep -Fq "\"warSha256\": \"$war_sha256\"" "$H2_CONTRACT_FILE" ||
     fail "contrato H2 não corresponde ao WAR"
 fi
+if [[ -n "$H2_LOGGING_RESULT_FILE" ]]; then
+  [[ -n "$WAR_FILE" ]] || fail "--h2-logging-result exige --war"
+  validate_logging_result \
+    "$H2_LOGGING_RESULT_FILE" portable-ci ci-h2
+  grep -Fq "\"warSha256\": \"$war_sha256\"" \
+    "$H2_LOGGING_RESULT_FILE" ||
+    fail "resultado de logging H2 não corresponde ao WAR"
+fi
 if [[ -n "$ORACLE_RESULT_FILE" ]]; then
   [[ -n "$WAR_FILE" ]] || fail "--oracle-result exige --war"
   validate_mybatis_result \
@@ -255,5 +396,13 @@ if [[ -n "$ORACLE_CONTRACT_FILE" ]]; then
   grep -Fq "\"warSha256\": \"$war_sha256\"" "$ORACLE_CONTRACT_FILE" ||
     fail "contrato Oracle não corresponde ao WAR"
 fi
+if [[ -n "$ORACLE_LOGGING_RESULT_FILE" ]]; then
+  [[ -n "$WAR_FILE" ]] || fail "--oracle-logging-result exige --war"
+  validate_logging_result \
+    "$ORACLE_LOGGING_RESULT_FILE" oracle-qualified oracle
+  grep -Fq "\"warSha256\": \"$war_sha256\"" \
+    "$ORACLE_LOGGING_RESULT_FILE" ||
+    fail "resultado de logging Oracle não corresponde ao WAR"
+fi
 
-printf 'OK: MyBatis 3.5.19 isolado, auditado e compatível com o CP-3B\n'
+printf 'OK: MyBatis 3.5.19 e logging transicional isolados no CP-3B\n'

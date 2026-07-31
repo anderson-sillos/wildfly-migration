@@ -40,7 +40,9 @@ passos.
     fixas, H2 2.4.240, preparação, validação e rollback.
 17. [Dependências centrais do CP-3B](cp-3b-core-dependencies.md): atualizações
     isoladas, qualificação H2/Oracle e rollback do gate Java 17.
-18. [Evidência CP-3B](evidence/CP-3B.md): resultados parciais das atualizações
+18. [Ponte de logging do CP-3B](cp-3b-logging-bridge.md): retirada do Log4j 1,
+    integração transitória com SLF4J/JBoss LogManager e validação do MDC.
+19. [Evidência CP-3B](evidence/CP-3B.md): resultados parciais das atualizações
     centrais e conclusão consolidada no fechamento do checkpoint.
 
 ## Aplicação e arquitetura
@@ -50,10 +52,11 @@ passos.
 - [dependências do WAR legado](legacy-dependencies.md);
 - [matriz de modernização das dependências no CP-3A](cp-3a-dependency-matrix.md);
 - [dependências centrais do CP-3B](cp-3b-core-dependencies.md);
+- [ponte temporária de logging do CP-3B](cp-3b-logging-bridge.md);
 - [persistência MyBatis](mybatis-persistence.md);
 - [upload legado e metadados comparáveis](legacy-upload.md);
 - [importação XML legada](legacy-xml-import.md);
-- [descoberta Reflections e logging Log4j 1](legacy-validation-logging.md).
+- [descoberta Reflections e evolução do logging](legacy-validation-logging.md).
 
 ## Runtime e banco
 

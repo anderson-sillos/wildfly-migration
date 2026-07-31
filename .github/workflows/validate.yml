@@ -221,9 +221,11 @@ jobs:
           ./scripts/smoke-cp-3b-datasource.sh \
             --profile ci-h2 \
             --war app/target/wildfly-migration.war \
-            --contract-result app/target/contract-results/cp-3b-ci-h2.json
+            --contract-result app/target/contract-results/cp-3b-ci-h2.json \
+            --logging-result \
+              app/target/contract-results/cp-3b-logging-ci-h2.json
 
-      - name: Validate Java 17 and MyBatis 3.5.19
+      - name: Validate Java 17, MyBatis and logging bridge
         if: steps.portable-selection.outputs.run == 'true'
         run: |
           ./scripts/validate-cp-3a.sh \
@@ -234,7 +236,9 @@ jobs:
             --war app/target/wildfly-migration.war \
             --h2-result \
               app/target/contract-results/cp-3b-mybatis-ci-h2.json \
-            --h2-contract app/target/contract-results/cp-3b-ci-h2.json
+            --h2-contract app/target/contract-results/cp-3b-ci-h2.json \
+            --h2-logging-result \
+              app/target/contract-results/cp-3b-logging-ci-h2.json
 
       - name: Upload sanitized CP-3B portable evidence
         if: steps.portable-selection.outputs.run == 'true'
@@ -244,6 +248,7 @@ jobs:
           path: |
             app/target/contract-results/cp-3b-mybatis-ci-h2.json
             app/target/contract-results/cp-3b-ci-h2.json
+            app/target/contract-results/cp-3b-logging-ci-h2.json
             app/target/dependency-tree.txt
           if-no-files-found: error
           retention-days: 14
