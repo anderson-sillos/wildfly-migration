@@ -123,6 +123,43 @@
 
   <build>
     <finalName>wildfly-migration</finalName>
+    <pluginManagement>
+      <plugins>
+        <!--
+          O Maven CLI executa o XMLBeans normalmente. Este metadata adicional
+          informa ao m2e/JDT como executar o mesmo goal no workspace do VS
+          Code e registrar target/generated-sources como fonte compilável.
+          O plugin fica somente em pluginManagement e não altera o WAR.
+        -->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.xmlbeans</groupId>
+                    <artifactId>xmlbeans</artifactId>
+                    <versionRange>[5.3.0,)</versionRange>
+                    <goals>
+                      <goal>compile</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute>
+                      <runOnConfiguration>true</runOnConfiguration>
+                      <runOnIncremental>true</runOnIncremental>
+                    </execute>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

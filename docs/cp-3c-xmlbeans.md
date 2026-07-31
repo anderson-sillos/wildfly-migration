@@ -19,6 +19,12 @@ artifactId do Maven seja transformado em um identificador inválido de pacote.
 O parser usa `PedidoDocument.Factory.parse` e `validate`; o mapeamento de
 domínio agora usa dom4j 2.2.0 com o mesmo XMLReader seguro.
 
+O `pluginManagement` também contém metadata do m2e para executar o goal
+`xmlbeans:compile` durante a importação/compilação incremental do workspace.
+Isso elimina o aviso “Plugin execution not covered by lifecycle configuration”
+e faz o JDT reconhecer `target/generated-sources`; a configuração não é
+executada como uma dependência nem altera o WAR no Maven CLI.
+
 XMLBeans 5.3.0 traz `log4j-api:2.24.2` como dependência de API. O WAR mantém
 essa API, mas não empacota `log4j-core` nem outro backend: no WildFly, o
 backend continua sendo administrado pelo servidor. A mensagem de ausência de

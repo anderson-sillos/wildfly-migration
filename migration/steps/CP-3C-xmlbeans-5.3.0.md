@@ -15,6 +15,11 @@ O POM agora fixa XMLBeans 5.3.0 e o plugin XMLBeans gera os tipos a partir de
 externas. O mapeamento dom4j fica deliberadamente inalterado para ser tratado
 na atividade 3.12.
 
+O metadata `org.eclipse.m2e:lifecycle-mapping` executa esse goal também no
+workspace Maven do VS Code. Sem ele, o Maven CLI continua funcionando, mas o
+m2e acusa execução não coberta e não adiciona os fontes gerados ao classpath
+do JDT.
+
 A allowlist do WAR foi atualizada para `xmlbeans-5.3.0.jar` e
 `log4j-api-2.24.2.jar`; não há `log4j-core` e não há `stax-api` transitivo.
 As dependências XML diretas legadas ainda presentes são uma pendência

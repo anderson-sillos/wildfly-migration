@@ -56,6 +56,10 @@ public final class ValidateLegacyXmlImport {
                 && pom.indexOf("<repackage>br.com.asillos.migration.metadata"
                         + "</repackage>") >= 0,
                 "geração dos tipos XMLBeans não está configurada pelo XSD");
+        require(pom.indexOf("<groupId>org.eclipse.m2e</groupId>") >= 0
+                && pom.indexOf("<artifactId>lifecycle-mapping</artifactId>") >= 0
+                && pom.indexOf("<runOnIncremental>true</runOnIncremental>") >= 0,
+                "lifecycle mapping do m2e para XMLBeans está ausente");
         require(pom.indexOf(
                 "<dom4j.version>2.2.0</dom4j.version>") >= 0,
                 "dom4j 2.2.0 não está fixado");
