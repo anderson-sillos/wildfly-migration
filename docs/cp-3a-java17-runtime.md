@@ -1,6 +1,6 @@
 # CP-3A — Runtime Java 17 no WildFly 26
 
-## Escopo da atividade 3.4
+## Escopo das atividades 3.4 e 3.5
 
 O runtime ativo passa a usar:
 
@@ -68,9 +68,32 @@ Valide o ambiente portátil:
   --war app/target/wildfly-migration.war
 ```
 
-A inicialização e os contratos completos H2/Oracle pertencem ao fechamento
-3.5. A promoção de runtime desta atividade, isoladamente, não produz
-`oracle-qualified`.
+## Fechamento reproduzível
+
+Execute primeiro a trilha portátil:
+
+```bash
+./scripts/qualify-cp-3a-h2.sh --env .env
+```
+
+Ela executa `doctor`, build Java 17, auditoria, ciclo do schema H2, sonda
+MyBatis e os 14 contratos externos. O relatório permanece classificado como
+`portable-ci`.
+
+Em uma máquina autorizada na rede interna, execute depois:
+
+```bash
+./scripts/qualify-cp-3a-oracle.sh --env .env
+```
+
+O executor exige o relatório H2 do mesmo diretório, reconstrói o mesmo WAR no
+perfil Oracle, executa os 14 contratos, compara o estado persistido e valida
+commit/rollback MyBatis, `TIMESTAMP(6)` e BLOB. O `trap` de limpeza remove
+somente os registros `LAB-SMOKE-*`, inclusive se uma etapa falhar.
+
+O fechamento aprovado e as limitações estão na
+[evidência do CP-3A](evidence/CP-3A.md). A trilha Oracle usa ainda o `ojdbc7`
+externo exclusivamente porque sua atualização pertence à atividade 3.14.
 
 ## Rollback
 

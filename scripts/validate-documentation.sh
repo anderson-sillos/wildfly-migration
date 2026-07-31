@@ -201,7 +201,9 @@ for marker in \
   '29b70e427cc1c40cdc376283adbb0cc62853073797bb5fe5761f81fe73d57ce0' \
   'jdbc:h2:mem:migration;MODE=Oracle;DB_CLOSE_DELAY=-1' \
   'atividade 3.14' \
-  'migration/02-java8-wildfly26'; do
+  'migration/02-java8-wildfly26' \
+  'qualify-cp-3a-h2.sh' \
+  'qualify-cp-3a-oracle.sh'; do
   if ! grep -Fq -- "$marker" \
       "$REPOSITORY_ROOT/docs/cp-3a-java17-runtime.md"; then
     printf 'FALHA: runbook do runtime CP-3A não contém: %s\n' "$marker" >&2

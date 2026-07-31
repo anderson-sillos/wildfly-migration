@@ -1,11 +1,12 @@
 # Evidência CP-3A — Entrada no Java 17
 
-## Escopo atual
+## Escopo
 
-Esta página registra inicialmente a atividade 3.1: executar o estado público
-e imutável `migration/02-java8-wildfly26` no mesmo WildFly 26.1.3.Final,
-trocando somente a JVM do servidor para Java 17. As atividades 3.2 a 3.5
-completarão este documento sem reclassificar H2 como qualificação Oracle.
+Esta página registra as atividades 3.1 a 3.5: partir do estado público e
+imutável `migration/02-java8-wildfly26`, executar e recompilar a aplicação no
+Java 17 sobre o mesmo WildFly 26.1.3.Final, promover esse runtime e encerrar o
+checkpoint com evidências separadas H2 e Oracle. H2 nunca é reclassificado
+como qualificação Oracle.
 
 ## Materialização da entrada
 
@@ -200,6 +201,80 @@ Esta conclusão comprova a promoção estrutural e as validações do runtime H2
 atividade, não o encerramento do CP-3A. Os contratos completos H2/Oracle, a
 auditoria final, os relatórios sanitizados e o rollback executado serão
 consolidados na atividade 3.5.
+
+## Fechamento do CP-3A — atividade 3.5
+
+O commit de implementação
+`737feb6f4d08aca24a580d5421af4437b1b45b15` foi reconstruído separadamente nos
+perfis `ci-h2` e `oracle`. Os dois builds produziram o mesmo WAR:
+
+- SHA-256
+  `9206fd3b66ed00cd01bade70f2594102ec3b75d1d817ed317d6fabaca9459704`;
+- bytecode Java 17, major `61`;
+- 20 JARs em `WEB-INF/lib`;
+- árvore Maven SHA-256
+  `8ad318314d7f5b97bfd0ec4d00c38dc1512584fe1cdad4c04ae11d3999b0c2ca`;
+- nenhum driver H2 ou Oracle dentro do WAR.
+
+| Trilha | Runtime e banco | Contratos | Resultado |
+| --- | --- | ---: | --- |
+| `portable-ci` | Java 17, WildFly 26.1.3 e H2 2.4.240 em memória | 14/14 | aprovado |
+| `oracle-qualified` | Java 17, WildFly 26.1.3, `ojdbc7` externo e Oracle Database 19c RU 19.3 | 14/14 | aprovado |
+
+No Oracle, a comparação de estado confirmou schema, seed, criação por
+contrato, BLOB do upload, importação XML e rejeição de estado inválido. A sonda
+de persistência aprovou commit e rollback MyBatis, round-trip de
+`TIMESTAMP(6)`, BLOB e remoção dos registros transitórios `LAB-SMOKE-*`.
+
+Os relatórios sanitizados e vinculados ao mesmo commit e WAR são:
+
+- `migration/evidence/CP-3A/contract-ci-h2.json`;
+- `migration/evidence/CP-3A/contract-oracle.json`;
+- `migration/evidence/CP-3A/oracle-state.json`;
+- `migration/evidence/CP-3A/oracle-persistence.json`;
+- `migration/evidence/CP-3A/closure.properties`.
+
+### Auditoria do cache remoto
+
+A execução GitHub Actions
+[`30593334871`](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30593334871)
+restaurou por prefixo a geração anterior do cache de runtimes, preservou os
+cinco arquivos válidos, baixou somente `h2-2.4.240.jar` de sua origem
+registrada e validou os seis checksums. Depois da trilha portátil verde, gravou
+a geração exata
+`runtime-archives-v4-Linux-X64-81be8d5ba4c568449785f9c9a3f8f3e90afb65f642660b1c6453702df688cc1a`.
+
+Portanto, o H2 2.4.240 participa do mesmo cache que os demais arquivos de
+runtime. O H2 1.4.200 continua presente para reproduzir as tags históricas, e
+os próximos commits do mesmo contexto podem restaurar a nova chave sem baixar
+novamente os componentes.
+
+### Rollback comprovado
+
+A execução validou o rollback para `migration/02-java8-wildfly26` sem alterar
+o checkout atual.
+A tag anotada `migration/02-java8-wildfly26` foi materializada em worktree
+temporário no commit
+`0440337d2256581666994f3192bf6c3516ce590e`. O build Java 8 reproduziu
+exatamente o WAR
+`62c9f723245b4aaebbeef41e63c02974a9f2fc65fc6e8758f956d03ab7f466f2`,
+bytecode major `52`, 20 bibliotecas e a árvore Maven histórica. O worktree
+permaneceu limpo e foi removido depois da verificação; o schema Oracle não foi
+alterado. A evidência está em
+`migration/evidence/CP-3A/rollback.properties`.
+
+### Conclusão comprovada do checkpoint
+
+O CP-3A comprova que os mesmos fontes da fase 2 podem ser recompilados e
+executados com Java 17 no WildFly 26.1.3, preservando os 14 comportamentos
+congelados tanto no H2 quanto no Oracle 19c. As correções necessárias até aqui
+ficaram no toolchain, na auditoria e no adaptador H2; código funcional,
+mappers, schema Oracle e conjunto de dependências permaneceram inalterados.
+
+Isso não declara as bibliotecas legadas mantidas, o WildFly 26 ou o `ojdbc7`
+como destino sustentável de produção. O checkpoint apenas estabelece um gate
+Java 17 verde e reversível para que as dependências sejam modernizadas
+isoladamente a partir do CP-3B.
 
 ## Rollback
 

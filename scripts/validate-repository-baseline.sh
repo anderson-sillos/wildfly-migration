@@ -53,6 +53,8 @@ shell_files=(
   scripts/validate-cp-2d-closure.sh
   scripts/reproduce-cp-2d.sh
   scripts/build-cp-3a.sh
+  scripts/qualify-cp-3a-h2.sh
+  scripts/qualify-cp-3a-oracle.sh
   scripts/smoke-cp-3a-datasource.sh
   scripts/validate-cp-3a.sh
   contract-tests/run.sh

@@ -12,10 +12,10 @@ TEMP_DIRECTORY="$(mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-oracle.XXXXXXXX")
 usage() {
   cat <<'USAGE'
 Uso:
-  ./scripts/oracle-lab-schema.sh inspect [--java 7|8] [--java-home DIRETORIO] [--env ARQUIVO]
-  ./scripts/oracle-lab-schema.sh apply [--java 7|8] [--java-home DIRETORIO] [--env ARQUIVO]
-  ./scripts/oracle-lab-schema.sh verify [--java 7|8] [--java-home DIRETORIO] [--env ARQUIVO]
-  ./scripts/oracle-lab-schema.sh cleanup-smokes [--java 7|8] [--java-home DIRETORIO] [--env ARQUIVO]
+  ./scripts/oracle-lab-schema.sh inspect [--java 7|8|17] [--java-home DIRETORIO] [--env ARQUIVO]
+  ./scripts/oracle-lab-schema.sh apply [--java 7|8|17] [--java-home DIRETORIO] [--env ARQUIVO]
+  ./scripts/oracle-lab-schema.sh verify [--java 7|8|17] [--java-home DIRETORIO] [--env ARQUIVO]
+  ./scripts/oracle-lab-schema.sh cleanup-smokes [--java 7|8|17] [--java-home DIRETORIO] [--env ARQUIVO]
 
 inspect é somente leitura. apply executa 001_schema.sql e 002_seed.sql apenas
 depois de aprovar identidade, container, quota, privilégios e objetos existentes.
@@ -116,8 +116,9 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --java)
-      [[ $# -ge 2 && ( "$2" == "7" || "$2" == "8" ) ]] || {
-        printf 'FALHA: --java exige 7 ou 8\n' >&2
+      [[ $# -ge 2 &&
+         ( "$2" == "7" || "$2" == "8" || "$2" == "17" ) ]] || {
+        printf 'FALHA: --java exige 7, 8 ou 17\n' >&2
         exit 2
       }
       JAVA_RELEASE="$2"
@@ -131,7 +132,9 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$JAVA_RELEASE" == "8" ]]; then
+if [[ "$JAVA_RELEASE" == "17" ]]; then
+  CONFIGURED_JAVA_HOME="$(configuration_value JAVA17_HOME)"
+elif [[ "$JAVA_RELEASE" == "8" ]]; then
   CONFIGURED_JAVA_HOME="$(configuration_value JAVA8_HOME)"
 else
   CONFIGURED_JAVA_HOME="$(configuration_value JAVA7_HOME)"

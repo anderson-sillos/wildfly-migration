@@ -8,6 +8,12 @@ BEFORE_BUILD_EVIDENCE="$REPOSITORY_ROOT/migration/evidence/CP-3A/before-build.pr
 AFTER_BUILD_EVIDENCE="$REPOSITORY_ROOT/migration/evidence/CP-3A/after-build.properties"
 BEFORE_CONTRACT="$REPOSITORY_ROOT/migration/evidence/CP-3A/contract-before-ci-h2.json"
 AFTER_CONTRACT="$REPOSITORY_ROOT/migration/evidence/CP-3A/contract-after-ci-h2.json"
+CLOSURE_EVIDENCE="$REPOSITORY_ROOT/migration/evidence/CP-3A/closure.properties"
+CLOSURE_PORTABLE_CONTRACT="$REPOSITORY_ROOT/migration/evidence/CP-3A/contract-ci-h2.json"
+CLOSURE_ORACLE_CONTRACT="$REPOSITORY_ROOT/migration/evidence/CP-3A/contract-oracle.json"
+CLOSURE_ORACLE_STATE="$REPOSITORY_ROOT/migration/evidence/CP-3A/oracle-state.json"
+CLOSURE_ORACLE_PERSISTENCE="$REPOSITORY_ROOT/migration/evidence/CP-3A/oracle-persistence.json"
+ROLLBACK_EVIDENCE="$REPOSITORY_ROOT/migration/evidence/CP-3A/rollback.properties"
 DOCUMENT="$REPOSITORY_ROOT/docs/evidence/CP-3A.md"
 TASKS="$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md"
 SMOKE="$REPOSITORY_ROOT/scripts/smoke-wildfly9-datasource.sh"
@@ -21,10 +27,15 @@ AFTER_WAR_FILE=""
 AFTER_CONTRACT_RESULT_FILE=""
 PROMOTED_WAR_FILE=""
 PROMOTED_CONTRACT_RESULT_FILE=""
+ORACLE_CONTRACT_RESULT_FILE=""
+ORACLE_STATE_RESULT_FILE=""
+ORACLE_PERSISTENCE_RESULT_FILE=""
 EXPECTED_SOURCE_COMMIT="0440337d2256581666994f3192bf6c3516ce590e"
 EXPECTED_WAR_SHA256="62c9f723245b4aaebbeef41e63c02974a9f2fc65fc6e8758f956d03ab7f466f2"
 EXPECTED_IMPLEMENTATION_COMMIT="fa87f1d8f6c74e1be1f7d978ada04ea743b7e551"
 EXPECTED_AFTER_WAR_SHA256="afc4d98594c3cf7113018f78fab4e4be6b7c0202bbe5cbd9b5e1db8390cbc294"
+EXPECTED_CLOSURE_COMMIT="737feb6f4d08aca24a580d5421af4437b1b45b15"
+EXPECTED_CLOSURE_WAR_SHA256="9206fd3b66ed00cd01bade70f2594102ec3b75d1d817ed317d6fabaca9459704"
 
 fail() {
   printf 'FALHA CP-3A: %s\n' "$1" >&2
@@ -64,11 +75,29 @@ while [[ $# -gt 0 ]]; do
       PROMOTED_CONTRACT_RESULT_FILE="$2"
       shift 2
       ;;
+    --oracle-contract-result)
+      [[ $# -ge 2 ]] || fail "--oracle-contract-result exige um arquivo"
+      ORACLE_CONTRACT_RESULT_FILE="$2"
+      shift 2
+      ;;
+    --oracle-state-result)
+      [[ $# -ge 2 ]] || fail "--oracle-state-result exige um arquivo"
+      ORACLE_STATE_RESULT_FILE="$2"
+      shift 2
+      ;;
+    --oracle-persistence-result)
+      [[ $# -ge 2 ]] ||
+        fail "--oracle-persistence-result exige um arquivo"
+      ORACLE_PERSISTENCE_RESULT_FILE="$2"
+      shift 2
+      ;;
     -h|--help)
       printf '%s\n' \
         'Uso: ./scripts/validate-cp-3a.sh [--war ARQUIVO] [--contract-result ARQUIVO]' \
         '  [--after-war ARQUIVO] [--after-contract-result ARQUIVO]' \
-        '  [--promoted-war ARQUIVO --promoted-contract-result ARQUIVO]'
+        '  [--promoted-war ARQUIVO --promoted-contract-result ARQUIVO]' \
+        '  [--oracle-contract-result ARQUIVO --oracle-state-result ARQUIVO]' \
+        '  [--oracle-persistence-result ARQUIVO]'
       exit 0
       ;;
     *)
@@ -83,6 +112,12 @@ for path in \
   "$AFTER_BUILD_EVIDENCE" \
   "$BEFORE_CONTRACT" \
   "$AFTER_CONTRACT" \
+  "$CLOSURE_EVIDENCE" \
+  "$CLOSURE_PORTABLE_CONTRACT" \
+  "$CLOSURE_ORACLE_CONTRACT" \
+  "$CLOSURE_ORACLE_STATE" \
+  "$CLOSURE_ORACLE_PERSISTENCE" \
+  "$ROLLBACK_EVIDENCE" \
   "$DOCUMENT" \
   "$TASKS" \
   "$SMOKE" \
@@ -102,6 +137,8 @@ for path in \
   "$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/profiles/ci-h2.cli" \
   "$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/profiles/oracle.cli" \
   "$REPOSITORY_ROOT/scripts/smoke-cp-3a-datasource.sh" \
+  "$REPOSITORY_ROOT/scripts/qualify-cp-3a-h2.sh" \
+  "$REPOSITORY_ROOT/scripts/qualify-cp-3a-oracle.sh" \
   "$REPOSITORY_ROOT/docs/cp-3a-java17-runtime.md"; do
   [[ -f "$path" ]] ||
     fail "arquivo obrigatório ausente: ${path#"$REPOSITORY_ROOT/"}"
@@ -192,10 +229,125 @@ scenario_count="$(
 [[ "$scenario_count" == "14" ]] ||
   fail "contrato após recompilação não contém os 14 cenários"
 
+for property in \
+  'schema=wildfly-migration-cp3a-closure/v1' \
+  "tested.commit=$EXPECTED_CLOSURE_COMMIT" \
+  "war.sha256=$EXPECTED_CLOSURE_WAR_SHA256" \
+  'war.bytecode.major=61' \
+  'war.libraryCount=20' \
+  'maven.tree.sha256=8ad318314d7f5b97bfd0ec4d00c38dc1512584fe1cdad4c04ae11d3999b0c2ca' \
+  'java.version=17.0.20+8' \
+  'maven.version=3.9.16' \
+  'wildfly.version=26.1.3.Final' \
+  'h2.version=2.4.240' \
+  'portable-ci.contract.scenarios=14' \
+  'portable-ci.result=passed' \
+  'oracle.database.version=19.3.0.0.0' \
+  'oracle.jdbc=ojdbc7-12.1.0.2.0' \
+  'oracle-qualified.contract.scenarios=14' \
+  'oracle-qualified.state=passed' \
+  'oracle-qualified.mybatisCommit=passed' \
+  'oracle-qualified.mybatisRollback=passed' \
+  'oracle-qualified.timestampRoundTrip=passed' \
+  'oracle-qualified.blobRoundTrip=passed' \
+  'oracle-qualified.result=passed' \
+  'transient.oracle.data.cleanup=passed' \
+  'result=passed'; do
+  grep -Fxq "$property" "$CLOSURE_EVIDENCE" ||
+    fail "evidência de fechamento não contém: $property"
+done
+
+for marker in \
+  '"qualification": "portable-ci"' \
+  '"profile": "ci-h2"' \
+  "\"commit\": \"$EXPECTED_CLOSURE_COMMIT\"" \
+  "\"sourceCommit\": \"$EXPECTED_CLOSURE_COMMIT\"" \
+  "\"warSha256\": \"$EXPECTED_CLOSURE_WAR_SHA256\"" \
+  '"runtime": "java17-wildfly26.1.3"'; do
+  grep -Fq "$marker" "$CLOSURE_PORTABLE_CONTRACT" ||
+    fail "contrato H2 do fechamento não contém: $marker"
+done
+
+for marker in \
+  '"qualification": "oracle-qualified"' \
+  '"profile": "oracle"' \
+  "\"commit\": \"$EXPECTED_CLOSURE_COMMIT\"" \
+  "\"sourceCommit\": \"$EXPECTED_CLOSURE_COMMIT\"" \
+  "\"warSha256\": \"$EXPECTED_CLOSURE_WAR_SHA256\""; do
+  grep -Fq "$marker" "$CLOSURE_ORACLE_CONTRACT" ||
+    fail "contrato Oracle do fechamento não contém: $marker"
+done
+
+for closure_contract in \
+  "$CLOSURE_PORTABLE_CONTRACT" \
+  "$CLOSURE_ORACLE_CONTRACT"; do
+  [[ "$(grep -Ec \
+      '^[[:space:]]+"[A-Za-z][A-Za-z0-9]*": "passed",?$' \
+      "$closure_contract")" == "14" ]] ||
+    fail "contrato do fechamento não contém os 14 cenários"
+done
+
+for result_file in \
+  "$CLOSURE_ORACLE_STATE" \
+  "$CLOSURE_ORACLE_PERSISTENCE"; do
+  for marker in \
+    '"qualification": "oracle-qualified"' \
+    '"profile": "oracle"' \
+    "\"commit\": \"$EXPECTED_CLOSURE_COMMIT\"" \
+    "\"sourceCommit\": \"$EXPECTED_CLOSURE_COMMIT\"" \
+    "\"warSha256\": \"$EXPECTED_CLOSURE_WAR_SHA256\"" \
+    '"runtime": "java17-wildfly26.1.3-ee8"' \
+    '"databaseVersion": "19.3.0.0.0"' \
+    '"jdbcDriver": "ojdbc7-12.1.0.2.0"'; do
+    grep -Fq "$marker" "$result_file" ||
+      fail "evidência Oracle do fechamento não contém: $marker"
+  done
+done
+for marker in \
+  '"schemaObjects": "passed"' \
+  '"seedState": "passed"' \
+  '"contractCreate": "passed"' \
+  '"contractUploadBlob": "passed"' \
+  '"contractXml": "passed"' \
+  '"rejectedState": "passed"'; do
+  grep -Fq "$marker" "$CLOSURE_ORACLE_STATE" ||
+    fail "estado Oracle do fechamento não contém: $marker"
+done
+for marker in \
+  '"mybatisCommit": "passed"' \
+  '"mybatisRollback": "passed"' \
+  '"timestampRoundTrip": "passed"' \
+  '"blobRoundTrip": "passed"' \
+  '"transientDataCleanup": "passed"'; do
+  grep -Fq "$marker" "$CLOSURE_ORACLE_PERSISTENCE" ||
+    fail "persistência Oracle do fechamento não contém: $marker"
+done
+
+for property in \
+  'schema=wildfly-migration-cp3a-rollback/v1' \
+  'source.tag=migration/02-java8-wildfly26' \
+  "source.commit=$EXPECTED_SOURCE_COMMIT" \
+  "source.war.sha256=$EXPECTED_WAR_SHA256" \
+  'source.war.bytecode.major=52' \
+  'source.maven.tree.sha256=8ad318314d7f5b97bfd0ec4d00c38dc1512584fe1cdad4c04ae11d3999b0c2ca' \
+  'worktree.clean.before=passed' \
+  'build.result=passed' \
+  'audit.result=passed' \
+  'worktree.clean.after=passed' \
+  'worktree.cleanup=passed' \
+  'oracle.schema.changed=false' \
+  'result=passed'; do
+  grep -Fxq "$property" "$ROLLBACK_EVIDENCE" ||
+    fail "evidência de rollback não contém: $property"
+done
+
 if grep -Eiq \
     'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url' \
     "$BEFORE_RUNTIME_EVIDENCE" "$BEFORE_BUILD_EVIDENCE" \
     "$AFTER_BUILD_EVIDENCE" "$BEFORE_CONTRACT" "$AFTER_CONTRACT" \
+    "$CLOSURE_EVIDENCE" "$CLOSURE_PORTABLE_CONTRACT" \
+    "$CLOSURE_ORACLE_CONTRACT" "$CLOSURE_ORACLE_STATE" \
+    "$CLOSURE_ORACLE_PERSISTENCE" "$ROLLBACK_EVIDENCE" \
     "$DOCUMENT"; then
   fail "evidência CP-3A contém configuração sensível"
 fi
@@ -322,7 +474,11 @@ for document_marker in \
   'bytecode major `61`' \
   'nenhuma correção de código ou' \
   'troca de biblioteca foi necessária' \
-  'POM permanece Java 8 por padrão'; do
+  'POM permanece Java 8 por padrão' \
+  'Fechamento do CP-3A — atividade 3.5' \
+  '14/14' \
+  'Oracle Database 19c RU 19.3' \
+  'rollback para `migration/02-java8-wildfly26`'; do
   grep -Fq "$document_marker" "$DOCUMENT" ||
     fail "documentação da tentativa não contém: $document_marker"
 done
@@ -335,6 +491,18 @@ grep -Fq -- \
   '- [x] 3.2 Capturar e corrigir somente incompatibilidades necessárias' \
   "$TASKS" ||
   fail "atividade 3.2 ainda não está marcada como concluída"
+grep -Fq -- \
+  '- [x] 3.3 Produzir a matriz de cada dependência legada' \
+  "$TASKS" ||
+  fail "atividade 3.3 ainda não está marcada como concluída"
+grep -Fq -- \
+  '- [x] 3.4 Atualizar runtime, versão H2 de teste' \
+  "$TASKS" ||
+  fail "atividade 3.4 ainda não está marcada como concluída"
+grep -Fq -- \
+  '- [x] 3.5 Encerrar `CP-3A`' \
+  "$TASKS" ||
+  fail "atividade 3.5 ainda não está marcada como concluída"
 
 if [[ -n "$WAR_FILE" ]]; then
   [[ -f "$WAR_FILE" ]] || fail "WAR informado não existe"
@@ -416,6 +584,79 @@ if [[ -n "$PROMOTED_WAR_FILE$PROMOTED_CONTRACT_RESULT_FILE" ]]; then
     fail "contrato promovido não contém os 14 cenários"
 fi
 
+if [[ -n "$ORACLE_CONTRACT_RESULT_FILE$ORACLE_STATE_RESULT_FILE$ORACLE_PERSISTENCE_RESULT_FILE" ]]; then
+  [[ -n "$PROMOTED_WAR_FILE" ]] ||
+    fail "resultados Oracle exigem também --promoted-war"
+  [[ -n "$ORACLE_CONTRACT_RESULT_FILE" &&
+     -n "$ORACLE_STATE_RESULT_FILE" &&
+     -n "$ORACLE_PERSISTENCE_RESULT_FILE" ]] ||
+    fail "contrato, estado e persistência Oracle devem ser informados juntos"
+
+  for result_file in \
+    "$ORACLE_CONTRACT_RESULT_FILE" \
+    "$ORACLE_STATE_RESULT_FILE" \
+    "$ORACLE_PERSISTENCE_RESULT_FILE"; do
+    [[ -f "$result_file" ]] ||
+      fail "resultado Oracle informado não existe: $result_file"
+    grep -Fq '"qualification": "oracle-qualified"' "$result_file" ||
+      fail "resultado Oracle dinâmico não está qualificado"
+    grep -Fq '"profile": "oracle"' "$result_file" ||
+      fail "resultado Oracle dinâmico não identifica o perfil"
+    grep -Fq "\"warSha256\": \"$promoted_war_sha256\"" "$result_file" ||
+      fail "resultado Oracle dinâmico não corresponde ao WAR promovido"
+  done
+
+  for marker in \
+    '"runtime": "java17-wildfly26.1.3"' \
+    '"qualification": "oracle-qualified"'; do
+    grep -Fq "$marker" "$ORACLE_CONTRACT_RESULT_FILE" ||
+      fail "contrato Oracle dinâmico não contém: $marker"
+  done
+  [[ "$(grep -Ec \
+      '^[[:space:]]+"[A-Za-z][A-Za-z0-9]*": "passed",?$' \
+      "$ORACLE_CONTRACT_RESULT_FILE")" == "14" ]] ||
+    fail "contrato Oracle dinâmico não contém os 14 cenários"
+
+  for result_file in \
+    "$ORACLE_STATE_RESULT_FILE" \
+    "$ORACLE_PERSISTENCE_RESULT_FILE"; do
+    for marker in \
+      '"runtime": "java17-wildfly26.1.3-ee8"' \
+      '"databaseVersion": "19.3.0.0.0"' \
+      '"jdbcDriver": "ojdbc7-12.1.0.2.0"'; do
+      grep -Fq "$marker" "$result_file" ||
+        fail "sonda Oracle dinâmica não contém: $marker"
+    done
+  done
+  for marker in \
+    '"schemaObjects": "passed"' \
+    '"seedState": "passed"' \
+    '"contractCreate": "passed"' \
+    '"contractUploadBlob": "passed"' \
+    '"contractXml": "passed"' \
+    '"rejectedState": "passed"'; do
+    grep -Fq "$marker" "$ORACLE_STATE_RESULT_FILE" ||
+      fail "estado Oracle dinâmico não contém: $marker"
+  done
+  for marker in \
+    '"mybatisCommit": "passed"' \
+    '"mybatisRollback": "passed"' \
+    '"timestampRoundTrip": "passed"' \
+    '"blobRoundTrip": "passed"' \
+    '"transientDataCleanup": "passed"'; do
+    grep -Fq "$marker" "$ORACLE_PERSISTENCE_RESULT_FILE" ||
+      fail "persistência Oracle dinâmica não contém: $marker"
+  done
+
+  if grep -Eiq \
+      'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url' \
+      "$ORACLE_CONTRACT_RESULT_FILE" "$ORACLE_STATE_RESULT_FILE" \
+      "$ORACLE_PERSISTENCE_RESULT_FILE"; then
+    fail "resultado Oracle dinâmico contém configuração sensível"
+  fi
+fi
+
 printf 'OK: CP-3A/3.1 comprova o WAR da fase 2 no Java 17 sem correção\n'
 printf 'OK: CP-3A/3.2 recompila no Java 17 com correções somente no harness\n'
 printf 'OK: CP-3A/3.4 promove Java 17 e isola H2 2.4.240 do perfil Oracle\n'
+printf 'OK: CP-3A/3.5 registra H2 portable-ci e Oracle oracle-qualified\n'
