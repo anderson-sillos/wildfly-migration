@@ -37,15 +37,20 @@ public final class ValidatePhase2OracleState {
     }
 
     private static void run(String[] args) throws Exception {
-        if (args.length != 3) {
+        if (args.length != 3 && args.length != 4) {
             throw new IllegalArgumentException(
                     "uso: ValidatePhase2OracleState "
-                    + "<resultado> <commit> <sha256-war>");
+                    + "<resultado> <commit> <sha256-war> [runtime]");
         }
         require(args[1].matches("[0-9a-f]{7,40}"),
                 "commit inválido");
         require(args[2].matches("[0-9a-f]{64}"),
                 "SHA-256 do WAR inválido");
+        String runtime = args.length == 4
+                ? args[3] : "java8-wildfly26.1.3-ee8";
+        require("java8-wildfly26.1.3-ee8".equals(runtime)
+                || "java17-wildfly26.1.3-ee8".equals(runtime),
+                "runtime inválido");
 
         Class.forName("oracle.jdbc.OracleDriver");
         Connection connection = DriverManager.getConnection(
@@ -64,7 +69,7 @@ public final class ValidatePhase2OracleState {
             connection.close();
         }
 
-        writeResult(new File(args[0]), args[1], args[2]);
+        writeResult(new File(args[0]), args[1], args[2], runtime);
         System.out.println(
                 "OK: estado Oracle da fase 2 corresponde ao baseline funcional");
     }
@@ -275,7 +280,7 @@ public final class ValidatePhase2OracleState {
     }
 
     private static void writeResult(
-            File file, String commit, String warSha256)
+            File file, String commit, String warSha256, String runtime)
             throws Exception {
         File parent = file.getAbsoluteFile().getParentFile();
         require(parent != null
@@ -292,7 +297,7 @@ public final class ValidatePhase2OracleState {
             writer.write("  \"commit\": \"" + commit + "\",\n");
             writer.write("  \"sourceCommit\": \"" + commit + "\",\n");
             writer.write("  \"warSha256\": \"" + warSha256 + "\",\n");
-            writer.write("  \"runtime\": \"java8-wildfly26.1.3-ee8\",\n");
+            writer.write("  \"runtime\": \"" + runtime + "\",\n");
             writer.write("  \"databaseVersion\": \""
                     + DATABASE_VERSION + "\",\n");
             writer.write("  \"jdbcDriver\": \"ojdbc7-"

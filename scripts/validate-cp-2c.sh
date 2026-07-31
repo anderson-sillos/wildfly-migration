@@ -152,22 +152,22 @@ for cache_marker in \
   'maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.9.16-' \
   'key: ${{ steps.runtime-archive-cache.outputs.cache-primary-key }}' \
   'key: ${{ steps.maven-dependency-cache.outputs.cache-primary-key }}' \
-  'MIGRATION_CHECKPOINT=CP-2D' \
-  './scripts/doctor.sh CP-2D --profile ci-h2 --ci' \
-  './scripts/build-cp-2c.sh --profile ci-h2' \
+  'MIGRATION_CHECKPOINT=CP-3A' \
+  './scripts/doctor.sh CP-3A --profile ci-h2 --ci' \
+  './scripts/build-cp-3a.sh --profile ci-h2' \
   './scripts/validate-cp-2c-oracle-persistence.sh' \
   './scripts/validate-cp-2d-oracle-state.sh' \
   '--compile-only' \
-  './scripts/validate-cp-2d-phase-comparison.sh' \
-  './scripts/validate-cp-2d-manifest.sh' \
+  './scripts/validate-cp-3a.sh \' \
+  '--promoted-war app/target/wildfly-migration.war' \
   'MIGRATION_SOURCE_COMMIT: >-' \
   '${{ github.event.pull_request.head.sha || github.sha }}' \
   'MAVEN_HOME=$tools/apache-maven-3.9.16' \
   'MAVEN_ARCHIVE_SHA256=80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb' \
   './scripts/prepare-portable-runtime-cache.sh \' \
   '--sources "$runtime_sources"' \
-  'app/target/contract-results/cp-2d-ci-h2.json' \
-  'cp-2d-portable-evidence'; do
+  'app/target/contract-results/cp-3a-ci-h2.json' \
+  'cp-3a-portable-evidence'; do
   grep -Fq -- "$cache_marker" "$WORKFLOW" ||
     fail "workflow não contém o cache reutilizável: $cache_marker"
 done
@@ -180,7 +180,8 @@ for cache_lock_row in \
   'da257f161d7f8c6ca5b0e5d9e4090f65ac28c5e398072e68b8ae87988b1d1a2e  OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz' \
   '80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb  apache-maven-3.9.16-bin.tar.gz' \
   'aadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f02528ae59  wildfly-26.1.3.Final.tar.gz' \
-  '3ad9ac4b6aae9cd9d3ac1c447465e1ed06019b851b893dd6a8d76ddb6d85bca6  h2-1.4.200.jar'; do
+  '3ad9ac4b6aae9cd9d3ac1c447465e1ed06019b851b893dd6a8d76ddb6d85bca6  h2-1.4.200.jar' \
+  '29b70e427cc1c40cdc376283adbb0cc62853073797bb5fe5761f81fe73d57ce0  h2-2.4.240.jar'; do
   grep -Fxq "$cache_lock_row" "$RUNTIME_CACHE_LOCK" ||
     fail "identidade do cache de runtime não contém: $cache_lock_row"
 done
@@ -236,7 +237,7 @@ done
 
 for marker in \
   '<modelVersion>4.0.0</modelVersion>' \
-  '<id>enforce-phase2-toolchain</id>' \
+  '<id>enforce-java17-toolchain</id>' \
   '<version>[3.9.16]</version>'; do
   grep -Fq "$marker" "$POM" ||
     fail "POM não contém o contrato Maven do CP-2C: $marker"

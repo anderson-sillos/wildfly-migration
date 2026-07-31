@@ -70,9 +70,9 @@ public final class ValidateExternalContracts {
         require(workflow.indexOf(
                 "--contract-result app/target/contract-results/") >= 0
                 && workflow.indexOf(
-                "name: cp-2d-portable-evidence") >= 0
+                "name: cp-3a-portable-evidence") >= 0
                 && workflow.indexOf(
-                "app/target/contract-results/cp-2d-ci-h2.json") >= 0
+                "app/target/contract-results/cp-3a-ci-h2.json") >= 0
                 && workflow.indexOf("if-no-files-found: error") >= 0,
                 "CI não preserva o resultado portable-ci");
 

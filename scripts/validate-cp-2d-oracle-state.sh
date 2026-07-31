@@ -7,6 +7,7 @@ ENV_FILE="$REPOSITORY_ROOT/.env"
 WAR_FILE=""
 RESULT_FILE=""
 COMPILE_ONLY=false
+JAVA_RELEASE="8"
 TEMP_DIRECTORY="$(
   mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-cp2d-oracle-state.XXXXXXXX"
 )"
@@ -17,7 +18,7 @@ Uso:
   ./scripts/validate-cp-2d-oracle-state.sh \
     --war ARQUIVO --result ARQUIVO [--env ARQUIVO]
   ./scripts/validate-cp-2d-oracle-state.sh \
-    --compile-only --war ARQUIVO [--env ARQUIVO]
+    --compile-only --war ARQUIVO [--java 8|17] [--env ARQUIVO]
 
 Compara no Oracle o estado produzido pelos contratos da fase 2 com o estado
 funcional congelado na fase 1. O relatório é sanitizado. O modo
@@ -104,6 +105,12 @@ while [[ $# -gt 0 ]]; do
       COMPILE_ONLY=true
       shift
       ;;
+    --java)
+      [[ $# -ge 2 && ( "$2" == "8" || "$2" == "17" ) ]] ||
+        fail "--java exige 8 ou 17"
+      JAVA_RELEASE="$2"
+      shift 2
+      ;;
     -h|--help)
       usage
       exit 0
@@ -119,20 +126,28 @@ if [[ "$COMPILE_ONLY" != true && -z "$RESULT_FILE" ]]; then
   fail "resultado não informado"
 fi
 
-JAVA8_HOME_VALUE="$(configuration_value JAVA8_HOME)"
-[[ -x "$JAVA8_HOME_VALUE/bin/java" &&
-   -x "$JAVA8_HOME_VALUE/bin/javac" ]] ||
-  fail "JAVA8_HOME não aponta para um JDK completo"
+if [[ "$JAVA_RELEASE" == "17" ]]; then
+  JAVA_HOME_VALUE="$(configuration_value JAVA17_HOME)"
+  EXPECTED_JAVA_VERSION='17.0.20'
+  RUNTIME_IDENTIFIER='java17-wildfly26.1.3-ee8'
+else
+  JAVA_HOME_VALUE="$(configuration_value JAVA8_HOME)"
+  EXPECTED_JAVA_VERSION='1.8.0_492'
+  RUNTIME_IDENTIFIER='java8-wildfly26.1.3-ee8'
+fi
+[[ -x "$JAVA_HOME_VALUE/bin/java" &&
+   -x "$JAVA_HOME_VALUE/bin/javac" ]] ||
+  fail "JAVA${JAVA_RELEASE}_HOME não aponta para um JDK completo"
 
-java_version="$("$JAVA8_HOME_VALUE/bin/java" -version 2>&1)"
-[[ "$java_version" == *'1.8.0_492'* ]] ||
-  fail "a sonda exige Eclipse Temurin OpenJDK 8u492"
+java_version="$("$JAVA_HOME_VALUE/bin/java" -version 2>&1)"
+[[ "$java_version" == *"$EXPECTED_JAVA_VERSION"* ]] ||
+  fail "a sonda exige a build Java $JAVA_RELEASE aprovada"
 
 install -d -m 0755 "$TEMP_DIRECTORY/classes"
-"$JAVA8_HOME_VALUE/bin/javac" \
+"$JAVA_HOME_VALUE/bin/javac" \
   -encoding UTF-8 \
-  -source 1.8 \
-  -target 1.8 \
+  -source "$JAVA_RELEASE" \
+  -target "$JAVA_RELEASE" \
   -d "$TEMP_DIRECTORY/classes" \
   "$REPOSITORY_ROOT/scripts/ValidatePhase2OracleState.java"
 
@@ -169,13 +184,14 @@ war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
 ORACLE_DB_URL="$ORACLE_DB_URL_VALUE" \
 ORACLE_DB_USER="$ORACLE_DB_USER_VALUE" \
 ORACLE_DB_PASSWORD="$ORACLE_DB_PASSWORD_VALUE" \
-  "$JAVA8_HOME_VALUE/bin/java" \
+  "$JAVA_HOME_VALUE/bin/java" \
   -Dfile.encoding=UTF-8 \
   -cp "$TEMP_DIRECTORY/classes:$OJDBC7_JAR_VALUE" \
   ValidatePhase2OracleState \
   "$RESULT_FILE" \
   "$source_commit_sha" \
-  "$war_sha256"
+  "$war_sha256" \
+  "$RUNTIME_IDENTIFIER"
 
 for marker in \
   '"schema": "wildfly-migration-phase2-oracle-state/v1"' \
@@ -184,7 +200,7 @@ for marker in \
   "\"commit\": \"$source_commit_sha\"" \
   "\"sourceCommit\": \"$source_commit_sha\"" \
   "\"warSha256\": \"$war_sha256\"" \
-  '"runtime": "java8-wildfly26.1.3-ee8"' \
+  "\"runtime\": \"$RUNTIME_IDENTIFIER\"" \
   '"databaseVersion": "19.3.0.0.0"' \
   '"jdbcDriver": "ojdbc7-12.1.0.2.0"' \
   '"contractUploadBytes": 44' \

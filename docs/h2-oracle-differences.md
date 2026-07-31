@@ -1,14 +1,15 @@
 # Diferenças H2/Oracle do contrato de persistência
 
-O Oracle 19c é a fonte canônica do schema. O H2 1.4.200 reproduz somente a
-semântica portátil necessária ao feedback de pull requests. Aprovação H2 recebe
-`portable-ci`; os itens marcados abaixo continuam pendentes até a execução
-`oracle-qualified`.
+O Oracle 19c é a fonte canônica do schema. O H2 reproduz somente a semântica
+portátil necessária ao feedback de pull requests: a fase histórica usa
+1.4.200, e o gate Java 17 usa 2.4.240. Aprovação H2 recebe `portable-ci`; os
+itens marcados abaixo continuam pendentes até a execução `oracle-qualified`.
+Na evidência congelada da fase 2, a descrição exata é H2 1.4.200 em `MODE=Oracle`.
 
 A matriz cobre explicitamente tipos, constraints, sequences, timestamps e
 LOBs, além dos mecanismos de idempotência e limpeza.
 
-| Área | Oracle 19c canônico | H2 1.4.200 em `MODE=Oracle` | Limite da evidência portátil |
+| Área | Oracle 19c canônico | H2 em `MODE=Oracle` | Limite da evidência portátil |
 | --- | --- | --- | --- |
 | inteiros de 64 bits | `NUMBER(19,0)` | `DECIMAL(19,0)` | precisão e escala são verificadas; conversão e códigos de erro do driver Oracle não |
 | valores monetários | `NUMBER(15,2)` | `DECIMAL(15,2)` | sinal, precisão e escala são portáveis; arredondamento do driver precisa do Oracle |
@@ -44,6 +45,12 @@ O validador do CP-1D exige:
 O mesmo validador proíbe PL/SQL, `USER_*`, `VARCHAR2` e `NUMBER(...)` nos
 scripts H2 para impedir que o adaptador de teste se torne uma cópia ambígua do
 DDL Oracle.
+
+Na linha H2 2.x, metadados de constraints são consultados em
+`INFORMATION_SCHEMA.TABLE_CONSTRAINTS`. Essa mudança pertence ao harness e não
+altera o DDL canônico nem o comportamento da aplicação. O schema e a massa
+continuam sendo executados duas vezes, seguidos de duas limpezas, em cada versão
+aprovada.
 
 ## Regras para mudanças futuras
 

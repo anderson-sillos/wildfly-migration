@@ -454,20 +454,33 @@ fi
 
 if [[ "$PROFILE" == "ci-h2" ]]; then
   H2_JAR_VALUE="$(configuration_value H2_JAR)"
+  if [[ "$JAVA_RELEASE" == "17" ]]; then
+    H2_MANIFEST="$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/runtime-manifest.tsv"
+    H2_EXPECTED_JAR="h2-2.4.240.jar"
+    H2_MODULE_DIRECTORY="com/h2database/h2/cp3a/main"
+    H2_MODULE_FILE="$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/h2/module.xml"
+  else
+    H2_MANIFEST="$REPOSITORY_ROOT/runtime/legacy/portable-runtime-manifest.tsv"
+    H2_EXPECTED_JAR="h2-1.4.200.jar"
+    H2_MODULE_DIRECTORY="com/h2database/h2/cp1d/main"
+    H2_MODULE_FILE="$REPOSITORY_ROOT/runtime/legacy/h2/module.xml"
+  fi
   if [[ ! -x "$SELECTED_JAVA_HOME/bin/java" || ! -f "$H2_JAR_VALUE" ]]; then
     printf 'FALHA: Java selecionado e H2 são obrigatórios para ci-h2\n' >&2
     exit 1
   fi
   expected_driver_checksum="$(
-    awk -F '\t' '$1 == "h2" { print $6 }' \
-      "$REPOSITORY_ROOT/runtime/legacy/portable-runtime-manifest.tsv"
+    awk -F '\t' '$1 == "h2" { print $6 }' "$H2_MANIFEST"
   )"
   actual_driver_checksum="$(sha256sum "$H2_JAR_VALUE" | awk '{print $1}')"
-  if [[ "$actual_driver_checksum" != "$expected_driver_checksum" ]]; then
-    printf 'FALHA: checksum do H2 diverge do manifesto portátil\n' >&2
+  if [[ "$(basename "$H2_JAR_VALUE")" != "$H2_EXPECTED_JAR" ||
+        "$actual_driver_checksum" != "$expected_driver_checksum" ]]; then
+    printf 'FALHA: arquivo ou checksum do H2 diverge do manifesto do gate\n' >&2
     exit 1
   fi
-  if [[ "$SERVER_RELEASE" == "26" ]]; then
+  if [[ "$JAVA_RELEASE" == "17" ]]; then
+    PROFILE_FILE="$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/profiles/ci-h2.cli"
+  elif [[ "$SERVER_RELEASE" == "26" ]]; then
     PROFILE_FILE="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/profiles/ci-h2.cli"
   else
     PROFILE_FILE="$REPOSITORY_ROOT/runtime/legacy/profiles/ci-h2.cli"
@@ -495,7 +508,9 @@ else
     printf 'FALHA: checksum do ojdbc7 não foi aprovado\n' >&2
     exit 1
   fi
-  if [[ "$SERVER_RELEASE" == "26" ]]; then
+  if [[ "$JAVA_RELEASE" == "17" ]]; then
+    PROFILE_FILE="$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/profiles/oracle.cli"
+  elif [[ "$SERVER_RELEASE" == "26" ]]; then
     PROFILE_FILE="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/profiles/oracle.cli"
   else
     PROFILE_FILE="$REPOSITORY_ROOT/runtime/legacy/profiles/oracle.cli"
@@ -541,11 +556,10 @@ if [[ "$SERVER_RELEASE" == "26" ]]; then
 fi
 
 if [[ "$PROFILE" == "ci-h2" ]]; then
-  module_directory="$RUNTIME_HOME/modules/com/h2database/h2/cp1d/main"
+  module_directory="$RUNTIME_HOME/modules/$H2_MODULE_DIRECTORY"
   install -d -m 0755 "$module_directory"
-  install -m 0644 "$H2_JAR_VALUE" "$module_directory/h2-1.4.200.jar"
-  install -m 0644 "$REPOSITORY_ROOT/runtime/legacy/h2/module.xml" \
-    "$module_directory/module.xml"
+  install -m 0644 "$H2_JAR_VALUE" "$module_directory/$H2_EXPECTED_JAR"
+  install -m 0644 "$H2_MODULE_FILE" "$module_directory/module.xml"
 else
   module_directory="$RUNTIME_HOME/modules/com/oracle/ojdbc7/main"
   install -d -m 0755 "$module_directory"

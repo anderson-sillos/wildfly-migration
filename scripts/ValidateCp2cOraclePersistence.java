@@ -56,15 +56,20 @@ public final class ValidateCp2cOraclePersistence {
     }
 
     private static void run(String[] args) throws Exception {
-        if (args.length != 4) {
+        if (args.length != 4 && args.length != 5) {
             throw new IllegalArgumentException(
                     "uso: ValidateCp2cOraclePersistence "
-                    + "<raiz> <resultado> <commit> <sha256-war>");
+                    + "<raiz> <resultado> <commit> <sha256-war> [runtime]");
         }
         require(args[2].matches("[0-9a-f]{7,40}"),
                 "commit inválido");
         require(args[3].matches("[0-9a-f]{64}"),
                 "SHA-256 do WAR inválido");
+        String runtime = args.length == 5
+                ? args[4] : "java8-wildfly26.1.3-ee8";
+        require("java8-wildfly26.1.3-ee8".equals(runtime)
+                || "java17-wildfly26.1.3-ee8".equals(runtime),
+                "runtime inválido");
 
         String url = requiredEnvironment("ORACLE_DB_URL");
         String user = requiredEnvironment("ORACLE_DB_USER");
@@ -90,7 +95,7 @@ public final class ValidateCp2cOraclePersistence {
             cleanup(dataSource, committedNumber, rolledBackNumber);
         }
 
-        writeResult(new File(args[1]), args[2], args[3]);
+        writeResult(new File(args[1]), args[2], args[3], runtime);
         System.out.println(
                 "OK: Oracle 19c qualificou MyBatis, rollback, "
                 + "TIMESTAMP(6) e BLOB; dados transitórios removidos");
@@ -314,7 +319,8 @@ public final class ValidateCp2cOraclePersistence {
     private static void writeResult(
             File file,
             String commit,
-            String warSha256) throws Exception {
+            String warSha256,
+            String runtime) throws Exception {
         File parent = file.getAbsoluteFile().getParentFile();
         require(parent != null
                 && (parent.isDirectory() || parent.mkdirs()),
@@ -330,7 +336,7 @@ public final class ValidateCp2cOraclePersistence {
             writer.write("  \"commit\": \"" + commit + "\",\n");
             writer.write("  \"sourceCommit\": \"" + commit + "\",\n");
             writer.write("  \"warSha256\": \"" + warSha256 + "\",\n");
-            writer.write("  \"runtime\": \"java8-wildfly26.1.3-ee8\",\n");
+            writer.write("  \"runtime\": \"" + runtime + "\",\n");
             writer.write("  \"databaseVersion\": \""
                     + DATABASE_VERSION + "\",\n");
             writer.write("  \"jdbcDriver\": \"ojdbc7-"

@@ -1,4 +1,4 @@
--- H2 1.4.200 in-memory schema for portable-ci.
+-- H2 in-memory schema for portable-ci (1.4.200 historical; 2.4.240 in CP-3A).
 -- Execute only with MODE=Oracle and never against the Oracle profile.
 
 CREATE SEQUENCE IF NOT EXISTS LAB_PEDIDO_SEQ
@@ -22,7 +22,14 @@ CREATE TABLE IF NOT EXISTS LAB_PEDIDO (
   CONSTRAINT UK_LAB_PEDIDO_NUMERO UNIQUE (NUMERO),
   CONSTRAINT CK_LAB_PEDIDO_VALOR CHECK (VALOR_TOTAL >= 0),
   CONSTRAINT CK_LAB_PEDIDO_STATUS
-    CHECK (STATUS IN ('NOVO', 'APROVADO', 'CANCELADO'))
+    CHECK (
+      CASE STATUS
+        WHEN 'NOVO' THEN TRUE
+        WHEN 'APROVADO' THEN TRUE
+        WHEN 'CANCELADO' THEN TRUE
+        ELSE FALSE
+      END
+    )
 );
 
 CREATE TABLE IF NOT EXISTS LAB_ANEXO (

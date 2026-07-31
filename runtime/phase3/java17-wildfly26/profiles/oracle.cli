@@ -1,0 +1,4 @@
+batch
+/subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle.ojdbc7,driver-class-name=oracle.jdbc.OracleDriver)
+/subsystem=datasources/data-source=MigrationDS:add(jndi-name=java:/jdbc/MigrationDS,driver-name=oracle,connection-url="${env.ORACLE_DB_URL}",user-name="${env.ORACLE_DB_USER}",password="${env.ORACLE_DB_PASSWORD}",jta=false,use-java-context=true,min-pool-size=1,max-pool-size=10,pool-prefill=false,validate-on-match=true,background-validation=false,check-valid-connection-sql="SELECT 1 FROM DUAL",valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker,exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter,enabled=true)
+run-batch

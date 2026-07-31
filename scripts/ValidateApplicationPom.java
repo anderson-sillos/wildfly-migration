@@ -94,13 +94,13 @@ public final class ValidateApplicationPom {
             }
         }
 
-        require("1.8".equals(properties.get("maven.compiler.source")),
-                "source do compilador deve ser 1.8 na fase 2");
-        require("1.8".equals(properties.get("maven.compiler.target")),
-                "target do compilador deve ser 1.8 na fase 2");
-        require("[1.8,1.9)".equals(
-                properties.get("phase2.java.version.range")),
-                "range Java padrão deve exigir a família Java 8");
+        require("17".equals(properties.get("maven.compiler.source")),
+                "source do compilador deve ser 17 no gate CP-3A");
+        require("17".equals(properties.get("maven.compiler.target")),
+                "target do compilador deve ser 17 no gate CP-3A");
+        require("[17,18)".equals(
+                properties.get("java.version.range")),
+                "range Java padrão deve exigir a família Java 17");
 
         Map<String, String[]> expected =
                 new LinkedHashMap<String, String[]>();
@@ -201,9 +201,9 @@ public final class ValidateApplicationPom {
                         uniqueDescendant(plugin, "requireJavaVersion");
                 require("[3.9.16]".equals(text(requireMaven, "version")),
                         "Enforcer deve exigir exatamente Maven 3.9.16");
-                require("${phase2.java.version.range}".equals(
+                require("${java.version.range}".equals(
                         text(requireJava, "version")),
-                        "Enforcer deve usar o range Java selecionado pelo perfil");
+                        "Enforcer deve usar o range Java ativo");
             }
         }
         require(pluginCount == expectedPlugins.size(),
@@ -211,8 +211,8 @@ public final class ValidateApplicationPom {
 
         Map<String, String> expectedProfiles =
                 new LinkedHashMap<String, String>();
-        expectedProfiles.put("oracle", "[1.8,1.9)");
-        expectedProfiles.put("ci-h2", "[1.8,1.9)");
+        expectedProfiles.put("oracle", "[17,18)");
+        expectedProfiles.put("ci-h2", "[17,18)");
 
         Element profiles = child(project, "profiles");
         NodeList profileNodes = profiles.getChildNodes();
@@ -231,7 +231,7 @@ public final class ValidateApplicationPom {
                     "perfil Maven inesperado: " + profileId);
             Element profileProperties = child(profile, "properties");
             require(expectedRange.equals(
-                    text(profileProperties, "phase2.java.version.range")),
+                    text(profileProperties, "java.version.range")),
                     "range Java divergente no perfil " + profileId);
         }
         require(profileCount == expectedProfiles.size(),

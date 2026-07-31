@@ -165,11 +165,47 @@ o resultado executável comprovado em 3.2 permanece inalterado e cada hipótese
 da matriz ainda precisa ser confirmada na atividade que aplica a respectiva
 troca.
 
+## Promoção do runtime — atividade 3.4
+
+Java 17 deixou de ser uma sobrescrita temporária do wrapper e passou a ser o
+padrão do POM, dos dois perfis Maven, do `doctor` e do CI portátil. O runtime
+fixa Eclipse Temurin 17.0.20+8, WildFly comunitário 26.1.3.Final, Maven 3.9.16
+e H2 2.4.240; origem, licença e SHA-256 estão no manifesto
+`runtime/phase3/java17-wildfly26/runtime-manifest.tsv`.
+
+O H2 2.4.240 possui módulo e perfil próprios e continua somente em memória,
+fora do WAR e sem console ou listener. O cache único preserva também o H2
+1.4.200 para não apagar a identidade das fases anteriores. A consulta do
+harness foi ajustada de `INFORMATION_SCHEMA.CONSTRAINTS` para
+`INFORMATION_SCHEMA.TABLE_CONSTRAINTS`, disponível nas duas versões aprovadas.
+
+A sonda MyBatis encontrou ainda a incompatibilidade natural `INC-013`: no H2
+2.4.240, a constraint H2 `STATUS IN (...)` falhou ao ser avaliada por outra
+conexão depois da criação do schema. Comparações `OR` foram normalizadas de
+volta para `IN`; o adaptador H2 passou então a expressar o mesmo conjunto
+fechado por `CASE`. Java, mappers, WAR e schema Oracle não foram alterados.
+
+O perfil Oracle permanece separado, com as mesmas variáveis externas e o
+`ojdbc7` ainda provisionado como módulo. A troca do driver não foi antecipada:
+ela continua pertencendo à atividade 3.14.
+
+### Conclusão comprovada da atividade 3.4
+
+A configuração padrão do projeto agora representa de fato o gate Java
+17/WildFly 26; não depende mais das três propriedades `-D` que viabilizaram a
+experiência da atividade 3.2. O H2 ativo possui identidade, origem e isolamento
+próprios, enquanto a trilha Oracle permanece independente.
+
+Esta conclusão comprova a promoção estrutural e as validações do runtime H2 da
+atividade, não o encerramento do CP-3A. Os contratos completos H2/Oracle, a
+auditoria final, os relatórios sanitizados e o rollback executado serão
+consolidados na atividade 3.5.
+
 ## Rollback
 
 A tentativa usa somente um worktree destacado, uma cópia temporária do
-WildFly e H2 em memória. O rollback consiste em encerrar o runtime temporário e
-remover o worktree criado para a tag. A branch, a instalação externa do
-WildFly, o WAR aprovado e o schema Oracle não são alterados. Para a atividade
-3.2, execute novamente `scripts/build-cp-2c.sh`: como o POM padrão permanece em
-Java 8, o WAR congelado da fase 2 volta a ser produzido sem reversão de fonte.
+WildFly e H2 em memória. O rollback das atividades 3.1 e 3.2 consiste em
+encerrar o runtime temporário e remover o worktree criado para a tag. Para a
+atividade 3.4, reproduza a fase 2 em outro worktree destacado na tag
+`migration/02-java8-wildfly26`; o POM ativo já foi promovido a Java 17. A
+instalação externa do WildFly e o schema Oracle não são alterados.

@@ -10,6 +10,7 @@ required_paths=(
   ".vscode/tasks.json"
   "docs/README.md"
   "docs/codex-handoff.md"
+  "docs/cp-3a-java17-runtime.md"
   "docs/cp-3a-dependency-matrix.md"
   "docs/evidence/CP-1F.md"
   "docs/environment-setup.md"
@@ -193,6 +194,20 @@ if ! grep -Fq -- \
   printf 'FALHA: índice/evidência não aponta para a matriz do CP-3A\n' >&2
   exit 1
 fi
+
+for marker in \
+  'Eclipse Temurin OpenJDK | 17.0.20+8' \
+  'H2 | 2.4.240' \
+  '29b70e427cc1c40cdc376283adbb0cc62853073797bb5fe5761f81fe73d57ce0' \
+  'jdbc:h2:mem:migration;MODE=Oracle;DB_CLOSE_DELAY=-1' \
+  'atividade 3.14' \
+  'migration/02-java8-wildfly26'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3a-java17-runtime.md"; then
+    printf 'FALHA: runbook do runtime CP-3A não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
 
 help_output="$(
   "$REPOSITORY_ROOT/scripts/smoke-wildfly9-datasource.sh" --help

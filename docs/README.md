@@ -36,6 +36,8 @@ passos.
     relação com os gates do laboratório.
 15. [Matriz de dependências do CP-3A](cp-3a-dependency-matrix.md): candidatos
     para Java 17/EE 8, transitivas, impacto, decisão e sequência de aplicação.
+16. [Runtime Java 17/WildFly 26 do CP-3A](cp-3a-java17-runtime.md): versões
+    fixas, H2 2.4.240, preparação, validação e rollback.
 
 ## Aplicação e arquitetura
 
@@ -53,6 +55,7 @@ passos.
 - [Runtime legado externo](../runtime/legacy/README.md);
 - [Runtime Java 8/WildFly 9 do CP-2A](../runtime/phase2/java8-wildfly9/README.md);
 - [Runtime Java 8/WildFly 26 do CP-2B](../runtime/phase2/java8-wildfly26/README.md);
+- [Runtime Java 17/WildFly 26 do CP-3A](../runtime/phase3/java17-wildfly26/README.md);
 - [evolução da compatibilidade WildFly × Java SE](wildfly-java-compatibility.md);
 - [seleção Java 7/H2 do CP-1D](cp-1d-runtime-selection.md);
 - [diferenças H2/Oracle](h2-oracle-differences.md);

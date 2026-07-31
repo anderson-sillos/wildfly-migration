@@ -9,16 +9,16 @@
   <version>1.0.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
-  <name>WildFly Migration Lab — Jakarta EE 8 on WildFly 26</name>
-  <description>Aplicação alinhada ao Jakarta EE 8 no Java 8 e WildFly 26 durante o CP-2C.</description>
+  <name>WildFly Migration Lab — Java 17 and Jakarta EE 8 on WildFly 26</name>
+  <description>Aplicação no gate Java 17/WildFly 26, preservando Jakarta EE 8 e o namespace javax.</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.build.outputTimestamp>2026-01-01T00:00:00Z</project.build.outputTimestamp>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <phase2.java.version.range>[1.8,1.9)</phase2.java.version.range>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <java.version.range>[17,18)</java.version.range>
 
     <jakarta.ee.web.api.version>8.0.0</jakarta.ee.web.api.version>
     <mybatis.version>3.4.5</mybatis.version>
@@ -113,7 +113,7 @@
         <version>3.0.0-M3</version>
         <executions>
           <execution>
-            <id>enforce-phase2-toolchain</id>
+            <id>enforce-java17-toolchain</id>
             <goals>
               <goal>enforce</goal>
             </goals>
@@ -123,7 +123,7 @@
                   <version>[3.9.16]</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
-                  <version>${phase2.java.version.range}</version>
+                  <version>${java.version.range}</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
@@ -162,14 +162,14 @@
     <profile>
       <id>oracle</id>
       <properties>
-        <phase2.java.version.range>[1.8,1.9)</phase2.java.version.range>
+        <java.version.range>[17,18)</java.version.range>
       </properties>
     </profile>
     <profile>
       <id>ci-h2</id>
       <properties>
-        <!-- O doctor fixa Temurin 8u492 para os dois perfis do CP-2A. -->
-        <phase2.java.version.range>[1.8,1.9)</phase2.java.version.range>
+        <!-- O doctor fixa Temurin 17.0.20+8 nos dois perfis do CP-3A. -->
+        <java.version.range>[17,18)</java.version.range>
       </properties>
     </profile>
   </profiles>

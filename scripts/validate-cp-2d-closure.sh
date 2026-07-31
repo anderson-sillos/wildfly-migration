@@ -44,15 +44,14 @@ for marker in \
   'name: portable-ci' \
   'MIGRATION_SOURCE_COMMIT: >-' \
   '${{ github.event.pull_request.head.sha || github.sha }}' \
-  'MIGRATION_CHECKPOINT=CP-2D' \
-  './scripts/doctor.sh CP-2D --profile ci-h2 --ci' \
-  './scripts/build-cp-2c.sh --profile ci-h2' \
+  'MIGRATION_CHECKPOINT=CP-3A' \
+  './scripts/doctor.sh CP-3A --profile ci-h2 --ci' \
+  './scripts/build-cp-3a.sh --profile ci-h2' \
   './scripts/validate-cp-2c-oracle-persistence.sh' \
   './scripts/validate-cp-2d-oracle-state.sh' \
-  './scripts/validate-cp-2d-phase-comparison.sh' \
-  './scripts/validate-cp-2d-manifest.sh' \
-  'app/target/contract-results/cp-2d-ci-h2.json' \
-  'name: cp-2d-portable-evidence' \
+  './scripts/validate-cp-3a.sh \' \
+  'app/target/contract-results/cp-3a-ci-h2.json' \
+  'name: cp-3a-portable-evidence' \
   'app/target/dependency-tree.txt' \
   'retention-days: 14'; do
   grep -Fq -- "$marker" "$WORKFLOW" ||

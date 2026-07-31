@@ -97,7 +97,7 @@
 - [x] 3.1 Materializar `migration/02-java8-wildfly26` e tentar executar a aplicação com Java 17 no WildFly 26.1.3 antes de atualizar bibliotecas.
 - [x] 3.2 Capturar e corrigir somente incompatibilidades necessárias ao Java 17 e reexecutar os contratos antes de modernizar dependências.
 - [x] 3.3 Produzir a matriz de cada dependência legada com versão candidata, suporte a Java 17, compatibilidade EE 8/`javax`, transitivas, impacto e decisão.
-- [ ] 3.4 Atualizar runtime, versão H2 de teste, documentação e `doctor` para a combinação Java 17/WildFly 26, preservando o perfil Oracle separado.
+- [x] 3.4 Atualizar runtime, versão H2 de teste, documentação e `doctor` para a combinação Java 17/WildFly 26, preservando o perfil Oracle separado.
 - [ ] 3.5 Encerrar `CP-3A`: validar inicialização, contratos H2/Oracle e auditoria no Java 17, registrar evidências separadas e rollback e integrar o PR pelo commit `checkpoint(CP-3A): establish Java 17 runtime`.
 
 ### Checkpoint CP-3B — Dependências centrais
