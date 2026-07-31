@@ -16,6 +16,7 @@ required_paths=(
   "docs/cp-3b-fileupload.md"
   "docs/cp-3b-logging-bridge.md"
   "docs/cp-3b-reflections-bridge.md"
+  "docs/cp-3c-xmlbeans.md"
   "docs/evidence/CP-3B.md"
   "docs/evidence/CP-1F.md"
   "docs/environment-setup.md"
@@ -31,6 +32,10 @@ required_paths=(
   "runtime/legacy/README.md"
   "runtime/legacy/profiles/README.md"
   "scripts/follow-wildfly9-log.sh"
+  "migration/steps/CP-3C-xmlbeans-5.3.0.md"
+  "migration/evidence/CP-3C/xmlbeans-ci-h2.json"
+  "scripts/validate-cp-3c-xmlbeans.sh"
+  "scripts/ValidateXmlBeans53.java"
 )
 
 for path in "${required_paths[@]}"; do
@@ -99,6 +104,35 @@ if ! grep -Fq -- \
   printf 'FALHA: índice não aponta para a decisão Reflections do CP-3B\n' >&2
   exit 1
 fi
+
+for marker in \
+  'XMLBeans 5.3.0' \
+  'pedido-importacao-v1.xsd' \
+  'PedidoDocument.Factory.parse' \
+  'round-trip' \
+  'log4j-core' \
+  'atividade 3.13' \
+  'xmlbeans.apache.org/guide/Maven.html'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3c-xmlbeans.md" \
+      "$REPOSITORY_ROOT/migration/steps/CP-3C-xmlbeans-5.3.0.md"; then
+    printf 'FALHA: documentação XMLBeans do CP-3C não contém: %s\n' \
+      "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'wildfly-migration-xmlbeans-compatibility/v1' \
+  '5.3.0' \
+  'namespaceRoundTrip' \
+  'serializationRoundTrip'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/migration/evidence/CP-3C/xmlbeans-ci-h2.json"; then
+    printf 'FALHA: evidência XMLBeans do CP-3C não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
 
 required_runbook_markers=(
   './scripts/doctor.sh CP-1E --profile ci-h2 --env .env'

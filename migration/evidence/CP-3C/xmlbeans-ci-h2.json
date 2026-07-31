@@ -1,0 +1,18 @@
+{
+  "schema": "wildfly-migration-xmlbeans-compatibility/v1",
+  "qualification": "portable-ci",
+  "profile": "ci-h2",
+  "runtime": "java17-wildfly26.1.3-ee8",
+  "xmlbeansVersion": "5.3.0",
+  "generatedPackage": "wildflyMigrationPedido1",
+  "generatedTypes": 7,
+  "checks": {
+    "validFixture": "passed",
+    "schemaRejection": "passed",
+    "namespaceRoundTrip": "passed",
+    "serializationRoundTrip": "passed",
+    "log4jCoreAbsent": "passed",
+    "staxApiTransitivelyAbsent": "passed"
+  },
+  "notes": "WAR e commit serão fixados no fechamento do CP-3C."
+}

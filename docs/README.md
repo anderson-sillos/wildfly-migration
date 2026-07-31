@@ -48,6 +48,8 @@ passos.
     scanners, TCCL, conjunto e ordem de validadores no WildFly 26.
 21. [Evidência CP-3B](evidence/CP-3B.md): resultados parciais das atualizações
     centrais e conclusão consolidada no fechamento do checkpoint.
+22. [XMLBeans 5.3.0 do CP-3C](cp-3c-xmlbeans.md): geração dos tipos a partir
+    do XSD, validação de namespace/serialização e auditoria do WAR.
 
 ## Aplicação e arquitetura
 
@@ -59,6 +61,7 @@ passos.
 - [ponte temporária de logging do CP-3B](cp-3b-logging-bridge.md);
 - [Commons FileUpload 1.x transitório no CP-3B](cp-3b-fileupload.md);
 - [Reflections 0.10.2 transitório no CP-3B](cp-3b-reflections-bridge.md);
+- [XMLBeans 5.3.0 e tipos gerados do CP-3C](cp-3c-xmlbeans.md);
 - [persistência MyBatis](mybatis-persistence.md);
 - [upload legado e metadados comparáveis](legacy-upload.md);
 - [importação XML legada](legacy-xml-import.md);

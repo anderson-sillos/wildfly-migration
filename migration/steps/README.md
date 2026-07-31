@@ -27,3 +27,5 @@ Registros atuais:
   separação entre produto JDBC e Release Update observado no banco.
 - [`CP-3B-reflections-0.10.2.md`](CP-3B-reflections-0.10.2.md):
   scanners e classloader explícitos para preservar a descoberta anotada.
+- [`CP-3C-xmlbeans-5.3.0.md`](CP-3C-xmlbeans-5.3.0.md):
+  geração dos tipos pelo XSD e round-trip seguro de XMLBeans 5.3.0.
