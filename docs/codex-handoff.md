@@ -1,163 +1,126 @@
 # Codex handoff
 
-Atualizado em 2026-07-29 durante o checkpoint `CP-2B`.
+Atualizado em 31/07/2026 após a conclusão da atividade 3.8 do checkpoint
+`CP-3B`. O trabalho deve permanecer pausado antes da atividade 3.9.
 
-Este documento preserva o contexto operacional necessário para continuar o
-laboratório em outra sessão do Codex. Ele não substitui o OpenSpec, o runbook
-ou as evidências e não contém credenciais, URLs Oracle, endereços internos nem
-conteúdo do `.env`.
+Este documento preserva o contexto operacional para a próxima sessão. Ele não
+substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
+URLs Oracle, endereços internos nem valores do `.env`.
 
-## Objetivo e decisões consolidadas
+## Estado de retomada
 
-- Repositório pessoal: `anderson-sillos/wildfly-migration`.
-- Licença do projeto: `AGPL-3.0-only`.
-- Identidade Git: `asillos@gmail.com`.
-- Uma única árvore Maven `app/` evolui entre as fases; não existem
-  `legacy-app` ou `modern-app`.
-- Cada checkpoint usa branch `checkpoint/*`, PR, checks e squash identificável.
-- Fases públicas:
-  1. Java 7u80/WildFly 9.0.2;
-  2. Java 8/WildFly 26.1.3/EE 8 `javax`;
-  3. OpenJDK 25/WildFly 41 comunitário/Jakarta EE 11, com gates internos em
-     Java 17 e Java 21.
-- H2 em memória gera somente `portable-ci`; Oracle Database 19c RU 19.3 gera a
-  qualificação oficial `oracle-qualified`.
-- Ambos os perfis usam pool gerenciado pelo WildFly em
-  `java:/jdbc/MigrationDS`. Drivers ficam fora do WAR.
-- `.env` é local e ignorado. Nunca mostrar ou versionar seus valores.
-
-## Estado atual
-
+- Repositório: `anderson-sillos/wildfly-migration`.
 - Mudança OpenSpec: `create-java-web-migration-lab`.
-- Branch: `checkpoint/cp-2b-wildfly26`.
-- Último squash no `main`: `bce4fb9`, fechamento do `CP-2A` pelo PR 15.
-- Tag pública da fase 1:
-  `migration/01-legacy-baseline`, apontando para `a7c7b5b`.
-- Tarefas OpenSpec 2.1 a 2.9 concluídas.
-- Progresso preparado: 44 de 110 tarefas.
+- Branch: `checkpoint/cp-3b-core-dependencies`.
+- PR draft: [#20 — CP-3B: modernizar dependências centrais](https://github.com/anderson-sillos/wildfly-migration/pull/20).
+- Base do checkpoint: `6d94e5fc735575fa2ac644690a2a0635d921199f`, fechamento do CP-3A.
+- Progresso OpenSpec: 63 de 110 tarefas concluídas.
+- Atividades CP-3B concluídas: 3.6, 3.7 e 3.8.
+- Próxima atividade: 3.9, atualizar Reflections para 0.10.2.
+- O PR deve continuar draft e não deve ser integrado antes do fechamento 3.10.
 
-## CP-2A encerrado
+## Decisões permanentes
 
-O CP-2A executou primeiro o WAR congelado Java 7, bytecode major 51 e SHA-256
-`9dc324fcdb800e5f65ca7f54d42c65fb2ac6edcdda7ebddc023665fb6191edbe`
-no Temurin Java 8/WildFly 9. Os 14 contratos H2 passaram sem recompilação.
+- Uma única árvore Maven em `app/` evolui entre as fases; não existem
+  `legacy-app` nem `modern-app`.
+- A fase 1 usa Java 7u80/WildFly 9.0.2; a fase 2 usa Java 8/WildFly
+  26.1.3/EE 8 `javax`; a fase 3 termina em OpenJDK 25/WildFly 41
+  comunitário/Jakarta EE 11, com gates internos Java 17 e Java 21.
+- H2 em memória fornece somente `portable-ci`. A qualificação oficial
+  `oracle-qualified` exige Oracle Database 19c RU 19.3.
+- Os dois perfis usam datasource e pool gerenciados pelo WildFly em
+  `java:/jdbc/MigrationDS`; os drivers ficam fora do WAR.
+- `.env`, credenciais, drivers proprietários e arquivos de runtime locais não
+  são versionados.
+- Cada checkpoint usa branch, PR e checks; somente o fechamento recebe o
+  commit squash identificável.
 
-As duas incompatibilidades naturais registradas são:
+## CP-3B concluído até a atividade 3.8
 
-- `INC-005`: Maven Enforcer rejeitava Java 8 pela faixa `[1.7,1.8)`;
-- `INC-006`: WildFly 9 enviava `-XX:MaxPermSize`, removida no Java 8.
+### 3.6 — MyBatis
 
-O estado corrigido:
+- MyBatis foi atualizado de 3.4.5 para 3.5.19.
+- Mappers, aliases, type handlers, reflexão, commit e rollback passaram no H2
+  e no Oracle.
+- O Oracle também aprovou `TIMESTAMP(6)` e BLOB.
+- Commit de implementação:
+  `d5f8a08242d4cdd18595a97e010954f1ee29f2f3`.
 
-- usa Eclipse Temurin OpenJDK 8u492-b09, origem, licença e SHA-256 fixados;
-- mantém Maven 3.8.9, WildFly 9.0.2.Final, dependências e `javax.*`;
-- produz WAR bytecode major 52 com SHA-256
-  `bb6caddd16d36028ef8547398634c6e6fbf0de389d7a63b5c5f803a3409a53e4`;
-- preserva as 24 dependências, os 20 JARs e a árvore Maven SHA-256
-  `2bd0439fb193fe3ba416980c3f3de606ae9152ca14a55b5dc5e01c018f9adcd6`;
-- remove `MaxPermSize` somente da cópia temporária do WildFly usada no Java 8.
-- registra a conclusão comprovada no próprio documento de evidência do CP-2A,
-  sem criar um quadro paralelo para checkpoints pendentes.
+### 3.7 — logging
+
+- `log4j:log4j:1.2.14` e `log4j.properties` foram removidos.
+- Imports `org.apache.log4j` permanecem provisoriamente sobre
+  `log4j-over-slf4j` 1.7.36.
+- O WildFly fornece SLF4J e JBoss LogManager; o WAR não inclui API SLF4J nem
+  backend concorrente.
+- Categoria, MDC e stack trace completo passaram nos dois bancos.
+- `logImpl` permanece implícito e deve ser fixado como `SLF4J` na atividade
+  3.34.
+- Commit de implementação:
+  `c9a4ee17b3548e57bd3c5cc499051e34eeebcf9c`.
+
+### 3.8 — upload
+
+- Commons FileUpload foi atualizado de 1.2.2 para 1.6.0.
+- Commons IO foi atualizado de 1.3.2 para 2.19.0 e continua explícito no POM.
+- O contrato `javax.servlet`, `ServletFileUpload`, `DiskFileItemFactory` e
+  `FileItem` foi preservado; a troca por Servlet `Part` pertence à 3.32.
+- H2 e Oracle aprovaram upload válido, nome normalizado, round-trip de
+  conteúdo/metadados, limites de 512 KiB por arquivo e 576 KiB por requisição
+  e limpeza de temporários `upload_*`.
+- Ambos reproduziram o WAR SHA-256
+  `b199837b374d44cc84df1dcadbdfdf3ff53351201305c70828b9b2cc602fa3ff`.
+- Commit de implementação:
+  `64b5962e23a7d5dcb740c3a8d50a6ac172c8878f`.
+- Commit de evidências: `beabe1b`.
+- Rollback isolado da 3.8: retornar ao commit verde
+  `e73f3184917984062d9ce8037d75236631399d99`.
+
+As conclusões explicativas estão em `docs/evidence/CP-3B.md`; os relatórios
+sanitizados ficam em `migration/evidence/CP-3B/`.
 
 ## Validações aprovadas
 
-Sobre `c76f42f`:
+- `repository-baseline` local: aprovado.
+- `doctor CP-3B/ci-h2 --non-interactive`: 200 OK, sem falha ou aviso.
+- Build Java 17/Maven 3.9.16: 20 bibliotecas, bytecode major 61.
+- Qualificação H2 2.4.240: aprovada como `portable-ci`.
+- Qualificação Oracle 19c RU 19.3: aprovada como `oracle-qualified` e dados
+  `LAB-SMOKE-*` removidos.
+- H2 e Oracle: os mesmos 14 contratos HTTP, commit-fonte e WAR.
+- GitHub Actions
+  [run 30640741212](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30640741212):
+  `repository-baseline` aprovado em 11s e `portable-ci` completo aprovado em
+  59s.
 
-- `doctor CP-2A/ci-h2`: 107 OK;
-- `doctor CP-2A/oracle`: 106 OK;
-- todas as validações estáticas CP-1B a CP-2A: aprovadas;
-- build Java 8/Maven 3.8.9 e auditoria major 52: aprovados;
-- H2 schema lifecycle e probe MyBatis: aprovados;
-- Java 8/WildFly 9/H2: 14/14, `portable-ci`;
-- Java 8/WildFly 9/Oracle: 14/14, `oracle-qualified`;
-- schema Oracle descartável, datasource JNDI, pool e limpeza: aprovados;
-- H2 e Oracle produziram o mesmo WAR e relatórios sanitizados ligados a
-  `c76f42f`;
-- o CI hospedado aprovou os checks finais no workflow `30465991815`;
-- o PR 15 foi integrado pelo squash
-  `bce4fb90b85301a0f2dd60c46f0ec5f6a96ff7a0`.
+Essa execução remota encerra a comprovação do comportamento do CI. Não repetir
+auditorias históricas em cada atividade. Nos próximos PRs, acompanhar somente
+os checks obrigatórios do SHA atual; consultar histórico de runs ou caches
+apenas diante de falha, comportamento inesperado ou mudança no workflow/cache.
 
-## CP-2B iniciado
+## Observação sobre o ambiente Codex
 
-- WildFly comunitário 26.1.3.Final baixado do release oficial:
-  `wildfly-26.1.3.Final.tar.gz`;
-- SHA-1 publicado:
-  `b9f52ba41df890e09bb141d72947d2510caf758c`;
-- SHA-256 fixado:
-  `aadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f02528ae59`;
-- instalação externa:
-  `/opt/migration-lab/tools/wildfly-26.1.3.Final`;
-- o `.env` local ignorado foi selecionado para `CP-2B` e recebeu os três
-  valores `WILDFLY26_*`;
-- `doctor CP-2B/ci-h2`: 126 OK, sem falha ou aviso;
-- `doctor CP-2B/oracle`: 125 OK, sem falha ou aviso;
-- o WAR aprovado no CP-2A manteve SHA-256
-  `bb6caddd16d36028ef8547398634c6e6fbf0de389d7a63b5c5f803a3409a53e4`;
-- a tentativa sem correção iniciou o WildFly em loopback, mas deixou o
-  deployment `FAILED` e o health em `404`;
-- causa natural catalogada como `INC-007`: ausência de
-  `java:/jdbc/MigrationDS` na configuração original do WildFly 26;
-- aviso preliminar `WFLYLOG0100`: suporte a `log4j.properties` no deployment
-  está depreciado, catalogado como `INC-008` e adiado para `CP-3B`;
-- `INC-009`: listener HTTPS e recursos de keystore removidos somente da cópia
-  temporária;
-- `INC-010`: CLI do WildFly 26 não aceita `pool-name`; perfis próprios
-  preservam o restante do contrato;
-- H2 e Oracle aprovaram 14/14 contratos, pool, health e classloader no runtime
-  `java8-wildfly26.1.3`, vinculados ao commit
-  `5d1f6be20168909e8777a5f8a479e7d6b6d4a81a`;
-- `INC-008` permanece não bloqueante; foi registrada a alternativa de retirar
-  a configuração do WAR sem trocar a biblioteca, preferindo o subsistema de
-  logging a uma propriedade global de arquivo externo;
-- PR #16 aberto; a execução GitHub Actions `30475883532` aprovou
-  `repository-baseline` e `portable-ci` no WildFly 26;
-- o fechamento do PR passou a cachear somente os arquivos fixados de Java,
-  Maven, WildFly e H2, com chave derivada dos manifestos e SHA-256 revalidado
-  em toda execução.
-- a tentativa 1 do workflow `30477479488` gravou o cache de 330.748.197 bytes
-  e concluiu `portable-ci` em 2m42s; a tentativa 2 restaurou a mesma chave,
-  revalidou os quatro arquivos sem download e concluiu em 1m02s;
-- `checkout` e `upload-artifact` foram atualizadas para v6; com
-  `actions/cache@v5`, as três actions do workflow usam Node 24.
-- o CI foi consolidado em `.github/workflows/validate.yml`, preservando os
-  jobs independentes `repository-baseline` e `portable-ci`; uma única etapa
-  baseada em `git diff` mantém PRs exclusivamente documentais sem recriar o
-  runtime;
-- o run `30591562923` aprovou a consolidação com o fluxo completo, caches
-  restaurados e 14 contratos, sem cancelar a execução iniciada;
-- o workflow portátil passou a cachear somente `~/.m2/repository`, com chave
-  exata baseada em SO, arquitetura, Maven 3.8.9 e `app/pom.xml`, sem
-  `restore-keys`, `settings.xml`, resultados ou credenciais;
-- Maven Central foi comprovado com os mesmos 8.296.518 bytes e SHA-256
-  aprovado do Maven 3.8.9 e passou a ser a origem primária do CI, mantendo
-  Apache Archive como fallback;
-- o workflow não cancela uma validação já iniciada da mesma referência; o
-  smoke WildFly e os 14 contratos não foram alterados.
-- no workflow `30479982987`, a tentativa 1 comprovou ambos os cache misses,
-  Maven Central em aproximadamente 0,1s, build Maven em 19,468s e job completo
-  em 1m04s; a tentativa 2 restaurou runtime e Maven, executou o Maven em
-  2,158s e concluiu o mesmo job em 39s;
-- os caches medidos no PR ocupam 330.748.175 bytes para o runtime e
-  28.626.190 bytes para `~/.m2/repository`.
+O WildFly precisa consultar interfaces de rede e abrir portas em loopback. Em
+sandbox com rede restrita, o boot falha com
+`java.net.SocketException: Operation not permitted (Socket creation failed)`.
+Isso é uma restrição do executor, não incompatibilidade da aplicação. As
+sondas de runtime devem receber permissão de loopback; validações estáticas e
+o build podem executar no sandbox.
 
-## Próximas ações
+## Próxima ação
 
-1. Confirmar o CI do commit documental final do PR #16.
-2. Integrar o PR por squash como
-   `checkpoint(CP-2B): migrate runtime to WildFly 26`.
-3. Atualizar `main` e iniciar o CP-2C pela tarefa 2.11.
-
-## Comandos de retomada
+Retomar pela atividade 3.9 sem refazer a auditoria de CI já aprovada:
 
 ```bash
 git status --short --branch
 openspec status --change create-java-web-migration-lab --json
 openspec instructions apply --change create-java-web-migration-lab --json
-./scripts/doctor.sh CP-2B --profile ci-h2 --env .env
-./scripts/build-cp-2a.sh --profile ci-h2 --env .env
-./scripts/validate-cp-2b.sh --war app/target/wildfly-migration.war
+./scripts/doctor.sh CP-3B --profile ci-h2 --env .env --non-interactive
+./scripts/validate-cp-3b.sh
 ```
 
-A primeira evidência sanitizada do CP-2B está em
-`migration/evidence/CP-2B/before-deployment.properties`. O `.env`, logs
-temporários, URLs internas e credenciais continuam fora do controle de versão.
+Antes de alterar Reflections, confirmar o contrato congelado de descoberta,
+conjunto e ordem dos validadores. O mecanismo final já decidido para remover
+Reflections é um `ServletContainerInitializer` em JAR separado, mas essa troca
+fica nas subtarefas da atividade 3.33; a 3.9 faz somente a atualização para
+0.10.2.
