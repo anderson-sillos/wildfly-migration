@@ -40,6 +40,8 @@ passos.
     fixas, H2 2.4.240, preparação, validação e rollback.
 17. [Dependências centrais do CP-3B](cp-3b-core-dependencies.md): atualizações
     isoladas, qualificação H2/Oracle e rollback do gate Java 17.
+18. [Evidência CP-3B](evidence/CP-3B.md): resultados parciais das atualizações
+    centrais e conclusão consolidada no fechamento do checkpoint.
 
 ## Aplicação e arquitetura
 

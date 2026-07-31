@@ -13,6 +13,7 @@ required_paths=(
   "docs/cp-3a-java17-runtime.md"
   "docs/cp-3a-dependency-matrix.md"
   "docs/cp-3b-core-dependencies.md"
+  "docs/evidence/CP-3B.md"
   "docs/evidence/CP-1F.md"
   "docs/environment-setup.md"
   "docs/legacy-application-runbook.md"
@@ -233,6 +234,20 @@ if ! grep -Fq -- \
   printf 'FALHA: índice não aponta para o CP-3B\n' >&2
   exit 1
 fi
+
+for marker in \
+  'd5f8a08242d4cdd18595a97e010954f1ee29f2f3' \
+  '94a6c0d81951cb47f591927222b2a070756ba9b9c67ed2925e88946727ae9106' \
+  'MyBatis 3.5.19 pode substituir diretamente' \
+  '14 contratos HTTP' \
+  'logImpl' \
+  '6d94e5fc735575fa2ac644690a2a0635d921199f'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/evidence/CP-3B.md"; then
+    printf 'FALHA: evidência CP-3B não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
 
 help_output="$(
   "$REPOSITORY_ROOT/scripts/smoke-wildfly9-datasource.sh" --help

@@ -102,7 +102,7 @@
 
 ### Checkpoint CP-3B — Dependências centrais
 
-- [ ] 3.6 Atualizar MyBatis para 3.5.19 e validar em H2 e Oracle os mappers, aliases, type handlers, reflexão e limites transacionais.
+- [x] 3.6 Atualizar MyBatis para 3.5.19 e validar em H2 e Oracle os mappers, aliases, type handlers, reflexão e limites transacionais.
 - [ ] 3.7 Remover `log4j:log4j` e adotar logging mantido, usando ponte temporária da API 1.2 somente onde necessário no gate Java 17.
 - [ ] 3.8 Atualizar Commons FileUpload para a última linha 1.x aprovada compatível com `javax` e preservar provisoriamente o contrato de upload.
 - [ ] 3.9 Atualizar Reflections para 0.10.2 e validar descoberta, conjunto e ordem dos validadores no classloader do WildFly 26.

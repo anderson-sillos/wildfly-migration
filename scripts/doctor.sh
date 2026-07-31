@@ -388,6 +388,9 @@ check_required_files() {
   if rank_at_least CP-3B; then
     required+=(
       "docs/cp-3b-core-dependencies.md"
+      "docs/evidence/CP-3B.md"
+      "migration/evidence/CP-3B/mybatis-ci-h2.json"
+      "migration/evidence/CP-3B/mybatis-oracle.json"
       "migration/steps/CP-3B-mybatis-3.5.19.md"
       "runtime/phase3/java17-wildfly26/war-libraries.txt"
       "scripts/build-cp-3b.sh"
