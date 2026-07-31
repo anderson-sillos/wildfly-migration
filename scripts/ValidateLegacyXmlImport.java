@@ -57,8 +57,8 @@ public final class ValidateLegacyXmlImport {
                         + "</repackage>") >= 0,
                 "geração dos tipos XMLBeans não está configurada pelo XSD");
         require(pom.indexOf(
-                "<dom4j.version>1.6.1</dom4j.version>") >= 0,
-                "dom4j 1.6.1 não está fixado");
+                "<dom4j.version>2.2.0</dom4j.version>") >= 0,
+                "dom4j 2.2.0 não está fixado");
         require(parser.indexOf("PedidoDocument.Factory.parse") >= 0
                 && parser.indexOf("document.validate") >= 0
                 && parser.indexOf("wildflyMigrationPedido1.PedidoDocument") >= 0,

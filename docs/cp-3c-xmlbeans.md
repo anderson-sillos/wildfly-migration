@@ -1,8 +1,8 @@
 # CP-3C — XMLBeans 5.3.0 e tipos gerados
 
-Esta atividade é a primeira entrega do CP-3C. Ela atualiza somente o
-processamento XML; dom4j, as APIs XML duplicadas e o driver Oracle continuam
-nas versões do CP-3B até as atividades 3.12–3.14.
+Esta atividade iniciou o CP-3C. XMLBeans e dom4j já foram atualizados; as APIs
+XML duplicadas e o driver Oracle continuam nas versões do CP-3B até as
+atividades 3.13–3.14.
 
 ## Decisão
 
@@ -17,7 +17,7 @@ O namespace `urn:wildfly-migration:pedido:1` é mapeado para o pacote gerado
 `wildflyMigrationPedido1`. O `repackage` explícito evita que o hífen do
 artifactId do Maven seja transformado em um identificador inválido de pacote.
 O parser usa `PedidoDocument.Factory.parse` e `validate`; o mapeamento de
-domínio continua com dom4j 1.6.1 para que a próxima troca permaneça isolada.
+domínio agora usa dom4j 2.2.0 com o mesmo XMLReader seguro.
 
 XMLBeans 5.3.0 traz `log4j-api:2.24.2` como dependência de API. O WAR mantém
 essa API, mas não empacota `log4j-core` nem outro backend: no WildFly, o
@@ -48,10 +48,20 @@ O resultado sanitizado fica em
 A evidência versionada da atividade fica em
 `migration/evidence/CP-3C/xmlbeans-ci-h2.json` após o commit da entrega.
 
+O parsing dom4j é validado separadamente:
+
+```bash
+./scripts/validate-cp-3c-dom4j.sh --env .env
+```
+
+Essa sonda confirma documento legítimo, namespace, rejeição de XXE e rejeição
+de expansão de entidades; o resultado fica em
+`migration/evidence/CP-3C/dom4j-ci-h2.json`.
+
 ## Limites e rollback
 
-Esta atividade não comprova a troca de dom4j, a remoção das APIs XML antigas,
-nem a compatibilidade do `ojdbc7` com o destino final. Ela também não altera o
+Esta atividade não comprova a remoção das APIs XML antigas, nem a
+compatibilidade do `ojdbc7` com o destino final. Ela também não altera o
 contrato XML ou o namespace público.
 
 O rollback é o commit imediatamente anterior à atividade 3.11: ele restaura
@@ -61,4 +71,5 @@ XMLBeans 2.3.0 e a compilação dinâmica histórica, sem alterar schema ou dado
 
 - [Guia oficial do plugin Maven XMLBeans](https://xmlbeans.apache.org/guide/Maven.html);
 - [Download e histórico oficial do XMLBeans 5.3.0](https://xmlbeans.apache.org/download/);
-- [Tipos gerados e namespaces no XMLBeans](https://xmlbeans.apache.org/guide/GeneratedTypes.html).
+- [Tipos gerados e namespaces no XMLBeans](https://xmlbeans.apache.org/guide/GeneratedTypes.html);
+- [dom4j 2.2.0 no Maven Central](https://repo1.maven.org/maven2/org/dom4j/dom4j/2.2.0/) e [SAXReader](https://dom4j.github.io/javadoc/2.0.3/org/dom4j/io/SAXReader.html).

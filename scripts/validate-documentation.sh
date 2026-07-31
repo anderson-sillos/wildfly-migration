@@ -17,6 +17,7 @@ required_paths=(
   "docs/cp-3b-logging-bridge.md"
   "docs/cp-3b-reflections-bridge.md"
   "docs/cp-3c-xmlbeans.md"
+  "docs/cp-3c-dom4j.md"
   "docs/evidence/CP-3B.md"
   "docs/evidence/CP-1F.md"
   "docs/environment-setup.md"
@@ -33,9 +34,13 @@ required_paths=(
   "runtime/legacy/profiles/README.md"
   "scripts/follow-wildfly9-log.sh"
   "migration/steps/CP-3C-xmlbeans-5.3.0.md"
+  "migration/steps/CP-3C-dom4j-2.2.0.md"
   "migration/evidence/CP-3C/xmlbeans-ci-h2.json"
+  "migration/evidence/CP-3C/dom4j-ci-h2.json"
   "scripts/validate-cp-3c-xmlbeans.sh"
+  "scripts/validate-cp-3c-dom4j.sh"
   "scripts/ValidateXmlBeans53.java"
+  "scripts/ValidateDom4j22.java"
 )
 
 for path in "${required_paths[@]}"; do
@@ -63,6 +68,21 @@ for marker in \
 done
 
 for marker in \
+  'dom4j 2.2.0' \
+  'org.dom4j:dom4j:2.2.0' \
+  'XMLReader' \
+  'pedido-xxe.xml' \
+  'pedido-entidades-expansivas.xml' \
+  'atividade 3.13'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3c-dom4j.md" \
+      "$REPOSITORY_ROOT/migration/steps/CP-3C-dom4j-2.2.0.md"; then
+    printf 'FALHA: documentação dom4j do CP-3C não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
   '## Fechamento do CP-3B — atividade 3.10' \
   '14b9fbf23757c6cb721a4d9a809569d1b5c71b6b' \
   'c6ed5ae93c5060815721084c2cb9beed9dd700f7' \
@@ -75,6 +95,18 @@ for marker in \
   if ! grep -Fq -- "$marker" \
       "$REPOSITORY_ROOT/docs/evidence/CP-3B.md"; then
     printf 'FALHA: fechamento CP-3B não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'wildfly-migration-dom4j-compatibility/v1' \
+  '2.2.0' \
+  'xxeRejection' \
+  'entityExpansionRejection'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/migration/evidence/CP-3C/dom4j-ci-h2.json"; then
+    printf 'FALHA: evidência dom4j do CP-3C não contém: %s\n' "$marker" >&2
     exit 1
   fi
 done

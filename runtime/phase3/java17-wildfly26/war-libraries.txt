@@ -3,7 +3,7 @@ commons-digester-1.8.1.jar
 commons-fileupload-1.6.0.jar
 commons-io-2.19.0.jar
 commons-logging-api-1.1.jar
-dom4j-1.6.1.jar
+dom4j-2.2.0.jar
 geronimo-stax-api_1.0_spec-1.0.jar
 javassist-3.28.0-GA.jar
 jsr305-3.0.2.jar

@@ -132,7 +132,7 @@ public final class ValidateApplicationPom {
         expected.put(
                 "org.apache.geronimo.specs:geronimo-stax-api_1.0_spec",
                 values("1.0", "compile"));
-        expected.put("dom4j:dom4j", values("1.6.1", "compile"));
+        expected.put("org.dom4j:dom4j", values("2.2.0", "compile"));
 
         Element dependencies = child(project, "dependencies");
         NodeList dependencyNodes = dependencies.getChildNodes();

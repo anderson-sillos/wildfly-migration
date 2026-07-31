@@ -1,0 +1,13 @@
+{
+  "schema": "wildfly-migration-dom4j-compatibility/v1",
+  "qualification": "portable-ci",
+  "profile": "ci-h2",
+  "runtime": "java17-wildfly26.1.3-ee8",
+  "dom4jVersion": "2.2.0",
+  "checks": {
+    "validDocument": "passed",
+    "xxeRejection": "passed",
+    "entityExpansionRejection": "passed"
+  },
+  "notes": "WAR e commit serão fixados na evidência consolidada do CP-3C."
+}

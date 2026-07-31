@@ -1,7 +1,7 @@
 # Codex handoff
 
-Atualizado em 31/07/2026 após a conclusão da atividade 3.11. O trabalho deve
-permanecer pausado antes da atividade 3.12.
+Atualizado em 31/07/2026 após a conclusão da atividade 3.12. O trabalho deve
+permanecer pausado antes da atividade 3.13.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -16,8 +16,8 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Base do checkpoint: `6d94e5fc735575fa2ac644690a2a0635d921199f`, fechamento do CP-3A.
 - Progresso OpenSpec: 66 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
-- Atividade CP-3C concluída: 3.11, atualizar XMLBeans para 5.3.0.
-- Próxima atividade: 3.12, atualizar dom4j para 2.2.0.
+- Atividades CP-3C concluídas: 3.11, XMLBeans 5.3.0; 3.12, dom4j 2.2.0.
+- Próxima atividade: 3.13, remover `xml-apis` e Geronimo StAX.
 - O PR #20 foi encerrado com squash merge pelo commit de checkpoint do CP-3B.
 
 ## Decisões permanentes
@@ -129,6 +129,19 @@ sanitizados ficam em `migration/evidence/CP-3B/`.
 - Detalhes e fontes oficiais: `docs/cp-3c-xmlbeans.md` e
   `migration/steps/CP-3C-xmlbeans-5.3.0.md`.
 
+## CP-3C — atividade 3.12 concluída
+
+- A coordenada foi alterada de `dom4j:dom4j:1.6.1` para
+  `org.dom4j:dom4j:2.2.0`; nenhuma transitiva opcional foi adicionada ao WAR.
+- O parser continua usando XMLReader namespace-aware com processamento seguro,
+  DTD/entidades externas bloqueadas e `EntityResolver` de rejeição.
+- Documento legítimo, XXE e expansão de entidades foram validados pela sonda
+  `scripts/validate-cp-3c-dom4j.sh`.
+- WAR reproduzido com 19 bibliotecas e SHA-256
+  `6a5d3ba33b6bd1541d7a7aa59962daa5d719a48d973fd8062f800082094b59b3`.
+- Detalhes: `docs/cp-3c-dom4j.md` e
+  `migration/steps/CP-3C-dom4j-2.2.0.md`.
+
 ## Validações aprovadas
 
 - `repository-baseline` local: aprovado.
@@ -159,7 +172,7 @@ o build podem executar no sandbox.
 
 ## Próxima ação
 
-Após integrar a entrega da 3.11, retomar pela atividade 3.12 sem refazer a
+Após integrar a entrega da 3.12, retomar pela atividade 3.13 sem refazer a
 auditoria histórica de CI já aprovada:
 
 ```bash
@@ -167,7 +180,7 @@ git status --short --branch
 openspec status --change create-java-web-migration-lab --json
 openspec instructions apply --change create-java-web-migration-lab --json
 ./scripts/doctor.sh CP-3B --profile ci-h2 --env .env --non-interactive
-./scripts/validate-cp-3c-xmlbeans.sh --env .env --skip-build
+./scripts/validate-cp-3c-dom4j.sh --env .env --skip-build
 ```
 
 A troca de Reflections por `ServletContainerInitializer` em JAR separado

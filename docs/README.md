@@ -50,6 +50,8 @@ passos.
     centrais e conclusão consolidada no fechamento do checkpoint.
 22. [XMLBeans 5.3.0 do CP-3C](cp-3c-xmlbeans.md): geração dos tipos a partir
     do XSD, validação de namespace/serialização e auditoria do WAR.
+23. [dom4j 2.2.0 do CP-3C](cp-3c-dom4j.md): coordenada moderna, reader seguro
+    e rejeição de XXE/expansão de entidades.
 
 ## Aplicação e arquitetura
 
@@ -62,6 +64,7 @@ passos.
 - [Commons FileUpload 1.x transitório no CP-3B](cp-3b-fileupload.md);
 - [Reflections 0.10.2 transitório no CP-3B](cp-3b-reflections-bridge.md);
 - [XMLBeans 5.3.0 e tipos gerados do CP-3C](cp-3c-xmlbeans.md);
+- [dom4j 2.2.0 e parsing seguro do CP-3C](cp-3c-dom4j.md);
 - [persistência MyBatis](mybatis-persistence.md);
 - [upload legado e metadados comparáveis](legacy-upload.md);
 - [importação XML legada](legacy-xml-import.md);

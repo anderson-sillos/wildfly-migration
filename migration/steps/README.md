@@ -29,3 +29,5 @@ Registros atuais:
   scanners e classloader explícitos para preservar a descoberta anotada.
 - [`CP-3C-xmlbeans-5.3.0.md`](CP-3C-xmlbeans-5.3.0.md):
   geração dos tipos pelo XSD e round-trip seguro de XMLBeans 5.3.0.
+- [`CP-3C-dom4j-2.2.0.md`](CP-3C-dom4j-2.2.0.md):
+  mudança de coordenada, parsing legítimo e rejeição de XXE/entidades.
