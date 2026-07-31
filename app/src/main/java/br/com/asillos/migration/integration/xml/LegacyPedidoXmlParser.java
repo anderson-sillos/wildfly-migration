@@ -33,7 +33,7 @@ import org.xml.sax.XMLReader;
 import wildflyMigrationPedido1.PedidoDocument;
 
 /**
- * Valida com tipos gerados pelo XMLBeans 5.3.0 e mapeia com dom4j 1.6.1.
+ * Valida com tipos gerados pelo XMLBeans 5.3.0 e mapeia com dom4j 2.2.0.
  */
 public final class LegacyPedidoXmlParser {
     private static final Logger LOGGER =
