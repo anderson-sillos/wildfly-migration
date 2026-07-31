@@ -21,7 +21,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.log4j.Logger;
 
 /**
- * Upload multipart deliberadamente implementado com Commons FileUpload 1.2.2.
+ * Upload multipart transitório com a última linha Commons FileUpload 1.x.
  */
 public final class UploadServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;

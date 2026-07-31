@@ -23,8 +23,8 @@
     <jakarta.ee.web.api.version>8.0.0</jakarta.ee.web.api.version>
     <mybatis.version>3.5.19</mybatis.version>
     <slf4j.version>1.7.36</slf4j.version>
-    <commons.fileupload.version>1.2.2</commons.fileupload.version>
-    <commons.io.version>1.3.2</commons.io.version>
+    <commons.fileupload.version>1.6.0</commons.fileupload.version>
+    <commons.io.version>2.19.0</commons.io.version>
     <reflections.version>0.9.10</reflections.version>
     <tiles.version>2.1.4</tiles.version>
     <xmlbeans.version>2.3.0</xmlbeans.version>
@@ -71,7 +71,7 @@
       <artifactId>commons-fileupload</artifactId>
       <version>${commons.fileupload.version}</version>
     </dependency>
-    <!-- FileUpload 1.2.2 declara esta dependência runtime como opcional. -->
+    <!-- Mantida explícita para auditar a versão usada pelo FileUpload. -->
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>

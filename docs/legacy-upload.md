@@ -11,6 +11,14 @@ opcional. A menor correção foi declarar essa mesma versão diretamente, elevan
 o WAR de 19 para 20 bibliotecas. O registro antes/depois está em
 [CP-1F — dependência opcional do FileUpload](../migration/steps/CP-1F-commons-fileupload-commons-io.md).
 
+## Evolução no CP-3B
+
+A atividade 3.8 atualiza provisoriamente o mesmo contrato para Commons
+FileUpload 1.6.0 e Commons IO 2.19.0. A API continua baseada em
+`javax.servlet`; limites, normalização, metadados e limpeza permanecem
+inalterados. A qualificação adicional está em
+[Commons FileUpload 1.x transitório](cp-3b-fileupload.md).
+
 ## Contrato funcional
 
 O detalhe de um pedido publica um formulário `multipart/form-data` para:

@@ -10,6 +10,7 @@ Esta configuração materializa a atividade 3.4 sem criar uma nova fase pública
 | H2 de teste | 2.4.240 |
 | API web | Jakarta EE 8, ainda em pacotes `javax.*` |
 | Logging | SLF4J 1.7.36 do servidor/JBoss LogManager |
+| Upload transitório | Commons FileUpload 1.6.0 / Commons IO 2.19.0 |
 
 O [manifesto](runtime-manifest.tsv) registra origem, licença e SHA-256. O
 WildFly 26 é um runtime de transição EOL e não representa o destino final.
@@ -27,3 +28,8 @@ H2 pode ser promovida a `oracle-qualified`.
 Os perfis configuram categoria e MDC no subsistema de logging. O WAR contém
 temporariamente `log4j-over-slf4j` 1.7.36 para preservar os imports antigos,
 mas não empacota Log4j 1, `slf4j-api` nem backend próprio.
+
+O WAR mantém temporariamente a API `javax` do Commons FileUpload 1.x. As
+versões 1.6.0 do parser e 2.19.0 do Commons IO ficam explícitas na allowlist;
+a substituição por Servlet `Part` no namespace `jakarta` pertence à atividade
+3.32.

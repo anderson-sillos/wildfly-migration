@@ -8,9 +8,11 @@ WAR_FILE=""
 H2_RESULT_FILE=""
 H2_CONTRACT_FILE=""
 H2_LOGGING_RESULT_FILE=""
+H2_UPLOAD_RESULT_FILE=""
 ORACLE_RESULT_FILE=""
 ORACLE_CONTRACT_FILE=""
 ORACLE_LOGGING_RESULT_FILE=""
+ORACLE_UPLOAD_RESULT_FILE=""
 TEMP_DIRECTORY="$(
   mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-cp3b.XXXXXXXX"
 )"
@@ -22,8 +24,10 @@ Uso:
   ./scripts/validate-cp-3b.sh --war ARQUIVO \
     [--h2-result ARQUIVO] [--h2-contract ARQUIVO] \
     [--h2-logging-result ARQUIVO] \
+    [--h2-upload-result ARQUIVO] \
     [--oracle-result ARQUIVO] [--oracle-contract ARQUIVO] \
-    [--oracle-logging-result ARQUIVO]
+    [--oracle-logging-result ARQUIVO] \
+    [--oracle-upload-result ARQUIVO]
 
 Sem argumentos, valida a estrutura versionada do CP-3B. Os resultados
 dinâmicos são opcionais durante o desenvolvimento e obrigatórios nas
@@ -70,6 +74,11 @@ while [[ $# -gt 0 ]]; do
       H2_LOGGING_RESULT_FILE="$2"
       shift 2
       ;;
+    --h2-upload-result)
+      [[ $# -ge 2 ]] || fail "--h2-upload-result exige um arquivo"
+      H2_UPLOAD_RESULT_FILE="$2"
+      shift 2
+      ;;
     --oracle-result)
       [[ $# -ge 2 ]] || fail "--oracle-result exige um arquivo"
       ORACLE_RESULT_FILE="$2"
@@ -83,6 +92,11 @@ while [[ $# -gt 0 ]]; do
     --oracle-logging-result)
       [[ $# -ge 2 ]] || fail "--oracle-logging-result exige um arquivo"
       ORACLE_LOGGING_RESULT_FILE="$2"
+      shift 2
+      ;;
+    --oracle-upload-result)
+      [[ $# -ge 2 ]] || fail "--oracle-upload-result exige um arquivo"
+      ORACLE_UPLOAD_RESULT_FILE="$2"
       shift 2
       ;;
     -h|--help)
@@ -101,8 +115,10 @@ required_paths=(
   "docs/evidence/CP-3B.md"
   "docs/mybatis-persistence.md"
   "docs/cp-3b-logging-bridge.md"
+  "docs/cp-3b-fileupload.md"
   "migration/steps/CP-3B-mybatis-3.5.19.md"
   "migration/steps/CP-3B-log4j-over-slf4j.md"
+  "migration/steps/CP-3B-commons-fileupload-1.6.0.md"
   "app/src/main/webapp/WEB-INF/jboss-deployment-structure.xml"
   "runtime/phase2/java8-wildfly26/war-libraries.txt"
   "runtime/phase3/java17-wildfly26/war-libraries.txt"
@@ -192,6 +208,49 @@ for source in \
     fail "ponte deixou de ser necessária antes da atividade 3.34: $source"
 done
 
+grep -Fq '<commons.fileupload.version>1.6.0</commons.fileupload.version>' \
+  "$REPOSITORY_ROOT/app/pom.xml" ||
+  fail "POM não fixa Commons FileUpload 1.6.0"
+grep -Fq '<commons.io.version>2.19.0</commons.io.version>' \
+  "$REPOSITORY_ROOT/app/pom.xml" ||
+  fail "POM não fixa Commons IO 2.19.0"
+for library in \
+  commons-fileupload-1.6.0.jar \
+  commons-io-2.19.0.jar; do
+  grep -Fxq "$library" "$current_allowlist" ||
+    fail "allowlist Java 17 não contém $library"
+done
+if grep -Eq \
+    '^(commons-fileupload-1\.2\.2|commons-io-1\.3\.2)\.jar$' \
+    "$current_allowlist"; then
+  fail "allowlist Java 17 ainda contém FileUpload/Commons IO legados"
+fi
+for library in \
+  commons-fileupload-1.2.2.jar \
+  commons-io-1.3.2.jar; do
+  grep -Fxq "$library" "$phase2_allowlist" ||
+    fail "allowlist histórica da fase 2 perdeu $library"
+done
+if grep -Eq \
+    '^(commons-fileupload-1\.6\.0|commons-io-2\.19\.0)\.jar$' \
+    "$phase2_allowlist"; then
+  fail "FileUpload/Commons IO novos foram atribuídos à fase 2"
+fi
+
+upload_source="$REPOSITORY_ROOT/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java"
+for marker in \
+  'javax.servlet.http.HttpServlet' \
+  'ServletFileUpload.isMultipartContent(request)' \
+  'setFileSizeMax(AnexoRepository.MAX_FILE_BYTES)' \
+  'setSizeMax(MAX_REQUEST_BYTES)' \
+  'item.delete()'; do
+  grep -Fq "$marker" "$upload_source" ||
+    fail "upload transitório não preserva: $marker"
+done
+if grep -Fq 'jakarta.servlet' "$upload_source"; then
+  fail "atividade 3.8 não pode antecipar o namespace Jakarta"
+fi
+
 for marker in \
   'MyBatis 3.5.19' \
   'MyBatis 3.4.5' \
@@ -271,6 +330,33 @@ validate_logging_result() {
   fi
 }
 
+validate_upload_result() {
+  local file="$1"
+  local qualification="$2"
+  local profile="$3"
+  [[ -f "$file" ]] || fail "resultado de upload ausente: $file"
+  for marker in \
+    '"schema": "wildfly-migration-upload-compatibility/v1"' \
+    "\"qualification\": \"$qualification\"" \
+    "\"profile\": \"$profile\"" \
+    '"fileUploadVersion": "1.6.0"' \
+    '"commonsIoVersion": "2.19.0"' \
+    '"apiNamespace": "javax.servlet"' \
+    '"validUpload": "passed"' \
+    '"normalizedFilename": "passed"' \
+    '"metadataRoundTrip": "passed"' \
+    '"fileSizeLimit": "passed"' \
+    '"requestSizeLimit": "passed"' \
+    '"temporaryCleanup": "passed"'; do
+    grep -Fq "$marker" "$file" ||
+      fail "resultado de upload não contém: $marker"
+  done
+  if grep -Eiq \
+      'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url' "$file"; then
+    fail "resultado de upload contém configuração sensível"
+  fi
+}
+
 if grep -Fq -- \
     '- [x] 3.6 Atualizar MyBatis para 3.5.19' "$TASKS_FILE"; then
   for evidence in \
@@ -309,6 +395,22 @@ if grep -Fq -- \
   git -C "$REPOSITORY_ROOT" cat-file -e \
     "${h2_source_commit}^{commit}" 2>/dev/null ||
     fail "commit-fonte das evidências MyBatis não existe"
+fi
+
+if grep -Fq -- \
+    '- [x] 3.8 Atualizar Commons FileUpload' "$TASKS_FILE"; then
+  for evidence in \
+    "migration/evidence/CP-3B/upload-ci-h2.json" \
+    "migration/evidence/CP-3B/upload-oracle.json"; do
+    [[ -f "$REPOSITORY_ROOT/$evidence" ]] ||
+      fail "evidência obrigatória da atividade 3.8 ausente: $evidence"
+  done
+  validate_upload_result \
+    "$REPOSITORY_ROOT/migration/evidence/CP-3B/upload-ci-h2.json" \
+    portable-ci ci-h2
+  validate_upload_result \
+    "$REPOSITORY_ROOT/migration/evidence/CP-3B/upload-oracle.json" \
+    oracle-qualified oracle
 fi
 
 if grep -Fq -- \
@@ -383,6 +485,17 @@ if [[ -n "$WAR_FILE" ]]; then
       "$TEMP_DIRECTORY/war-entries.txt"; then
     fail "WAR ainda contém log4j.properties"
   fi
+  for library in \
+    commons-fileupload-1.6.0.jar \
+    commons-io-2.19.0.jar; do
+    grep -Fxq "WEB-INF/lib/$library" "$TEMP_DIRECTORY/war-entries.txt" ||
+      fail "WAR não contém $library"
+  done
+  if grep -Eq \
+      '^WEB-INF/lib/(commons-fileupload-1\.2\.2|commons-io-1\.3\.2)\.jar$' \
+      "$TEMP_DIRECTORY/war-entries.txt"; then
+    fail "WAR ainda contém FileUpload/Commons IO legados"
+  fi
   war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
 else
   war_sha256=""
@@ -408,6 +521,13 @@ if [[ -n "$H2_LOGGING_RESULT_FILE" ]]; then
     "$H2_LOGGING_RESULT_FILE" ||
     fail "resultado de logging H2 não corresponde ao WAR"
 fi
+if [[ -n "$H2_UPLOAD_RESULT_FILE" ]]; then
+  [[ -n "$WAR_FILE" ]] || fail "--h2-upload-result exige --war"
+  validate_upload_result "$H2_UPLOAD_RESULT_FILE" portable-ci ci-h2
+  grep -Fq "\"warSha256\": \"$war_sha256\"" \
+    "$H2_UPLOAD_RESULT_FILE" ||
+    fail "resultado de upload H2 não corresponde ao WAR"
+fi
 if [[ -n "$ORACLE_RESULT_FILE" ]]; then
   [[ -n "$WAR_FILE" ]] || fail "--oracle-result exige --war"
   validate_mybatis_result \
@@ -432,5 +552,13 @@ if [[ -n "$ORACLE_LOGGING_RESULT_FILE" ]]; then
     "$ORACLE_LOGGING_RESULT_FILE" ||
     fail "resultado de logging Oracle não corresponde ao WAR"
 fi
+if [[ -n "$ORACLE_UPLOAD_RESULT_FILE" ]]; then
+  [[ -n "$WAR_FILE" ]] || fail "--oracle-upload-result exige --war"
+  validate_upload_result \
+    "$ORACLE_UPLOAD_RESULT_FILE" oracle-qualified oracle
+  grep -Fq "\"warSha256\": \"$war_sha256\"" \
+    "$ORACLE_UPLOAD_RESULT_FILE" ||
+    fail "resultado de upload Oracle não corresponde ao WAR"
+fi
 
-printf 'OK: MyBatis 3.5.19 e logging transicional isolados no CP-3B\n'
+printf 'OK: MyBatis, logging e upload transicionais isolados no CP-3B\n'

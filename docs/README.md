@@ -42,7 +42,9 @@ passos.
     isoladas, qualificação H2/Oracle e rollback do gate Java 17.
 18. [Ponte de logging do CP-3B](cp-3b-logging-bridge.md): retirada do Log4j 1,
     integração transitória com SLF4J/JBoss LogManager e validação do MDC.
-19. [Evidência CP-3B](evidence/CP-3B.md): resultados parciais das atualizações
+19. [FileUpload 1.x no CP-3B](cp-3b-fileupload.md): atualização compatível
+    com `javax`, limites, temporários e validação H2/Oracle.
+20. [Evidência CP-3B](evidence/CP-3B.md): resultados parciais das atualizações
     centrais e conclusão consolidada no fechamento do checkpoint.
 
 ## Aplicação e arquitetura
@@ -53,6 +55,7 @@ passos.
 - [matriz de modernização das dependências no CP-3A](cp-3a-dependency-matrix.md);
 - [dependências centrais do CP-3B](cp-3b-core-dependencies.md);
 - [ponte temporária de logging do CP-3B](cp-3b-logging-bridge.md);
+- [Commons FileUpload 1.x transitório no CP-3B](cp-3b-fileupload.md);
 - [persistência MyBatis](mybatis-persistence.md);
 - [upload legado e metadados comparáveis](legacy-upload.md);
 - [importação XML legada](legacy-xml-import.md);

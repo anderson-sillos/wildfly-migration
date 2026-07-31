@@ -11,6 +11,7 @@ WAR_FILE=""
 CONTRACT_RESULT_FILE=""
 DIAGNOSTIC_LOG_FILE=""
 LOGGING_RESULT_FILE=""
+UPLOAD_RESULT_FILE=""
 MANUAL_MODE=false
 PRESERVE_ORACLE_SMOKES=false
 TEMP_DIRECTORY=""
@@ -26,7 +27,7 @@ Uso:
   ./scripts/smoke-wildfly9-datasource.sh --profile ci-h2|oracle \
     [--java 7|8|17] [--server 9|26] [--env ARQUIVO] [--war ARQUIVO] \
     [--contract-result ARQUIVO] [--diagnostic-log ARQUIVO] \
-    [--logging-result ARQUIVO] \
+    [--logging-result ARQUIVO] [--upload-result ARQUIVO] \
     [--manual] [--preserve-oracle-smokes]
 
 Valores já exportados no ambiente prevalecem sobre o arquivo informado.
@@ -37,6 +38,8 @@ Com --contract-result, preserva fora do runtime o relatório JSON sanitizado.
 Com --diagnostic-log, preserva uma cópia sanitizada do log do servidor.
 Com --logging-result, valida a ponte Log4j sobre SLF4J no WildFly 26/Java 17
 e preserva um relatório JSON sanitizado.
+Com --upload-result, valida a linha FileUpload 1.x no WildFly 26/Java 17 e
+preserva um relatório JSON sanitizado.
 Com --preserve-oracle-smokes, o perfil Oracle mantém temporariamente apenas
 os dados LAB-SMOKE-* para uma sonda externa; o chamador deve limpá-los.
 O padrão Java 7 preserva a reprodução histórica; CP-2A deve informar --java 8.
@@ -265,6 +268,14 @@ while [[ $# -gt 0 ]]; do
       LOGGING_RESULT_FILE="$2"
       shift 2
       ;;
+    --upload-result)
+      [[ $# -ge 2 ]] || {
+        printf 'FALHA: --upload-result exige um arquivo\n' >&2
+        exit 2
+      }
+      UPLOAD_RESULT_FILE="$2"
+      shift 2
+      ;;
     --manual)
       MANUAL_MODE=true
       shift
@@ -313,6 +324,13 @@ if [[ -n "$LOGGING_RESULT_FILE" &&
   exit 2
 fi
 
+if [[ -n "$UPLOAD_RESULT_FILE" &&
+      ( -z "$WAR_FILE" || "$SERVER_RELEASE" != "26" ||
+        "$JAVA_RELEASE" != "17" || "$MANUAL_MODE" == true ) ]]; then
+  printf 'FALHA: --upload-result exige WAR, WildFly 26, Java 17 e modo não manual\n' >&2
+  exit 2
+fi
+
 if [[ "$SERVER_RELEASE" == "26" &&
       "$JAVA_RELEASE" != "8" &&
       "$JAVA_RELEASE" != "17" ]]; then
@@ -329,9 +347,14 @@ if [[ -n "$WAR_FILE" ]]; then
     printf 'FALHA: curl é obrigatório para o smoke web\n' >&2
     exit 1
   fi
-  if [[ -n "$LOGGING_RESULT_FILE" ]] &&
+  if [[ -n "$LOGGING_RESULT_FILE" || -n "$UPLOAD_RESULT_FILE" ]] &&
      ! command -v unzip >/dev/null 2>&1; then
-    printf 'FALHA: unzip é obrigatório para validar o logging do WAR\n' >&2
+    printf 'FALHA: unzip é obrigatório para validar o WAR\n' >&2
+    exit 1
+  fi
+  if [[ -n "$UPLOAD_RESULT_FILE" ]] &&
+     ! command -v diff >/dev/null 2>&1; then
+    printf 'FALHA: diff é obrigatório para validar temporários de upload\n' >&2
     exit 1
   fi
   WAR_FILE="$(cd "$(dirname "$WAR_FILE")" && pwd)/$(basename "$WAR_FILE")"
@@ -831,6 +854,12 @@ if [[ -n "$WAR_FILE" ]]; then
     exit 1
   fi
 
+  if [[ -n "$UPLOAD_RESULT_FILE" ]]; then
+    find "$RUNTIME_HOME/standalone/tmp" -type f -name 'upload_*' \
+      -printf '%f\n' | LC_ALL=C sort \
+      >"$TEMP_DIRECTORY/upload-temporaries-before.txt"
+  fi
+
   upload_file="$TEMP_DIRECTORY/upload-smoke.txt"
   printf 'conteúdo portátil do upload CP-1F\n' >"$upload_file"
   upload_size="$(wc -c <"$upload_file" | tr -d '[:space:]')"
@@ -877,6 +906,27 @@ if [[ -n "$WAR_FILE" ]]; then
      ! grep -Fq 'excede o limite de 512 KiB' "$body"; then
     printf 'FALHA: arquivo acima do limite não foi rejeitado com HTTP 413\n' >&2
     exit 1
+  fi
+
+  if [[ -n "$UPLOAD_RESULT_FILE" ]]; then
+    request_oversized_file="$TEMP_DIRECTORY/request-oversized.bin"
+    dd if=/dev/zero of="$request_oversized_file" \
+      bs=1024 count=640 status=none
+    request_oversized_status="$(
+      curl --silent --show-error \
+        --cookie-jar "$cookies" \
+        --cookie "$cookies" \
+        --form \
+          "arquivo=@$request_oversized_file;filename=request-oversized.bin;type=application/octet-stream" \
+        --output "$body" \
+        --write-out '%{http_code}' \
+        "$base_url/anexos/upload?pedidoId=$smoke_id"
+    )"
+    if [[ "$request_oversized_status" != "413" ]] ||
+       ! grep -Fq 'A requisição excede o limite de 576 KiB' "$body"; then
+      printf 'FALHA: requisição acima do limite não foi rejeitada com HTTP 413\n' >&2
+      exit 1
+    fi
   fi
 
   xml_number="LAB-SMOKE-XML-$(date +%s)-$SERVER_PID"
@@ -1058,6 +1108,60 @@ if [[ -n "$WAR_FILE" ]]; then
       "$TEMP_DIRECTORY/server.log"; then
     printf 'FALHA: logs da execução externa não preservaram o contrato\n' >&2
     exit 1
+  fi
+
+  if [[ -n "$UPLOAD_RESULT_FILE" ]]; then
+    find "$RUNTIME_HOME/standalone/tmp" -type f -name 'upload_*' \
+      -printf '%f\n' | LC_ALL=C sort \
+      >"$TEMP_DIRECTORY/upload-temporaries-after.txt"
+    if ! diff -u \
+        "$TEMP_DIRECTORY/upload-temporaries-before.txt" \
+        "$TEMP_DIRECTORY/upload-temporaries-after.txt" >/dev/null; then
+      printf 'FALHA: arquivos temporários do upload não foram limpos\n' >&2
+      exit 1
+    fi
+
+    unzip -Z1 "$WAR_FILE" >"$TEMP_DIRECTORY/upload-war-entries.txt"
+    if [[ "$(grep -Ec \
+        '^WEB-INF/lib/commons-fileupload-1\.6\.0\.jar$' \
+        "$TEMP_DIRECTORY/upload-war-entries.txt")" != "1" ]] ||
+       [[ "$(grep -Ec \
+        '^WEB-INF/lib/commons-io-2\.19\.0\.jar$' \
+        "$TEMP_DIRECTORY/upload-war-entries.txt")" != "1" ]] ||
+       grep -Eq \
+        '^WEB-INF/lib/(commons-fileupload-1\.2\.2|commons-io-1\.3\.2)\.jar$' \
+        "$TEMP_DIRECTORY/upload-war-entries.txt"; then
+      printf 'FALHA: WAR não contém a linha FileUpload/Commons IO aprovada\n' >&2
+      exit 1
+    fi
+
+    upload_qualification="portable-ci"
+    if [[ "$PROFILE" == "oracle" ]]; then
+      upload_qualification="oracle-qualified"
+    fi
+    upload_war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
+    install -d -m 0755 "$(dirname "$UPLOAD_RESULT_FILE")"
+    {
+      printf '{\n'
+      printf '  "schema": "wildfly-migration-upload-compatibility/v1",\n'
+      printf '  "qualification": "%s",\n' "$upload_qualification"
+      printf '  "profile": "%s",\n' "$PROFILE"
+      printf '  "sourceCommit": "%s",\n' "$source_commit_sha"
+      printf '  "warSha256": "%s",\n' "$upload_war_sha256"
+      printf '  "runtime": "%s",\n' "$RUNTIME_IDENTIFIER"
+      printf '  "fileUploadVersion": "1.6.0",\n'
+      printf '  "commonsIoVersion": "2.19.0",\n'
+      printf '  "apiNamespace": "javax.servlet",\n'
+      printf '  "checks": {\n'
+      printf '    "validUpload": "passed",\n'
+      printf '    "normalizedFilename": "passed",\n'
+      printf '    "metadataRoundTrip": "passed",\n'
+      printf '    "fileSizeLimit": "passed",\n'
+      printf '    "requestSizeLimit": "passed",\n'
+      printf '    "temporaryCleanup": "passed"\n'
+      printf '  }\n'
+      printf '}\n'
+    } >"$UPLOAD_RESULT_FILE"
   fi
 
   if [[ -n "$LOGGING_RESULT_FILE" ]]; then

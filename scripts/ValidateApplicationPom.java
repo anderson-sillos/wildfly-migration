@@ -116,9 +116,9 @@ public final class ValidateApplicationPom {
         expected.put("org.slf4j:slf4j-api",
                 values("1.7.36", "provided"));
         expected.put("commons-fileupload:commons-fileupload",
-                values("1.2.2", "compile"));
+                values("1.6.0", "compile"));
         expected.put("commons-io:commons-io",
-                values("1.3.2", "compile"));
+                values("2.19.0", "compile"));
         expected.put("org.reflections:reflections",
                 values("0.9.10", "compile"));
         expected.put("org.apache.tiles:tiles-api",

@@ -13,6 +13,7 @@ required_paths=(
   "docs/cp-3a-java17-runtime.md"
   "docs/cp-3a-dependency-matrix.md"
   "docs/cp-3b-core-dependencies.md"
+  "docs/cp-3b-fileupload.md"
   "docs/cp-3b-logging-bridge.md"
   "docs/evidence/CP-3B.md"
   "docs/evidence/CP-1F.md"
@@ -233,6 +234,31 @@ if ! grep -Fq -- \
     '[Dependências centrais do CP-3B](cp-3b-core-dependencies.md)' \
     "$REPOSITORY_ROOT/docs/README.md"; then
   printf 'FALHA: índice não aponta para o CP-3B\n' >&2
+  exit 1
+fi
+
+for marker in \
+  'Commons FileUpload 1.x transitório' \
+  'commons-fileupload:commons-fileupload` de 1.2.2 para 1.6.0' \
+  'commons-io:commons-io` de 1.3.2 para 2.19.0' \
+  '`javax.servlet`' \
+  'arquivo máximo de 512 KiB' \
+  'requisição multipart máxima de 576 KiB' \
+  'atividade 3.32' \
+  'e73f3184917984062d9ce8037d75236631399d99'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3b-fileupload.md" \
+      "$REPOSITORY_ROOT/migration/steps/CP-3B-commons-fileupload-1.6.0.md"; then
+    printf 'FALHA: documentação do FileUpload 1.x não contém: %s\n' \
+      "$marker" >&2
+    exit 1
+  fi
+done
+
+if ! grep -Fq -- \
+    '[FileUpload 1.x no CP-3B](cp-3b-fileupload.md)' \
+    "$REPOSITORY_ROOT/docs/README.md"; then
+  printf 'FALHA: índice não aponta para a decisão FileUpload do CP-3B\n' >&2
   exit 1
 fi
 

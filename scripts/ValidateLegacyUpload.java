@@ -41,17 +41,17 @@ public final class ValidateLegacyUpload {
                 "app/src/main/webapp/WEB-INF/views/pedidos/"
                 + "detalhe-content.jsp")));
         System.out.println(
-                "OK: upload Commons FileUpload 1.2.2 e metadados validados");
+                "OK: upload Commons FileUpload 1.6.0 e metadados validados");
     }
 
     private static void validatePom(String pom) {
         require(pom.indexOf(
-                "<commons.fileupload.version>1.2.2"
+                "<commons.fileupload.version>1.6.0"
                 + "</commons.fileupload.version>") >= 0,
-                "Commons FileUpload 1.2.2 não está fixado");
+                "Commons FileUpload 1.6.0 não está fixado");
         require(pom.indexOf(
-                "<commons.io.version>1.3.2</commons.io.version>") >= 0,
-                "Commons IO 1.3.2 não está fixado");
+                "<commons.io.version>2.19.0</commons.io.version>") >= 0,
+                "Commons IO 2.19.0 não está fixado");
         require(pom.indexOf("<artifactId>commons-io</artifactId>") >= 0,
                 "dependência opcional do FileUpload não foi declarada");
     }

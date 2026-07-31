@@ -68,6 +68,18 @@ As mesmas qualificações H2 e Oracle também produzem:
 Esses relatórios comprovam categoria, MDC, exceção completa e ausência do
 aviso de configuração Log4j depreciada ou backend concorrente.
 
+## Atividade 3.8 — Commons FileUpload 1.6.0
+
+FileUpload 1.2.2 e Commons IO 1.3.2 são substituídos por FileUpload 1.6.0 e
+Commons IO 2.19.0. O [documento da atualização](cp-3b-fileupload.md) registra
+por que a linha 1.x ainda é usada no gate `javax`, os limites preservados e a
+sonda adicional de limpeza.
+
+As mesmas qualificações produzem:
+
+- `app/target/contract-results/cp-3b-upload-ci-h2.json`;
+- `app/target/contract-results/cp-3b-upload-oracle.json`.
+
 ## Rollback
 
 Durante o CP-3B, o último checkpoint verde é o commit de entrega do CP-3A:
