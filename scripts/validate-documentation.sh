@@ -58,6 +58,23 @@ for marker in \
 done
 
 for marker in \
+  '## Fechamento do CP-3B — atividade 3.10' \
+  '14b9fbf23757c6cb721a4d9a809569d1b5c71b6b' \
+  'c6ed5ae93c5060815721084c2cb9beed9dd700f7' \
+  '30650580350' \
+  '19 bibliotecas' \
+  '14/14' \
+  'rollback do CP-3B' \
+  'Tiles, `javax.servlet`, a ponte de logging' \
+  'migration/evidence/CP-3B/closure.properties'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/evidence/CP-3B.md"; then
+    printf 'FALHA: fechamento CP-3B não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
   '14b9fbf23757c6cb721a4d9a809569d1b5c71b6b' \
   'd3866778808f442b02691e1739ca7f0e8c1e6ec1c9dea7d99e72c9505362b5b5' \
   'Reflections 0.10.2 pode substituir a versão 0.9.10' \

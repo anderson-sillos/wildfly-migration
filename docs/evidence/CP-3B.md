@@ -4,8 +4,7 @@
 
 Este documento acompanha o checkpoint CP-3B. As atividades 3.6 a 3.9
 atualizam MyBatis, logging, upload e descoberta de validadores de forma
-isolada. A conclusão consolidada do checkpoint será registrada no fechamento
-3.10.
+isolada. O fechamento 3.10 consolida os dois perfis e o rollback do checkpoint.
 
 ## MyBatis 3.5.19 — atividade 3.6
 
@@ -192,6 +191,51 @@ com validadores em JARs internos, módulos de EAR ou classloaders filhos devem
 repetir a sonda. Reflections permanece uma ponte: a atividade 3.33 o
 substituirá por `ServletContainerInitializer` em JAR separado, preservando
 este contrato de conjunto e ordem.
+
+## Fechamento do CP-3B — atividade 3.10
+
+O fechamento consolidou as atividades 3.6 a 3.9 após reconstruir e auditar o
+WAR final em Java 17/Maven 3.9.16/WildFly 26.1.3. Os dois perfis reproduziram
+o mesmo artefato:
+
+- commit-fonte funcional testado: `14b9fbf23757c6cb721a4d9a809569d1b5c71b6b`;
+- commit de documentação e encerramento: `c6ed5ae93c5060815721084c2cb9beed9dd700f7`;
+- WAR SHA-256:
+  `d3866778808f442b02691e1739ca7f0e8c1e6ec1c9dea7d99e72c9505362b5b5`;
+- árvore Maven SHA-256:
+  `47517b7396beadb34c08515f8631ec7ce59a6fdf173345d78f562c61e3d2d5a1`;
+- bytecode da aplicação Java 17, major `61`;
+- 19 bibliotecas em `WEB-INF/lib`.
+
+| Trilha | Runtime e banco | Contratos | Descoberta | Resultado |
+| --- | --- | ---: | ---: | --- |
+| `portable-ci` | Java 17, WildFly 26.1.3 e H2 2.4.240 em memória | 14/14 | aprovada | aprovado |
+| `oracle-qualified` | Java 17, WildFly 26.1.3, `ojdbc7` externo e Oracle 19c RU 19.3 | 14/14 | aprovada | aprovado |
+
+O CI remoto obrigatório do PR #20 passou no run
+[`30650580350`](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30650580350),
+com `repository-baseline` e `portable-ci` aprovados. O Oracle foi qualificado
+na rede interna; os registros transitórios `LAB-SMOKE-*` foram removidos.
+O relatório versionado do fechamento está em
+`migration/evidence/CP-3B/closure.properties`.
+
+### Rollback comprovado
+
+O rollback do CP-3B aponta para o último checkpoint verde do CP-3A,
+`28789b65964b6daf79082179893687140b84493b`, que preserva o estado anterior à
+atividade 3.9. A existência do commit, a divergência esperada de Reflections e
+a allowlist histórica foram verificadas; nenhum schema Oracle ou dado
+permanente é alterado pelo rollback.
+
+### Conclusão comprovada do checkpoint
+
+O CP-3B comprova que MyBatis 3.5.19, a ponte transitória de logging, Commons
+FileUpload 1.6.0/Commons IO 2.19.0 e Reflections 0.10.2 podem coexistir no
+Java 17/WildFly 26.1.3 preservando os 14 contratos HTTP, a persistência H2 e
+Oracle 19c e a descoberta determinística representada pelo laboratório.
+Tiles, `javax.servlet`, a ponte de logging, FileUpload 1.x e Reflections ainda
+são exceções transitórias; suas substituições finais permanecem nos
+checkpoints posteriores.
 
 ## Rollback
 

@@ -106,7 +106,7 @@
 - [x] 3.7 Remover `log4j:log4j` e adotar logging mantido, usando ponte temporária da API 1.2 somente onde necessário no gate Java 17.
 - [x] 3.8 Atualizar Commons FileUpload para a última linha 1.x aprovada compatível com `javax` e preservar provisoriamente o contrato de upload.
 - [x] 3.9 Atualizar Reflections para 0.10.2 e validar descoberta, conjunto e ordem dos validadores no classloader do WildFly 26.
-- [ ] 3.10 Encerrar `CP-3B`: executar contratos e auditoria depois das atualizações, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-3B): modernize core dependencies`.
+- [x] 3.10 Encerrar `CP-3B`: executar contratos e auditoria depois das atualizações, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-3B): modernize core dependencies`.
 
 ### Checkpoint CP-3C — XML e Oracle JDBC
 

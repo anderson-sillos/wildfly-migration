@@ -400,6 +400,7 @@ check_required_files() {
       "migration/evidence/CP-3B/upload-oracle.json"
       "migration/evidence/CP-3B/discovery-ci-h2.json"
       "migration/evidence/CP-3B/discovery-oracle.json"
+      "migration/evidence/CP-3B/closure.properties"
       "migration/steps/CP-3B-commons-fileupload-1.6.0.md"
       "migration/steps/CP-3B-mybatis-3.5.19.md"
       "migration/steps/CP-3B-log4j-over-slf4j.md"

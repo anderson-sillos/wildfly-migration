@@ -15,6 +15,7 @@ ORACLE_CONTRACT_FILE=""
 ORACLE_LOGGING_RESULT_FILE=""
 ORACLE_UPLOAD_RESULT_FILE=""
 ORACLE_DISCOVERY_RESULT_FILE=""
+CLOSURE_EVIDENCE="$REPOSITORY_ROOT/migration/evidence/CP-3B/closure.properties"
 TEMP_DIRECTORY="$(
   mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-cp3b.XXXXXXXX"
 )"
@@ -135,6 +136,7 @@ required_paths=(
   "migration/steps/CP-3B-log4j-over-slf4j.md"
   "migration/steps/CP-3B-commons-fileupload-1.6.0.md"
   "migration/steps/CP-3B-reflections-0.10.2.md"
+  "migration/evidence/CP-3B/closure.properties"
   "app/src/main/java/br/com/asillos/migration/integration/validation/Validator.java"
   "app/src/main/webapp/WEB-INF/jboss-deployment-structure.xml"
   "runtime/phase2/java8-wildfly26/war-libraries.txt"
@@ -617,6 +619,46 @@ if grep -Fq -- \
   git -C "$REPOSITORY_ROOT" cat-file -e \
     "${h2_discovery_source_commit}^{commit}" 2>/dev/null ||
     fail "commit-fonte das evidências de descoberta não existe"
+fi
+
+if grep -Fq -- \
+    '- [x] 3.10 Encerrar `CP-3B`' "$TASKS_FILE"; then
+  [[ -f "$CLOSURE_EVIDENCE" ]] ||
+    fail "evidência de fechamento CP-3B ausente"
+  for marker in \
+    'schema=wildfly-migration-cp3b-closure/v1' \
+    'checkpoint=CP-3B' \
+    'pull-request=20' \
+    'tested.commit=14b9fbf23757c6cb721a4d9a809569d1b5c71b6b' \
+    'documentation.commit=c6ed5ae93c5060815721084c2cb9beed9dd700f7' \
+    'war.sha256=d3866778808f442b02691e1739ca7f0e8c1e6ec1c9dea7d99e72c9505362b5b5' \
+    'maven.tree.sha256=47517b7396beadb34c08515f8631ec7ce59a6fdf173345d78f562c61e3d2d5a1' \
+    'java.version=17.0.20+8' \
+    'maven.version=3.9.16' \
+    'wildfly.version=26.1.3.Final' \
+    'portable-ci.contract.scenarios=14' \
+    'portable-ci.discovery=passed' \
+    'portable-ci.result=passed' \
+    'portable.run.id=30650580350' \
+    'portable.run.url=https://github.com/anderson-sillos/wildfly-migration/actions/runs/30650580350' \
+    'portable.head.sha=c6ed5ae93c5060815721084c2cb9beed9dd700f7' \
+    'oracle.database.version=19.3.0.0.0' \
+    'oracle-qualified.contract.scenarios=14' \
+    'oracle-qualified.discovery=passed' \
+    'oracle-qualified.result=passed' \
+    'transient.oracle.data.cleanup=passed' \
+    'rollback.commit=28789b65964b6daf79082179893687140b84493b' \
+    'rollback.result=verified-by-commit' \
+    'squash.subject=checkpoint(CP-3B): modernize core dependencies' \
+    'result=passed'; do
+    grep -Fxq "$marker" "$CLOSURE_EVIDENCE" ||
+      fail "evidência de fechamento CP-3B não contém: $marker"
+  done
+  if grep -Eiq \
+      'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url' \
+      "$CLOSURE_EVIDENCE"; then
+    fail "evidência de fechamento CP-3B contém configuração sensível"
+  fi
 fi
 
 if [[ -n "$WAR_FILE" ]]; then

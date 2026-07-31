@@ -98,6 +98,11 @@ versionadas em `migration/evidence/CP-3B/` como `discovery-ci-h2.json` e
 
 ## Rollback
 
+O fechamento consolidado, com os 14 contratos H2/Oracle, auditoria, run remoto
+e rollback verificado, está em
+`migration/evidence/CP-3B/closure.properties` e em
+[Evidência CP-3B](evidence/CP-3B.md).
+
 Durante o CP-3B, o último checkpoint verde é o commit de entrega do CP-3A:
 
 ```bash

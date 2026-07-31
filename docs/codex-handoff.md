@@ -1,7 +1,7 @@
 # Codex handoff
 
-Atualizado em 31/07/2026 após a conclusão local da atividade 3.9 do checkpoint
-`CP-3B`. O trabalho deve permanecer pausado antes do fechamento 3.10.
+Atualizado em 31/07/2026 após a conclusão da atividade 3.10 e do checkpoint
+`CP-3B`. O trabalho deve permanecer pausado antes da atividade 3.11.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -14,10 +14,10 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Branch: `checkpoint/cp-3b-core-dependencies`.
 - PR draft: [#20 — CP-3B: modernizar dependências centrais](https://github.com/anderson-sillos/wildfly-migration/pull/20).
 - Base do checkpoint: `6d94e5fc735575fa2ac644690a2a0635d921199f`, fechamento do CP-3A.
-- Progresso OpenSpec: 64 de 110 tarefas concluídas.
-- Atividades CP-3B concluídas: 3.6, 3.7, 3.8 e 3.9.
-- Próxima atividade: 3.10, fechar o CP-3B.
-- O PR deve continuar draft e não deve ser integrado antes do fechamento 3.10.
+- Progresso OpenSpec: 65 de 110 tarefas concluídas.
+- Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
+- Próxima atividade: 3.11, atualizar XMLBeans para 5.3.0.
+- O PR #20 foi encerrado com squash merge pelo commit de checkpoint do CP-3B.
 
 ## Decisões permanentes
 
@@ -35,7 +35,7 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Cada checkpoint usa branch, PR e checks; somente o fechamento recebe o
   commit squash identificável.
 
-## CP-3B concluído até a atividade 3.9
+## CP-3B concluído até a atividade 3.10
 
 ### 3.6 — MyBatis
 
@@ -94,6 +94,18 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Rollback isolado da 3.9: retornar ao commit verde
   `28789b65964b6daf79082179893687140b84493b`.
 
+### 3.10 — fechamento do checkpoint
+
+- Os 14 contratos e a auditoria final passaram nos perfis H2 e Oracle.
+- O CI remoto obrigatório passou no run `30650580350`.
+- O WAR final tem SHA-256
+  `d3866778808f442b02691e1739ca7f0e8c1e6ec1c9dea7d99e72c9505362b5b5` e 19
+  bibliotecas.
+- A evidência de fechamento está em
+  `migration/evidence/CP-3B/closure.properties`.
+- O rollback verificado aponta para `28789b65964b6daf79082179893687140b84493b`.
+- Commit integrado: `checkpoint(CP-3B): modernize core dependencies`.
+
 As conclusões explicativas estão em `docs/evidence/CP-3B.md`; os relatórios
 sanitizados ficam em `migration/evidence/CP-3B/`.
 
@@ -127,7 +139,7 @@ o build podem executar no sandbox.
 
 ## Próxima ação
 
-Retomar pelo fechamento 3.10 sem refazer a auditoria de CI já aprovada:
+Retomar pela atividade 3.11 sem refazer a auditoria de CI já aprovada:
 
 ```bash
 git status --short --branch
@@ -137,7 +149,6 @@ openspec instructions apply --change create-java-web-migration-lab --json
 ./scripts/validate-cp-3b.sh
 ```
 
-O fechamento 3.10 deve consolidar o CP-3B, executar os gates finais, atualizar
-o PR draft e só então integrar o checkpoint. A troca de Reflections por
+A atividade 3.11 inicia o CP-3C para XMLBeans. A troca de Reflections por
 `ServletContainerInitializer` em JAR separado continua reservada às subtarefas
 da atividade 3.33.
