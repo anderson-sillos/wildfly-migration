@@ -152,24 +152,27 @@ for cache_marker in \
   'maven-repository-v3-${{ runner.os }}-${{ runner.arch }}-maven-3.9.16-' \
   'key: ${{ steps.runtime-archive-cache.outputs.cache-primary-key }}' \
   'key: ${{ steps.maven-dependency-cache.outputs.cache-primary-key }}' \
-  'MIGRATION_CHECKPOINT=CP-3A' \
-  './scripts/doctor.sh CP-3A --profile ci-h2 --ci' \
-  './scripts/build-cp-3a.sh --profile ci-h2' \
   './scripts/validate-cp-2c-oracle-persistence.sh' \
   './scripts/validate-cp-2d-oracle-state.sh' \
   '--compile-only' \
-  './scripts/validate-cp-3a.sh \' \
-  '--promoted-war app/target/wildfly-migration.war' \
   'MIGRATION_SOURCE_COMMIT: >-' \
   '${{ github.event.pull_request.head.sha || github.sha }}' \
   'MAVEN_HOME=$tools/apache-maven-3.9.16' \
   'MAVEN_ARCHIVE_SHA256=80ffca22aed9e8b9713a232f3394fd81d7f20322df75efdb2b047dbd3e3a23bb' \
   './scripts/prepare-portable-runtime-cache.sh \' \
-  '--sources "$runtime_sources"' \
-  'app/target/contract-results/cp-3a-ci-h2.json' \
-  'cp-3a-portable-evidence'; do
+  '--sources "$runtime_sources"'; do
   grep -Fq -- "$cache_marker" "$WORKFLOW" ||
     fail "workflow não contém o cache reutilizável: $cache_marker"
+done
+
+for workflow_pattern in \
+  'MIGRATION_CHECKPOINT=CP-3[A-K]' \
+  '\./scripts/doctor\.sh CP-3[A-K] --profile ci-h2 --ci' \
+  '\./scripts/build-cp-3[a-k]\.sh --profile ci-h2' \
+  'app/target/contract-results/cp-3[a-k]-ci-h2\.json' \
+  'cp-3[a-k]-portable-evidence'; do
+  grep -Eq -- "$workflow_pattern" "$WORKFLOW" ||
+    fail "workflow não identifica o checkpoint ativo: $workflow_pattern"
 done
 grep -Fq \
   $'apache-maven-3.9.16-bin.tar.gz\thttps://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz' \

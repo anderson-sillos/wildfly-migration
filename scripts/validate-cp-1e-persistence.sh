@@ -6,6 +6,7 @@ REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 JAVA_HOME_ARGUMENT=""
 H2_JAR_ARGUMENT=""
 WAR_FILE="$REPOSITORY_ROOT/app/target/wildfly-migration.war"
+RESULT_FILE=""
 TEMP_DIRECTORY="$(mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-cp1e.XXXXXXXX")"
 
 usage() {
@@ -13,7 +14,8 @@ usage() {
 Uso:
   ./scripts/validate-cp-1e-persistence.sh
   ./scripts/validate-cp-1e-persistence.sh \
-    --java-home DIRETORIO --h2-jar ARQUIVO [--war ARQUIVO]
+    --java-home DIRETORIO --h2-jar ARQUIVO [--war ARQUIVO] \
+    [--result ARQUIVO]
 
 Sem argumentos, valida estaticamente a configuração. Com Java, H2 e um WAR já
 construído, executa também os mappers e os limites transacionais em memória.
@@ -58,6 +60,14 @@ while [[ $# -gt 0 ]]; do
       WAR_FILE="$2"
       shift 2
       ;;
+    --result)
+      [[ $# -ge 2 ]] || {
+        printf 'FALHA: --result exige um arquivo\n' >&2
+        exit 2
+      }
+      RESULT_FILE="$2"
+      shift 2
+      ;;
     -h|--help)
       usage
       exit 0
@@ -73,6 +83,10 @@ done
 if [[ -n "$JAVA_HOME_ARGUMENT" && -z "$H2_JAR_ARGUMENT" ||
       -z "$JAVA_HOME_ARGUMENT" && -n "$H2_JAR_ARGUMENT" ]]; then
   printf 'FALHA: --java-home e --h2-jar devem ser informados juntos\n' >&2
+  exit 2
+fi
+if [[ -n "$RESULT_FILE" && -z "$JAVA_HOME_ARGUMENT" ]]; then
+  printf 'FALHA: --result exige a validação dinâmica\n' >&2
   exit 2
 fi
 
@@ -161,20 +175,48 @@ fi
   "$JAVA_HOME_ARGUMENT/bin/jar" xf "$WAR_FILE"
 )
 
-MYBATIS_JAR="$TEMP_DIRECTORY/WEB-INF/lib/mybatis-3.4.5.jar"
+MYBATIS_JAR="$TEMP_DIRECTORY/WEB-INF/lib/mybatis-3.5.19.jar"
 if [[ ! -f "$MYBATIS_JAR" ]]; then
-  printf 'FALHA: MyBatis 3.4.5 não está presente no WAR auditado\n' >&2
+  printf 'FALHA: MyBatis 3.5.19 não está presente no WAR auditado\n' >&2
   exit 1
 fi
 
 classpath="$TEMP_DIRECTORY/WEB-INF/classes:$MYBATIS_JAR:$H2_JAR_ARGUMENT"
 install -d -m 0755 "$TEMP_DIRECTORY/probe"
 "$JAVA_HOME_ARGUMENT/bin/javac" \
-  -Xlint:-options -source 1.7 -target 1.7 \
+  -Xlint:-options -source 17 -target 17 \
   -cp "$classpath" \
   -d "$TEMP_DIRECTORY/probe" \
   "$REPOSITORY_ROOT/scripts/ValidateLegacyMyBatis.java"
 
+java_arguments=("$REPOSITORY_ROOT")
+if [[ -n "$RESULT_FILE" ]]; then
+  source_commit="${MIGRATION_SOURCE_COMMIT:-$(
+    git -C "$REPOSITORY_ROOT" rev-parse HEAD
+  )}"
+  war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
+  java_arguments+=("$RESULT_FILE" "$source_commit" "$war_sha256")
+fi
+
 "$JAVA_HOME_ARGUMENT/bin/java" \
   -cp "$TEMP_DIRECTORY/probe:$classpath" \
-  ValidateLegacyMyBatis "$REPOSITORY_ROOT"
+  ValidateLegacyMyBatis "${java_arguments[@]}"
+
+if [[ -n "$RESULT_FILE" ]]; then
+  for marker in \
+    '"schema": "wildfly-migration-mybatis-compatibility/v1"' \
+    '"qualification": "portable-ci"' \
+    '"profile": "ci-h2"' \
+    '"mybatisVersion": "3.5.19"' \
+    '"mappers": "passed"' \
+    '"aliases": "passed"' \
+    '"typeHandlers": "passed"' \
+    '"reflection": "passed"' \
+    '"mybatisCommit": "passed"' \
+    '"mybatisRollback": "passed"'; do
+    grep -Fq "$marker" "$RESULT_FILE" || {
+      printf 'FALHA: resultado MyBatis H2 não contém: %s\n' "$marker" >&2
+      exit 1
+    }
+  done
+fi

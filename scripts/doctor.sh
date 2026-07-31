@@ -385,6 +385,19 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-3B; then
+    required+=(
+      "docs/cp-3b-core-dependencies.md"
+      "migration/steps/CP-3B-mybatis-3.5.19.md"
+      "runtime/phase3/java17-wildfly26/war-libraries.txt"
+      "scripts/build-cp-3b.sh"
+      "scripts/qualify-cp-3b-h2.sh"
+      "scripts/qualify-cp-3b-oracle.sh"
+      "scripts/smoke-cp-3b-datasource.sh"
+      "scripts/validate-cp-3b.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"

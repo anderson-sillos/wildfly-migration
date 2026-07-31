@@ -1,7 +1,14 @@
-# Persistência MyBatis do baseline legado
+# Persistência MyBatis
 
-O CP-1E preserva MyBatis 3.4.5 e usa o mesmo contrato
-`java:/jdbc/MigrationDS` nos perfis `ci-h2` e `oracle`. URL, usuário, senha e
+## Evolução da versão
+
+O baseline e a fase 2 preservam MyBatis 3.4.5. A atividade 3.6 atualiza a
+aplicação ativa para MyBatis 3.5.19 no gate Java 17/WildFly 26, mantendo o
+mesmo contrato `java:/jdbc/MigrationDS`, os mesmos mappers XML e o namespace
+EE 8 `javax.*`.
+
+As allowlists históricas continuam registrando MyBatis 3.4.5. Somente a
+allowlist do gate Java 17 aceita `mybatis-3.5.19.jar`. URL, usuário, senha e
 drivers continuam exclusivamente na configuração externa do WildFly; não há
 fallback JDBC dentro do WAR.
 
@@ -38,10 +45,35 @@ O identificador de fornecedor vem do `DatabaseMetaData`: `Oracle` seleciona
 `oracle` e `H2` seleciona `h2`. Um banco não reconhecido falha ao tentar obter
 o próximo ID em vez de executar uma variante presumida.
 
+## Validação da atualização
+
+A sonda da atividade 3.6 executa separadamente em H2 e Oracle:
+
+- carregamento dos mappers `PedidoMapper` e `AnexoMapper`;
+- resolução dos aliases `pedido` e `anexo`;
+- seleção dos type handlers de `StatusPedido` e SHA-256;
+- leitura e escrita por reflexão da propriedade `Pedido.numero` pelas APIs
+  `MetaClass` e `MetaObject` do MyBatis;
+- commit por uma nova sessão e rollback de uma falha intencional;
+- round-trip de timestamps e BLOB no Oracle.
+
+Os contratos HTTP completos são repetidos para detectar regressões fora da
+sonda de persistência. O relatório H2 é classificado como `portable-ci`; apenas
+o relatório executado no Oracle 19c recebe `oracle-qualified`.
+
+## Logging
+
+MyBatis 3.5.19 mantém autodetecção da implementação de logging. Nesta
+atividade, `logImpl` permanece sem valor explícito para não misturar a troca do
+MyBatis com a remoção do Log4j 1. A atividade 3.7 introduzirá a ponte temporária
+necessária ao gate Java 17 e a atividade 3.34 definirá explicitamente
+`logImpl=SLF4J` no destino final, integrado ao logging do WildFly e sem backend
+concorrente dentro do WAR.
+
 ## Limites da validação
 
 A validação estática comprova a estrutura dos mappers, aliases, handler, JNDI,
-transações e isolamento do SQL específico. O smoke HTTP do checkpoint 1.24
-comprovará o fluxo completo no WildFly/H2 e no WildFly/Oracle. Somente o
-resultado Oracle pode qualificar comportamento do `ojdbc7`, timestamps, BLOBs e
-rollback no Oracle 19c.
+transações e isolamento do SQL específico. Os smokes do checkpoint ativo
+comprovam o fluxo completo no WildFly/H2 e no WildFly/Oracle. Somente o
+resultado Oracle pode qualificar comportamento do `ojdbc7`, timestamps, BLOBs
+e rollback no Oracle 19c.

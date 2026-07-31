@@ -12,6 +12,7 @@ required_paths=(
   "docs/codex-handoff.md"
   "docs/cp-3a-java17-runtime.md"
   "docs/cp-3a-dependency-matrix.md"
+  "docs/cp-3b-core-dependencies.md"
   "docs/evidence/CP-1F.md"
   "docs/environment-setup.md"
   "docs/legacy-application-runbook.md"
@@ -210,6 +211,28 @@ for marker in \
     exit 1
   fi
 done
+
+for marker in \
+  'MyBatis 3.5.19' \
+  'mybatis-3.5.19.jar' \
+  'qualify-cp-3b-h2.sh' \
+  'qualify-cp-3b-oracle.sh' \
+  'portable-ci' \
+  'oracle-qualified' \
+  '6d94e5fc735575fa2ac644690a2a0635d921199f'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3b-core-dependencies.md"; then
+    printf 'FALHA: documentação CP-3B não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+if ! grep -Fq -- \
+    '[Dependências centrais do CP-3B](cp-3b-core-dependencies.md)' \
+    "$REPOSITORY_ROOT/docs/README.md"; then
+  printf 'FALHA: índice não aponta para o CP-3B\n' >&2
+  exit 1
+fi
 
 help_output="$(
   "$REPOSITORY_ROOT/scripts/smoke-wildfly9-datasource.sh" --help

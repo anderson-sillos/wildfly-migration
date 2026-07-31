@@ -106,7 +106,7 @@ public final class ValidateApplicationPom {
                 new LinkedHashMap<String, String[]>();
         expected.put("jakarta.platform:jakarta.jakartaee-web-api",
                 values("8.0.0", "provided"));
-        expected.put("org.mybatis:mybatis", values("3.4.5", "compile"));
+        expected.put("org.mybatis:mybatis", values("3.5.19", "compile"));
         expected.put("log4j:log4j", values("1.2.14", "compile"));
         expected.put("commons-fileupload:commons-fileupload",
                 values("1.2.2", "compile"));

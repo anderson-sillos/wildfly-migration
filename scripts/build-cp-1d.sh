@@ -150,7 +150,7 @@ elif [[ "$JAVA_RELEASE" == "17" ]]; then
   JAVA_HOME_VALUE="$(configuration_value JAVA17_HOME)"
   EXPECTED_JAVA='Java version: 17.0.20'
   MAVEN_OPTIONS='-Dhttps.protocols=TLSv1.2'
-  EXPECTED_LIBRARIES="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/war-libraries.txt"
+  EXPECTED_LIBRARIES="$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/war-libraries.txt"
 else
   EXPECTED_LIBRARIES="$REPOSITORY_ROOT/runtime/legacy/war-libraries.txt"
 fi

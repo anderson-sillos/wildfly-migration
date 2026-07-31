@@ -212,6 +212,11 @@ for marker in \
   "\"runtime\": \"$RUNTIME_IDENTIFIER\"" \
   '"databaseVersion": "19.3.0.0.0"' \
   '"jdbcDriver": "ojdbc7-12.1.0.2.0"' \
+  '"mybatisVersion": "3.5.19"' \
+  '"mappers": "passed"' \
+  '"aliases": "passed"' \
+  '"typeHandlers": "passed"' \
+  '"reflection": "passed"' \
   '"mybatisCommit": "passed"' \
   '"mybatisRollback": "passed"' \
   '"timestampRoundTrip": "passed"' \
