@@ -387,6 +387,7 @@ check_required_files() {
   if rank_at_least CP-3B; then
     required+=(
       "docs/cp-3b-core-dependencies.md"
+      "docs/cp-3b-fileupload.md"
       "docs/cp-3b-logging-bridge.md"
       "docs/evidence/CP-3B.md"
       "app/src/main/webapp/WEB-INF/jboss-deployment-structure.xml"
@@ -394,6 +395,9 @@ check_required_files() {
       "migration/evidence/CP-3B/mybatis-oracle.json"
       "migration/evidence/CP-3B/logging-ci-h2.json"
       "migration/evidence/CP-3B/logging-oracle.json"
+      "migration/evidence/CP-3B/upload-ci-h2.json"
+      "migration/evidence/CP-3B/upload-oracle.json"
+      "migration/steps/CP-3B-commons-fileupload-1.6.0.md"
       "migration/steps/CP-3B-mybatis-3.5.19.md"
       "migration/steps/CP-3B-log4j-over-slf4j.md"
       "runtime/phase3/java17-wildfly26/war-libraries.txt"

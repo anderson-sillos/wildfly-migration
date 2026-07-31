@@ -411,6 +411,34 @@ if grep -Fq -- \
   validate_upload_result \
     "$REPOSITORY_ROOT/migration/evidence/CP-3B/upload-oracle.json" \
     oracle-qualified oracle
+
+  h2_upload_evidence="$REPOSITORY_ROOT/migration/evidence/CP-3B/upload-ci-h2.json"
+  oracle_upload_evidence="$REPOSITORY_ROOT/migration/evidence/CP-3B/upload-oracle.json"
+  h2_upload_source_commit="$(
+    sed -n 's/.*"sourceCommit": "\([^"]*\)".*/\1/p' \
+      "$h2_upload_evidence"
+  )"
+  oracle_upload_source_commit="$(
+    sed -n 's/.*"sourceCommit": "\([^"]*\)".*/\1/p' \
+      "$oracle_upload_evidence"
+  )"
+  h2_upload_war_sha256="$(
+    sed -n 's/.*"warSha256": "\([^"]*\)".*/\1/p' \
+      "$h2_upload_evidence"
+  )"
+  oracle_upload_war_sha256="$(
+    sed -n 's/.*"warSha256": "\([^"]*\)".*/\1/p' \
+      "$oracle_upload_evidence"
+  )"
+  [[ "$h2_upload_source_commit" =~ ^[0-9a-f]{40}$ &&
+     "$h2_upload_source_commit" == "$oracle_upload_source_commit" ]] ||
+    fail "evidências de upload H2 e Oracle não usam o mesmo commit-fonte"
+  [[ "$h2_upload_war_sha256" =~ ^[0-9a-f]{64}$ &&
+     "$h2_upload_war_sha256" == "$oracle_upload_war_sha256" ]] ||
+    fail "evidências de upload H2 e Oracle não usam o mesmo WAR"
+  git -C "$REPOSITORY_ROOT" cat-file -e \
+    "${h2_upload_source_commit}^{commit}" 2>/dev/null ||
+    fail "commit-fonte das evidências de upload não existe"
 fi
 
 if grep -Fq -- \

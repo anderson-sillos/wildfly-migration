@@ -309,6 +309,24 @@ for marker in \
   fi
 done
 
+for marker in \
+  '64b5962e23a7d5dcb740c3a8d50a6ac172c8878f' \
+  'b199837b374d44cc84df1dcadbdfdf3ff53351201305c70828b9b2cc602fa3ff' \
+  'Commons FileUpload 1.6.0 e Commons IO 2.19.0 podem substituir diretamente' \
+  'limite de 512 KiB por' \
+  'limite de 576 KiB por' \
+  'portable-ci' \
+  'oracle-qualified' \
+  'atividade 3.32' \
+  'e73f3184917984062d9ce8037d75236631399d99'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/evidence/CP-3B.md"; then
+    printf 'FALHA: evidência CP-3B de upload não contém: %s\n' \
+      "$marker" >&2
+    exit 1
+  fi
+done
+
 help_output="$(
   "$REPOSITORY_ROOT/scripts/smoke-wildfly9-datasource.sh" --help
 )"

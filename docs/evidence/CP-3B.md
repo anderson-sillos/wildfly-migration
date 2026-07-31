@@ -2,10 +2,10 @@
 
 ## Escopo atual
 
-Este documento acompanha o checkpoint CP-3B. As atividades 3.6 e 3.7
-atualizam MyBatis e logging de forma isolada; upload e descoberta de
-validadores permanecem inalterados até as atividades 3.8 e 3.9. A conclusão
-consolidada do checkpoint será registrada no fechamento 3.10.
+Este documento acompanha o checkpoint CP-3B. As atividades 3.6, 3.7 e 3.8
+atualizam MyBatis, logging e upload de forma isolada; a descoberta de
+validadores permanece inalterada até a atividade 3.9. A conclusão consolidada
+do checkpoint será registrada no fechamento 3.10.
 
 ## MyBatis 3.5.19 — atividade 3.6
 
@@ -98,7 +98,55 @@ específico do WildFly. Chamadas da aplicação real a appenders, configuradores
 ou APIs Log4j fora do conjunto testado exigem inventário próprio. A atividade
 3.34 removerá a ponte e fixará `logImpl=SLF4J`.
 
+## Commons FileUpload 1.x — atividade 3.8
+
+O commit de implementação
+`64b5962e23a7d5dcb740c3a8d50a6ac172c8878f` substituiu FileUpload 1.2.2 por
+1.6.0 e Commons IO 1.3.2 por 2.19.0, sem alterar o código de negócio nem
+antecipar a troca de `javax.servlet` para `jakarta.servlet`.
+
+Os perfis H2 e Oracle reproduziram o mesmo artefato:
+
+- SHA-256 do WAR:
+  `b199837b374d44cc84df1dcadbdfdf3ff53351201305c70828b9b2cc602fa3ff`;
+- SHA-256 da árvore Maven:
+  `c2386269619697e8e760514cfe33155d883ffab0af1302b87a37b7b7bdbd539f`;
+- SHA-256 de `commons-fileupload-1.6.0.jar`:
+  `9383272c93569afeabedb16923a94a6dc8a5bd7a2f9f83bf326af4ee68434629`;
+- SHA-256 de `commons-io-2.19.0.jar`:
+  `824268919b4b62f9f40f08c54381de5993b078f58667e332d17348ae019d72b9`;
+- 22 dependências Maven e 20 bibliotecas em `WEB-INF/lib`;
+- bytecode da aplicação Java 17, major `61`.
+
+As sondas repetiram os 14 contratos HTTP e aprovaram o upload válido com nome
+normalizado, o round-trip de conteúdo e metadados, o limite de 512 KiB por
+arquivo, o limite de 576 KiB por requisição e a remoção dos temporários
+`upload_*`. O H2 2.4.240 recebeu `portable-ci`; o Oracle Database 19c RU 19.3
+recebeu `oracle-qualified`.
+
+Os relatórios sanitizados são:
+
+- `migration/evidence/CP-3B/upload-ci-h2.json`;
+- `migration/evidence/CP-3B/upload-oracle.json`.
+
+### Conclusão comprovada
+
+Commons FileUpload 1.6.0 e Commons IO 2.19.0 podem substituir diretamente as
+versões 1.2.2 e 1.3.2 no subconjunto usado por esta aplicação, preservando o
+contrato `javax`, os limites, a persistência e a limpeza no Java 17/WildFly
+26. A comprovação nos dois bancos mostra que a atualização de segurança pode
+ser feita com baixo impacto antes da migração Jakarta.
+
+Esta ainda é uma ponte: a linha 1.x mantém o parser externo e não cobre
+factories personalizadas, listeners, streaming API ou serialização de
+`FileItem` que existam somente na aplicação real. A atividade 3.32 fará a
+substituição final por `@MultipartConfig` e `jakarta.servlet.http.Part`.
+
 ## Rollback
+
+Para desfazer somente a atividade 3.8, retorne ao commit verde da atividade
+3.7 `e73f3184917984062d9ce8037d75236631399d99`. Esse estado mantém MyBatis
+3.5.19 e a ponte de logging, restaurando FileUpload 1.2.2 e Commons IO 1.3.2.
 
 Para desfazer somente a atividade 3.7, retorne ao commit verde da atividade
 3.6 `57d6e7630ef42a85b15e16aeb126a5027c67950d`. Esse estado mantém MyBatis
