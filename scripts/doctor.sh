@@ -8,6 +8,7 @@ ENV_FILE=""
 LEGACY_RUNTIME_MANIFEST="runtime/legacy/runtime-manifest.tsv"
 PORTABLE_RUNTIME_MANIFEST="runtime/legacy/portable-runtime-manifest.tsv"
 PHASE2_JAVA8_RUNTIME_MANIFEST="runtime/phase2/java8-wildfly9/runtime-manifest.tsv"
+PHASE3_JAVA17_RUNTIME_MANIFEST="runtime/phase3/java17-wildfly26/runtime-manifest.tsv"
 DB_PROFILE_ARGUMENT=""
 DB_PROFILE=""
 CI_MODE=false
@@ -201,7 +202,6 @@ check_required_files() {
 
   if rank_at_least CP-1D; then
     required+=(
-      ".github/workflows/portable.yml"
       "docs/cp-1d-runtime-selection.md"
       "docs/evidence/CP-1D.md"
       "runtime/legacy/portable-runtime-manifest.tsv"
@@ -349,6 +349,39 @@ check_required_files() {
       "scripts/validate-cp-2d-reproduction.sh"
       "scripts/validate-cp-2d-closure.sh"
       "scripts/reproduce-cp-2d.sh"
+    )
+  fi
+
+  if rank_at_least CP-3A; then
+    required+=(
+      "docs/evidence/CP-3A.md"
+      "migration/evidence/CP-3A/after-build.properties"
+      "migration/evidence/CP-3A/before-build.properties"
+      "migration/evidence/CP-3A/before-runtime.properties"
+      "migration/evidence/CP-3A/contract-after-ci-h2.json"
+      "migration/evidence/CP-3A/contract-before-ci-h2.json"
+      "migration/evidence/CP-3A/closure.properties"
+      "migration/evidence/CP-3A/contract-ci-h2.json"
+      "migration/evidence/CP-3A/contract-oracle.json"
+      "migration/evidence/CP-3A/oracle-state.json"
+      "migration/evidence/CP-3A/oracle-persistence.json"
+      "migration/evidence/CP-3A/rollback.properties"
+      "migration/steps/CP-3A-java17-bytecode-audit.md"
+      "migration/steps/CP-3A-h2-2-check-constraint.md"
+      "migration/steps/CP-3A-java17-toolchain.md"
+      "runtime/phase3/java17-wildfly26/README.md"
+      "runtime/phase3/java17-wildfly26/runtime-manifest.tsv"
+      "runtime/phase3/java17-wildfly26/h2/module.xml"
+      "runtime/phase3/java17-wildfly26/profiles/README.md"
+      "runtime/phase3/java17-wildfly26/profiles/ci-h2.cli"
+      "runtime/phase3/java17-wildfly26/profiles/oracle.cli"
+      "runtime/portable-runtime-sources.tsv"
+      "scripts/build-cp-3a.sh"
+      "scripts/prepare-portable-runtime-cache.sh"
+      "scripts/qualify-cp-3a-h2.sh"
+      "scripts/qualify-cp-3a-oracle.sh"
+      "scripts/smoke-cp-3a-datasource.sh"
+      "scripts/validate-cp-3a.sh"
     )
   fi
 
@@ -586,6 +619,113 @@ phase2_java8_manifest_field() {
   ' "$PHASE2_JAVA8_RUNTIME_MANIFEST"
 }
 
+phase3_manifest_field() {
+  local component="$1"
+  local field="$2"
+
+  awk -F '\t' -v wanted_component="$component" -v wanted_field="$field" '
+    NR == 1 {
+      for (column = 1; column <= NF; column++) {
+        header[$column] = column
+      }
+      next
+    }
+    $1 == wanted_component {
+      if (!(wanted_field in header)) {
+        exit 2
+      }
+      print $header[wanted_field]
+      found = 1
+      exit
+    }
+    END {
+      if (!found) {
+        exit 1
+      }
+    }
+  ' "$PHASE3_JAVA17_RUNTIME_MANIFEST"
+}
+
+check_phase3_artifact() {
+  local component="$1"
+  local label="$2"
+  local artifact_variable="$3"
+  local checksum_variable="$4"
+  local artifact="${!artifact_variable:-}"
+  local configured_checksum="${!checksum_variable:-}"
+  local expected_artifact=""
+  local expected_checksum=""
+  local origin=""
+  local license=""
+  local actual=""
+
+  if [[ ! -f "$PHASE3_JAVA17_RUNTIME_MANIFEST" ]]; then
+    fail "$label: manifesto do gate Java 17 ausente"
+    return
+  fi
+
+  expected_artifact="$(
+    phase3_manifest_field "$component" archive 2>/dev/null || true
+  )"
+  expected_checksum="$(
+    phase3_manifest_field "$component" sha256 2>/dev/null || true
+  )"
+  origin="$(
+    phase3_manifest_field "$component" origin 2>/dev/null || true
+  )"
+  license="$(
+    phase3_manifest_field "$component" license 2>/dev/null || true
+  )"
+
+  if [[ -z "$expected_artifact" || -z "$origin" || -z "$license" ||
+        ! "$expected_checksum" =~ ^[[:xdigit:]]{64}$ ]]; then
+    fail "$label: identidade ou proveniência incompleta no manifesto Java 17"
+    return
+  fi
+  if [[ -z "$artifact" || ! -f "$artifact" ]]; then
+    fail "$label: $artifact_variable não aponta para o arquivo externo"
+    return
+  fi
+  if [[ "$(basename "$artifact")" != "$expected_artifact" ]]; then
+    fail "$label: nome do arquivo diverge do manifesto Java 17"
+    return
+  fi
+  if [[ "${configured_checksum,,}" != "${expected_checksum,,}" ]]; then
+    fail "$label: $checksum_variable diverge do manifesto Java 17"
+    return
+  fi
+
+  actual="$(sha256sum "$artifact" | awk '{print $1}')"
+  if [[ "$actual" != "$expected_checksum" ]]; then
+    fail "$label: checksum efetivo diverge do manifesto Java 17"
+    return
+  fi
+
+  pass "$label: origem aprovada $origin"
+  pass "$label: licença registrada $license"
+  pass "$label: checksum SHA-256 efetivo $actual"
+}
+
+check_phase3_java17() {
+  local java_home="${JAVA17_HOME:-}"
+  local version_output=""
+
+  if [[ -z "$java_home" || ! -x "$java_home/bin/java" ]]; then
+    fail "Temurin Java 17: JAVA17_HOME não aponta para um JDK"
+  else
+    version_output="$("$java_home/bin/java" -version 2>&1 || true)"
+    if [[ "$version_output" == *'openjdk version "17.0.20"'* &&
+          "$version_output" == *'Temurin-17.0.20+8'* ]]; then
+      pass "Temurin Java 17: OpenJDK 17.0.20+8 detectado"
+    else
+      fail "Temurin Java 17: distribuição ou build divergente"
+    fi
+  fi
+
+  check_phase3_artifact temurin-openjdk "Temurin Java 17" \
+    JAVA17_ARCHIVE JAVA17_ARCHIVE_SHA256
+}
+
 check_phase2_java8() {
   local java_home="${JAVA8_HOME:-}"
   local archive="${JAVA8_ARCHIVE:-}"
@@ -759,13 +899,19 @@ check_portable_java7() {
 check_h2() {
   local driver="${H2_JAR:-}"
   local java_home="${JAVA7_PORTABLE_HOME:-}"
+  local expected_version="1.4.200"
   local output=""
 
-  if rank_at_least CP-2A; then
+  if rank_at_least CP-3A; then
+    java_home="${JAVA17_HOME:-}"
+    expected_version="2.4.240"
+    check_phase3_artifact h2 "H2 portátil" H2_JAR H2_SHA256
+  elif rank_at_least CP-2A; then
     java_home="${JAVA8_HOME:-}"
+    check_portable_artifact h2 "H2 portátil" H2_JAR H2_SHA256
+  else
+    check_portable_artifact h2 "H2 portátil" H2_JAR H2_SHA256
   fi
-
-  check_portable_artifact h2 "H2 portátil" H2_JAR H2_SHA256
 
   if [[ -z "$driver" || ! -f "$driver" ]]; then
     return
@@ -780,8 +926,8 @@ check_h2() {
       -url 'jdbc:h2:mem:doctor;MODE=Oracle;DB_CLOSE_DELAY=-1' \
       -user sa -password '' -sql 'SELECT H2VERSION();' 2>&1 || true
   )"
-  if [[ "$output" == *"1.4.200"* && "$output" == *"(1 row"* ]]; then
-    pass "H2 portátil: versão 1.4.200 iniciou em memória no modo Oracle"
+  if [[ "$output" == *"$expected_version"* && "$output" == *"(1 row"* ]]; then
+    pass "H2 portátil: versão $expected_version iniciou em memória no modo Oracle"
   else
     fail "H2 portátil: smoke em memória no modo Oracle falhou"
   fi
@@ -1269,10 +1415,10 @@ else
   skip "H2, variáveis Oracle 19c e ojdbc7 externo (entram no CP-1D)"
 fi
 
-if rank_at_least CP-2A; then
+if rank_at_least CP-2A && ! rank_at_least CP-3A; then
   check_phase2_java8
 else
-  skip "OpenJDK 8 e checksum (entram no CP-2A)"
+  skip "OpenJDK 8 e checksum (exigidos de CP-2A a CP-2D)"
 fi
 
 if rank_at_least CP-2B; then
@@ -1287,14 +1433,14 @@ else
   skip "Maven 3.9.16 (entra no CP-2C)"
 fi
 
-if [[ "$CI_MODE" != true ]] && rank_at_least CP-3A; then
-  check_java "OpenJDK 17" JAVA17_HOME 'version \"17' JAVA17_ARCHIVE JAVA17_ARCHIVE_SHA256
+if rank_at_least CP-3A; then
+  check_phase3_java17
 else
   skip "OpenJDK 17 e checksum (entram no CP-3A)"
 fi
 
 if [[ "$CI_MODE" != true ]] && rank_at_least CP-3E; then
-  check_java "OpenJDK 21" JAVA21_HOME 'version \"21' JAVA21_ARCHIVE JAVA21_ARCHIVE_SHA256
+  check_java "OpenJDK 21" JAVA21_HOME 'version "21' JAVA21_ARCHIVE JAVA21_ARCHIVE_SHA256
   check_wildfly "WildFly 41" WILDFLY41_HOME '41.0.0.Final' WILDFLY41_ARCHIVE WILDFLY41_ARCHIVE_SHA256
 else
   skip "OpenJDK 21 e checksum (entram no CP-3E)"
@@ -1302,7 +1448,7 @@ else
 fi
 
 if [[ "$CI_MODE" != true ]] && rank_at_least CP-3J; then
-  check_java "OpenJDK 25" JAVA25_HOME 'version \"25' JAVA25_ARCHIVE JAVA25_ARCHIVE_SHA256
+  check_java "OpenJDK 25" JAVA25_HOME 'version "25' JAVA25_ARCHIVE JAVA25_ARCHIVE_SHA256
 else
   skip "OpenJDK 25 e checksum (entram no CP-3J)"
 fi

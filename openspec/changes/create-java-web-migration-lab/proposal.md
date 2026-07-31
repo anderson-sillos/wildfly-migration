@@ -25,7 +25,7 @@ A migração direta de uma aplicação Java 7/WildFly 9 para Java 25/WildFly 41 
   1. Java 17 no WildFly 26.1.3 para atualizar bibliotecas compatíveis com EE 8/`javax` e remover APIs duplicadas;
   2. Java 21 no WildFly 41 para migrar a aplicação para Jakarta EE 11 e aplicar as substituições arquiteturais;
   3. Java 25 no WildFly 41 para qualificação e fechamento do destino final.
-- Na fase 3, substituir Log4j 1 e qualquer ponte temporária, Apache Tiles, Commons FileUpload e Reflections pelas soluções finais compatíveis com Jakarta EE 11.
+- Na fase 3, substituir Log4j 1 e qualquer ponte temporária, Apache Tiles e Commons FileUpload pelas soluções finais compatíveis com Jakarta EE 11 e substituir Reflections pelo mecanismo padrão Jakarta Servlet `ServletContainerInitializer` com `@HandlesTypes`, encapsulado por uma fachada própria e registrado em um JAR interno do WAR, preservando a extensibilidade automática baseada em `@Validator` sem biblioteca externa de descoberta.
 - Na fase 3, confirmar e, quando necessário, ajustar MyBatis, Oracle JDBC, XMLBeans e dom4j para as versões finais aprovadas, provisionando o driver Oracle no WildFly, fora do WAR.
 - Usar no destino final somente uma distribuição OpenJDK e a distribuição comunitária open source do WildFly, com versões fixadas, origem, licença e checksums registrados.
 - Reproduzir incompatibilidades tentando executar o checkpoint anterior no runtime seguinte, usando fixtures artificiais apenas quando a falha não puder ser reproduzida naturalmente.
@@ -61,5 +61,5 @@ Nenhuma. O projeto ainda não possui especificações de capacidades existentes.
 - Jakarta EE Web Profile 11 no escopo `provided` somente na fase final, substituindo as APIs Servlet, JSP e JSTL antigas.
 - H2 em memória, em versão fixada e compatível com o Java de cada fase, somente no runtime de teste e nunca no WAR.
 - Oracle Database 19c e `com.oracle.database.jdbc:ojdbc17:23.26.2.0.0` na qualificação oficial.
-- Gates internos para modernizar MyBatis, logging, upload, Tiles, Reflections, XMLBeans, dom4j e APIs XML antes e durante a transição Jakarta.
+- Gates internos para modernizar MyBatis, logging, upload, Tiles, XMLBeans, dom4j e APIs XML e para substituir o mecanismo Reflections de descoberta de validadores pelo SCI padrão durante a transição Jakarta.
 - Scripts, dados de teste, documentação, tags e verificações do conteúdo do WAR em cada fase.

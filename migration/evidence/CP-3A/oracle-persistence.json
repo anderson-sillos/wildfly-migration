@@ -1,0 +1,18 @@
+{
+  "schema": "wildfly-migration-oracle-persistence/v1",
+  "qualification": "oracle-qualified",
+  "profile": "oracle",
+  "commit": "737feb6f4d08aca24a580d5421af4437b1b45b15",
+  "sourceCommit": "737feb6f4d08aca24a580d5421af4437b1b45b15",
+  "warSha256": "9206fd3b66ed00cd01bade70f2594102ec3b75d1d817ed317d6fabaca9459704",
+  "runtime": "java17-wildfly26.1.3-ee8",
+  "databaseVersion": "19.3.0.0.0",
+  "jdbcDriver": "ojdbc7-12.1.0.2.0",
+  "checks": {
+    "mybatisCommit": "passed",
+    "mybatisRollback": "passed",
+    "timestampRoundTrip": "passed",
+    "blobRoundTrip": "passed",
+    "transientDataCleanup": "passed"
+  }
+}

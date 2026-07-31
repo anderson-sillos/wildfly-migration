@@ -15,7 +15,7 @@ usage() {
 Uso:
   ./scripts/audit-legacy-war.sh --java-home DIRETORIO \
     [--expected-libraries ARQUIVO] \
-    [--expected-bytecode 51|52] [--expected-java-label TEXTO] [WAR]
+    [--expected-bytecode 51|52|61] [--expected-java-label TEXTO] [WAR]
 USAGE
 }
 
@@ -51,8 +51,9 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --expected-bytecode)
-      if [[ $# -lt 2 || ( "$2" != "51" && "$2" != "52" ) ]]; then
-        printf 'FALHA: --expected-bytecode exige 51 ou 52\n' >&2
+      if [[ $# -lt 2 ||
+            ( "$2" != "51" && "$2" != "52" && "$2" != "61" ) ]]; then
+        printf 'FALHA: --expected-bytecode exige 51, 52 ou 61\n' >&2
         exit 2
       fi
       EXPECTED_BYTECODE_MAJOR="$2"

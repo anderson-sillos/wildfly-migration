@@ -13,3 +13,8 @@ trilha H2/Java 7 redistribuível usa
 [`legacy/portable-runtime-manifest.tsv`](legacy/portable-runtime-manifest.tsv).
 Os dois manifestos permanecem separados para impedir que uma evidência
 `portable-ci` seja confundida com `oracle-qualified`.
+
+O gate ativo Java 17/WildFly 26 está em
+[`phase3/java17-wildfly26/`](phase3/java17-wildfly26/). Seu H2 2.4.240 não
+substitui o H2 histórico: as duas versões permanecem no inventário do cache,
+mas cada execução seleciona somente o artefato do próprio gate.

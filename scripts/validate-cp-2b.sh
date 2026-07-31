@@ -5,6 +5,7 @@ set -euo pipefail
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MANIFEST="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/runtime-manifest.tsv"
 RUNTIME_CACHE_LOCK="$REPOSITORY_ROOT/runtime/portable-runtime-cache.sha256"
+RUNTIME_CACHE_SOURCES="$REPOSITORY_ROOT/runtime/portable-runtime-sources.tsv"
 EVIDENCE="$REPOSITORY_ROOT/migration/evidence/CP-2B/before-deployment.properties"
 WAR_FILE=""
 CONTRACT_RESULT_FILE=""
@@ -54,6 +55,7 @@ done
 for path in \
   "$MANIFEST" \
   "$RUNTIME_CACHE_LOCK" \
+  "$RUNTIME_CACHE_SOURCES" \
   "$EVIDENCE" \
   "$REPOSITORY_ROOT/migration/evidence/CP-2B/compatibility-observations.tsv" \
   "$REPOSITORY_ROOT/migration/evidence/CP-2B/after.properties" \
@@ -222,12 +224,8 @@ for cache_lock_row in \
   grep -Fxq "$cache_lock_row" "$RUNTIME_CACHE_LOCK" ||
     fail "identidade do cache de runtime não contém: $cache_lock_row"
 done
-if [[ "$(awk 'END { print NR + 0 }' "$RUNTIME_CACHE_LOCK")" -ne 4 ]]; then
-  fail "identidade do cache deve relacionar somente os quatro runtimes usados"
-fi
 
-STATIC_WORKFLOW="$REPOSITORY_ROOT/.github/workflows/validate.yml"
-WORKFLOW="$REPOSITORY_ROOT/.github/workflows/portable.yml"
+WORKFLOW="$REPOSITORY_ROOT/.github/workflows/validate.yml"
 for action_marker in \
   'uses: actions/checkout@v6' \
   'uses: actions/upload-artifact@v6'; do
@@ -235,33 +233,45 @@ for action_marker in \
     fail "workflow do CP-2B não usa a action Node 24: $action_marker"
 done
 if grep -Eq 'uses: actions/(checkout|upload-artifact)@v4' \
-    "$STATIC_WORKFLOW" "$WORKFLOW"; then
+    "$WORKFLOW"; then
   fail "workflow do CP-2B não deve usar actions baseadas em Node 20"
 fi
-for concurrent_workflow in "$STATIC_WORKFLOW" "$WORKFLOW"; do
-  grep -Fq 'group: ${{ github.workflow }}-${{ github.ref }}' \
-    "$concurrent_workflow" ||
-    fail "workflow não isola concorrência por workflow e referência"
-  grep -Fq 'cancel-in-progress: true' "$concurrent_workflow" ||
-    fail "workflow não cancela execução obsoleta da mesma referência"
-  grep -Fq 'persist-credentials: false' "$concurrent_workflow" ||
-    fail "checkout não deve persistir o token no runner"
+grep -Fq 'group: ${{ github.workflow }}-${{ github.ref }}' "$WORKFLOW" ||
+  fail "workflow não isola concorrência por workflow e referência"
+grep -Fq 'cancel-in-progress: false' "$WORKFLOW" ||
+  fail "workflow não deve cancelar uma validação funcional em andamento"
+grep -Fq 'persist-credentials: false' "$WORKFLOW" ||
+  fail "checkout não deve persistir o token no runner"
+for light_path_marker in \
+  "':(exclude,glob)*.md'" \
+  "':(exclude,glob)**/*.md'" \
+  "':(exclude,glob)docs/**'" \
+  "':(exclude,glob)openspec/**'" \
+  "':(exclude,glob)migration/evidence/**'" \
+  "':(exclude,glob)migration/steps/**'" \
+  "':(exclude)migration/incompatibilities.tsv'" \
+  "':(exclude)scripts/validate-documentation.sh'"; do
+  grep -Fq "$light_path_marker" "$WORKFLOW" ||
+    fail "modo leve não declara caminho documental: $light_path_marker"
 done
-for path_marker in \
-  '".env.example"' \
-  '".github/workflows/pr-cache-cleanup.yml"' \
-  '".github/workflows/portable.yml"' \
-  '"app/**"' \
-  '"contract-tests/**"' \
-  '"migration/baselines/**"' \
-  '"runtime/**"' \
-  '"scripts/**"'; do
-  grep -Fq "$path_marker" "$WORKFLOW" ||
-    fail "portable-ci não declara caminho aplicável: $path_marker"
-done
-if grep -Fq '"docs/**"' "$WORKFLOW"; then
-  fail "portable-ci não deve executar por alteração exclusivamente documental"
+if grep -Fq "':(exclude,glob)migration/baselines/**'" "$WORKFLOW"; then
+  fail "baseline executável não pode ser excluído do CI completo"
 fi
+for selection_marker in \
+  'id: portable-selection' \
+  'EVENT_ACTION: ${{ github.event.action }}' \
+  'BEFORE_SHA: ${{ github.event.before }}' \
+  'git diff --quiet --no-renames' \
+  'run_portable=true' \
+  'reason="runtime-impacting-path"' \
+  '.name == "portable-ci" and .conclusion == "success"' \
+  'previous-head-without-successful-portable-check' \
+  'documentation-or-planning-only' \
+  "steps.portable-selection.outputs.run == 'true'" \
+  'checks: read'; do
+  grep -Fq -- "$selection_marker" "$WORKFLOW" ||
+    fail "seleção incremental do portable-ci não contém: $selection_marker"
+done
 for cache_marker in \
   'uses: actions/cache/restore@v5' \
   'uses: actions/cache/save@v5' \
@@ -274,16 +284,21 @@ for cache_marker in \
   "hashFiles('app/pom.xml')" \
   'archives="$RUNNER_TEMP/wildfly-migration-cache/runtime-archives"' \
   'cache_lock="$GITHUB_WORKSPACE/runtime/portable-runtime-cache.sha256"' \
-  'Removendo arquivo obsoleto do cache restaurado' \
-  'Cache validado por SHA-256' \
-  'Download validado por SHA-256' \
-  'https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz' \
-  'https://archive.apache.org/dist/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz' \
-  'sha256sum --check "$cache_lock"' \
+  'runtime_sources="$GITHUB_WORKSPACE/runtime/portable-runtime-sources.tsv"' \
+  './scripts/prepare-portable-runtime-cache.sh \' \
+  '--archives-dir "$archives" \' \
+  '--lock "$cache_lock" \' \
+  '--sources "$runtime_sources"' \
   'key: ${{ steps.runtime-archive-cache.outputs.cache-primary-key }}' \
   'key: ${{ steps.maven-dependency-cache.outputs.cache-primary-key }}'; do
-  grep -Fq "$cache_marker" "$WORKFLOW" ||
+  grep -Fq -- "$cache_marker" "$WORKFLOW" ||
     fail "cache portátil do CP-2B não contém: $cache_marker"
+done
+for source_marker in \
+  'apache-maven-3.9.16-bin.tar.gz	https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz' \
+  'apache-maven-3.9.16-bin.tar.gz	https://archive.apache.org/dist/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz'; do
+  grep -Fq -- "$source_marker" "$RUNTIME_CACHE_SOURCES" ||
+    fail "índice de origens do cache não contém: $source_marker"
 done
 if [[ "$(grep -Fc 'uses: actions/cache/restore@v5' "$WORKFLOW")" -ne 2 ]] ||
    [[ "$(grep -Fc 'uses: actions/cache/save@v5' "$WORKFLOW")" -ne 2 ]]; then
@@ -292,13 +307,16 @@ fi
 if [[ "$(grep -Fc 'restore-keys:' "$WORKFLOW")" -ne 2 ]]; then
   fail "os dois caches reutilizáveis devem declarar chave parcial"
 fi
+cache_save_section="$(
+  sed -n '/- name: Save reusable runtime archive cache/,$p' "$WORKFLOW"
+)"
 for save_guard in \
   "github.event_name == 'push'" \
   "github.ref == 'refs/heads/main'" \
   "github.event_name == 'pull_request'" \
   "github.event.pull_request.head.repo.full_name ==" \
   "github.repository"; do
-  if [[ "$(grep -Fc "$save_guard" "$WORKFLOW")" -ne 2 ]]; then
+  if [[ "$(grep -Fc "$save_guard" <<< "$cache_save_section")" -ne 2 ]]; then
     fail "os dois caches não compartilham a proteção de gravação: $save_guard"
   fi
 done

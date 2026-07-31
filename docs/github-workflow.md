@@ -71,15 +71,22 @@ Cada PR deve:
 Somente os finais das três fases públicas recebem tags. Gates Java 17 e Java 21
 da fase 3 ficam identificados por commits e manifestos, sem tags públicas.
 
-## Workflows de validação
+## Workflow de validação
 
-O CI é separado por finalidade:
+`.github/workflows/validate.yml` concentra os dois jobs, que continuam
+independentes e paralelos:
 
-- `.github/workflows/validate.yml` executa `repository-baseline` em todo pull
-  request e em todo push para `main`;
-- `.github/workflows/portable.yml` executa `portable-ci` somente quando mudam
+- `repository-baseline` executa a validação estática em todo pull request e em
+  todo push para `main`;
+- `portable-ci` publica seu próprio check em toda entrega, mas só monta o
+  ambiente e executa a trilha H2 completa quando o delta do push atual muda
   configuração de exemplo, aplicação, contratos, baseline executável,
-  runtimes, scripts ou o próprio workflow portátil.
+  runtimes, scripts funcionais ou o próprio workflow.
+
+A separação histórica em `validate.yml` e `portable.yml` não era necessária
+para conservar os dois checks. A consolidação mantém isolamento por job,
+execução paralela e diagnóstico separado, mas elimina eventos, permissões e
+concorrência duplicados em dois arquivos.
 
 O `repository-baseline` local e remoto usa o mesmo executor versionado. Antes
 de enviar uma alteração, execute:
@@ -93,16 +100,61 @@ lista manual de validadores no workflow ou na documentação. Os validadores de
 checkpoints antigos verificam apenas seus contratos permanentes; o validador
 do checkpoint ativo confere nomes, versões e caminhos que podem evoluir.
 
-Alterações exclusivamente em `docs/`, `openspec/` ou evidências já capturadas
-continuam recebendo a validação estática, mas não recriam Java, Maven, WildFly,
-H2 e o WAR. Uma alteração em `scripts/`, `runtime/`, `contract-tests/`,
-`migration/baselines/`, `app/`, `.env.example` ou no workflow portátil sempre
-executa a trilha H2 completa.
+Alterações exclusivamente em arquivos `*.md`, `docs/`, `openspec/`,
+`migration/evidence/`, `migration/steps/`, no catálogo de incompatibilidades
+ou no validador estático da documentação continuam recebendo
+`repository-baseline`. O check `portable-ci` conclui em modo leve, sem
+restaurar caches, recriar Java, Maven, WildFly, H2 ou o WAR. Uma alteração em
+scripts funcionais, `runtime/`, `contract-tests/`, `migration/baselines/`,
+`app/`, `.env.example`, no workflow de validação ou em um caminho ainda não
+classificado executa a trilha H2 completa.
 
-Os dois workflows agrupam execuções pelo nome do workflow e pela referência
-Git. Quando um novo commit chega ao mesmo PR, a execução anterior ainda em
-andamento é cancelada. Isso não cancela validações de outros PRs nem mistura
-`repository-baseline` com `portable-ci`.
+No evento `synchronize` de um pull request, a seleção compara o `before` e o
+`after` fornecidos pelo GitHub, em vez do diff acumulado do PR contra `main`.
+Isso evita repetir o runtime por um commit documental feito depois de uma
+mudança funcional. O modo leve só é aceito quando o SHA anterior já possui um
+check `portable-ci` aprovado. Se a execução anterior estiver pendente,
+cancelada ou reprovada, a nova entrega executa a trilha completa. O token do
+GitHub é tratado como valor opaco pela CLI, sem suposição sobre prefixo ou
+tamanho.
+
+A decisão fica em uma única etapa do próprio workflow. Ela usa `git diff` com
+exclusões explícitas para os caminhos documentais e considera todo caminho não
+classificado como funcional. O validador local confere a presença da lista
+leve, do fallback completo e da proteção pelo resultado anterior; não existe
+um segundo script com outra implementação da regra.
+
+O workflow agrupa execuções pelo nome e pela referência Git e usa
+`cancel-in-progress: false`. Um novo commit no mesmo PR aguarda a execução em
+andamento, preservando a evidência funcional do SHA anterior. Depois, a
+verificação desse resultado decide entre o modo leve e o CI completo para o
+novo SHA. Execuções de outros PRs não entram nessa fila; os dois jobs do mesmo
+commit permanecem identificados separadamente.
+
+O GitHub conserva no máximo uma execução pendente por grupo de concorrência;
+commits adicionais podem substituir uma execução que ainda não começou. Por
+isso a verificação do último SHA continua obrigatória e escolhe o CI completo
+sempre que não encontra um `portable-ci` aprovado.
+
+### Auditoria da consolidação
+
+Em 30/07/2026, o commit `321e65b9dfed050412ecf4dbaed21ca61313d763`
+validou a versão consolidada no
+[run `30591562923`](https://github.com/anderson-sillos/wildfly-migration/actions/runs/30591562923):
+
+- o único workflow `validation` publicou os jobs separados
+  `repository-baseline` e `portable-ci`;
+- a alteração do próprio workflow selecionou corretamente o CI completo;
+- `repository-baseline` concluiu em 13 segundos e `portable-ci` em 48
+  segundos;
+- os caches exatos de runtime e Maven foram restaurados, sem gerar cópias;
+- build, sondas, H2, WildFly 26 e os 14 contratos foram aprovados;
+- o artefato sanitizado de evidências foi publicado.
+
+A entrega exclusivamente documental que registra esta auditoria é o teste de
+aceitação do modo leve: ela deve executar a seleção e
+`repository-baseline`, sem restaurar caches, montar runtime, compilar,
+iniciar WildFly ou publicar artefato.
 
 ## Reutilização dos caches
 
@@ -124,10 +176,22 @@ não invalidam o cache quando os binários permanecem iguais. Os manifestos
 continuam sendo a fonte completa de proveniência; o arquivo `.sha256` é
 somente a identidade mínima do cache.
 
+As origens de download ficam em
+`runtime/portable-runtime-sources.tsv`. O script
+`scripts/prepare-portable-runtime-cache.sh` verifica que todo arquivo do lock
+possui ao menos uma origem HTTPS e que nenhuma origem referencia um arquivo
+fora do lock. Portanto, adicionar um runtime não exige copiar a lógica de
+download para o workflow: registre nome e checksum no lock e uma ou mais
+origens no índice. A validação estática executada localmente e no GitHub acusa
+qualquer divergência entre os dois arquivos.
+
 Todos os arquivos baixados para montar o runtime portátil — JDK, distribuição
 Maven, WildFly e driver H2, independentemente do tamanho — ficam juntos em uma
 única entrada `runtime-archives`. O repositório local do Maven permanece em
 outra entrada porque seu conteúdo e ciclo de invalidação são diferentes.
+O lock inclui também o Temurin 17 usado a partir do CP-3A; o arquivo é
+reutilizado pelo cache desde já, mas só será extraído pelo workflow quando a
+trilha Java 17 passar a ser executada.
 
 Cada cache possui uma chave parcial de restauração. Se a chave exata não
 existir, o job reaproveita a entrada compatível anterior, elimina do pacote os

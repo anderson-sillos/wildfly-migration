@@ -25,6 +25,7 @@ Não existem JARs versionados manualmente em `WEB-INF/lib`. Mesmo assim, o conte
 - Permitir que uma pessoa prepare e diagnostique o ambiente a partir da documentação antes de implementar a aplicação.
 - Garantir que o destino final dependa somente de distribuições open source de Java e WildFly.
 - Separar APIs fornecidas pelo WildFly, bibliotecas empacotadas no WAR e componentes provisionados no servidor.
+- Preservar a extensibilidade automática dos validadores por annotation sem manter Reflections como dependência final nem exigir um registro central atualizado manualmente.
 - Produzir documentação que possa ser reutilizada como roteiro na aplicação real.
 
 **Non-Goals:**
@@ -85,7 +86,7 @@ Os checkpoints planejados são:
 |---|---|
 | 1 | `CP-1A` repositório e ambiente; `CP-1B` estrutura e runtime legado; `CP-1C` WAR e dependências; `CP-1D` fundação H2/Oracle; `CP-1E` fluxo web/persistência; `CP-1F` integrações e contratos; `CP-1G` baseline completo |
 | 2 | `CP-2A` Java 8/WildFly 9; `CP-2B` WildFly 26; `CP-2C` EE 8, Maven e datasource; `CP-2D` fechamento da ponte |
-| 3 | `CP-3A` Java 17; `CP-3B` dependências centrais; `CP-3C` XML e Oracle JDBC; `CP-3D` gate Java 17; `CP-3E` entrada no WildFly 41; `CP-3F` namespace e descritores; `CP-3G` substituições web; `CP-3H` Oracle e auditoria; `CP-3I` gate Java 21; `CP-3J` Java 25; `CP-3K` destino final |
+| 3 | `CP-3A` Java 17; `CP-3B` dependências centrais; `CP-3C` XML e Oracle JDBC; `CP-3D` gate Java 17; `CP-3E` entrada no WildFly 41; `CP-3F` namespace e descritores; `CP-3G` substituições web e descoberta de validadores; `CP-3H` Oracle e auditoria; `CP-3I` gate Java 21; `CP-3J` Java 25; `CP-3K` destino final |
 
 Alternativas consideradas: criar um único commit ao final de cada fase, o que concentraria muitas mudanças e tornaria o diagnóstico e o rollback pouco precisos; e criar uma tag para toda entrega parcial, o que confundiria checkpoints de engenharia com as três fases públicas. Ambas foram descartadas.
 
@@ -140,7 +141,7 @@ A política desse gate será:
 3. adiar para o gate Jakarta qualquer mudança que exija `jakarta.*` ou reescrita substancial;
 4. registrar explicitamente exceções temporárias sem tratá-las como estado de produção.
 
-O resultado previsto inclui MyBatis 3.5.19, XMLBeans 5.3.0 com tipos regenerados, dom4j 2.x, Reflections 0.10.2, driver Oracle compatível com Java 17/Oracle 19c, remoção de `xml-apis` e Geronimo StAX e substituição de Log4j 1 por uma implementação mantida com ponte temporária quando necessária. Commons FileUpload poderá permanecer provisoriamente na última linha 1.x compatível com `javax`, e Tiles continuará apenas até o gate seguinte.
+O resultado previsto inclui MyBatis 3.5.19, XMLBeans 5.3.0 com tipos regenerados, dom4j 2.x, Reflections 0.10.2 como ponte temporária, driver Oracle compatível com Java 17/Oracle 19c, remoção de `xml-apis` e Geronimo StAX e substituição de Log4j 1 por uma implementação mantida com ponte temporária quando necessária. A atividade 3.9 atualizará Reflections e comprovará no Java 17/WildFly 26 o conjunto, a ordem e o classloader da descoberta existente, formando a referência funcional que será preservada pela substituição por SCI. Commons FileUpload poderá permanecer provisoriamente na última linha 1.x compatível com `javax`, e Tiles continuará apenas até o gate seguinte.
 
 **Gate 3B — Java 21 no WildFly 41/Jakarta EE 11:** o WAR aprovado no gate 3A será primeiro tentado sem transformação no WildFly 41 para capturar as falhas reais. Em seguida, a mesma árvore `app/` será executada com Java 21 e migrada para Jakarta EE 11. Java 21 isola a mudança de servidor, namespace e arquitetura antes da troca final da JVM.
 
@@ -152,9 +153,17 @@ jakarta.platform:jakarta.jakartaee-web-api:11.0.0 (provided)
 
 Os imports migrarão de `javax.servlet*`, `javax.servlet.jsp*`, `javax.servlet.jsp.tagext*`, `javax.servlet.jsp.jstl*` e `javax.el*` para `jakarta.*`. Pacotes Java SE como `javax.sql`, `javax.naming` e `javax.xml` permanecerão inalterados.
 
-Tiles será substituído por tag files/includes sob `WEB-INF`; Commons FileUpload será substituído por `@MultipartConfig` e `jakarta.servlet.http.Part`; Reflections será substituído por registro explícito; e qualquer ponte temporária de logging será removida em favor do mecanismo final integrado ao WildFly.
-
 O URI funcional da tag customizada permanecerá estável, mas os handlers migrarão para `jakarta.servlet.jsp.tagext`. As JSPs usarão preferencialmente `jakarta.tags.core`, `jakarta.tags.fmt` e `jakarta.tags.functions`.
+
+Depois da aprovação do namespace e dos descritores no `CP-3F`, a atividade `3.33` do `CP-3G` substituirá Reflections pelo mecanismo padrão Jakarta Servlet `ServletContainerInitializer` (SCI) com `@HandlesTypes(Validator.class)` no runtime de destino Java 21/WildFly 41. A fachada própria receberá as classes localizadas pelo contêiner, descartará interfaces, classes abstratas e tipos que não implementem o contrato de validação e preservará o conjunto e a ordenação determinística comprovados pela ponte Reflections 0.10.2. A descoberta cobrirá validators elegíveis em `WEB-INF/classes` e em JARs aprovados de `WEB-INF/lib`, sem registro central atualizado manualmente e sem código de negócio dependente da API Servlet.
+
+A infraestrutura do mecanismo será produzida pelo projeto como um JAR interno, empacotado em `WEB-INF/lib`, contendo `@Validator`, o contrato de validação, a fachada/registro, a implementação de `ServletContainerInitializer` e o descritor `META-INF/services/jakarta.servlet.ServletContainerInitializer`. As implementações concretas dos validators não precisarão residir nesse JAR: poderão permanecer em `WEB-INF/classes` ou em outros JARs aprovados da aplicação.
+
+O JAR separado não representa uma biblioteca externa. Ele existe porque a especificação Jakarta Servlet define a descoberta portátil de implementações de `ServletContainerInitializer` pela JAR Services API e exige que o arquivo de serviço correspondente esteja em `META-INF/services` do JAR. Empacotar a classe do SCI apenas em `WEB-INF/classes` pode funcionar em uma implementação específica, mas não oferece a mesma garantia normativa de portabilidade. O mecanismo não dependerá de VFS, TCCL ou outra API exclusiva do WildFly; cada módulo WAR, implantado isoladamente ou dentro de um EAR, manterá o registro associado ao próprio `ServletContext`.
+
+Ainda no `CP-3G`, as tarefas originais permanecerão numeradas: `3.31` substituirá Tiles por tag files/includes sob `WEB-INF`; `3.32` substituirá Commons FileUpload por `@MultipartConfig` e `jakarta.servlet.http.Part`; `3.33` substituirá Reflections pelo SCI; e `3.34` removerá qualquer ponte temporária de logging em favor do mecanismo final integrado ao WildFly.
+
+Na configuração final do MyBatis, `logImpl` será definido explicitamente como `SLF4J`. A fachada SLF4J disponibilizada pelo subsistema de logging do WildFly encaminhará os eventos ao backend administrado pelo contêiner; o WAR não empacotará Log4j 1, Logback, Log4j 2 Core nem outro backend concorrente. A escolha explícita evita que a autodetecção do MyBatis mude de comportamento conforme as bibliotecas ou os módulos visíveis no classloader.
 
 **Gate 3C — Java 25 no WildFly 41:** depois da aprovação funcional e estrutural no Java 21, somente a JVM será alterada para Java 25. As falhas exclusivas dessa troca serão registradas, os contratos e auditorias serão repetidos e o estado aprovado receberá a tag pública `migration/03-final`. Uma execução adicional em Java 21 permanecerá na matriz de qualificação.
 
@@ -198,7 +207,7 @@ Para cada incompatibilidade serão capturados: checkpoint de origem, runtime de 
 
 ### 9. Auditoria e segurança do laboratório
 
-Cada checkpoint público e gate interno produzirá inventário de dependências diretas/transitivas, versões de ferramentas, checksum do WAR e lista de `WEB-INF/lib`. A fase final rejeitará APIs do contêiner, `log4j:log4j`, Tiles, Commons FileUpload 1, `xml-apis`, Geronimo StAX, `ojdbc7` e Reflections.
+Cada checkpoint público e gate interno produzirá inventário de dependências diretas/transitivas, versões de ferramentas, checksum do WAR e lista de `WEB-INF/lib`. A fase final rejeitará APIs do contêiner, `log4j:log4j`, Tiles, Commons FileUpload 1, `xml-apis`, Geronimo StAX, `ojdbc7`, Reflections e qualquer biblioteca externa de scanning de classes. A auditoria aceitará o JAR interno do SCI somente quando o descritor `META-INF/services/jakarta.servlet.ServletContainerInitializer`, a implementação indicada e o conteúdo esperado estiverem presentes.
 
 Os runtimes WildFly 9 e WildFly 26 ficarão ligados apenas a loopback ou rede interna do ambiente de containers. Nenhuma credencial, binário proprietário do Java 7 ou segredo Oracle será versionado.
 
@@ -216,7 +225,8 @@ Os runtimes WildFly 9 e WildFly 26 ficarão ligados apenas a loopback ou rede in
 - [O ambiente legado não pode ser reproduzido integralmente nos runners hospedados do GitHub] → Usar Java 7 redistribuível e H2 apenas como trilha portátil, manter Oracle JDK 7u80/Oracle 19c na validação interna documentada, exigir evidência do `doctor` e nunca enviar binários proprietários ou credenciais como artefatos públicos.
 - [Maven 3.8.9 está em fim de vida apesar de ser a última versão disponível compatível com Java 7] → Fixar origem e checksum, restringi-lo ao caminho legado isolado e substituí-lo por Maven 3.9.16 no `CP-2C`.
 - [O TLD histórico pode ser aceito de forma diferente por contêineres] → Testar o descritor original antes da normalização e registrar o comportamento observado.
-- [Remover Reflections altera o mecanismo de extensibilidade] → Preservar o conjunto e a ordem dos validadores por contrato e documentar como adicionar novos validadores.
+- [Substituir Reflections pode alterar descoberta, classloading ou extensibilidade] → Congelar o contrato com `@Validator`, delegar a descoberta ao SCI padrão, preservar conjunto e ordem e manter o mecanismo atrás de uma fachada própria.
+- [O SCI empacotado somente em `WEB-INF/classes` pode depender de comportamento específico do contêiner] → Fornecer o mecanismo em JAR interno de `WEB-INF/lib` com o descritor padrão da JAR Services API e auditar o empacotamento.
 - [Logging gerenciado pelo servidor reduz portabilidade do formato de configuração] → Usar APIs padrão no código e encapsular a configuração específica do WildFly na área de runtime.
 - [Dependências atuais podem avançar durante a implementação] → Fixar as versões aprovadas nesta proposta e executar uma revisão explícita antes de alterá-las.
 - [Uma distribuição proprietária de Java ou do servidor pode entrar por conveniência operacional] → Auditar origem, licença e checksum do runtime final e reprovar Oracle JDK, JBoss EAP ou artefato sem proveniência open source documentada.
@@ -225,7 +235,7 @@ Os runtimes WildFly 9 e WildFly 26 ficarão ligados apenas a loopback ou rede in
 
 1. **Baseline legado:** concluir `CP-1A` a `CP-1G`, começando pelo repositório e ambiente, reconciliar a fundação H2/Oracle antes do fluxo web, construir a aplicação em `app/`, executar no Java 7/WildFly 9, congelar contratos, WAR, manifesto e tag `migration/01-legacy-baseline`.
 2. **Modernização máxima com baixo impacto:** concluir `CP-2A` a `CP-2D`, executar primeiro no Java 8/WildFly 9, migrar para WildFly 26.1.3 ainda em `javax`, aprovar os contratos e criar `migration/02-java8-wildfly26`.
-3. **Destino final:** concluir `CP-3A` a `CP-3K`, executar o gate Java 17/WildFly 26 e modernizar dependências; executar o gate Java 21/WildFly 41 e migrar para Jakarta EE 11; trocar somente a JVM para Java 25; validar Oracle, contratos e auditorias; e criar `migration/03-final`.
+3. **Destino final:** concluir `CP-3A` a `CP-3K`, executar o gate Java 17/WildFly 26 e modernizar dependências; executar o gate Java 21/WildFly 41, migrar para Jakarta EE 11 e substituir Reflections pelo SCI na atividade `3.33` do runtime de destino; trocar somente a JVM para Java 25; validar Oracle, contratos e auditorias; e criar `migration/03-final`.
 
 O rollback de uma fase pública consiste em selecionar a tag anterior, reprovisionar seu runtime e restaurar somente os dados de teste do laboratório. Dentro de uma fase, o rollback retorna ao commit de entrega e aos artefatos do último checkpoint parcial verde; dentro da fase 3, os gates continuam sendo pontos adicionais de retorno. Não haverá atualização in-place das instalações do WildFly nem alteração destrutiva do Oracle 19c.
 

@@ -98,6 +98,25 @@ O laboratório SHALL concluir o destino final por gates sequenciais em Java 17/W
 - **WHEN** Java 25, WildFly 41, Jakarta EE 11, contratos, dependências, segurança, WAR e Oracle 19c são aprovados
 - **THEN** o estado é preservado como `migration/03-final`, relacionando evidências dos gates internos sem publicar checkpoints adicionais
 
+### Requirement: Substituição do Reflections pelo SCI padrão
+Depois de atualizar Reflections para 0.10.2 no gate Java 17 e concluir a migração de namespace no Java 21/WildFly 41, o laboratório SHALL substituí-lo na atividade `3.33` do `CP-3G` pelo mecanismo padrão Jakarta Servlet `ServletContainerInitializer` com `@HandlesTypes(Validator.class)`, encapsulado por uma fachada própria e sem biblioteca externa de descoberta.
+
+#### Scenario: Contrato legado preservado
+- **WHEN** a atividade `3.33` substitui a ponte Reflections 0.10.2
+- **THEN** o SCI e a fachada produzem o mesmo conjunto e a mesma ordem para validators elegíveis e descartam interfaces, classes abstratas e tipos que não implementam o contrato de validação
+
+#### Scenario: Registro portátil do SCI
+- **WHEN** o WAR final é inspecionado
+- **THEN** um JAR interno em `WEB-INF/lib` contém a implementação do SCI e o arquivo `META-INF/services/jakarta.servlet.ServletContainerInitializer` aponta para essa implementação
+
+#### Scenario: Separação entre infraestrutura e validators
+- **WHEN** o mecanismo de descoberta é empacotado
+- **THEN** o JAR interno contém `@Validator`, o contrato de validação, a fachada/registro, o SCI e o descritor de serviço, enquanto as implementações concretas podem permanecer em `WEB-INF/classes` ou em outros JARs aprovados de `WEB-INF/lib`
+
+#### Scenario: Portabilidade do empacotamento
+- **WHEN** o módulo WAR é implantado isoladamente ou dentro de um EAR
+- **THEN** o SCI usa somente APIs Jakarta Servlet padrão e mantém o registro associado ao `ServletContext` do módulo web, sem depender de VFS ou API exclusiva do WildFly
+
 ### Requirement: Catálogo de incompatibilidades
 O laboratório SHALL manter um catálogo versionado das incompatibilidades cobertas, classificadas por fase de compilação, empacotamento, implantação ou execução.
 
@@ -107,7 +126,7 @@ O laboratório SHALL manter um catálogo versionado das incompatibilidades cober
 
 #### Scenario: Cobertura mínima
 - **WHEN** o catálogo inicial é validado
-- **THEN** ele contém cenários para Java, namespaces Jakarta, APIs empacotadas, Tiles/TLD, upload, logging, MyBatis/reflexão, Reflections, Oracle JDBC, XMLBeans, APIs XML duplicadas e dom4j
+- **THEN** ele contém cenários para Java, namespaces Jakarta, APIs empacotadas, Tiles/TLD, upload, logging, MyBatis/reflexão, descoberta por annotation e substituição do Reflections, Oracle JDBC, XMLBeans, APIs XML duplicadas e dom4j
 
 ### Requirement: Falhas naturais e fixtures determinísticas
 Cada transição entre fases e cada gate interno da fase final SHALL começar tentando executar o último estado verde no runtime seguinte para capturar incompatibilidades naturais; fixtures opt-in SHALL ser usadas somente quando essa reprodução não for determinística, e os três checkpoints públicos e gates internos MUST permanecer verdes.

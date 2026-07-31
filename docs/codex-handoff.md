@@ -119,17 +119,20 @@ Sobre `c76f42f`:
   revalidou os quatro arquivos sem download e concluiu em 1m02s;
 - `checkout` e `upload-artifact` foram atualizadas para v6; com
   `actions/cache@v5`, as três actions do workflow usam Node 24.
-- o CI estático permanece em `.github/workflows/validate.yml`; a trilha
-  completa foi isolada em `.github/workflows/portable.yml` para que PRs
-  exclusivamente documentais não recriem o runtime;
+- o CI foi consolidado em `.github/workflows/validate.yml`, preservando os
+  jobs independentes `repository-baseline` e `portable-ci`; uma única etapa
+  baseada em `git diff` mantém PRs exclusivamente documentais sem recriar o
+  runtime;
+- o run `30591562923` aprovou a consolidação com o fluxo completo, caches
+  restaurados e 14 contratos, sem cancelar a execução iniciada;
 - o workflow portátil passou a cachear somente `~/.m2/repository`, com chave
   exata baseada em SO, arquitetura, Maven 3.8.9 e `app/pom.xml`, sem
   `restore-keys`, `settings.xml`, resultados ou credenciais;
 - Maven Central foi comprovado com os mesmos 8.296.518 bytes e SHA-256
   aprovado do Maven 3.8.9 e passou a ser a origem primária do CI, mantendo
   Apache Archive como fallback;
-- os workflows cancelam execuções obsoletas da mesma referência; o smoke
-  WildFly e os 14 contratos não foram alterados.
+- o workflow não cancela uma validação já iniciada da mesma referência; o
+  smoke WildFly e os 14 contratos não foram alterados.
 - no workflow `30479982987`, a tentativa 1 comprovou ambos os cache misses,
   Maven Central em aproximadamente 0,1s, build Maven em 19,468s e job completo
   em 1m04s; a tentativa 2 restaurou runtime e Maven, executou o Maven em

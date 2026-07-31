@@ -104,7 +104,8 @@ if ! awk -F '\t' '
         $2 !~ /^CP-[123][A-Z]$/ ||
         ($5 != "compilation" && $5 != "packaging" &&
          $5 != "deployment" && $5 != "execution" &&
-         $5 != "startup" && $5 != "configuration") ||
+         $5 != "startup" && $5 != "configuration" &&
+         $5 != "verification") ||
         ($7 != "natural" && $7 != "fixture-opt-in") ||
         ($8 != "observed" && $8 != "resolved" &&
          $8 !~ /^deferred-CP-[123][A-Z]$/) ||

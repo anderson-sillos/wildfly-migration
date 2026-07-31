@@ -152,15 +152,14 @@ grep -Fq $'INC-005\tCP-2A\t' \
 grep -Fq $'INC-006\tCP-2A\t' \
   "$REPOSITORY_ROOT/migration/incompatibilities.tsv" ||
   fail "INC-006 não foi catalogada"
-grep -Fq '<maven.compiler.source>1.8</maven.compiler.source>' \
-  "$REPOSITORY_ROOT/app/pom.xml" ||
-  fail "POM não compila source 1.8"
-grep -Fq '<maven.compiler.target>1.8</maven.compiler.target>' \
-  "$REPOSITORY_ROOT/app/pom.xml" ||
-  fail "POM não produz target 1.8"
-grep -Fq '<phase2.java.version.range>[1.8,1.9)</phase2.java.version.range>' \
-  "$REPOSITORY_ROOT/app/pom.xml" ||
-  fail "Enforcer não restringe a família Java 8"
+for phase2_marker in \
+  'target.java=Eclipse-Temurin-OpenJDK-8u492-b09' \
+  'war.bytecode.major=52' \
+  'tag=migration/02-java8-wildfly26'; do
+  grep -Fxq "$phase2_marker" \
+    "$REPOSITORY_ROOT/migration/baselines/02-java8-wildfly26/manifest.properties" ||
+    fail "manifesto imutável não preserva o contrato Java 8: $phase2_marker"
+done
 grep -Fq -- '--java 8' "$REPOSITORY_ROOT/docs/cp-2a-java8-wildfly9.md" ||
   fail "runbook não seleciona Java 8 explicitamente"
 grep -Fq 'Conclusão comprovada' \

@@ -6,7 +6,7 @@ P2-LIM-004	jdbc	ojdbc7-12.1.0.2.0	legacy-proprietary-external	Driver antigo rest
 P2-LIM-005	logging	Log4j-1.2.14	EOL	A biblioteca permanece empacotada somente para preservar o legado	substituir-no-CP-3B-e-remover-ponte-no-CP-3G	migration/incompatibilities.tsv
 P2-LIM-006	presentation	Apache-Tiles-2.1.4	discontinued	O layout depende de uma biblioteca sem caminho Jakarta mantido	substituir-no-CP-3G	openspec/changes/create-java-web-migration-lab/design.md
 P2-LIM-007	upload	Commons-FileUpload-1.2.2	legacy	O processamento multipart ainda usa uma API antiga	atualizar-no-CP-3B-e-substituir-no-CP-3G	docs/legacy-upload.md
-P2-LIM-008	discovery	Reflections-0.9.10	legacy	A descoberta dinâmica depende de classpath scanning antigo	atualizar-no-CP-3B-e-substituir-no-CP-3G	docs/legacy-validation-logging.md
+P2-LIM-008	discovery	Reflections-0.9.10	legacy	A descoberta dinâmica depende de classpath scanning antigo	atualizar-no-CP-3B-e-substituir-na-tarefa-3.33-do-CP-3G	docs/legacy-validation-logging.md
 P2-LIM-009	xml	XMLBeans-2.3.0-dom4j-1.6.1-and-duplicated-XML-APIs	legacy-and-duplicated	APIs XML antigas duplicam contratos fornecidos pelo JDK	modernizar-no-CP-3C	docs/legacy-xml-import.md
 P2-LIM-010	persistence	MyBatis-3.4.5	legacy	A camada permanece funcional mas fora da versão final aprovada	atualizar-no-CP-3B	docs/mybatis-persistence.md
 P2-LIM-011	oracle	Oracle-Home-one-off-patches	unknown	O RU 19.3 foi comprovado mas o inventário de patches one-off não foi fornecido	registrar-quando-o-Oracle-Home-estiver-disponível	migration/steps/CP-1G-oracle-ru-detection.md

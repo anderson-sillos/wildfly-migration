@@ -14,13 +14,14 @@ em máquina descartável, container ou VM isolada e sem bind em interface públi
 | Java 7 histórico | Oracle JDK 7u80 | Download manual externo | Proprietário, EOL e não redistribuível pelo projeto |
 | Java 7 portátil | Zulu 7.56.0.11 CA / OpenJDK 7u352 | Arquivo oficial Azul | OpenJDK, redistribuível, EOL e exclusivo de `portable-ci` |
 | Java 8 | Eclipse Temurin OpenJDK 8u492-b09 | Arquivo oficial fixado no CP-2A | OpenJDK, open source |
-| Java 17/21/25 | Eclipse Temurin/OpenJDK | Pacote ou arquivo oficial a fixar no gate correspondente | OpenJDK, open source |
+| Java 17 | Eclipse Temurin OpenJDK 17.0.20+8 | Arquivo oficial fixado no CP-3A | OpenJDK, open source |
+| Java 21/25 | Eclipse Temurin/OpenJDK | Pacote ou arquivo oficial a fixar no gate correspondente | OpenJDK, open source |
 | Maven legado | 3.8.9 | Arquivo histórico oficial Apache | Open source e EOL; última versão disponível compatível com Java 7 |
 | Maven moderno | 3.9.16 | Arquivo oficial Apache | Open source; requer JDK 8+ para executar |
 | WildFly | 9.0.2, 26.1.3 e 41.0.0.Final | Arquivo da comunidade | WildFly comunitário open source |
 | Oracle Database | 19c EE já disponível | Serviço externo | Proprietário; acesso e licença são responsabilidade do usuário |
 | Drivers Oracle | `ojdbc7` legado e driver aprovado por gate | Fornecimento externo | Não versionar nem redistribuir |
-| Banco portátil | H2 1.4.200 | Maven Central; módulo de runtime | Open source, EOL e exclusivo de `portable-ci` |
+| Banco portátil | H2 1.4.200 histórico; H2 2.4.240 no CP-3A | Maven Central; módulo de runtime | Open source e exclusivo de `portable-ci` |
 
 Fontes oficiais:
 
@@ -41,6 +42,7 @@ Fontes oficiais:
 - WildFly comunitário: <https://www.wildfly.org/downloads/>
 - Oracle Database 19c: <https://www.oracle.com/database/technologies/oracle-database-software-downloads.html>
 - H2 1.4.200: <https://github.com/h2database/h2database/releases/tag/version-1.4.200>
+- H2 2.4.240: <https://github.com/h2database/h2database/releases/tag/version-2.4.240>
 - licença H2: <https://h2database.com/html/license.html>
 
 Sempre releia os termos do fornecedor. O repositório registra proveniência e
@@ -60,30 +62,32 @@ combinação abaixo; o `doctor` marca os componentes futuros como `NÃO EXIGIDO`
 | CP-1B a CP-2B | Apache Maven 3.8.9 | Arquivo histórico oficial `apache-maven-3.8.9-bin.tar.gz` |
 | CP-1B a CP-1G e CP-2A | WildFly 9.0.2.Final | Distribuição Full/Web `wildfly-9.0.2.Final.tar.gz` |
 | CP-1C a CP-1G no Oracle JDK | Truststore JKS atualizado | Pacote de certificados do sistema; não substituir por conexão insegura |
-| Perfil `ci-h2` a partir do CP-1D | H2 1.4.200 | JAR oficial como módulo do WildFly, nunca como dependência do WAR |
+| Perfil `ci-h2`, CP-1D a CP-2D | H2 1.4.200 | JAR histórico como módulo do WildFly, nunca como dependência do WAR |
 | CP-1D e seguintes enquanto legado | Driver `ojdbc7` aprovado | Fornecido externamente; não versionar |
 | CP-1D e checkpoints com persistência | Acesso ao Oracle Database 19c existente | URL, usuário e senha ou wallet fornecidos pelo DBA |
 | CP-2A e CP-2B | Eclipse Temurin OpenJDK 8u492-b09 | `OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz`, URL e digest fixados no manifesto |
 | CP-2B a CP-3D | WildFly 26.1.3.Final | Distribuição EE 8 `wildfly-26.1.3.Final.tar.gz` |
 | CP-2C e seguintes | Apache Maven 3.9.16 | Distribuição binária oficial |
-| CP-3A a CP-3D | Eclipse Temurin/OpenJDK 17 | A build exata será fixada no CP-3A |
+| CP-3A a CP-3D | Eclipse Temurin OpenJDK 17.0.20+8 | `OpenJDK17U-jdk_x64_linux_hotspot_17.0.20_8.tar.gz`, URL e digest fixados no cache portátil |
+| Perfil `ci-h2`, CP-3A em diante | H2 2.4.240 | `h2-2.4.240.jar`, origem e digest fixados no manifesto do gate |
 | CP-3E a CP-3I | Eclipse Temurin/OpenJDK 21 e WildFly 41.0.0.Final | Builds exatas fixadas no CP-3E |
 | CP-3H e seguintes | `com.oracle.database.jdbc:ojdbc17:23.26.2.0.0` | Provisionado no WildFly, fora do WAR |
 | CP-3J e CP-3K | Eclipse Temurin/OpenJDK 25 e WildFly 41.0.0.Final | Destino final exclusivamente open source |
 
-Para o checkpoint atual, siga a
-[lista de downloads do runtime legado](../runtime/legacy/README.md). Os links
-das fases futuras estão documentados abaixo apenas para planejamento; não use
-uma referência flutuante como `latest`. Cada arquivo será fixado por versão e
-checksum quando entrar no respectivo checkpoint.
+Para o checkpoint atual, siga o
+[runtime Java 17/WildFly 26](cp-3a-java17-runtime.md). Para reproduzir fases
+anteriores, use sua tag imutável e a respectiva lista de downloads. Não use uma
+referência flutuante como `latest`.
 
-### Endereços das fases futuras
+### Endereços dos gates atual e futuros
 
 | Componente | Fonte oficial |
 | --- | --- |
-| Temurin/OpenJDK 17, 21 e 25 | <https://adoptium.net/temurin/releases/> |
+| Temurin OpenJDK 17.0.20+8 | <https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20%2B8/OpenJDK17U-jdk_x64_linux_hotspot_17.0.20_8.tar.gz> |
+| Temurin/OpenJDK 21 e 25 | <https://adoptium.net/temurin/releases/> |
 | WildFly 26.1.3.Final EE 8 | <https://github.com/wildfly/wildfly/releases/download/26.1.3.Final/wildfly-26.1.3.Final.tar.gz> |
 | Maven 3.9.16 | <https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz> |
+| H2 2.4.240 | <https://repo.maven.apache.org/maven2/com/h2database/h2/2.4.240/h2-2.4.240.jar> |
 | WildFly 41.0.0.Final | <https://github.com/wildfly/wildfly/releases/download/41.0.0.Final/wildfly-41.0.0.Final.tar.gz> |
 | Oracle JDBC | <https://www.oracle.com/database/technologies/appdev/jdbc-downloads.html> |
 
@@ -261,10 +265,11 @@ e valide SHA-256
 O [manifesto do CP-2A](../runtime/phase2/java8-wildfly9/runtime-manifest.tsv)
 registra origem e licença.
 
-Para Java 17, 21 e 25, use uma distribuição baseada em OpenJDK,
-preferencialmente Eclipse Temurin, mas fixe a build somente no gate
-correspondente. Mantenha cada JDK em diretório próprio e configure seus arquivos
-e digests correspondentes.
+O CP-3A fixa Eclipse Temurin OpenJDK `17.0.20+8`, arquivo
+`OpenJDK17U-jdk_x64_linux_hotspot_17.0.20_8.tar.gz` e SHA-256
+`be7668bc030d578b83d6d5ef9221d6d6729bbbca8cf94a7d52e16ac68b5a5a35`.
+Para Java 21 e 25, fixe uma distribuição baseada em OpenJDK somente quando o
+gate correspondente começar. Mantenha cada JDK em diretório próprio.
 
 O destino final será fixado em uma build OpenJDK 25 aprovada. Oracle JDK não
 será aceito nesse gate.
@@ -438,18 +443,24 @@ WildFly 41 expõe apenas as portas necessárias aos testes.
 
 ## 7. Oracle Database 19c
 
-Antes do perfil Oracle, o CP-1D usa H2 1.4.200 em memória somente para feedback
-portátil. O H2 será provisionado como módulo do WildFly, não abrirá console ou
-listener de rede e não poderá aparecer em `WEB-INF/lib`:
+O perfil portátil usa uma versão H2 fixa por gate. O H2 é provisionado como
+módulo do WildFly, não abre console ou listener de rede e não pode aparecer em
+`WEB-INF/lib`:
 
 ```text
+CP-1D a CP-2D:
 https://repo.maven.apache.org/maven2/com/h2database/h2/1.4.200/h2-1.4.200.jar
 SHA-256: 3ad9ac4b6aae9cd9d3ac1c447465e1ed06019b851b893dd6a8d76ddb6d85bca6
+
+CP-3A:
+https://repo.maven.apache.org/maven2/com/h2database/h2/2.4.240/h2-2.4.240.jar
+SHA-256: 29b70e427cc1c40cdc376283adbb0cc62853073797bb5fe5761f81fe73d57ce0
 ```
 
-H2 1.4.200 está EOL e sua compatibilidade Oracle é parcial. O resultado é
-sempre `portable-ci`; somente a execução abaixo no Oracle 19c pode produzir
-`oracle-qualified`.
+H2 1.4.200 está EOL e permanece apenas nas tags históricas. H2 2.4.240 é o
+artefato ativo no Java 17. A compatibilidade Oracle de ambos é parcial: o
+resultado é sempre `portable-ci`; somente a execução abaixo no Oracle 19c pode
+produzir `oracle-qualified`.
 
 O laboratório usa o Oracle Database 19c EE existente. Não cria nem publica uma
 imagem do banco. Solicite ao DBA:
@@ -489,6 +500,10 @@ No CP-2A, os dois perfis passam a exigir o mesmo Temurin Java 8u492 e WildFly
 9. O perfil `ci-h2` acrescenta H2; o perfil `oracle` acrescenta `ojdbc7` e a
 configuração externa do Oracle 19c.
 
+No CP-3A, os dois perfis usam Temurin 17.0.20+8 e WildFly 26.1.3. O perfil
+`ci-h2` seleciona H2 2.4.240 em memória; o perfil `oracle` mantém `ojdbc7` e as
+credenciais externas até a atualização planejada na atividade 3.14.
+
 O perfil não é armazenado no `.env`. A partir do `CP-1D`, todo comando
 aplicável exige `--profile ci-h2` ou `--profile oracle` explicitamente.
 O modo `--ci` é não interativo e recusa o perfil `oracle`, impedindo que o
@@ -499,6 +514,8 @@ workflow hospedado dependa de rota ou credenciais internas.
 ./scripts/doctor.sh CP-1E --profile oracle --env .env
 ./scripts/doctor.sh CP-2A --profile ci-h2 --env .env
 ./scripts/doctor.sh CP-2A --profile oracle --env .env
+./scripts/doctor.sh CP-3A --profile ci-h2 --env .env
+./scripts/doctor.sh CP-3A --profile oracle --env .env
 ```
 
 Build, preparação do schema, inicialização, URLs, testes manuais, stop e
@@ -506,7 +523,7 @@ limpeza estão consolidados no
 [runbook da aplicação legada](legacy-application-runbook.md). Esta página
 permanece como fonte para instalação, versões e variáveis.
 Para o estado atual, use o
-[runbook do CP-2A](cp-2a-java8-wildfly9.md).
+[runbook do runtime CP-3A](cp-3a-java17-runtime.md).
 
 O GitHub Actions executa somente a trilha `ci-h2`. A execução Oracle deve
 ocorrer em um host autorizado na rede interna e com

@@ -7,10 +7,10 @@ cada entrega validável e reversível.
 
 Repositório GitHub: <https://github.com/anderson-sillos/wildfly-migration>
 
-Os checkpoints da fase 1 estão concluídos e preservados pela tag
-`migration/01-legacy-baseline`. A árvore única `app/` está agora no
-**CP-2A — Java 8 no WildFly 9**, mantendo as dependências, os pacotes `javax`,
-os perfis H2/Oracle e o contrato funcional do baseline.
+As fases 1 e 2 estão preservadas pelas tags `migration/01-legacy-baseline` e
+`migration/02-java8-wildfly26`. A árvore única `app/` está agora no
+**CP-3A — Java 17 no WildFly 26**, ainda com EE 8/`javax`, as dependências
+legadas e os perfis H2/Oracle separados.
 
 ## Fases públicas
 
@@ -32,8 +32,11 @@ não fases adicionais.
 4. Para reproduzir a fase 1, siga
    [o fechamento do baseline legado](docs/legacy-baseline-reproduction.md).
 5. Para executar o estado atual, siga
-   [o CP-2A no Java 8/WildFly 9](docs/cp-2a-java8-wildfly9.md).
+   [o CP-3A no Java 17/WildFly 26](docs/cp-3a-java17-runtime.md).
 6. Para contribuir, consulte [o fluxo GitHub](docs/github-workflow.md).
+
+As reproduções intermediárias continuam documentadas, incluindo o
+[CP-2A no Java 8/WildFly 9](docs/cp-2a-java8-wildfly9.md).
 
 No primeiro checkout:
 
@@ -49,17 +52,17 @@ O comando falha de forma explícita enquanto identidade Git, autenticação ou
 `origin` não estiverem configurados. Pré-requisitos futuros aparecem como
 “não exigido”.
 
-## Executar a aplicação no CP-2A
+## Executar a aplicação no CP-3A
 
-O [runbook do CP-2A](docs/cp-2a-java8-wildfly9.md) documenta a versão exata e
-a URL de origem do JDK, diagnóstico, build, H2, Oracle, testes e rollback.
+O [runbook do runtime CP-3A](docs/cp-3a-java17-runtime.md) documenta versões,
+origens, checksums, diagnóstico, build, H2 e rollback. O fechamento dos testes
+H2/Oracle ocorrerá na atividade 3.5.
 
 O modo manual provisiona uma cópia temporária do WildFly e mantém a aplicação
 ativa em loopback até `Ctrl+C`:
 
 ```bash
-./scripts/smoke-wildfly9-datasource.sh \
-  --java 8 \
+./scripts/smoke-cp-3a-datasource.sh \
   --profile ci-h2 \
   --env .env \
   --war app/target/wildfly-migration.war \

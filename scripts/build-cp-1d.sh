@@ -7,11 +7,12 @@ ENV_FILE="$REPOSITORY_ROOT/.env"
 PROFILE=""
 JAVA_RELEASE="7"
 MAVEN_RELEASE="3.8.9"
+MAVEN_EXTRA_ARGUMENTS=()
 
 usage() {
   cat <<'USAGE'
 Uso:
-  ./scripts/build-cp-1d.sh --profile ci-h2|oracle [--java 7|8] \
+  ./scripts/build-cp-1d.sh --profile ci-h2|oracle [--java 7|8|17] \
     [--maven 3.8.9|3.9.16] [--env ARQUIVO]
 
 Valores já exportados no ambiente prevalecem sobre o arquivo informado.
@@ -84,8 +85,9 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --java)
-      [[ $# -ge 2 && ( "$2" == "7" || "$2" == "8" ) ]] || {
-        printf 'FALHA: --java exige 7 ou 8\n' >&2
+      [[ $# -ge 2 &&
+         ( "$2" == "7" || "$2" == "8" || "$2" == "17" ) ]] || {
+        printf 'FALHA: --java exige 7, 8 ou 17\n' >&2
         exit 2
       }
       JAVA_RELEASE="$2"
@@ -144,6 +146,11 @@ if [[ "$JAVA_RELEASE" == "8" ]]; then
   EXPECTED_JAVA='Java version: 1.8.0_492'
   MAVEN_OPTIONS='-Dhttps.protocols=TLSv1.2'
   EXPECTED_LIBRARIES="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/war-libraries.txt"
+elif [[ "$JAVA_RELEASE" == "17" ]]; then
+  JAVA_HOME_VALUE="$(configuration_value JAVA17_HOME)"
+  EXPECTED_JAVA='Java version: 17.0.20'
+  MAVEN_OPTIONS='-Dhttps.protocols=TLSv1.2'
+  EXPECTED_LIBRARIES="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/war-libraries.txt"
 else
   EXPECTED_LIBRARIES="$REPOSITORY_ROOT/runtime/legacy/war-libraries.txt"
 fi
@@ -179,6 +186,7 @@ MAVEN_OPTS="$MAVEN_OPTIONS" \
   "$MAVEN_HOME_VALUE/bin/mvn" -B -ntp \
   -f "$REPOSITORY_ROOT/app/pom.xml" \
   -P"$MAVEN_PROFILE" \
+  "${MAVEN_EXTRA_ARGUMENTS[@]}" \
   clean verify \
   org.apache.maven.plugins:maven-dependency-plugin:3.1.2:tree \
   -DoutputFile=target/dependency-tree.txt
@@ -186,7 +194,13 @@ MAVEN_OPTS="$MAVEN_OPTIONS" \
 "$REPOSITORY_ROOT/scripts/audit-legacy-war.sh" \
   --java-home "$JAVA_HOME_VALUE" \
   --expected-libraries "$EXPECTED_LIBRARIES" \
-  --expected-bytecode "$([[ "$JAVA_RELEASE" == "8" ]] && printf 52 || printf 51)" \
+  --expected-bytecode "$(
+    case "$JAVA_RELEASE" in
+      7) printf 51 ;;
+      8) printf 52 ;;
+      17) printf 61 ;;
+    esac
+  )" \
   --expected-java-label "Java $JAVA_RELEASE" \
   "$REPOSITORY_ROOT/app/target/wildfly-migration.war"
 

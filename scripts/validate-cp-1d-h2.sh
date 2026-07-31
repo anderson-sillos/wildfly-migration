@@ -172,9 +172,20 @@ if [[ ! -f "$H2_JAR_ARGUMENT" ]]; then
   exit 1
 fi
 
+case "$(basename "$H2_JAR_ARGUMENT")" in
+  h2-1.4.200.jar)
+    h2_manifest="$REPOSITORY_ROOT/runtime/legacy/portable-runtime-manifest.tsv"
+    ;;
+  h2-2.4.240.jar)
+    h2_manifest="$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/runtime-manifest.tsv"
+    ;;
+  *)
+    printf 'FALHA: versão H2 não pertence a um gate aprovado\n' >&2
+    exit 1
+    ;;
+esac
 expected_h2_checksum="$(
-  awk -F '\t' '$1 == "h2" { print $6 }' \
-    "$REPOSITORY_ROOT/runtime/legacy/portable-runtime-manifest.tsv"
+  awk -F '\t' '$1 == "h2" { print $6 }' "$h2_manifest"
 )"
 actual_h2_checksum="$(sha256sum "$H2_JAR_ARGUMENT" | awk '{print $1}')"
 if [[ "$actual_h2_checksum" != "$expected_h2_checksum" ]]; then
@@ -195,7 +206,7 @@ RUNSCRIPT FROM '$H2_DIRECTORY/002_seed.sql';
 RUNSCRIPT FROM '$H2_DIRECTORY/001_schema.sql';
 RUNSCRIPT FROM '$H2_DIRECTORY/002_seed.sql';
 SELECT 'PEDIDOS=' || COUNT(*) FROM LAB_PEDIDO WHERE NUMERO = 'LAB-0001';
-SELECT 'CONSTRAINTS=' || COUNT(*) FROM INFORMATION_SCHEMA.CONSTRAINTS
+SELECT 'CONSTRAINTS=' || COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
  WHERE CONSTRAINT_NAME IN (
   'PK_LAB_PEDIDO', 'UK_LAB_PEDIDO_NUMERO', 'CK_LAB_PEDIDO_VALOR',
   'CK_LAB_PEDIDO_STATUS', 'PK_LAB_ANEXO', 'FK_LAB_ANEXO_PEDIDO',

@@ -94,11 +94,11 @@
 
 ### Checkpoint CP-3A — Entrada no Java 17
 
-- [ ] 3.1 Materializar `migration/02-java8-wildfly26` e tentar executar a aplicação com Java 17 no WildFly 26.1.3 antes de atualizar bibliotecas.
-- [ ] 3.2 Capturar e corrigir somente incompatibilidades necessárias ao Java 17 e reexecutar os contratos antes de modernizar dependências.
-- [ ] 3.3 Produzir a matriz de cada dependência legada com versão candidata, suporte a Java 17, compatibilidade EE 8/`javax`, transitivas, impacto e decisão.
-- [ ] 3.4 Atualizar runtime, versão H2 de teste, documentação e `doctor` para a combinação Java 17/WildFly 26, preservando o perfil Oracle separado.
-- [ ] 3.5 Encerrar `CP-3A`: validar inicialização, contratos H2/Oracle e auditoria no Java 17, registrar evidências separadas e rollback e integrar o PR pelo commit `checkpoint(CP-3A): establish Java 17 runtime`.
+- [x] 3.1 Materializar `migration/02-java8-wildfly26` e tentar executar a aplicação com Java 17 no WildFly 26.1.3 antes de atualizar bibliotecas.
+- [x] 3.2 Capturar e corrigir somente incompatibilidades necessárias ao Java 17 e reexecutar os contratos antes de modernizar dependências.
+- [x] 3.3 Produzir a matriz de cada dependência legada com versão candidata, suporte a Java 17, compatibilidade EE 8/`javax`, transitivas, impacto e decisão.
+- [x] 3.4 Atualizar runtime, versão H2 de teste, documentação e `doctor` para a combinação Java 17/WildFly 26, preservando o perfil Oracle separado.
+- [x] 3.5 Encerrar `CP-3A`: validar inicialização, contratos H2/Oracle e auditoria no Java 17, registrar evidências separadas e rollback e integrar o PR pelo commit `checkpoint(CP-3A): establish Java 17 runtime`.
 
 ### Checkpoint CP-3B — Dependências centrais
 
@@ -144,16 +144,16 @@
 
 - [ ] 3.31 Substituir Tiles por JSP tag files ou includes sob `WEB-INF` e comprovar a equivalência do layout.
 - [ ] 3.32 Substituir Commons FileUpload por `@MultipartConfig` e `jakarta.servlet.http.Part` com limites, normalização, validação e limpeza.
-- [ ] 3.33 Remover Reflections e implementar registro explícito de validadores com conjunto e ordem preservados.
-- [ ] 3.34 Remover a ponte temporária de Log4j e integrar logs da aplicação e do MyBatis ao mecanismo final do WildFly.
-- [ ] 3.35 Encerrar `CP-3G`: executar contratos web, auditoria de dependências e segurança, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-3G): replace legacy web libraries`.
+- [ ] 3.33 Substituir Reflections pelo mecanismo padrão Jakarta Servlet `ServletContainerInitializer` com `@HandlesTypes(Validator.class)`, fornecido em JAR interno de `WEB-INF/lib` com o registro `META-INF/services`, encapsulado por fachada própria e validado quanto a classes elegíveis, conjunto e ordem em `WEB-INF/classes` e `WEB-INF/lib` no Java 21/WildFly 41.
+- [ ] 3.34 Remover a ponte temporária de Log4j, definir explicitamente `logImpl=SLF4J` no MyBatis e integrar os logs ao mecanismo final do WildFly, comprovando no `server.log` as categorias dos mappers e exceções completas sem empacotar backend concorrente no WAR.
+- [ ] 3.35 Encerrar `CP-3G`: executar contratos web, validar descoberta, fachada, conteúdo e registro do JAR interno do SCI, executar auditoria de dependências e segurança, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-3G): replace legacy web libraries`.
 
 ### Checkpoint CP-3H — Oracle e auditoria final
 
 - [ ] 3.36 Fixar MyBatis 3.5.19, XMLBeans 5.3.0 e dom4j 2.2.0 e reexecutar geração e testes XML seguros.
 - [ ] 3.37 Provisionar `com.oracle.database.jdbc:ojdbc17:23.26.2.0.0` no WildFly, preservar o perfil H2 em memória e publicar `java:/jdbc/MigrationDS` nos dois perfis sem empacotar drivers no WAR.
 - [ ] 3.38 Executar a suíte Oracle 19c e registrar versão completa, Release Update, driver, JVM e WildFly observados.
-- [ ] 3.39 Implementar a auditoria que rejeite APIs do contêiner, Log4j 1/ponte, Tiles, Commons FileUpload 1, Reflections, `xml-apis`, Geronimo StAX e `ojdbc7`.
+- [ ] 3.39 Implementar a auditoria que rejeite APIs do contêiner, Log4j 1/ponte, Tiles, Commons FileUpload 1, Reflections, bibliotecas externas de scanning, `xml-apis`, Geronimo StAX e `ojdbc7` e valide o JAR interno e o descritor de serviço do SCI definidos na atividade `3.33`.
 - [ ] 3.40 Encerrar `CP-3H`: validar H2, Oracle, XML, dependências e WAR, registrar evidências separadas e rollback e integrar o PR pelo commit `checkpoint(CP-3H): finalize Oracle and packaging`.
 
 ### Checkpoint CP-3I — Gate Java 21

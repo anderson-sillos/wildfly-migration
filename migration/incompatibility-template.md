@@ -5,7 +5,8 @@
 - checkpoint:
 - estado verde de origem:
 - runtime de destino:
-- etapa: `compilation`, `packaging`, `deployment` ou `execution`;
+- etapa: `compilation`, `packaging`, `deployment`, `execution`, `startup`,
+  `configuration` ou `verification`;
 - categoria:
 - reprodução: `natural` ou `fixture-opt-in`;
 - perfis afetados: `portable-ci`, `oracle-qualified` ou ambos.

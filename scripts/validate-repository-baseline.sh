@@ -14,6 +14,7 @@ run_step() {
 
 shell_files=(
   scripts/doctor.sh
+  scripts/prepare-portable-runtime-cache.sh
   scripts/validate-repository-baseline.sh
   scripts/validate-cp-1b.sh
   scripts/audit-legacy-war.sh
@@ -51,11 +52,18 @@ shell_files=(
   scripts/validate-cp-2d-reproduction.sh
   scripts/validate-cp-2d-closure.sh
   scripts/reproduce-cp-2d.sh
+  scripts/build-cp-3a.sh
+  scripts/qualify-cp-3a-h2.sh
+  scripts/qualify-cp-3a-oracle.sh
+  scripts/smoke-cp-3a-datasource.sh
+  scripts/validate-cp-3a.sh
   contract-tests/run.sh
 )
 
 run_step "Validar sintaxe dos scripts shell" bash -n "${shell_files[@]}"
 run_step "Validar baseline do repositório" ./scripts/doctor.sh CP-1A --ci
+run_step "Validar identidade e origens do cache portátil" \
+  ./scripts/prepare-portable-runtime-cache.sh --validate-only
 run_step "Validar recursos estáticos do CP-1B" \
   ./scripts/validate-cp-1b.sh --release
 run_step "Validar recursos estáticos do CP-1C" ./scripts/validate-cp-1c.sh
@@ -95,5 +103,7 @@ run_step "Validar reprodução limpa da fase 2" \
   ./scripts/validate-cp-2d-reproduction.sh
 run_step "Validar candidato de encerramento da fase 2" \
   ./scripts/validate-cp-2d-closure.sh
+run_step "Validar tentativa inicial do CP-3A no Java 17" \
+  ./scripts/validate-cp-3a.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'

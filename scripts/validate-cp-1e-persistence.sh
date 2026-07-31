@@ -135,9 +135,20 @@ if [[ ! -f "$H2_JAR_ARGUMENT" || ! -f "$WAR_FILE" ]]; then
 fi
 WAR_FILE="$(cd "$(dirname "$WAR_FILE")" && pwd)/$(basename "$WAR_FILE")"
 
+case "$(basename "$H2_JAR_ARGUMENT")" in
+  h2-1.4.200.jar)
+    h2_manifest="$REPOSITORY_ROOT/runtime/legacy/portable-runtime-manifest.tsv"
+    ;;
+  h2-2.4.240.jar)
+    h2_manifest="$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/runtime-manifest.tsv"
+    ;;
+  *)
+    printf 'FALHA: versão H2 não pertence a um gate aprovado\n' >&2
+    exit 1
+    ;;
+esac
 expected_h2_checksum="$(
-  awk -F '\t' '$1 == "h2" { print $6 }' \
-    "$REPOSITORY_ROOT/runtime/legacy/portable-runtime-manifest.tsv"
+  awk -F '\t' '$1 == "h2" { print $6 }' "$h2_manifest"
 )"
 actual_h2_checksum="$(sha256sum "$H2_JAR_ARGUMENT" | awk '{print $1}')"
 if [[ "$actual_h2_checksum" != "$expected_h2_checksum" ]]; then

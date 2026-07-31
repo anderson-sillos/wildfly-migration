@@ -9,6 +9,7 @@ JAVA_RELEASE="7"
 SERVER_RELEASE="9"
 WAR_FILE=""
 CONTRACT_RESULT_FILE=""
+DIAGNOSTIC_LOG_FILE=""
 MANUAL_MODE=false
 PRESERVE_ORACLE_SMOKES=false
 TEMP_DIRECTORY=""
@@ -22,18 +23,21 @@ usage() {
   cat <<'USAGE'
 Uso:
   ./scripts/smoke-wildfly9-datasource.sh --profile ci-h2|oracle \
-    [--java 7|8] [--server 9|26] [--env ARQUIVO] [--war ARQUIVO] \
-    [--contract-result ARQUIVO] [--manual] [--preserve-oracle-smokes]
+    [--java 7|8|17] [--server 9|26] [--env ARQUIVO] [--war ARQUIVO] \
+    [--contract-result ARQUIVO] [--diagnostic-log ARQUIVO] \
+    [--manual] [--preserve-oracle-smokes]
 
 Valores já exportados no ambiente prevalecem sobre o arquivo informado.
 Sem --war, valida somente o datasource. Com --war, valida também o fluxo web.
 Com --manual, mantém a aplicação ativa em loopback até Ctrl+C; exige --war.
 No modo manual, imprime o caminho do log bruto do WildFly.
 Com --contract-result, preserva fora do runtime o relatório JSON sanitizado.
+Com --diagnostic-log, preserva uma cópia sanitizada do log do servidor.
 Com --preserve-oracle-smokes, o perfil Oracle mantém temporariamente apenas
 os dados LAB-SMOKE-* para uma sonda externa; o chamador deve limpá-los.
 O padrão Java 7 preserva a reprodução histórica; CP-2A deve informar --java 8.
-O argumento --server 26 é usado pelo wrapper do CP-2B e exige Java 8.
+O argumento --server 26 aceita Java 8 ou a tentativa controlada do CP-3A
+com Java 17.
 USAGE
 }
 
@@ -132,6 +136,22 @@ sanitize_oracle_output() {
 }
 
 cleanup() {
+  if [[ -n "$DIAGNOSTIC_LOG_FILE" &&
+        -n "$TEMP_DIRECTORY" &&
+        -f "$TEMP_DIRECTORY/server.log" ]]; then
+    install -d -m 0755 "$(dirname "$DIAGNOSTIC_LOG_FILE")"
+    if [[ "$PROFILE" == "oracle" ]]; then
+      sanitize_oracle_output <"$TEMP_DIRECTORY/server.log" |
+        sed -E $'s/\x1B\\[[0-9;]*[[:alpha:]]//g' \
+          >"$DIAGNOSTIC_LOG_FILE"
+    else
+      sed -E \
+        -e "s#${TEMP_DIRECTORY}#<runtime-temporario>#g" \
+        -e $'s/\x1B\\[[0-9;]*[[:alpha:]]//g' \
+        "$TEMP_DIRECTORY/server.log" >"$DIAGNOSTIC_LOG_FILE"
+    fi
+  fi
+
   if [[ "$ORACLE_SMOKE_CREATED" == true && "$PROFILE" == "oracle" ]]; then
     ORACLE_DB_URL="$ORACLE_DB_URL_VALUE" \
     ORACLE_DB_USER="$ORACLE_DB_USER_VALUE" \
@@ -193,8 +213,9 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --java)
-      [[ $# -ge 2 && ( "$2" == "7" || "$2" == "8" ) ]] || {
-        printf 'FALHA: --java exige 7 ou 8\n' >&2
+      [[ $# -ge 2 &&
+         ( "$2" == "7" || "$2" == "8" || "$2" == "17" ) ]] || {
+        printf 'FALHA: --java exige 7, 8 ou 17\n' >&2
         exit 2
       }
       JAVA_RELEASE="$2"
@@ -222,6 +243,14 @@ while [[ $# -gt 0 ]]; do
         exit 2
       }
       CONTRACT_RESULT_FILE="$2"
+      shift 2
+      ;;
+    --diagnostic-log)
+      [[ $# -ge 2 ]] || {
+        printf 'FALHA: --diagnostic-log exige um arquivo\n' >&2
+        exit 2
+      }
+      DIAGNOSTIC_LOG_FILE="$2"
       shift 2
       ;;
     --manual)
@@ -265,8 +294,10 @@ if [[ "$MANUAL_MODE" == true && -z "$WAR_FILE" ]]; then
   exit 2
 fi
 
-if [[ "$SERVER_RELEASE" == "26" && "$JAVA_RELEASE" != "8" ]]; then
-  printf 'FALHA: WildFly 26 do CP-2B exige --java 8\n' >&2
+if [[ "$SERVER_RELEASE" == "26" &&
+      "$JAVA_RELEASE" != "8" &&
+      "$JAVA_RELEASE" != "17" ]]; then
+  printf 'FALHA: WildFly 26 exige --java 8 ou 17\n' >&2
   exit 2
 fi
 
@@ -371,6 +402,50 @@ if [[ "$JAVA_RELEASE" == "8" ]]; then
   else
     RUNTIME_IDENTIFIER="java8-wildfly9.0.2"
   fi
+elif [[ "$JAVA_RELEASE" == "17" ]]; then
+  SELECTED_JAVA_HOME="$(configuration_value JAVA17_HOME)"
+  java17_archive="$(configuration_value JAVA17_ARCHIVE)"
+  java17_configured_checksum="$(
+    configuration_value JAVA17_ARCHIVE_SHA256
+  )"
+  java17_expected_archive="$(
+    awk '$2 ~ /^OpenJDK17U-jdk_/ { print $2; exit }' \
+      "$REPOSITORY_ROOT/runtime/portable-runtime-cache.sha256"
+  )"
+  java17_expected_checksum="$(
+    awk '$2 ~ /^OpenJDK17U-jdk_/ { print $1; exit }' \
+      "$REPOSITORY_ROOT/runtime/portable-runtime-cache.sha256"
+  )"
+  java17_actual_checksum=""
+  java17_version_output=""
+
+  if [[ "$SERVER_RELEASE" != "26" ]]; then
+    printf 'FALHA: Java 17 é aceito somente com WildFly 26 no CP-3A\n' >&2
+    exit 1
+  fi
+  if [[ ! -x "$SELECTED_JAVA_HOME/bin/java" ||
+        ! -f "$java17_archive" ||
+        -z "$java17_expected_archive" ||
+        -z "$java17_expected_checksum" ]]; then
+    printf 'FALHA: Java 17 e sua identidade no cache são obrigatórios\n' >&2
+    exit 1
+  fi
+  java17_actual_checksum="$(
+    sha256sum "$java17_archive" | awk '{print $1}'
+  )"
+  if [[ "$(basename "$java17_archive")" != "$java17_expected_archive" ]] ||
+     [[ "${java17_configured_checksum,,}" != "${java17_expected_checksum,,}" ]] ||
+     [[ "$java17_actual_checksum" != "$java17_expected_checksum" ]]; then
+    printf 'FALHA: arquivo ou checksum do Java 17 diverge do cache aprovado\n' >&2
+    exit 1
+  fi
+  java17_version_output="$("$SELECTED_JAVA_HOME/bin/java" -version 2>&1)"
+  if [[ "$java17_version_output" != *'openjdk version "17.0.20"'* ||
+        "$java17_version_output" != *'Temurin-17.0.20+8'* ]]; then
+    printf 'FALHA: Eclipse Temurin OpenJDK 17.0.20+8 não foi detectado\n' >&2
+    exit 1
+  fi
+  RUNTIME_IDENTIFIER="java17-wildfly26.1.3"
 elif [[ "$PROFILE" == "ci-h2" ]]; then
   SELECTED_JAVA_HOME="$(configuration_value JAVA7_PORTABLE_HOME)"
 else
@@ -379,20 +454,33 @@ fi
 
 if [[ "$PROFILE" == "ci-h2" ]]; then
   H2_JAR_VALUE="$(configuration_value H2_JAR)"
+  if [[ "$JAVA_RELEASE" == "17" ]]; then
+    H2_MANIFEST="$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/runtime-manifest.tsv"
+    H2_EXPECTED_JAR="h2-2.4.240.jar"
+    H2_MODULE_DIRECTORY="com/h2database/h2/cp3a/main"
+    H2_MODULE_FILE="$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/h2/module.xml"
+  else
+    H2_MANIFEST="$REPOSITORY_ROOT/runtime/legacy/portable-runtime-manifest.tsv"
+    H2_EXPECTED_JAR="h2-1.4.200.jar"
+    H2_MODULE_DIRECTORY="com/h2database/h2/cp1d/main"
+    H2_MODULE_FILE="$REPOSITORY_ROOT/runtime/legacy/h2/module.xml"
+  fi
   if [[ ! -x "$SELECTED_JAVA_HOME/bin/java" || ! -f "$H2_JAR_VALUE" ]]; then
     printf 'FALHA: Java selecionado e H2 são obrigatórios para ci-h2\n' >&2
     exit 1
   fi
   expected_driver_checksum="$(
-    awk -F '\t' '$1 == "h2" { print $6 }' \
-      "$REPOSITORY_ROOT/runtime/legacy/portable-runtime-manifest.tsv"
+    awk -F '\t' '$1 == "h2" { print $6 }' "$H2_MANIFEST"
   )"
   actual_driver_checksum="$(sha256sum "$H2_JAR_VALUE" | awk '{print $1}')"
-  if [[ "$actual_driver_checksum" != "$expected_driver_checksum" ]]; then
-    printf 'FALHA: checksum do H2 diverge do manifesto portátil\n' >&2
+  if [[ "$(basename "$H2_JAR_VALUE")" != "$H2_EXPECTED_JAR" ||
+        "$actual_driver_checksum" != "$expected_driver_checksum" ]]; then
+    printf 'FALHA: arquivo ou checksum do H2 diverge do manifesto do gate\n' >&2
     exit 1
   fi
-  if [[ "$SERVER_RELEASE" == "26" ]]; then
+  if [[ "$JAVA_RELEASE" == "17" ]]; then
+    PROFILE_FILE="$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/profiles/ci-h2.cli"
+  elif [[ "$SERVER_RELEASE" == "26" ]]; then
     PROFILE_FILE="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/profiles/ci-h2.cli"
   else
     PROFILE_FILE="$REPOSITORY_ROOT/runtime/legacy/profiles/ci-h2.cli"
@@ -420,7 +508,9 @@ else
     printf 'FALHA: checksum do ojdbc7 não foi aprovado\n' >&2
     exit 1
   fi
-  if [[ "$SERVER_RELEASE" == "26" ]]; then
+  if [[ "$JAVA_RELEASE" == "17" ]]; then
+    PROFILE_FILE="$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/profiles/oracle.cli"
+  elif [[ "$SERVER_RELEASE" == "26" ]]; then
     PROFILE_FILE="$REPOSITORY_ROOT/runtime/phase2/java8-wildfly26/profiles/oracle.cli"
   else
     PROFILE_FILE="$REPOSITORY_ROOT/runtime/legacy/profiles/oracle.cli"
@@ -466,11 +556,10 @@ if [[ "$SERVER_RELEASE" == "26" ]]; then
 fi
 
 if [[ "$PROFILE" == "ci-h2" ]]; then
-  module_directory="$RUNTIME_HOME/modules/com/h2database/h2/cp1d/main"
+  module_directory="$RUNTIME_HOME/modules/$H2_MODULE_DIRECTORY"
   install -d -m 0755 "$module_directory"
-  install -m 0644 "$H2_JAR_VALUE" "$module_directory/h2-1.4.200.jar"
-  install -m 0644 "$REPOSITORY_ROOT/runtime/legacy/h2/module.xml" \
-    "$module_directory/module.xml"
+  install -m 0644 "$H2_JAR_VALUE" "$module_directory/$H2_EXPECTED_JAR"
+  install -m 0644 "$H2_MODULE_FILE" "$module_directory/module.xml"
 else
   module_directory="$RUNTIME_HOME/modules/com/oracle/ojdbc7/main"
   install -d -m 0755 "$module_directory"

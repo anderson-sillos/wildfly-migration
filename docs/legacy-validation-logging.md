@@ -27,8 +27,10 @@ vazios ou duplicados e conjunto vazio interrompem a inicialização.
 Para adicionar um validador no legado, crie uma classe pública concreta com
 construtor sem argumentos, implemente `PedidoImportValidator`, escolha ordem e
 identificador únicos e atualize o contrato automatizado. A tarefa final de
-migração substituirá essa descoberta por registro explícito preservando o
-mesmo conjunto e a mesma ordem.
+migração substituirá o Reflections pelo `ServletContainerInitializer` com
+`@HandlesTypes(Validator.class)` na atividade `3.33` do `CP-3G`, atrás de uma
+fachada própria e preservando a descoberta automática, o mesmo conjunto e a
+mesma ordem.
 
 O XSD aceita `NOVO`, `APROVADO` e `CANCELADO` porque descreve todos os estados
 persistidos. A importação, porém, só pode criar pedidos em `NOVO`. Essa
@@ -68,4 +70,5 @@ Reflections 0.9.10 declara `slf4j-api` 1.6.1 como dependência opcional. O WAR
 não empacota SLF4J; no WildFly 9 a API é disponibilizada implicitamente pelo
 subsistema de logging. Isso cria um acoplamento de classloader que precisa ser
 revalidado em cada troca de servidor. A fase final remove Reflections e Log4j
-1, sem adicionar outro backend concorrente ao WAR.
+1, adota o SCI padrão sem biblioteca externa de descoberta e não adiciona outro
+backend concorrente ao WAR.

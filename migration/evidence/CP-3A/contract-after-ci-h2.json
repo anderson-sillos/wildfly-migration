@@ -1,0 +1,25 @@
+{
+  "schema": "wildfly-migration-contract-result/v1",
+  "qualification": "portable-ci",
+  "profile": "ci-h2",
+  "commit": "fa87f1d8f6c74e1be1f7d978ada04ea743b7e551",
+  "sourceCommit": "fa87f1d8f6c74e1be1f7d978ada04ea743b7e551",
+  "warSha256": "afc4d98594c3cf7113018f78fab4e4be6b7c0202bbe5cbd9b5e1db8390cbc294",
+  "runtime": "java17-wildfly26.1.3",
+  "scenarios": {
+    "health": "passed",
+    "list": "passed",
+    "create": "passed",
+    "detail": "passed",
+    "session": "passed",
+    "upload": "passed",
+    "uploadLimit": "passed",
+    "xmlForm": "passed",
+    "xmlValid": "passed",
+    "xmlInvalidXsd": "passed",
+    "xmlValidatorRejected": "passed",
+    "xmlXxe": "passed",
+    "xmlEntityExpansion": "passed",
+    "persistedState": "passed"
+  }
+}
