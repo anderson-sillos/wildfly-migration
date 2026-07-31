@@ -57,6 +57,25 @@ for marker in \
   fi
 done
 
+for marker in \
+  '14b9fbf23757c6cb721a4d9a809569d1b5c71b6b' \
+  'd3866778808f442b02691e1739ca7f0e8c1e6ec1c9dea7d99e72c9505362b5b5' \
+  'Reflections 0.10.2 pode substituir a versão 0.9.10' \
+  'org.jboss.modules.ModuleClassLoader' \
+  'numero-formato,valor-monetario,status-inicial' \
+  'Guava 15 do WAR' \
+  'portable-ci' \
+  'oracle-qualified' \
+  'atividade 3.33' \
+  '28789b65964b6daf79082179893687140b84493b'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/evidence/CP-3B.md"; then
+    printf 'FALHA: evidência CP-3B de Reflections não contém: %s\n' \
+      "$marker" >&2
+    exit 1
+  fi
+done
+
 if ! grep -Fq -- \
     '[Reflections 0.10.2 no CP-3B](cp-3b-reflections-bridge.md)' \
     "$REPOSITORY_ROOT/docs/README.md"; then

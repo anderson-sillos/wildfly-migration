@@ -1,7 +1,7 @@
 # Codex handoff
 
-Atualizado em 31/07/2026 após a conclusão da atividade 3.8 do checkpoint
-`CP-3B`. O trabalho deve permanecer pausado antes da atividade 3.9.
+Atualizado em 31/07/2026 após a conclusão local da atividade 3.9 do checkpoint
+`CP-3B`. O trabalho deve permanecer pausado antes do fechamento 3.10.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -14,9 +14,9 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Branch: `checkpoint/cp-3b-core-dependencies`.
 - PR draft: [#20 — CP-3B: modernizar dependências centrais](https://github.com/anderson-sillos/wildfly-migration/pull/20).
 - Base do checkpoint: `6d94e5fc735575fa2ac644690a2a0635d921199f`, fechamento do CP-3A.
-- Progresso OpenSpec: 63 de 110 tarefas concluídas.
-- Atividades CP-3B concluídas: 3.6, 3.7 e 3.8.
-- Próxima atividade: 3.9, atualizar Reflections para 0.10.2.
+- Progresso OpenSpec: 64 de 110 tarefas concluídas.
+- Atividades CP-3B concluídas: 3.6, 3.7, 3.8 e 3.9.
+- Próxima atividade: 3.10, fechar o CP-3B.
 - O PR deve continuar draft e não deve ser integrado antes do fechamento 3.10.
 
 ## Decisões permanentes
@@ -35,7 +35,7 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Cada checkpoint usa branch, PR e checks; somente o fechamento recebe o
   commit squash identificável.
 
-## CP-3B concluído até a atividade 3.8
+## CP-3B concluído até a atividade 3.9
 
 ### 3.6 — MyBatis
 
@@ -76,14 +76,32 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Rollback isolado da 3.8: retornar ao commit verde
   `e73f3184917984062d9ce8037d75236631399d99`.
 
+### 3.9 — descoberta de validadores
+
+- Reflections foi atualizado de 0.9.10 para 0.10.2.
+- Os três validadores concretos usam `@Validator`, e a ponte executa
+  `getTypesAnnotatedWith(Validator.class)` com scanners e TCCL explícitos.
+- H2 e Oracle observaram `org.jboss.modules.ModuleClassLoader`, o mesmo
+  conjunto de três classes e a ordem
+  `numero-formato,valor-monetario,status-inicial`.
+- Guava 15 e FindBugs annotations 2.0.1 saíram do WAR; Reflections passou a
+  trazer Javassist 3.28.0-GA e JSR-305 3.0.2. A API SLF4J transitiva foi
+  excluída porque o WildFly já a fornece.
+- Ambos reproduziram o WAR SHA-256
+  `d3866778808f442b02691e1739ca7f0e8c1e6ec1c9dea7d99e72c9505362b5b5`.
+- Commit de implementação:
+  `14b9fbf23757c6cb721a4d9a809569d1b5c71b6b`.
+- Rollback isolado da 3.9: retornar ao commit verde
+  `28789b65964b6daf79082179893687140b84493b`.
+
 As conclusões explicativas estão em `docs/evidence/CP-3B.md`; os relatórios
 sanitizados ficam em `migration/evidence/CP-3B/`.
 
 ## Validações aprovadas
 
 - `repository-baseline` local: aprovado.
-- `doctor CP-3B/ci-h2 --non-interactive`: 200 OK, sem falha ou aviso.
-- Build Java 17/Maven 3.9.16: 20 bibliotecas, bytecode major 61.
+- `doctor CP-3B/ci-h2 --non-interactive`: aprovado sem falha ou aviso.
+- Build Java 17/Maven 3.9.16: 19 bibliotecas, bytecode major 61.
 - Qualificação H2 2.4.240: aprovada como `portable-ci`.
 - Qualificação Oracle 19c RU 19.3: aprovada como `oracle-qualified` e dados
   `LAB-SMOKE-*` removidos.
@@ -109,7 +127,7 @@ o build podem executar no sandbox.
 
 ## Próxima ação
 
-Retomar pela atividade 3.9 sem refazer a auditoria de CI já aprovada:
+Retomar pelo fechamento 3.10 sem refazer a auditoria de CI já aprovada:
 
 ```bash
 git status --short --branch
@@ -119,8 +137,7 @@ openspec instructions apply --change create-java-web-migration-lab --json
 ./scripts/validate-cp-3b.sh
 ```
 
-Antes de alterar Reflections, confirmar o contrato congelado de descoberta,
-conjunto e ordem dos validadores. O mecanismo final já decidido para remover
-Reflections é um `ServletContainerInitializer` em JAR separado, mas essa troca
-fica nas subtarefas da atividade 3.33; a 3.9 faz somente a atualização para
-0.10.2.
+O fechamento 3.10 deve consolidar o CP-3B, executar os gates finais, atualizar
+o PR draft e só então integrar o checkpoint. A troca de Reflections por
+`ServletContainerInitializer` em JAR separado continua reservada às subtarefas
+da atividade 3.33.

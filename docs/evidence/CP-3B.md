@@ -2,10 +2,10 @@
 
 ## Escopo atual
 
-Este documento acompanha o checkpoint CP-3B. As atividades 3.6, 3.7 e 3.8
-atualizam MyBatis, logging e upload de forma isolada; a descoberta de
-validadores permanece inalterada até a atividade 3.9. A conclusão consolidada
-do checkpoint será registrada no fechamento 3.10.
+Este documento acompanha o checkpoint CP-3B. As atividades 3.6 a 3.9
+atualizam MyBatis, logging, upload e descoberta de validadores de forma
+isolada. A conclusão consolidada do checkpoint será registrada no fechamento
+3.10.
 
 ## MyBatis 3.5.19 — atividade 3.6
 
@@ -142,7 +142,63 @@ factories personalizadas, listeners, streaming API ou serialização de
 `FileItem` que existam somente na aplicação real. A atividade 3.32 fará a
 substituição final por `@MultipartConfig` e `jakarta.servlet.http.Part`.
 
+## Reflections 0.10.2 — atividade 3.9
+
+O commit de implementação
+`14b9fbf23757c6cb721a4d9a809569d1b5c71b6b` atualizou Reflections 0.9.10
+para 0.10.2. Os validadores concretos passaram a declarar a annotation runtime
+`@Validator`, e a ponte usa `getTypesAnnotatedWith(Validator.class)` com
+`TypesAnnotated`, `SubTypes`, URLs, filtro de pacote e TCCL explícitos.
+
+Os perfis H2 e Oracle reproduziram o mesmo artefato:
+
+- SHA-256 do WAR:
+  `d3866778808f442b02691e1739ca7f0e8c1e6ec1c9dea7d99e72c9505362b5b5`;
+- SHA-256 da árvore Maven:
+  `47517b7396beadb34c08515f8631ec7ce59a6fdf173345d78f562c61e3d2d5a1`;
+- SHA-256 de `reflections-0.10.2.jar`:
+  `938a2d08fe54050d7610b944d8ddc3a09355710d9e6be0aac838dbc04e9a2825`;
+- SHA-256 de `javassist-3.28.0-GA.jar`:
+  `57d0a9e9286f82f4eaa851125186997f811befce0e2060ff0a15a77f5a9dd9a7`;
+- SHA-256 de `jsr305-3.0.2.jar`:
+  `766ad2a0783f2687962c8ad74ceecc38a28b9f72a2d085ee438b7813e928d0c7`;
+- 21 dependências Maven e 19 bibliotecas em `WEB-INF/lib`;
+- nenhum Reflections 0.9.10, Guava 15, FindBugs annotations 2.0.1,
+  Javassist 3.19 ou `slf4j-api` empacotado no WAR.
+
+Em ambos os bancos, o TCCL observado foi
+`org.jboss.modules.ModuleClassLoader`. O conjunto alfabético encontrado foi
+`NumeroFormatoValidator`, `StatusInicialValidator` e
+`ValorMonetarioValidator`; a execução preservou a ordem funcional
+`numero-formato,valor-monetario,status-inicial`. O XML com status diferente de
+`NOVO` continuou rejeitado sem persistência parcial, e os 14 contratos HTTP
+foram aprovados.
+
+Os relatórios sanitizados são:
+
+- `migration/evidence/CP-3B/discovery-ci-h2.json` (`portable-ci`);
+- `migration/evidence/CP-3B/discovery-oracle.json` (`oracle-qualified`).
+
+### Conclusão comprovada
+
+Reflections 0.10.2 pode substituir a versão 0.9.10 no Java 17/WildFly 26 para
+o uso `getTypesAnnotatedWith` representado pelo laboratório. A configuração
+explícita encontra o mesmo conjunto nos perfis H2 e Oracle 19c, filtra tipos
+inelegíveis e mantém a ordem fora da biblioteca. A mudança também remove
+Guava 15 do WAR e evita uma segunda cópia da API SLF4J.
+
+A conclusão vale para os pacotes e o classloader exercitados. Aplicações reais
+com validadores em JARs internos, módulos de EAR ou classloaders filhos devem
+repetir a sonda. Reflections permanece uma ponte: a atividade 3.33 o
+substituirá por `ServletContainerInitializer` em JAR separado, preservando
+este contrato de conjunto e ordem.
+
 ## Rollback
+
+Para desfazer somente a atividade 3.9, retorne ao commit verde da atividade
+3.8 `28789b65964b6daf79082179893687140b84493b`. Esse estado mantém MyBatis,
+logging e FileUpload modernizados e restaura Reflections 0.9.10 e suas
+transitivas.
 
 Para desfazer somente a atividade 3.8, retorne ao commit verde da atividade
 3.7 `e73f3184917984062d9ce8037d75236631399d99`. Esse estado mantém MyBatis

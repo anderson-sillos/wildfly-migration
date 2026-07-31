@@ -92,6 +92,10 @@ As mesmas qualificações produzem:
 - `app/target/contract-results/cp-3b-discovery-ci-h2.json`;
 - `app/target/contract-results/cp-3b-discovery-oracle.json`.
 
+Depois da aprovação sobre o mesmo commit e WAR, as cópias sanitizadas ficam
+versionadas em `migration/evidence/CP-3B/` como `discovery-ci-h2.json` e
+`discovery-oracle.json`.
+
 ## Rollback
 
 Durante o CP-3B, o último checkpoint verde é o commit de entrega do CP-3A:
