@@ -6,6 +6,7 @@ import br.com.asillos.migration.domain.StatusPedido;
 /**
  * Impede que uma importação ignore o estado inicial do fluxo de negócio.
  */
+@Validator
 public final class StatusInicialValidator
         implements PedidoImportValidator {
     @Override

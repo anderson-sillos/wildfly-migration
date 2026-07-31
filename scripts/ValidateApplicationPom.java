@@ -120,7 +120,7 @@ public final class ValidateApplicationPom {
         expected.put("commons-io:commons-io",
                 values("2.19.0", "compile"));
         expected.put("org.reflections:reflections",
-                values("0.9.10", "compile"));
+                values("0.10.2", "compile"));
         expected.put("org.apache.tiles:tiles-api",
                 values("2.1.4", "compile"));
         expected.put("org.apache.tiles:tiles-jsp",

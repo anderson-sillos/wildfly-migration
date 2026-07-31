@@ -80,6 +80,18 @@ As mesmas qualificações produzem:
 - `app/target/contract-results/cp-3b-upload-ci-h2.json`;
 - `app/target/contract-results/cp-3b-upload-oracle.json`.
 
+## Atividade 3.9 — Reflections 0.10.2
+
+Reflections 0.9.10 é substituído por 0.10.2 e a descoberta passa a usar a
+annotation runtime `@Validator`, como na aplicação real. A
+[decisão da ponte](cp-3b-reflections-bridge.md) registra os scanners, o TCCL,
+as transitivas e o contrato que será preservado pelo SCI na atividade 3.33.
+
+As mesmas qualificações produzem:
+
+- `app/target/contract-results/cp-3b-discovery-ci-h2.json`;
+- `app/target/contract-results/cp-3b-discovery-oracle.json`.
+
 ## Rollback
 
 Durante o CP-3B, o último checkpoint verde é o commit de entrega do CP-3A:

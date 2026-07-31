@@ -9,10 +9,12 @@ H2_RESULT_FILE=""
 H2_CONTRACT_FILE=""
 H2_LOGGING_RESULT_FILE=""
 H2_UPLOAD_RESULT_FILE=""
+H2_DISCOVERY_RESULT_FILE=""
 ORACLE_RESULT_FILE=""
 ORACLE_CONTRACT_FILE=""
 ORACLE_LOGGING_RESULT_FILE=""
 ORACLE_UPLOAD_RESULT_FILE=""
+ORACLE_DISCOVERY_RESULT_FILE=""
 TEMP_DIRECTORY="$(
   mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-cp3b.XXXXXXXX"
 )"
@@ -25,9 +27,11 @@ Uso:
     [--h2-result ARQUIVO] [--h2-contract ARQUIVO] \
     [--h2-logging-result ARQUIVO] \
     [--h2-upload-result ARQUIVO] \
+    [--h2-discovery-result ARQUIVO] \
     [--oracle-result ARQUIVO] [--oracle-contract ARQUIVO] \
     [--oracle-logging-result ARQUIVO] \
-    [--oracle-upload-result ARQUIVO]
+    [--oracle-upload-result ARQUIVO] \
+    [--oracle-discovery-result ARQUIVO]
 
 Sem argumentos, valida a estrutura versionada do CP-3B. Os resultados
 dinâmicos são opcionais durante o desenvolvimento e obrigatórios nas
@@ -79,6 +83,11 @@ while [[ $# -gt 0 ]]; do
       H2_UPLOAD_RESULT_FILE="$2"
       shift 2
       ;;
+    --h2-discovery-result)
+      [[ $# -ge 2 ]] || fail "--h2-discovery-result exige um arquivo"
+      H2_DISCOVERY_RESULT_FILE="$2"
+      shift 2
+      ;;
     --oracle-result)
       [[ $# -ge 2 ]] || fail "--oracle-result exige um arquivo"
       ORACLE_RESULT_FILE="$2"
@@ -99,6 +108,11 @@ while [[ $# -gt 0 ]]; do
       ORACLE_UPLOAD_RESULT_FILE="$2"
       shift 2
       ;;
+    --oracle-discovery-result)
+      [[ $# -ge 2 ]] || fail "--oracle-discovery-result exige um arquivo"
+      ORACLE_DISCOVERY_RESULT_FILE="$2"
+      shift 2
+      ;;
     -h|--help)
       usage
       exit 0
@@ -116,9 +130,12 @@ required_paths=(
   "docs/mybatis-persistence.md"
   "docs/cp-3b-logging-bridge.md"
   "docs/cp-3b-fileupload.md"
+  "docs/cp-3b-reflections-bridge.md"
   "migration/steps/CP-3B-mybatis-3.5.19.md"
   "migration/steps/CP-3B-log4j-over-slf4j.md"
   "migration/steps/CP-3B-commons-fileupload-1.6.0.md"
+  "migration/steps/CP-3B-reflections-0.10.2.md"
+  "app/src/main/java/br/com/asillos/migration/integration/validation/Validator.java"
   "app/src/main/webapp/WEB-INF/jboss-deployment-structure.xml"
   "runtime/phase2/java8-wildfly26/war-libraries.txt"
   "runtime/phase3/java17-wildfly26/war-libraries.txt"
@@ -251,6 +268,51 @@ if grep -Fq 'jakarta.servlet' "$upload_source"; then
   fail "atividade 3.8 não pode antecipar o namespace Jakarta"
 fi
 
+grep -Fq '<reflections.version>0.10.2</reflections.version>' \
+  "$REPOSITORY_ROOT/app/pom.xml" ||
+  fail "POM não fixa Reflections 0.10.2"
+for library in \
+  reflections-0.10.2.jar \
+  javassist-3.28.0-GA.jar \
+  jsr305-3.0.2.jar; do
+  grep -Fxq "$library" "$current_allowlist" ||
+    fail "allowlist Java 17 não contém $library"
+done
+if grep -Eq \
+    '^(reflections-0\.9\.10|javassist-3\.19\.0-GA|annotations-2\.0\.1|guava-15\.0|slf4j-api-[^/]+)\.jar$' \
+    "$current_allowlist"; then
+  fail "allowlist Java 17 contém transitiva legada ou API SLF4J duplicada"
+fi
+for library in \
+  reflections-0.9.10.jar \
+  javassist-3.19.0-GA.jar \
+  annotations-2.0.1.jar \
+  guava-15.0.jar; do
+  grep -Fxq "$library" "$phase2_allowlist" ||
+    fail "allowlist histórica da fase 2 perdeu $library"
+done
+
+discovery_source="$REPOSITORY_ROOT/app/src/main/java/br/com/asillos/migration/integration/validation/LegacyValidatorDiscovery.java"
+for marker in \
+  'getTypesAnnotatedWith(Validator.class)' \
+  'Scanners.TypesAnnotated' \
+  'Scanners.SubTypes' \
+  'setClassLoaders(new ClassLoader[] {classLoader})' \
+  'PedidoImportValidator.class.isAssignableFrom(type)' \
+  'legacy_validator_discovery classloader=' \
+  'Collections.sort(names)'; do
+  grep -Fq "$marker" "$discovery_source" ||
+    fail "descoberta Reflections não preserva: $marker"
+done
+for validator_source in \
+  NumeroFormatoValidator.java \
+  ValorMonetarioValidator.java \
+  StatusInicialValidator.java; do
+  grep -Fq '@Validator' \
+    "$REPOSITORY_ROOT/app/src/main/java/br/com/asillos/migration/integration/validation/$validator_source" ||
+    fail "validador não possui @Validator: $validator_source"
+done
+
 for marker in \
   'MyBatis 3.5.19' \
   'MyBatis 3.4.5' \
@@ -354,6 +416,36 @@ validate_upload_result() {
   if grep -Eiq \
       'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url' "$file"; then
     fail "resultado de upload contém configuração sensível"
+  fi
+}
+
+validate_discovery_result() {
+  local file="$1"
+  local qualification="$2"
+  local profile="$3"
+  [[ -f "$file" ]] || fail "resultado de descoberta ausente: $file"
+  for marker in \
+    '"schema": "wildfly-migration-validator-discovery/v1"' \
+    "\"qualification\": \"$qualification\"" \
+    "\"profile\": \"$profile\"" \
+    '"reflectionsVersion": "0.10.2"' \
+    '"annotation": "br.com.asillos.migration.integration.validation.Validator"' \
+    '"scanners": "TypesAnnotated+SubTypes"' \
+    '"classLoader": "org.jboss.modules.ModuleClassLoader"' \
+    '"validatorSet": "br.com.asillos.migration.integration.validation.NumeroFormatoValidator,br.com.asillos.migration.integration.validation.StatusInicialValidator,br.com.asillos.migration.integration.validation.ValorMonetarioValidator"' \
+    '"validatorOrder": "numero-formato,valor-monetario,status-inicial"' \
+    '"annotationDiscovery": "passed"' \
+    '"eligibleTypes": "passed"' \
+    '"classLoader": "passed"' \
+    '"deterministicSet": "passed"' \
+    '"deterministicOrder": "passed"' \
+    '"domainRejection": "passed"'; do
+    grep -Fq "$marker" "$file" ||
+      fail "resultado de descoberta não contém: $marker"
+  done
+  if grep -Eiq \
+      'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url' "$file"; then
+    fail "resultado de descoberta contém configuração sensível"
   fi
 }
 
@@ -485,6 +577,48 @@ if grep -Fq -- \
     fail "commit-fonte das evidências de logging não existe"
 fi
 
+if grep -Fq -- \
+    '- [x] 3.9 Atualizar Reflections para 0.10.2' "$TASKS_FILE"; then
+  for evidence in \
+    "migration/evidence/CP-3B/discovery-ci-h2.json" \
+    "migration/evidence/CP-3B/discovery-oracle.json"; do
+    [[ -f "$REPOSITORY_ROOT/$evidence" ]] ||
+      fail "evidência obrigatória da atividade 3.9 ausente: $evidence"
+  done
+  h2_discovery_evidence="$REPOSITORY_ROOT/migration/evidence/CP-3B/discovery-ci-h2.json"
+  oracle_discovery_evidence="$REPOSITORY_ROOT/migration/evidence/CP-3B/discovery-oracle.json"
+  validate_discovery_result \
+    "$h2_discovery_evidence" portable-ci ci-h2
+  validate_discovery_result \
+    "$oracle_discovery_evidence" oracle-qualified oracle
+
+  h2_discovery_source_commit="$(
+    sed -n 's/.*"sourceCommit": "\([^"]*\)".*/\1/p' \
+      "$h2_discovery_evidence"
+  )"
+  oracle_discovery_source_commit="$(
+    sed -n 's/.*"sourceCommit": "\([^"]*\)".*/\1/p' \
+      "$oracle_discovery_evidence"
+  )"
+  h2_discovery_war_sha256="$(
+    sed -n 's/.*"warSha256": "\([^"]*\)".*/\1/p' \
+      "$h2_discovery_evidence"
+  )"
+  oracle_discovery_war_sha256="$(
+    sed -n 's/.*"warSha256": "\([^"]*\)".*/\1/p' \
+      "$oracle_discovery_evidence"
+  )"
+  [[ "$h2_discovery_source_commit" =~ ^[0-9a-f]{40}$ &&
+     "$h2_discovery_source_commit" == "$oracle_discovery_source_commit" ]] ||
+    fail "evidências de descoberta H2 e Oracle não usam o mesmo commit-fonte"
+  [[ "$h2_discovery_war_sha256" =~ ^[0-9a-f]{64}$ &&
+     "$h2_discovery_war_sha256" == "$oracle_discovery_war_sha256" ]] ||
+    fail "evidências de descoberta H2 e Oracle não usam o mesmo WAR"
+  git -C "$REPOSITORY_ROOT" cat-file -e \
+    "${h2_discovery_source_commit}^{commit}" 2>/dev/null ||
+    fail "commit-fonte das evidências de descoberta não existe"
+fi
+
 if [[ -n "$WAR_FILE" ]]; then
   [[ -f "$WAR_FILE" ]] || fail "WAR informado não existe"
   unzip -Z1 "$WAR_FILE" >"$TEMP_DIRECTORY/war-entries.txt"
@@ -524,6 +658,18 @@ if [[ -n "$WAR_FILE" ]]; then
       "$TEMP_DIRECTORY/war-entries.txt"; then
     fail "WAR ainda contém FileUpload/Commons IO legados"
   fi
+  for library in \
+    reflections-0.10.2.jar \
+    javassist-3.28.0-GA.jar \
+    jsr305-3.0.2.jar; do
+    grep -Fxq "WEB-INF/lib/$library" "$TEMP_DIRECTORY/war-entries.txt" ||
+      fail "WAR não contém $library"
+  done
+  if grep -Eq \
+      '^WEB-INF/lib/(reflections-0\.9\.10|javassist-3\.19\.0-GA|annotations-2\.0\.1|guava-15\.0|slf4j-api-[^/]+)\.jar$' \
+      "$TEMP_DIRECTORY/war-entries.txt"; then
+    fail "WAR contém transitiva legada ou API SLF4J duplicada"
+  fi
   war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
 else
   war_sha256=""
@@ -555,6 +701,14 @@ if [[ -n "$H2_UPLOAD_RESULT_FILE" ]]; then
   grep -Fq "\"warSha256\": \"$war_sha256\"" \
     "$H2_UPLOAD_RESULT_FILE" ||
     fail "resultado de upload H2 não corresponde ao WAR"
+fi
+if [[ -n "$H2_DISCOVERY_RESULT_FILE" ]]; then
+  [[ -n "$WAR_FILE" ]] || fail "--h2-discovery-result exige --war"
+  validate_discovery_result \
+    "$H2_DISCOVERY_RESULT_FILE" portable-ci ci-h2
+  grep -Fq "\"warSha256\": \"$war_sha256\"" \
+    "$H2_DISCOVERY_RESULT_FILE" ||
+    fail "resultado de descoberta H2 não corresponde ao WAR"
 fi
 if [[ -n "$ORACLE_RESULT_FILE" ]]; then
   [[ -n "$WAR_FILE" ]] || fail "--oracle-result exige --war"
@@ -588,5 +742,13 @@ if [[ -n "$ORACLE_UPLOAD_RESULT_FILE" ]]; then
     "$ORACLE_UPLOAD_RESULT_FILE" ||
     fail "resultado de upload Oracle não corresponde ao WAR"
 fi
+if [[ -n "$ORACLE_DISCOVERY_RESULT_FILE" ]]; then
+  [[ -n "$WAR_FILE" ]] || fail "--oracle-discovery-result exige --war"
+  validate_discovery_result \
+    "$ORACLE_DISCOVERY_RESULT_FILE" oracle-qualified oracle
+  grep -Fq "\"warSha256\": \"$war_sha256\"" \
+    "$ORACLE_DISCOVERY_RESULT_FILE" ||
+    fail "resultado de descoberta Oracle não corresponde ao WAR"
+fi
 
-printf 'OK: MyBatis, logging e upload transicionais isolados no CP-3B\n'
+printf 'OK: MyBatis, logging, upload e descoberta isolados no CP-3B\n'

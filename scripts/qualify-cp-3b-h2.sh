@@ -83,6 +83,7 @@ MYBATIS_RESULT="$RESULT_DIRECTORY/cp-3b-mybatis-ci-h2.json"
 CONTRACT_RESULT="$RESULT_DIRECTORY/cp-3b-ci-h2.json"
 LOGGING_RESULT="$RESULT_DIRECTORY/cp-3b-logging-ci-h2.json"
 UPLOAD_RESULT="$RESULT_DIRECTORY/cp-3b-upload-ci-h2.json"
+DISCOVERY_RESULT="$RESULT_DIRECTORY/cp-3b-discovery-ci-h2.json"
 JAVA17_HOME_VALUE="${JAVA17_HOME:-$(read_env_value JAVA17_HOME || true)}"
 H2_JAR_VALUE="${H2_JAR:-$(read_env_value H2_JAR || true)}"
 
@@ -111,7 +112,8 @@ fi
   --war "$WAR_FILE" \
   --contract-result "$CONTRACT_RESULT" \
   --logging-result "$LOGGING_RESULT" \
-  --upload-result "$UPLOAD_RESULT"
+  --upload-result "$UPLOAD_RESULT" \
+  --discovery-result "$DISCOVERY_RESULT"
 "$REPOSITORY_ROOT/scripts/validate-cp-3a.sh" \
   --promoted-war "$WAR_FILE" \
   --promoted-contract-result "$CONTRACT_RESULT"
@@ -120,7 +122,8 @@ fi
   --h2-result "$MYBATIS_RESULT" \
   --h2-contract "$CONTRACT_RESULT" \
   --h2-logging-result "$LOGGING_RESULT" \
-  --h2-upload-result "$UPLOAD_RESULT"
+  --h2-upload-result "$UPLOAD_RESULT" \
+  --h2-discovery-result "$DISCOVERY_RESULT"
 
 printf 'OK: qualificação H2 CP-3B concluída; relatórios em %s\n' \
   "$RESULT_DIRECTORY"

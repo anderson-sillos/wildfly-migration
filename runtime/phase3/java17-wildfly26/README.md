@@ -11,6 +11,7 @@ Esta configuração materializa a atividade 3.4 sem criar uma nova fase pública
 | API web | Jakarta EE 8, ainda em pacotes `javax.*` |
 | Logging | SLF4J 1.7.36 do servidor/JBoss LogManager |
 | Upload transitório | Commons FileUpload 1.6.0 / Commons IO 2.19.0 |
+| Descoberta transitória | Reflections 0.10.2 |
 
 O [manifesto](runtime-manifest.tsv) registra origem, licença e SHA-256. O
 WildFly 26 é um runtime de transição EOL e não representa o destino final.
@@ -33,3 +34,7 @@ O WAR mantém temporariamente a API `javax` do Commons FileUpload 1.x. As
 versões 1.6.0 do parser e 2.19.0 do Commons IO ficam explícitas na allowlist;
 a substituição por Servlet `Part` no namespace `jakarta` pertence à atividade
 3.32.
+
+A descoberta anotada usa Reflections 0.10.2 somente como ponte. O WAR inclui
+Javassist 3.28.0-GA e JSR-305 3.0.2, não inclui Guava 15, FindBugs annotations
+2.0.1 nem SLF4J próprio, e resolve `@Validator` pelo ModuleClassLoader do WAR.

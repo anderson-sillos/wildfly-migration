@@ -15,6 +15,7 @@ required_paths=(
   "docs/cp-3b-core-dependencies.md"
   "docs/cp-3b-fileupload.md"
   "docs/cp-3b-logging-bridge.md"
+  "docs/cp-3b-reflections-bridge.md"
   "docs/evidence/CP-3B.md"
   "docs/evidence/CP-1F.md"
   "docs/environment-setup.md"
@@ -38,6 +39,30 @@ for path in "${required_paths[@]}"; do
     exit 1
   fi
 done
+
+for marker in \
+  'Reflections 0.10.2' \
+  '`@Validator`' \
+  '`getTypesAnnotatedWith(Validator.class)`' \
+  '`Scanners.TypesAnnotated` e `Scanners.SubTypes`' \
+  '`org.jboss.modules.ModuleClassLoader`' \
+  'Guava 15' \
+  'atividade 3.33' \
+  '28789b65964b6daf79082179893687140b84493b'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3b-reflections-bridge.md" \
+      "$REPOSITORY_ROOT/migration/steps/CP-3B-reflections-0.10.2.md"; then
+    printf 'FALHA: documentação Reflections não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+if ! grep -Fq -- \
+    '[Reflections 0.10.2 no CP-3B](cp-3b-reflections-bridge.md)' \
+    "$REPOSITORY_ROOT/docs/README.md"; then
+  printf 'FALHA: índice não aponta para a decisão Reflections do CP-3B\n' >&2
+  exit 1
+fi
 
 required_runbook_markers=(
   './scripts/doctor.sh CP-1E --profile ci-h2 --env .env'

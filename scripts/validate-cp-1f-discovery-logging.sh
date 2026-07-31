@@ -21,6 +21,7 @@ trap cleanup EXIT
 
 required_paths=(
   "app/src/main/java/br/com/asillos/migration/integration/validation/PedidoImportValidator.java"
+  "app/src/main/java/br/com/asillos/migration/integration/validation/Validator.java"
   "app/src/main/java/br/com/asillos/migration/integration/validation/LegacyValidatorDiscovery.java"
   "app/src/main/java/br/com/asillos/migration/integration/validation/NumeroFormatoValidator.java"
   "app/src/main/java/br/com/asillos/migration/integration/validation/ValorMonetarioValidator.java"

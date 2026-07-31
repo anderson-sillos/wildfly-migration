@@ -18,6 +18,10 @@ public final class ValidateLegacyDiscoveryLogging {
                 repository,
                 "app/src/main/java/br/com/asillos/migration/integration/"
                 + "validation/LegacyValidatorDiscovery.java"));
+        String annotation = read(file(
+                repository,
+                "app/src/main/java/br/com/asillos/migration/integration/"
+                + "validation/Validator.java"));
         String numberValidator = read(file(
                 repository,
                 "app/src/main/java/br/com/asillos/migration/integration/"
@@ -76,15 +80,38 @@ public final class ValidateLegacyDiscoveryLogging {
 
         require(discovery.indexOf("new Reflections(configuration)") >= 0
                 && discovery.indexOf(
-                        "getSubTypesOf(PedidoImportValidator.class)") >= 0,
+                        "getTypesAnnotatedWith(Validator.class)") >= 0
+                && discovery.indexOf("Scanners.TypesAnnotated") >= 0
+                && discovery.indexOf("Scanners.SubTypes") >= 0,
                 "Reflections não descobre os validadores");
         require(discovery.indexOf("ClasspathHelper.forPackage") >= 0
-                && discovery.indexOf("addClassLoader(classLoader)") >= 0,
+                && discovery.indexOf(
+                        "setClassLoaders(new ClassLoader[] {classLoader})")
+                        >= 0,
                 "classloader do WAR não está explícito na descoberta");
+        require(annotation.indexOf("@Retention(RetentionPolicy.RUNTIME)")
+                        >= 0
+                && annotation.indexOf("@Target(ElementType.TYPE)") >= 0
+                && numberValidator.indexOf("@Validator") >= 0
+                && moneyValidator.indexOf("@Validator") >= 0
+                && statusValidator.indexOf("@Validator") >= 0,
+                "annotation runtime dos validadores divergiu");
+        require(discovery.indexOf(
+                    "PedidoImportValidator.class.isAssignableFrom(type)")
+                        >= 0
+                && discovery.indexOf("!type.isInterface()") >= 0
+                && discovery.indexOf("!Modifier.isAbstract") >= 0,
+                "filtro de tipos elegíveis dos validadores ausente");
         require(discovery.indexOf("Collections.sort") >= 0
                 && discovery.indexOf("left.order()") >= 0
                 && discovery.indexOf("getClass().getName()") >= 0,
                 "ordenação determinística dos validadores ausente");
+        require(discovery.indexOf(
+                    "legacy_validator_discovery classloader=") >= 0
+                && discovery.indexOf("scanners=TypesAnnotated+SubTypes")
+                        >= 0
+                && discovery.indexOf("describeTypes(validators)") >= 0,
+                "diagnóstico de classloader e conjunto descoberto ausente");
         require(numberValidator.indexOf("return 10;") >= 0
                 && numberValidator.indexOf(
                         "return \"numero-formato\";") >= 0,

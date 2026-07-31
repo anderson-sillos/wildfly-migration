@@ -25,3 +25,5 @@ Registros atuais:
   interpretação histórica de expressão regular pelo XMLBeans;
 - [`CP-1G-oracle-ru-detection.md`](CP-1G-oracle-ru-detection.md):
   separação entre produto JDBC e Release Update observado no banco.
+- [`CP-3B-reflections-0.10.2.md`](CP-3B-reflections-0.10.2.md):
+  scanners e classloader explícitos para preservar a descoberta anotada.

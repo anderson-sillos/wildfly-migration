@@ -76,11 +76,20 @@ mínima na aplicação.
 os perfis reproduzíveis do servidor. O mecanismo e a sonda de exceção estão
 descritos em [Ponte temporária de logging](cp-3b-logging-bridge.md).
 
+A atividade 3.9 atualiza Reflections para 0.10.2 e aproxima a reprodução do
+uso real: `@Validator` marca as três implementações, e a consulta usa
+`getTypesAnnotatedWith(Validator.class)`. O TCCL do WAR e os scanners
+`TypesAnnotated`/`SubTypes` ficam explícitos; a ordenação continua fora da
+biblioteca. A decisão e os limites estão em
+[Reflections 0.10.2 como ponte](cp-3b-reflections-bridge.md).
+
 ## Acoplamento transitivo observado
 
-Reflections 0.9.10 declara `slf4j-api` 1.6.1 como dependência opcional. O WAR
+Reflections 0.9.10 declarava `slf4j-api` 1.6.1 como dependência opcional. O WAR
 não empacota SLF4J; no WildFly 9 a API é disponibilizada implicitamente pelo
 subsistema de logging. Isso cria um acoplamento de classloader que precisa ser
-revalidado em cada troca de servidor. A fase final remove Reflections e a
+revalidado em cada troca de servidor. No gate Java 17, Reflections 0.10.2 tem
+a transitiva SLF4J excluída e usa a API fornecida pelo WildFly. A fase final
+remove Reflections e a
 ponte temporária, adota o SCI padrão sem biblioteca externa de descoberta e
 não adiciona outro backend concorrente ao WAR.

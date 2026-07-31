@@ -12,6 +12,7 @@ CONTRACT_RESULT_FILE=""
 DIAGNOSTIC_LOG_FILE=""
 LOGGING_RESULT_FILE=""
 UPLOAD_RESULT_FILE=""
+DISCOVERY_RESULT_FILE=""
 MANUAL_MODE=false
 PRESERVE_ORACLE_SMOKES=false
 TEMP_DIRECTORY=""
@@ -28,6 +29,7 @@ Uso:
     [--java 7|8|17] [--server 9|26] [--env ARQUIVO] [--war ARQUIVO] \
     [--contract-result ARQUIVO] [--diagnostic-log ARQUIVO] \
     [--logging-result ARQUIVO] [--upload-result ARQUIVO] \
+    [--discovery-result ARQUIVO] \
     [--manual] [--preserve-oracle-smokes]
 
 Valores já exportados no ambiente prevalecem sobre o arquivo informado.
@@ -40,6 +42,8 @@ Com --logging-result, valida a ponte Log4j sobre SLF4J no WildFly 26/Java 17
 e preserva um relatório JSON sanitizado.
 Com --upload-result, valida a linha FileUpload 1.x no WildFly 26/Java 17 e
 preserva um relatório JSON sanitizado.
+Com --discovery-result, valida Reflections 0.10.2, @Validator, classloader,
+conjunto e ordem determinística no WildFly 26/Java 17.
 Com --preserve-oracle-smokes, o perfil Oracle mantém temporariamente apenas
 os dados LAB-SMOKE-* para uma sonda externa; o chamador deve limpá-los.
 O padrão Java 7 preserva a reprodução histórica; CP-2A deve informar --java 8.
@@ -276,6 +280,14 @@ while [[ $# -gt 0 ]]; do
       UPLOAD_RESULT_FILE="$2"
       shift 2
       ;;
+    --discovery-result)
+      [[ $# -ge 2 ]] || {
+        printf 'FALHA: --discovery-result exige um arquivo\n' >&2
+        exit 2
+      }
+      DISCOVERY_RESULT_FILE="$2"
+      shift 2
+      ;;
     --manual)
       MANUAL_MODE=true
       shift
@@ -331,6 +343,13 @@ if [[ -n "$UPLOAD_RESULT_FILE" &&
   exit 2
 fi
 
+if [[ -n "$DISCOVERY_RESULT_FILE" &&
+      ( -z "$WAR_FILE" || "$SERVER_RELEASE" != "26" ||
+        "$JAVA_RELEASE" != "17" || "$MANUAL_MODE" == true ) ]]; then
+  printf 'FALHA: --discovery-result exige WAR, WildFly 26, Java 17 e modo não manual\n' >&2
+  exit 2
+fi
+
 if [[ "$SERVER_RELEASE" == "26" &&
       "$JAVA_RELEASE" != "8" &&
       "$JAVA_RELEASE" != "17" ]]; then
@@ -347,7 +366,8 @@ if [[ -n "$WAR_FILE" ]]; then
     printf 'FALHA: curl é obrigatório para o smoke web\n' >&2
     exit 1
   fi
-  if [[ -n "$LOGGING_RESULT_FILE" || -n "$UPLOAD_RESULT_FILE" ]] &&
+  if [[ -n "$LOGGING_RESULT_FILE" || -n "$UPLOAD_RESULT_FILE" ||
+        -n "$DISCOVERY_RESULT_FILE" ]] &&
      ! command -v unzip >/dev/null 2>&1; then
     printf 'FALHA: unzip é obrigatório para validar o WAR\n' >&2
     exit 1
@@ -1108,6 +1128,65 @@ if [[ -n "$WAR_FILE" ]]; then
       "$TEMP_DIRECTORY/server.log"; then
     printf 'FALHA: logs da execução externa não preservaram o contrato\n' >&2
     exit 1
+  fi
+
+  if [[ -n "$DISCOVERY_RESULT_FILE" ]]; then
+    discovery_set="br.com.asillos.migration.integration.validation.NumeroFormatoValidator,br.com.asillos.migration.integration.validation.StatusInicialValidator,br.com.asillos.migration.integration.validation.ValorMonetarioValidator"
+    discovery_order="numero-formato,valor-monetario,status-inicial"
+    discovery_log="legacy_validator_discovery classloader=org.jboss.modules.ModuleClassLoader scanners=TypesAnnotated+SubTypes set=$discovery_set order=$discovery_order"
+    if ! grep -Fq "$discovery_log" "$TEMP_DIRECTORY/server.log"; then
+      printf 'FALHA: classloader, conjunto ou ordem da descoberta não correspondem ao contrato\n' >&2
+      exit 1
+    fi
+
+    unzip -Z1 "$WAR_FILE" >"$TEMP_DIRECTORY/discovery-war-entries.txt"
+    for library in \
+      reflections-0.10.2.jar \
+      javassist-3.28.0-GA.jar \
+      jsr305-3.0.2.jar; do
+      grep -Fxq "WEB-INF/lib/$library" \
+        "$TEMP_DIRECTORY/discovery-war-entries.txt" || {
+        printf 'FALHA: WAR não contém %s para a descoberta\n' "$library" >&2
+        exit 1
+      }
+    done
+    if grep -Eq \
+        '^WEB-INF/lib/(reflections-0\.9\.10|javassist-3\.19\.0-GA|annotations-2\.0\.1|guava-15\.0|slf4j-api-[^/]+)\.jar$' \
+        "$TEMP_DIRECTORY/discovery-war-entries.txt"; then
+      printf 'FALHA: WAR contém transitiva legada ou API SLF4J duplicada\n' >&2
+      exit 1
+    fi
+
+    discovery_qualification="portable-ci"
+    if [[ "$PROFILE" == "oracle" ]]; then
+      discovery_qualification="oracle-qualified"
+    fi
+    discovery_war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
+    install -d -m 0755 "$(dirname "$DISCOVERY_RESULT_FILE")"
+    {
+      printf '{\n'
+      printf '  "schema": "wildfly-migration-validator-discovery/v1",\n'
+      printf '  "qualification": "%s",\n' "$discovery_qualification"
+      printf '  "profile": "%s",\n' "$PROFILE"
+      printf '  "sourceCommit": "%s",\n' "$source_commit_sha"
+      printf '  "warSha256": "%s",\n' "$discovery_war_sha256"
+      printf '  "runtime": "%s",\n' "$RUNTIME_IDENTIFIER"
+      printf '  "reflectionsVersion": "0.10.2",\n'
+      printf '  "annotation": "br.com.asillos.migration.integration.validation.Validator",\n'
+      printf '  "scanners": "TypesAnnotated+SubTypes",\n'
+      printf '  "classLoader": "org.jboss.modules.ModuleClassLoader",\n'
+      printf '  "validatorSet": "%s",\n' "$discovery_set"
+      printf '  "validatorOrder": "%s",\n' "$discovery_order"
+      printf '  "checks": {\n'
+      printf '    "annotationDiscovery": "passed",\n'
+      printf '    "eligibleTypes": "passed",\n'
+      printf '    "classLoader": "passed",\n'
+      printf '    "deterministicSet": "passed",\n'
+      printf '    "deterministicOrder": "passed",\n'
+      printf '    "domainRejection": "passed"\n'
+      printf '  }\n'
+      printf '}\n'
+    } >"$DISCOVERY_RESULT_FILE"
   fi
 
   if [[ -n "$UPLOAD_RESULT_FILE" ]]; then

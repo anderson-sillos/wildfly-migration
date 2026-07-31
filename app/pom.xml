@@ -25,7 +25,7 @@
     <slf4j.version>1.7.36</slf4j.version>
     <commons.fileupload.version>1.6.0</commons.fileupload.version>
     <commons.io.version>2.19.0</commons.io.version>
-    <reflections.version>0.9.10</reflections.version>
+    <reflections.version>0.10.2</reflections.version>
     <tiles.version>2.1.4</tiles.version>
     <xmlbeans.version>2.3.0</xmlbeans.version>
     <xml.apis.version>1.3.02</xml.apis.version>
@@ -81,6 +81,13 @@
       <groupId>org.reflections</groupId>
       <artifactId>reflections</artifactId>
       <version>${reflections.version}</version>
+      <exclusions>
+        <!-- A API SLF4J é fornecida pelo WildFly e fixada como provided. -->
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.tiles</groupId>
