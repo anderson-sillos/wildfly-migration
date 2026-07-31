@@ -1,0 +1,18 @@
+{
+  "schema": "wildfly-migration-mybatis-compatibility/v1",
+  "qualification": "portable-ci",
+  "profile": "ci-h2",
+  "sourceCommit": "d5f8a08242d4cdd18595a97e010954f1ee29f2f3",
+  "warSha256": "94a6c0d81951cb47f591927222b2a070756ba9b9c67ed2925e88946727ae9106",
+  "runtime": "java17-wildfly26.1.3-ee8",
+  "database": "h2-2.4.240-memory",
+  "mybatisVersion": "3.5.19",
+  "checks": {
+    "mappers": "passed",
+    "aliases": "passed",
+    "typeHandlers": "passed",
+    "reflection": "passed",
+    "mybatisCommit": "passed",
+    "mybatisRollback": "passed"
+  }
+}

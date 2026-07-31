@@ -441,20 +441,25 @@ fi
 grep -Fq -- '--java 17' \
   "$REPOSITORY_ROOT/scripts/smoke-cp-3a-datasource.sh" ||
   fail "wrapper de runtime CP-3A não fixa Java 17"
-for workflow_marker in \
-  'MIGRATION_CHECKPOINT=CP-3A' \
-  'JAVA17_HOME=$tools/jdk-17.0.20+8' \
-  'H2_JAR=$archives/h2-2.4.240.jar' \
-  './scripts/doctor.sh CP-3A --profile ci-h2 --ci' \
-  './scripts/build-cp-3a.sh --profile ci-h2' \
-  './scripts/smoke-cp-3a-datasource.sh \' \
-  '--java 17 \' \
-  'app/target/contract-results/cp-3a-ci-h2.json' \
-  'name: cp-3a-portable-evidence'; do
-  grep -Fq -- "$workflow_marker" \
-    "$REPOSITORY_ROOT/.github/workflows/validate.yml" ||
-    fail "CI portátil ainda não promoveu o CP-3A: $workflow_marker"
-done
+if grep -Fq 'MIGRATION_CHECKPOINT=CP-3A' \
+    "$REPOSITORY_ROOT/.github/workflows/validate.yml"; then
+  for workflow_marker in \
+    'JAVA17_HOME=$tools/jdk-17.0.20+8' \
+    'H2_JAR=$archives/h2-2.4.240.jar' \
+    './scripts/doctor.sh CP-3A --profile ci-h2 --ci' \
+    './scripts/build-cp-3a.sh --profile ci-h2' \
+    './scripts/smoke-cp-3a-datasource.sh \' \
+    '--java 17 \' \
+    'app/target/contract-results/cp-3a-ci-h2.json' \
+    'name: cp-3a-portable-evidence'; do
+    grep -Fq -- "$workflow_marker" \
+      "$REPOSITORY_ROOT/.github/workflows/validate.yml" ||
+      fail "CI portátil do CP-3A não contém: $workflow_marker"
+  done
+elif ! grep -Eq 'MIGRATION_CHECKPOINT=CP-3[B-K]' \
+    "$REPOSITORY_ROOT/.github/workflows/validate.yml"; then
+  fail "CI portátil não identifica o CP-3A nem um checkpoint posterior"
+fi
 
 for catalog_marker in \
   $'INC-011\tCP-3A\t' \

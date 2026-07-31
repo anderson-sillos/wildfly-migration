@@ -12,6 +12,11 @@ required_paths=(
   "docs/codex-handoff.md"
   "docs/cp-3a-java17-runtime.md"
   "docs/cp-3a-dependency-matrix.md"
+  "docs/cp-3b-core-dependencies.md"
+  "docs/cp-3b-fileupload.md"
+  "docs/cp-3b-logging-bridge.md"
+  "docs/cp-3b-reflections-bridge.md"
+  "docs/evidence/CP-3B.md"
   "docs/evidence/CP-1F.md"
   "docs/environment-setup.md"
   "docs/legacy-application-runbook.md"
@@ -34,6 +39,66 @@ for path in "${required_paths[@]}"; do
     exit 1
   fi
 done
+
+for marker in \
+  'Reflections 0.10.2' \
+  '`@Validator`' \
+  '`getTypesAnnotatedWith(Validator.class)`' \
+  '`Scanners.TypesAnnotated` e `Scanners.SubTypes`' \
+  '`org.jboss.modules.ModuleClassLoader`' \
+  'Guava 15' \
+  'atividade 3.33' \
+  '28789b65964b6daf79082179893687140b84493b'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3b-reflections-bridge.md" \
+      "$REPOSITORY_ROOT/migration/steps/CP-3B-reflections-0.10.2.md"; then
+    printf 'FALHA: documentação Reflections não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  '## Fechamento do CP-3B — atividade 3.10' \
+  '14b9fbf23757c6cb721a4d9a809569d1b5c71b6b' \
+  'c6ed5ae93c5060815721084c2cb9beed9dd700f7' \
+  '30650580350' \
+  '19 bibliotecas' \
+  '14/14' \
+  'rollback do CP-3B' \
+  'Tiles, `javax.servlet`, a ponte de logging' \
+  'migration/evidence/CP-3B/closure.properties'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/evidence/CP-3B.md"; then
+    printf 'FALHA: fechamento CP-3B não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  '14b9fbf23757c6cb721a4d9a809569d1b5c71b6b' \
+  'd3866778808f442b02691e1739ca7f0e8c1e6ec1c9dea7d99e72c9505362b5b5' \
+  'Reflections 0.10.2 pode substituir a versão 0.9.10' \
+  'org.jboss.modules.ModuleClassLoader' \
+  'numero-formato,valor-monetario,status-inicial' \
+  'Guava 15 do WAR' \
+  'portable-ci' \
+  'oracle-qualified' \
+  'atividade 3.33' \
+  '28789b65964b6daf79082179893687140b84493b'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/evidence/CP-3B.md"; then
+    printf 'FALHA: evidência CP-3B de Reflections não contém: %s\n' \
+      "$marker" >&2
+    exit 1
+  fi
+done
+
+if ! grep -Fq -- \
+    '[Reflections 0.10.2 no CP-3B](cp-3b-reflections-bridge.md)' \
+    "$REPOSITORY_ROOT/docs/README.md"; then
+  printf 'FALHA: índice não aponta para a decisão Reflections do CP-3B\n' >&2
+  exit 1
+fi
 
 required_runbook_markers=(
   './scripts/doctor.sh CP-1E --profile ci-h2 --env .env'
@@ -207,6 +272,118 @@ for marker in \
   if ! grep -Fq -- "$marker" \
       "$REPOSITORY_ROOT/docs/cp-3a-java17-runtime.md"; then
     printf 'FALHA: runbook do runtime CP-3A não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'MyBatis 3.5.19' \
+  'mybatis-3.5.19.jar' \
+  'qualify-cp-3b-h2.sh' \
+  'qualify-cp-3b-oracle.sh' \
+  'portable-ci' \
+  'oracle-qualified' \
+  '6d94e5fc735575fa2ac644690a2a0635d921199f'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3b-core-dependencies.md"; then
+    printf 'FALHA: documentação CP-3B não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+if ! grep -Fq -- \
+    '[Dependências centrais do CP-3B](cp-3b-core-dependencies.md)' \
+    "$REPOSITORY_ROOT/docs/README.md"; then
+  printf 'FALHA: índice não aponta para o CP-3B\n' >&2
+  exit 1
+fi
+
+for marker in \
+  'Commons FileUpload 1.x transitório' \
+  'commons-fileupload:commons-fileupload` de 1.2.2 para 1.6.0' \
+  'commons-io:commons-io` de 1.3.2 para 2.19.0' \
+  '`javax.servlet`' \
+  'arquivo máximo de 512 KiB' \
+  'requisição multipart máxima de 576 KiB' \
+  'atividade 3.32' \
+  'e73f3184917984062d9ce8037d75236631399d99'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3b-fileupload.md" \
+      "$REPOSITORY_ROOT/migration/steps/CP-3B-commons-fileupload-1.6.0.md"; then
+    printf 'FALHA: documentação do FileUpload 1.x não contém: %s\n' \
+      "$marker" >&2
+    exit 1
+  fi
+done
+
+if ! grep -Fq -- \
+    '[FileUpload 1.x no CP-3B](cp-3b-fileupload.md)' \
+    "$REPOSITORY_ROOT/docs/README.md"; then
+  printf 'FALHA: índice não aponta para a decisão FileUpload do CP-3B\n' >&2
+  exit 1
+fi
+
+for marker in \
+  'd5f8a08242d4cdd18595a97e010954f1ee29f2f3' \
+  '94a6c0d81951cb47f591927222b2a070756ba9b9c67ed2925e88946727ae9106' \
+  'MyBatis 3.5.19 pode substituir diretamente' \
+  '14 contratos HTTP' \
+  'logImpl' \
+  '6d94e5fc735575fa2ac644690a2a0635d921199f'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/evidence/CP-3B.md"; then
+    printf 'FALHA: evidência CP-3B não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'log4j-over-slf4j 1.7.36 no WAR' \
+  'slf4j-api 1.7.36 fornecida pelo WildFly' \
+  'org.apache.log4j' \
+  'jboss-deployment-structure.xml' \
+  'WFLYLOG0100' \
+  'stack trace do MyBatis' \
+  'atividade 3.34'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3b-logging-bridge.md" \
+      "$REPOSITORY_ROOT/migration/steps/CP-3B-log4j-over-slf4j.md"; then
+    printf 'FALHA: documentação da ponte de logging não contém: %s\n' \
+      "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'c9a4ee17b3548e57bd3c5cc499051e34eeebcf9c' \
+  '4f6eb8c63b1e7abb9d0c89c1020251686240b98d4901ce2150cc85262442d335' \
+  'Log4j 1 pode ser retirado' \
+  '22 dependências Maven' \
+  'o mesmo MDC' \
+  '57d6e7630ef42a85b15e16aeb126a5027c67950d' \
+  '3.34 removerá'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/evidence/CP-3B.md"; then
+    printf 'FALHA: evidência CP-3B de logging não contém: %s\n' \
+      "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  '64b5962e23a7d5dcb740c3a8d50a6ac172c8878f' \
+  'b199837b374d44cc84df1dcadbdfdf3ff53351201305c70828b9b2cc602fa3ff' \
+  'Commons FileUpload 1.6.0 e Commons IO 2.19.0 podem substituir diretamente' \
+  'limite de 512 KiB por' \
+  'limite de 576 KiB por' \
+  'portable-ci' \
+  'oracle-qualified' \
+  'atividade 3.32' \
+  'e73f3184917984062d9ce8037d75236631399d99'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/evidence/CP-3B.md"; then
+    printf 'FALHA: evidência CP-3B de upload não contém: %s\n' \
+      "$marker" >&2
     exit 1
   fi
 done

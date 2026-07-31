@@ -10,16 +10,19 @@ import java.util.Set;
 
 import br.com.asillos.migration.integration.xml.XmlImportException;
 
+import org.apache.log4j.Logger;
 import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.Scanners;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 
 /**
- * Descoberta legada isolada para futura substituição por registro explícito.
+ * Ponte Reflections 0.10.2 isolada para futura substituição pelo SCI padrão.
  */
 public final class LegacyValidatorDiscovery {
+    private static final Logger LOGGER =
+            Logger.getLogger(LegacyValidatorDiscovery.class);
     private static final String PACKAGE =
             "br.com.asillos.migration.integration.validation";
 
@@ -34,19 +37,24 @@ public final class LegacyValidatorDiscovery {
                 .setUrls(ClasspathHelper.forPackage(PACKAGE, classLoader))
                 .filterInputsBy(
                         new FilterBuilder().includePackage(PACKAGE))
-                .setScanners(new SubTypesScanner())
-                .addClassLoader(classLoader);
+                .setScanners(
+                        Scanners.TypesAnnotated,
+                        Scanners.SubTypes)
+                .setClassLoaders(new ClassLoader[] {classLoader});
         Reflections reflections = new Reflections(configuration);
 
-        Set<Class<? extends PedidoImportValidator>> discovered =
-                reflections.getSubTypesOf(PedidoImportValidator.class);
+        Set<Class<?>> discovered =
+                reflections.getTypesAnnotatedWith(Validator.class);
         List<PedidoImportValidator> validators =
                 new ArrayList<PedidoImportValidator>();
         try {
-            for (Class<? extends PedidoImportValidator> type : discovered) {
-                if (!type.isInterface()
+            for (Class<?> type : discovered) {
+                if (PedidoImportValidator.class.isAssignableFrom(type)
+                        && !type.isInterface()
                         && !Modifier.isAbstract(type.getModifiers())) {
-                    validators.add(type.newInstance());
+                    validators.add(type.asSubclass(
+                            PedidoImportValidator.class)
+                            .getDeclaredConstructor().newInstance());
                 }
             }
         } catch (InstantiationException exception) {
@@ -56,6 +64,13 @@ public final class LegacyValidatorDiscovery {
         } catch (IllegalAccessException exception) {
             throw new XmlImportException(
                     "Validador descoberto não é acessível", exception);
+        } catch (NoSuchMethodException exception) {
+            throw new XmlImportException(
+                    "Validador descoberto não possui construtor padrão",
+                    exception);
+        } catch (java.lang.reflect.InvocationTargetException exception) {
+            throw new XmlImportException(
+                    "Construtor do validador descoberto falhou", exception);
         }
 
         Collections.sort(
@@ -76,6 +91,12 @@ public final class LegacyValidatorDiscovery {
                     }
                 });
         validateContract(validators);
+        LOGGER.info(
+                "legacy_validator_discovery classloader="
+                + classLoader.getClass().getName()
+                + " scanners=TypesAnnotated+SubTypes set="
+                + describeTypes(validators)
+                + " order=" + describe(validators));
         return Collections.unmodifiableList(validators);
     }
 
@@ -87,6 +108,23 @@ public final class LegacyValidatorDiscovery {
                 description.append(',');
             }
             description.append(validator.identifier());
+        }
+        return description.toString();
+    }
+
+    private static String describeTypes(
+            List<PedidoImportValidator> validators) {
+        List<String> names = new ArrayList<String>();
+        for (PedidoImportValidator validator : validators) {
+            names.add(validator.getClass().getName());
+        }
+        Collections.sort(names);
+        StringBuilder description = new StringBuilder();
+        for (String name : names) {
+            if (description.length() > 0) {
+                description.append(',');
+            }
+            description.append(name);
         }
         return description.toString();
     }

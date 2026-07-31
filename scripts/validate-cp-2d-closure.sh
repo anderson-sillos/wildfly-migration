@@ -44,18 +44,22 @@ for marker in \
   'name: portable-ci' \
   'MIGRATION_SOURCE_COMMIT: >-' \
   '${{ github.event.pull_request.head.sha || github.sha }}' \
-  'MIGRATION_CHECKPOINT=CP-3A' \
-  './scripts/doctor.sh CP-3A --profile ci-h2 --ci' \
-  './scripts/build-cp-3a.sh --profile ci-h2' \
   './scripts/validate-cp-2c-oracle-persistence.sh' \
   './scripts/validate-cp-2d-oracle-state.sh' \
-  './scripts/validate-cp-3a.sh \' \
-  'app/target/contract-results/cp-3a-ci-h2.json' \
-  'name: cp-3a-portable-evidence' \
   'app/target/dependency-tree.txt' \
   'retention-days: 14'; do
   grep -Fq -- "$marker" "$WORKFLOW" ||
     fail "workflow portátil não contém: $marker"
+done
+
+for pattern in \
+  'MIGRATION_CHECKPOINT=CP-3[A-K]' \
+  '\./scripts/doctor\.sh CP-3[A-K] --profile ci-h2 --ci' \
+  '\./scripts/build-cp-3[a-k]\.sh --profile ci-h2' \
+  'app/target/contract-results/cp-3[a-k]-ci-h2\.json' \
+  'name: cp-3[a-k]-portable-evidence'; do
+  grep -Eq -- "$pattern" "$WORKFLOW" ||
+    fail "workflow portátil não identifica o checkpoint ativo: $pattern"
 done
 
 if grep -Eq \

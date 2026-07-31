@@ -7,6 +7,7 @@ import br.com.asillos.migration.domain.Pedido;
 /**
  * Confirma a regra de número já expressa pelo XSD.
  */
+@Validator
 public final class NumeroFormatoValidator
         implements PedidoImportValidator {
     private static final Pattern FORMAT =

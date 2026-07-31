@@ -32,6 +32,10 @@ public final class ValidateApplicationPom {
         validateProject(pom);
         validateWebXml(parse(file(
                 repository, "app/src/main/webapp/WEB-INF/web.xml")));
+        validateDeploymentStructure(parse(file(
+                repository,
+                "app/src/main/webapp/WEB-INF/"
+                + "jboss-deployment-structure.xml")));
         validateOracleModule(parse(file(
                 repository,
                 "runtime/legacy/ojdbc7/module.xml.template")));
@@ -106,14 +110,17 @@ public final class ValidateApplicationPom {
                 new LinkedHashMap<String, String[]>();
         expected.put("jakarta.platform:jakarta.jakartaee-web-api",
                 values("8.0.0", "provided"));
-        expected.put("org.mybatis:mybatis", values("3.4.5", "compile"));
-        expected.put("log4j:log4j", values("1.2.14", "compile"));
+        expected.put("org.mybatis:mybatis", values("3.5.19", "compile"));
+        expected.put("org.slf4j:log4j-over-slf4j",
+                values("1.7.36", "compile"));
+        expected.put("org.slf4j:slf4j-api",
+                values("1.7.36", "provided"));
         expected.put("commons-fileupload:commons-fileupload",
-                values("1.2.2", "compile"));
+                values("1.6.0", "compile"));
         expected.put("commons-io:commons-io",
-                values("1.3.2", "compile"));
+                values("2.19.0", "compile"));
         expected.put("org.reflections:reflections",
-                values("0.9.10", "compile"));
+                values("0.10.2", "compile"));
         expected.put("org.apache.tiles:tiles-api",
                 values("2.1.4", "compile"));
         expected.put("org.apache.tiles:tiles-jsp",
@@ -247,6 +254,20 @@ public final class ValidateApplicationPom {
                 "namespace legado de web.xml divergente");
         require("2.4".equals(webApp.getAttribute("version")),
                 "web.xml deve declarar Servlet 2.4");
+    }
+
+    private static void validateDeploymentStructure(Document document) {
+        Element structure = document.getDocumentElement();
+        require("jboss-deployment-structure".equals(
+                structure.getLocalName()),
+                "raiz de jboss-deployment-structure.xml inválida");
+        NodeList modules =
+                document.getElementsByTagNameNS("*", "module");
+        require(modules.getLength() == 1,
+                "deployment deve excluir somente um módulo");
+        Element module = (Element) modules.item(0);
+        require("org.apache.log4j".equals(module.getAttribute("name")),
+                "módulo Log4j 1 do WildFly deve ser excluído");
     }
 
     private static void validateOracleModule(Document document) {

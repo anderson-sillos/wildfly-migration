@@ -243,7 +243,6 @@ check_required_files() {
       "app/src/main/java/br/com/asillos/migration/integration/xml/LegacyPedidoXmlParser.java"
       "app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java"
       "app/src/main/java/br/com/asillos/migration/integration/validation/LegacyValidatorDiscovery.java"
-      "app/src/main/resources/log4j.properties"
       "contract-tests/run.sh"
     )
   fi
@@ -382,6 +381,36 @@ check_required_files() {
       "scripts/qualify-cp-3a-oracle.sh"
       "scripts/smoke-cp-3a-datasource.sh"
       "scripts/validate-cp-3a.sh"
+    )
+  fi
+
+  if rank_at_least CP-3B; then
+    required+=(
+      "docs/cp-3b-core-dependencies.md"
+      "docs/cp-3b-fileupload.md"
+      "docs/cp-3b-logging-bridge.md"
+      "docs/cp-3b-reflections-bridge.md"
+      "docs/evidence/CP-3B.md"
+      "app/src/main/webapp/WEB-INF/jboss-deployment-structure.xml"
+      "migration/evidence/CP-3B/mybatis-ci-h2.json"
+      "migration/evidence/CP-3B/mybatis-oracle.json"
+      "migration/evidence/CP-3B/logging-ci-h2.json"
+      "migration/evidence/CP-3B/logging-oracle.json"
+      "migration/evidence/CP-3B/upload-ci-h2.json"
+      "migration/evidence/CP-3B/upload-oracle.json"
+      "migration/evidence/CP-3B/discovery-ci-h2.json"
+      "migration/evidence/CP-3B/discovery-oracle.json"
+      "migration/evidence/CP-3B/closure.properties"
+      "migration/steps/CP-3B-commons-fileupload-1.6.0.md"
+      "migration/steps/CP-3B-mybatis-3.5.19.md"
+      "migration/steps/CP-3B-log4j-over-slf4j.md"
+      "migration/steps/CP-3B-reflections-0.10.2.md"
+      "runtime/phase3/java17-wildfly26/war-libraries.txt"
+      "scripts/build-cp-3b.sh"
+      "scripts/qualify-cp-3b-h2.sh"
+      "scripts/qualify-cp-3b-oracle.sh"
+      "scripts/smoke-cp-3b-datasource.sh"
+      "scripts/validate-cp-3b.sh"
     )
   fi
 

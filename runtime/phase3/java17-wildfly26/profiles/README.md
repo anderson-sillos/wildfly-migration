@@ -10,3 +10,8 @@ Os dois perfis publicam o mesmo pool `MigrationDS` no JNDI
 
 O H2 não abre console, listener TCP ou arquivo persistente. Nenhum driver pode
 ser empacotado em `WEB-INF/lib`.
+
+Os dois perfis também configuram a mesma categoria
+`br.com.asillos.migration`, o formatter `MIGRATION_PATTERN` e o campo MDC
+`correlationId`. Assim, o comportamento de logging não depende de um
+`log4j.properties` dentro do WAR.

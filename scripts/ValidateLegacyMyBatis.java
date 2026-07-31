@@ -1,8 +1,11 @@
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.util.Arrays;
@@ -24,6 +27,10 @@ import br.com.asillos.migration.persistence.TransactionWork;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
 import org.apache.ibatis.mapping.Environment;
+import org.apache.ibatis.reflection.DefaultReflectorFactory;
+import org.apache.ibatis.reflection.MetaClass;
+import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -33,13 +40,22 @@ import org.apache.ibatis.type.JdbcType;
 import org.h2.tools.RunScript;
 
 public final class ValidateLegacyMyBatis {
+    private static final String MYBATIS_VERSION = "3.5.19";
+
     private ValidateLegacyMyBatis() {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
+        if (args.length != 1 && args.length != 4) {
             throw new IllegalArgumentException(
-                    "uso: ValidateLegacyMyBatis <raiz-do-repositorio>");
+                    "uso: ValidateLegacyMyBatis <raiz-do-repositorio> "
+                    + "[<resultado> <commit> <sha256-war>]");
+        }
+        if (args.length == 4) {
+            require(args[2].matches("[0-9a-f]{7,40}"),
+                    "commit inválido");
+            require(args[3].matches("[0-9a-f]{64}"),
+                    "SHA-256 do WAR inválido");
         }
 
         File repository = new File(args[0]);
@@ -48,7 +64,9 @@ public final class ValidateLegacyMyBatis {
                 "jdbc:h2:mem:cp1e_mybatis;MODE=Oracle;DB_CLOSE_DELAY=-1",
                 "sa",
                 "");
+        validateRuntimeVersion();
         validatePackagedConfiguration();
+        validateReflection();
         runScript(dataSource.getConnection(), file(
                 repository,
                 "app/src/main/resources/db/h2/001_schema.sql"));
@@ -67,8 +85,19 @@ public final class ValidateLegacyMyBatis {
                     "app/src/main/resources/db/h2/rollback.sql"));
         }
 
+        if (args.length == 4) {
+            writeResult(new File(args[1]), args[2], args[3]);
+        }
         System.out.println(
-                "OK: mappers, aliases, handler e transações executados no H2");
+                "OK: MyBatis 3.5.19, mappers, aliases, type handlers, "
+                + "reflexão e transações executados no H2");
+    }
+
+    private static void validateRuntimeVersion() {
+        String version = SqlSessionFactory.class.getPackage()
+                .getImplementationVersion();
+        require(MYBATIS_VERSION.equals(version),
+                "versão efetiva do MyBatis diverge: " + version);
     }
 
     private static void validatePackagedConfiguration() throws Exception {
@@ -108,6 +137,24 @@ public final class ValidateLegacyMyBatis {
         require(configuration.hasStatement(
                 "br.com.asillos.migration.persistence.AnexoMapper.buscarPorId"),
                 "mapper de anexo não foi carregado");
+    }
+
+    private static void validateReflection() {
+        MetaClass metaClass = MetaClass.forClass(
+                Pedido.class, new DefaultReflectorFactory());
+        require(metaClass.hasGetter("numero")
+                && metaClass.hasSetter("numero"),
+                "reflexão não reconheceu a propriedade numero");
+        require(String.class.equals(metaClass.getGetterType("numero"))
+                && String.class.equals(metaClass.getSetterType("numero")),
+                "reflexão inferiu tipo divergente para numero");
+
+        Pedido pedido = new Pedido();
+        MetaObject metaObject = SystemMetaObject.forObject(pedido);
+        metaObject.setValue("numero", "LAB-REFLECTION");
+        require("LAB-REFLECTION".equals(metaObject.getValue("numero"))
+                && "LAB-REFLECTION".equals(pedido.getNumero()),
+                "reflexão não preservou leitura e escrita da propriedade");
     }
 
     private static SqlSessionFactory buildFactory(
@@ -268,6 +315,41 @@ public final class ValidateLegacyMyBatis {
         File result = new File(repository, relativePath);
         require(result.isFile(), "arquivo ausente: " + relativePath);
         return result;
+    }
+
+    private static void writeResult(
+            File file, String commit, String warSha256) throws Exception {
+        File parent = file.getAbsoluteFile().getParentFile();
+        require(parent != null
+                && (parent.isDirectory() || parent.mkdirs()),
+                "diretório do resultado não pôde ser criado");
+        Writer writer = new OutputStreamWriter(
+                new FileOutputStream(file), "UTF-8");
+        try {
+            writer.write("{\n");
+            writer.write("  \"schema\": "
+                    + "\"wildfly-migration-mybatis-compatibility/v1\",\n");
+            writer.write("  \"qualification\": \"portable-ci\",\n");
+            writer.write("  \"profile\": \"ci-h2\",\n");
+            writer.write("  \"sourceCommit\": \"" + commit + "\",\n");
+            writer.write("  \"warSha256\": \"" + warSha256 + "\",\n");
+            writer.write("  \"runtime\": "
+                    + "\"java17-wildfly26.1.3-ee8\",\n");
+            writer.write("  \"database\": \"h2-2.4.240-memory\",\n");
+            writer.write("  \"mybatisVersion\": \""
+                    + MYBATIS_VERSION + "\",\n");
+            writer.write("  \"checks\": {\n");
+            writer.write("    \"mappers\": \"passed\",\n");
+            writer.write("    \"aliases\": \"passed\",\n");
+            writer.write("    \"typeHandlers\": \"passed\",\n");
+            writer.write("    \"reflection\": \"passed\",\n");
+            writer.write("    \"mybatisCommit\": \"passed\",\n");
+            writer.write("    \"mybatisRollback\": \"passed\"\n");
+            writer.write("  }\n");
+            writer.write("}\n");
+        } finally {
+            writer.close();
+        }
     }
 
     private static void require(boolean condition, String message) {

@@ -1,0 +1,19 @@
+{
+  "schema": "wildfly-migration-upload-compatibility/v1",
+  "qualification": "portable-ci",
+  "profile": "ci-h2",
+  "sourceCommit": "64b5962e23a7d5dcb740c3a8d50a6ac172c8878f",
+  "warSha256": "b199837b374d44cc84df1dcadbdfdf3ff53351201305c70828b9b2cc602fa3ff",
+  "runtime": "java17-wildfly26.1.3",
+  "fileUploadVersion": "1.6.0",
+  "commonsIoVersion": "2.19.0",
+  "apiNamespace": "javax.servlet",
+  "checks": {
+    "validUpload": "passed",
+    "normalizedFilename": "passed",
+    "metadataRoundTrip": "passed",
+    "fileSizeLimit": "passed",
+    "requestSizeLimit": "passed",
+    "temporaryCleanup": "passed"
+  }
+}

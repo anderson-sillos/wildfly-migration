@@ -156,6 +156,12 @@ aceitação do modo leve: ela deve executar a seleção e
 `repository-baseline`, sem restaurar caches, montar runtime, compilar,
 iniciar WildFly ou publicar artefato.
 
+Esta auditoria é uma comprovação de aceitação, não uma rotina por atividade.
+Depois de comprovado o comportamento remoto, os próximos PRs acompanham
+somente seus checks obrigatórios. O histórico de runs e caches só volta a ser
+auditado se houver falha, comportamento inesperado ou alteração no workflow e
+na estratégia de cache.
+
 ## Reutilização dos caches
 
 As chaves de cache identificam o conteúdo reutilizável, não a atividade ou o

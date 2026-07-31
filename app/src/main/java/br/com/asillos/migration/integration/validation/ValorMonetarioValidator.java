@@ -7,6 +7,7 @@ import br.com.asillos.migration.domain.Pedido;
 /**
  * Confirma a semântica monetária comum ao XSD e aos dois bancos.
  */
+@Validator
 public final class ValorMonetarioValidator
         implements PedidoImportValidator {
     @Override

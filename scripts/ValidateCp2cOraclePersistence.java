@@ -25,6 +25,10 @@ import br.com.asillos.migration.persistence.TransactionWork;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
 import org.apache.ibatis.mapping.Environment;
+import org.apache.ibatis.reflection.DefaultReflectorFactory;
+import org.apache.ibatis.reflection.MetaClass;
+import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -35,6 +39,7 @@ import org.apache.ibatis.type.JdbcType;
 public final class ValidateCp2cOraclePersistence {
     private static final String DATABASE_VERSION = "19.3.0.0.0";
     private static final String DRIVER_VERSION = "12.1.0.2.0";
+    private static final String MYBATIS_VERSION = "3.5.19";
 
     private ValidateCp2cOraclePersistence() {
     }
@@ -87,6 +92,8 @@ public final class ValidateCp2cOraclePersistence {
         try {
             SqlSessionFactory sessionFactory =
                     buildFactory(dataSource);
+            validateConfiguration(sessionFactory.getConfiguration());
+            validateReflection();
             Pedido created = validateCommitAndTimestamps(
                     sessionFactory, committedNumber);
             validateBlob(sessionFactory, created.getId());
@@ -99,6 +106,51 @@ public final class ValidateCp2cOraclePersistence {
         System.out.println(
                 "OK: Oracle 19c qualificou MyBatis, rollback, "
                 + "TIMESTAMP(6) e BLOB; dados transitórios removidos");
+    }
+
+    private static void validateConfiguration(Configuration configuration) {
+        String version = SqlSessionFactory.class.getPackage()
+                .getImplementationVersion();
+        require(MYBATIS_VERSION.equals(version),
+                "versão efetiva do MyBatis diverge: " + version);
+        require(Pedido.class.equals(
+                configuration.getTypeAliasRegistry().resolveAlias("pedido")),
+                "alias pedido não foi carregado");
+        require(Anexo.class.equals(
+                configuration.getTypeAliasRegistry().resolveAlias("anexo")),
+                "alias anexo não foi carregado");
+        require(configuration.getTypeHandlerRegistry()
+                .getTypeHandler(StatusPedido.class)
+                instanceof StatusPedidoTypeHandler,
+                "handler de StatusPedido não foi carregado");
+        require(configuration.getTypeHandlerRegistry()
+                .getTypeHandler(String.class, JdbcType.CHAR)
+                instanceof Sha256TypeHandler,
+                "handler de SHA-256 não foi carregado");
+        require(configuration.hasStatement(
+                "br.com.asillos.migration.persistence.PedidoMapper.listar"),
+                "mapper de pedido não foi carregado");
+        require(configuration.hasStatement(
+                "br.com.asillos.migration.persistence.AnexoMapper.buscarPorId"),
+                "mapper de anexo não foi carregado");
+    }
+
+    private static void validateReflection() {
+        MetaClass metaClass = MetaClass.forClass(
+                Pedido.class, new DefaultReflectorFactory());
+        require(metaClass.hasGetter("numero")
+                && metaClass.hasSetter("numero"),
+                "reflexão não reconheceu a propriedade numero");
+        require(String.class.equals(metaClass.getGetterType("numero"))
+                && String.class.equals(metaClass.getSetterType("numero")),
+                "reflexão inferiu tipo divergente para numero");
+
+        Pedido pedido = new Pedido();
+        MetaObject metaObject = SystemMetaObject.forObject(pedido);
+        metaObject.setValue("numero", "LAB-REFLECTION");
+        require("LAB-REFLECTION".equals(metaObject.getValue("numero"))
+                && "LAB-REFLECTION".equals(pedido.getNumero()),
+                "reflexão não preservou leitura e escrita da propriedade");
     }
 
     private static void verifyRuntime(UnpooledDataSource dataSource)
@@ -341,7 +393,13 @@ public final class ValidateCp2cOraclePersistence {
                     + DATABASE_VERSION + "\",\n");
             writer.write("  \"jdbcDriver\": \"ojdbc7-"
                     + DRIVER_VERSION + "\",\n");
+            writer.write("  \"mybatisVersion\": \""
+                    + MYBATIS_VERSION + "\",\n");
             writer.write("  \"checks\": {\n");
+            writer.write("    \"mappers\": \"passed\",\n");
+            writer.write("    \"aliases\": \"passed\",\n");
+            writer.write("    \"typeHandlers\": \"passed\",\n");
+            writer.write("    \"reflection\": \"passed\",\n");
             writer.write("    \"mybatisCommit\": \"passed\",\n");
             writer.write("    \"mybatisRollback\": \"passed\",\n");
             writer.write("    \"timestampRoundTrip\": \"passed\",\n");
