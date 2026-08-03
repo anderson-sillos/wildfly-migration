@@ -438,7 +438,17 @@ check_required_files() {
   if rank_at_least CP-3D; then
     required+=(
       "docs/cp-3d-java17-gate.md"
+      "docs/cp-3d-reproduction.md"
+      "docs/evidence/CP-3D.md"
       "migration/steps/CP-3D-tiles-tld-exception.md"
+      "migration/evidence/CP-3D/portable-ci.json"
+      "migration/evidence/CP-3D/oracle-qualified.json"
+      "migration/evidence/CP-3D/manifest.properties"
+      "migration/evidence/CP-3D/closure.properties"
+      "migration/evidence/CP-3D/rollback.properties"
+      "scripts/qualify-cp-3d-h2.sh"
+      "scripts/qualify-cp-3d-oracle.sh"
+      "scripts/validate-cp-3d.sh"
       "scripts/validate-cp-3d-tiles-tld.sh"
     )
   fi

@@ -60,6 +60,10 @@ passos.
     dependências, H2, Oracle e rollback do checkpoint.
 27. [Gate Java 17 do CP-3D](cp-3d-java17-gate.md): exceção temporária de Tiles
     2.1.4 e TLD `javax`, limites, validação e substituição planejada.
+28. [Reprodução do gate CP-3D](cp-3d-reproduction.md): build isolado, contratos
+    H2/Oracle, comparação com o baseline e rollback.
+29. [Evidência CP-3D](evidence/CP-3D.md): qualificação final Java 17/WildFly 26,
+    manifesto, exceções adiadas e decisão de integração.
 
 ## Aplicação e arquitetura
 
@@ -76,6 +80,8 @@ passos.
 - [APIs XML do Java 17 no CP-3C](cp-3c-java-xml-apis.md);
 - [Oracle JDBC 17 do CP-3C](cp-3c-ojdbc17.md);
 - [Gate Java 17 do CP-3D](cp-3d-java17-gate.md);
+- [Reprodução do gate CP-3D](cp-3d-reproduction.md);
+- [Evidência CP-3D](evidence/CP-3D.md);
 - [persistência MyBatis](mybatis-persistence.md);
 - [upload legado e metadados comparáveis](legacy-upload.md);
 - [importação XML legada](legacy-xml-import.md);

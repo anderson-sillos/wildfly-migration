@@ -62,6 +62,9 @@ shell_files=(
   scripts/qualify-cp-3b-oracle.sh
   scripts/smoke-cp-3b-datasource.sh
   scripts/validate-cp-3b.sh
+  scripts/qualify-cp-3d-h2.sh
+  scripts/qualify-cp-3d-oracle.sh
+  scripts/validate-cp-3d.sh
   scripts/validate-cp-3d-tiles-tld.sh
   contract-tests/run.sh
 )
@@ -115,5 +118,7 @@ run_step "Validar atualização do MyBatis no CP-3B" \
   ./scripts/validate-cp-3b.sh
 run_step "Validar exceção Tiles/TLD do CP-3D" \
   ./scripts/validate-cp-3d-tiles-tld.sh
+run_step "Validar gate Java 17 do CP-3D" \
+  ./scripts/validate-cp-3d.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'

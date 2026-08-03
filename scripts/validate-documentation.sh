@@ -21,6 +21,8 @@ required_paths=(
   "docs/cp-3c-java-xml-apis.md"
   "docs/cp-3c-ojdbc17.md"
   "docs/evidence/CP-3C.md"
+  "docs/cp-3d-reproduction.md"
+  "docs/evidence/CP-3D.md"
   "docs/evidence/CP-3B.md"
   "docs/evidence/CP-1F.md"
   "docs/environment-setup.md"
@@ -60,6 +62,14 @@ required_paths=(
   "scripts/ValidateJavaXmlModule.java"
   "docs/cp-3d-java17-gate.md"
   "migration/steps/CP-3D-tiles-tld-exception.md"
+  "migration/evidence/CP-3D/portable-ci.json"
+  "migration/evidence/CP-3D/oracle-qualified.json"
+  "migration/evidence/CP-3D/manifest.properties"
+  "migration/evidence/CP-3D/closure.properties"
+  "migration/evidence/CP-3D/rollback.properties"
+  "scripts/qualify-cp-3d-h2.sh"
+  "scripts/qualify-cp-3d-oracle.sh"
+  "scripts/validate-cp-3d.sh"
   "scripts/validate-cp-3d-tiles-tld.sh"
 )
 
@@ -81,6 +91,20 @@ for marker in \
       "$REPOSITORY_ROOT/docs/cp-3d-java17-gate.md" \
       "$REPOSITORY_ROOT/migration/steps/CP-3D-tiles-tld-exception.md"; then
     printf 'FALHA: documentação CP-3D/Tiles/TLD não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  '14/14' \
+  'portable-ci' \
+  'oracle-qualified' \
+  'ojdbc17-23.26.2.0.0' \
+  'baseline' \
+  'rollback' \
+  'sem criar fase ou tag pública'; do
+  if ! grep -Fqi -- "$marker" "$REPOSITORY_ROOT/docs/evidence/CP-3D.md"; then
+    printf 'FALHA: fechamento CP-3D não contém: %s\n' "$marker" >&2
     exit 1
   fi
 done
