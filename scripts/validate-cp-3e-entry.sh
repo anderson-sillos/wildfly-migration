@@ -7,10 +7,11 @@ RESULT="$ROOT/migration/evidence/CP-3E/unchanged-war.json"
 LOG="$ROOT/migration/evidence/CP-3E/unchanged-war-server.txt"
 BUILD_RESULT="$ROOT/migration/evidence/CP-3E/jakarta-build.json"
 BUILD_OUTPUT="$ROOT/migration/evidence/CP-3E/jakarta-build.txt"
+CLOSURE="$ROOT/migration/evidence/CP-3E/closure.properties"
 OBSERVATIONS="$ROOT/migration/evidence/CP-3E/compatibility-observations.tsv"
 MANIFEST="$ROOT/runtime/phase3/java21-wildfly41/runtime-manifest.tsv"
 
-for file in "$RESULT" "$LOG" "$BUILD_RESULT" "$BUILD_OUTPUT" "$OBSERVATIONS" "$MANIFEST"; do
+for file in "$RESULT" "$LOG" "$BUILD_RESULT" "$BUILD_OUTPUT" "$CLOSURE" "$OBSERVATIONS" "$MANIFEST"; do
   [[ -f "$file" ]] || { printf 'FALHA: evidência CP-3E ausente: %s\n' "$file" >&2; exit 1; }
 done
 
@@ -26,6 +27,10 @@ grep -Fq '"profile": "cp-3e-jakarta11"' "$BUILD_RESULT"
 grep -Fq '"api": "jakarta.platform:jakarta.jakartaee-web-api:11.0.0"' "$BUILD_RESULT"
 grep -Fq '"expectedBeforeCp3f": true' "$BUILD_RESULT"
 grep -Fq 'javax.servlet' "$BUILD_OUTPUT"
+grep -Fq 'checkpoint=CP-3E' "$CLOSURE"
+grep -Fq 'entry.deployment=rejected-expected' "$CLOSURE"
+grep -Fq 'jakarta.first-build=failed-expected-before-CP-3F' "$CLOSURE"
+grep -Fq 'result=passed' "$CLOSURE"
 grep -Fq $'area\tobserved-on-entry\tseverity\tstatus\tdecision\trecord' "$OBSERVATIONS"
 grep -Fq $'namespace\tjavax.servlet.http.HttpServlet' "$OBSERVATIONS"
 grep -Fq $'datasource\tA tentativa de entrada' "$OBSERVATIONS"

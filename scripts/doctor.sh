@@ -462,6 +462,7 @@ check_required_files() {
       "migration/evidence/CP-3E/unchanged-war-server.txt"
       "migration/evidence/CP-3E/jakarta-build.json"
       "migration/evidence/CP-3E/jakarta-build.txt"
+      "migration/evidence/CP-3E/closure.properties"
       "migration/steps/CP-3E-wildfly41-entry.md"
       "runtime/phase3/java21-wildfly41/README.md"
       "runtime/phase3/java21-wildfly41/runtime-manifest.tsv"

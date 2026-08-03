@@ -58,3 +58,12 @@ O rollback do diagnóstico retorna ao estado verde do CP-3D e não altera banco
 ou histórico. Depois da troca da API `provided`, o teste de entrada deixa de
 ser um critério verde; a validação passa a ser a compilação Jakarta e os
 contratos do CP-3F.
+
+## Conclusão do checkpoint
+
+O CP-3E está aprovado como gate de entrada: o runtime foi provisionado e
+iniciado, a incompatibilidade natural foi reproduzida e o primeiro build com
+Jakarta EE 11 foi registrado como falha esperada antes do CP-3F. O estado
+executável continua sendo o CP-3D até a migração dos namespaces. A decisão,
+checksum, rollback e assunto de integração estão em
+[`closure.properties`](../../migration/evidence/CP-3E/closure.properties).
