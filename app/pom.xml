@@ -246,6 +246,14 @@
     </profile>
     <profile>
       <id>cp-3e-jakarta11</id>
+      <!--
+        O JDT usa o JDK selecionado no workspace para importar os profiles.
+        A ativação por JDK 21 mantém Jakarta ativo no editor sem alterar os
+        gates históricos executados com Java 17.
+      -->
+      <activation>
+        <jdk>[21,22)</jdk>
+      </activation>
       <properties>
         <jakarta.ee.web.api.version>11.0.0</jakarta.ee.web.api.version>
         <maven.compiler.source>21</maven.compiler.source>

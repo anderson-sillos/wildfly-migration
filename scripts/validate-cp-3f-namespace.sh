@@ -61,6 +61,16 @@ grep -Fq 'jakarta.servlet.jsp.tagext.SimpleTagSupport' \
   "$ROOT/app/src/main/java/br/com/asillos/migration/web/tag/StatusPedidoTag.java" ||
   fail "handler da tag não usa Jakarta JSP"
 
+grep -Fq '<jdk>[21,22)</jdk>' "$ROOT/app/pom.xml" ||
+  fail "profile Jakarta não é ativado automaticamente no JDK 21"
+grep -Fq '"name": "JavaSE-21"' "$ROOT/.vscode/settings.json" ||
+  fail "JDT não está configurado com JavaSE-21"
+grep -Fq '"java.jdt.ls.java.home": "/opt/migration-lab/tools/jdk-21.0.12+8"' \
+  "$ROOT/.vscode/settings.json" ||
+  fail "JDT não aponta para o Temurin 21 do laboratório"
+grep -Fq -- '--ide-rebuild' "$ROOT/scripts/build-cp-3f-jakarta.sh" ||
+  fail "build do JDT não possui modo para target/generated-sources"
+
 for uri in jakarta.tags.core jakarta.tags.fmt; do
   grep -R -Fq "uri=\"$uri\"" "$ROOT/app/src/main/webapp" ||
     fail "URI JSTL ausente: $uri"

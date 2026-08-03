@@ -46,5 +46,18 @@ este gate e a substituição do layout.
 O resultado do build e o registro do TLD ficam em
 [`migration/evidence/CP-3F`](../migration/evidence/CP-3F/).
 
+## JDT no VS Code
+
+O workspace usa Temurin 21 como JDK padrão do JDT. O profile
+`cp-3e-jakarta11` também é ativado automaticamente quando o Maven é importado
+com Java 21; os gates históricos continuam usando Java 17 e seus profiles
+explícitos.
+
+Para regenerar os tipos XMLBeans no diretório que o JDT acompanha, execute a
+task **Build: limpar bytecode e reconstruir (Java 21/Jakarta/H2)**. Ela usa
+`--ide-rebuild` e grava em `app/target/generated-sources`. Depois execute
+`Java: Clean Java Language Server Workspace` e recarregue a janela do VS Code.
+Não edite os arquivos gerados e não inclua `app/target` no Git.
+
 Rollback: retornar ao commit integrado do CP-3E e ao perfil
 `cp-3e-jakarta11`/WAR aprovado anteriormente, sem alterar dados do Oracle.

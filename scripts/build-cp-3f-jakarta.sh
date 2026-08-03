@@ -6,14 +6,16 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ENV_FILE="$ROOT/.env"
 RESULT_FILE="$ROOT/migration/evidence/CP-3F/jakarta-build.json"
 OUTPUT_FILE="$ROOT/migration/evidence/CP-3F/jakarta-build.txt"
+IDE_REBUILD=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --env) ENV_FILE="$2"; shift 2 ;;
     --result) RESULT_FILE="$2"; shift 2 ;;
     --output) OUTPUT_FILE="$2"; shift 2 ;;
+    --ide-rebuild) IDE_REBUILD=true; shift ;;
     -h|--help)
-      printf '%s\n' 'Uso: ./scripts/build-cp-3f-jakarta.sh [--env ARQUIVO] [--result ARQUIVO] [--output ARQUIVO]'
+      printf '%s\n' 'Uso: ./scripts/build-cp-3f-jakarta.sh [--env ARQUIVO] [--result ARQUIVO] [--output ARQUIVO] [--ide-rebuild]'
       exit 0
       ;;
     *) printf 'FALHA: argumento desconhecido: %s\n' "$1" >&2; exit 2 ;;
@@ -47,7 +49,13 @@ cleanup() {
 }
 trap cleanup EXIT
 
-BUILD_DIRECTORY="$ROOT/app/target/cp3f-jakarta11"
+if [[ "$IDE_REBUILD" == "true" ]]; then
+  # O JDT importa o POM no diretório Maven padrão e espera os tipos gerados
+  # em app/target/generated-sources. O CI continua isolado em cp3f-jakarta11.
+  BUILD_DIRECTORY="$ROOT/app/target"
+else
+  BUILD_DIRECTORY="$ROOT/app/target/cp3f-jakarta11"
+fi
 set +e
 JAVA_HOME="$JAVA_HOME_VALUE" \
 PATH="$JAVA_HOME_VALUE/bin:$PATH" \
