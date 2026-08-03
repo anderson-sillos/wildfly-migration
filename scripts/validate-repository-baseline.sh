@@ -66,6 +66,9 @@ shell_files=(
   scripts/qualify-cp-3d-oracle.sh
   scripts/validate-cp-3d.sh
   scripts/validate-cp-3d-tiles-tld.sh
+  scripts/diagnose-cp-3e-unchanged.sh
+  scripts/build-cp-3e-jakarta.sh
+  scripts/validate-cp-3e-entry.sh
   contract-tests/run.sh
 )
 
@@ -120,5 +123,7 @@ run_step "Validar exceção Tiles/TLD do CP-3D" \
   ./scripts/validate-cp-3d-tiles-tld.sh
 run_step "Validar gate Java 17 do CP-3D" \
   ./scripts/validate-cp-3d.sh
+run_step "Validar entrada do CP-3E no WildFly 41" \
+  ./scripts/validate-cp-3e-entry.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'

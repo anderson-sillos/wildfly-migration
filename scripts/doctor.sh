@@ -453,6 +453,25 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-3E; then
+    required+=(
+      "docs/cp-3e-entry.md"
+      "docs/evidence/CP-3E.md"
+      "migration/evidence/CP-3E/compatibility-observations.tsv"
+      "migration/evidence/CP-3E/unchanged-war.json"
+      "migration/evidence/CP-3E/unchanged-war-server.txt"
+      "migration/evidence/CP-3E/jakarta-build.json"
+      "migration/evidence/CP-3E/jakarta-build.txt"
+      "migration/evidence/CP-3E/closure.properties"
+      "migration/steps/CP-3E-wildfly41-entry.md"
+      "runtime/phase3/java21-wildfly41/README.md"
+      "runtime/phase3/java21-wildfly41/runtime-manifest.tsv"
+      "scripts/diagnose-cp-3e-unchanged.sh"
+      "scripts/build-cp-3e-jakarta.sh"
+      "scripts/validate-cp-3e-entry.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"
@@ -1122,6 +1141,9 @@ check_wildfly() {
     )"
     if [[ -n "$manifest" ]] && grep -Fq "$expected_version" "$manifest"; then
       pass "$label: versão $expected_version detectada no manifesto"
+    elif [[ -f "$wildfly_home/version.txt" ]] &&
+         grep -Fq "$expected_version" "$wildfly_home/version.txt"; then
+      pass "$label: versão $expected_version detectada em version.txt"
     else
       fail "$label: não foi possível confirmar a versão $expected_version"
     fi

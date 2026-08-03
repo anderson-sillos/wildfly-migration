@@ -1,0 +1,12 @@
+{
+  "schema": "wildfly-migration-cp3e-jakarta-build/v1",
+  "checkpoint": "CP-3E",
+  "profile": "cp-3e-jakarta11",
+  "runtime": "Temurin 21.0.12+8/Maven 3.9.16",
+  "api": "jakarta.platform:jakarta.jakartaee-web-api:11.0.0",
+  "buildOutcome": "failed",
+  "exitCode": 1,
+  "compilationErrorBlocks": 1,
+  "namespaceDiagnostics": 62,
+  "expectedBeforeCp3f": true
+}

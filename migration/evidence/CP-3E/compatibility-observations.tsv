@@ -1,0 +1,9 @@
+area	observed-on-entry	severity	status	decision	record
+java	bytecode Java 17 foi carregado pela JVM Temurin 21.0.12+8; o servidor iniciou	informational	observed	manter Java 21 como gate e separar falhas de plataforma	unchanged-war-server.txt
+server	WildFly Community 41.0.0.Final iniciou em loopback e rollbackou o deploy	blocking	observed	prosseguir somente após migração Jakarta	unchanged-war-server.txt
+namespace	javax.servlet.http.HttpServlet e javax.servlet.Filter não estão disponíveis no módulo WAR	blocking	observed	substituir APIs EE 8 pelo Web Profile Jakarta EE 11 e migrar imports no CP-3F	INC-015
+datasource	A tentativa de entrada não provisiona MigrationDS; nenhuma conclusão de compatibilidade de banco foi inferida	pending	deferred	provisionar H2/Oracle no gate de persistência, sem mascarar a falha de namespace	CP-3E scope
+security	O perfil padrão do WildFly emite avisos de keystore HTTPS auto-gerado; a aplicação usa somente HTTP de loopback	non-blocking	observed	remover listener HTTPS apenas na configuração isolada do laboratório	INC-009
+logging	O subsistema de logging do servidor iniciou; não houve diagnóstico separado antes da falha de linkage	pending	deferred	revalidar logging depois do namespace Jakarta e remover a ponte no CP-3G	CP-3E scope
+jsp-tld	Tiles e handlers do TLD falham ao resolver javax.servlet.jsp.tagext.TryCatchFinally	blocking	observed	capturar TLD histórico no CP-3F e substituir Tiles no CP-3G	INC-015
+classloader	ModuleClassLoader carregou o WAR e reportou classes javax ausentes	blocking	observed	preservar o teste de classloader após a migração para jakarta.*	INC-015

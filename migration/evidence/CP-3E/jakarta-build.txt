@@ -1,0 +1,517 @@
+[INFO] Scanning for projects...
+[INFO]
+[INFO] -----------< br.com.asillos.migration:wildfly-migration-lab >-----------
+[INFO] Building WildFly Migration Lab — Java 17 and Jakarta EE 8 on WildFly 26 1.0.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ war ]---------------------------------
+[INFO]
+[INFO] --- clean:3.2.0:clean (default-clean) @ wildfly-migration-lab ---
+[INFO] Deleting <repository>/app/target/cp3e-jakarta11
+[INFO]
+[INFO] --- enforcer:3.0.0-M3:enforce (enforce-java17-toolchain) @ wildfly-migration-lab ---
+[INFO]
+[INFO] >>> xmlbeans.plugin:5.3.0:compile (generate-pedido-xml-types) > generate-sources @ wildfly-migration-lab >>>
+[INFO]
+[INFO] --- enforcer:3.0.0-M3:enforce (enforce-java17-toolchain) @ wildfly-migration-lab ---
+[INFO]
+[INFO] <<< xmlbeans.plugin:5.3.0:compile (generate-pedido-xml-types) < generate-sources @ wildfly-migration-lab <<<
+[INFO]
+[INFO]
+[INFO] --- xmlbeans.plugin:5.3.0:compile (generate-pedido-xml-types) @ wildfly-migration-lab ---
+SchemaCompiler  Metadata LOAD:org/apache/xmlbeans/metadata GEN:br/com/asillos/migration/metadata
+2026-08-03T20:57:41.922387319Z main ERROR Log4j API could not find a logging provider.
+Time to build schema type system: 0.246 seconds
+Time to generate code: 0.019 seconds
+[INFO]
+[INFO] --- resources:3.4.0:resources (default-resources) @ wildfly-migration-lab ---
+[INFO] Copying 12 resources from src/main/resources to target/cp3e-jakarta11/classes
+[INFO] Copying 25 resources from target/cp3e-jakarta11/generated-resources to target/cp3e-jakarta11/classes
+[INFO]
+[INFO] --- compiler:3.8.1:compile (default-compile) @ wildfly-migration-lab ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 48 source files to <repository>/app/target/cp3e-jakarta11/classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR :
+[INFO] -------------------------------------------------------------
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[10,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[11,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[12,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[13,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[14,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[31,45] cannot find symbol
+  symbol: class HttpServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[52,31] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[64,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[65,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[65,50] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[75,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[76,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[76,50] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[172,34] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[252,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[253,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[255,36] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[267,32] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/tag/StatusPedidoTag.java:[5,25] package javax.servlet.jsp does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/tag/StatusPedidoTag.java:[6,32] package javax.servlet.jsp.tagext does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/tag/StatusPedidoTag.java:[13,44] cannot find symbol
+  symbol: class SimpleTagSupport
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/tag/StatusPedidoTag.java:[21,32] cannot find symbol
+  symbol:   class JspException
+  location: class br.com.asillos.migration.web.tag.StatusPedidoTag
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[7,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[8,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[9,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[10,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[11,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[21,42] cannot find symbol
+  symbol: class HttpServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[38,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[39,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[39,63] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[58,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[59,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[59,63] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[73,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[74,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[74,50] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[86,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[87,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[87,50] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[93,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[94,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[94,50] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[136,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[137,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[137,50] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[171,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[172,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[174,36] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[183,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[184,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[186,20] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[196,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[197,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[199,36] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[207,35] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[213,32] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[224,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[225,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[226,33] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/ApplicationResources.java:[3,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/ApplicationResources.java:[22,53] cannot find symbol
+  symbol:   class ServletContext
+  location: class br.com.asillos.migration.web.ApplicationResources
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/ApplicationResources.java:[31,51] cannot find symbol
+  symbol:   class ServletContext
+  location: class br.com.asillos.migration.web.ApplicationResources
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[8,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[9,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[10,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[11,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[12,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[26,42] cannot find symbol
+  symbol: class HttpServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[41,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[42,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[42,50] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[53,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[54,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[54,50] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[168,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[169,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[171,36] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[183,32] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[5,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[6,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[7,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[8,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[13,46] cannot find symbol
+  symbol: class HttpServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[18,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.PreferenceServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[19,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.PreferenceServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[30,13] cannot find symbol
+  symbol:   class HttpServletRequest
+  location: class br.com.asillos.migration.web.PreferenceServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[31,13] cannot find symbol
+  symbol:   class HttpServletResponse
+  location: class br.com.asillos.migration.web.PreferenceServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[31,63] cannot find symbol
+  symbol:   class ServletException
+  location: class br.com.asillos.migration.web.PreferenceServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/SessionPreferences.java:[3,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/SessionPreferences.java:[16,30] cannot find symbol
+  symbol:   class HttpSession
+  location: class br.com.asillos.migration.web.SessionPreferences
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/SessionPreferences.java:[23,30] cannot find symbol
+  symbol:   class HttpSession
+  location: class br.com.asillos.migration.web.SessionPreferences
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[7,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[8,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[9,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[10,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[11,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[12,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[13,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[14,26] package javax.servlet.http does not exist
+[INFO] 100 errors
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.282 s
+[INFO] Finished at: 2026-08-03T17:57:43-03:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.8.1:compile (default-compile) on project wildfly-migration-lab: Compilation failure: Compilation failure:
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[10,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[11,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[12,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[13,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[14,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[31,45] cannot find symbol
+[ERROR]   symbol: class HttpServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[52,31] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[64,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[65,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[65,50] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[75,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[76,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[76,50] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[172,34] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[252,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[253,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[255,36] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java:[267,32] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.XmlImportServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/tag/StatusPedidoTag.java:[5,25] package javax.servlet.jsp does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/tag/StatusPedidoTag.java:[6,32] package javax.servlet.jsp.tagext does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/tag/StatusPedidoTag.java:[13,44] cannot find symbol
+[ERROR]   symbol: class SimpleTagSupport
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/tag/StatusPedidoTag.java:[21,32] cannot find symbol
+[ERROR]   symbol:   class JspException
+[ERROR]   location: class br.com.asillos.migration.web.tag.StatusPedidoTag
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[7,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[8,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[9,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[10,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[11,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[21,42] cannot find symbol
+[ERROR]   symbol: class HttpServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[38,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[39,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[39,63] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[58,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[59,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[59,63] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[73,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[74,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[74,50] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[86,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[87,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[87,50] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[93,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[94,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[94,50] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[136,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[137,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[137,50] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[171,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[172,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[174,36] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[183,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[184,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[186,20] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[196,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[197,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[199,36] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[207,35] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[213,32] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[224,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[225,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PedidoServlet.java:[226,33] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.PedidoServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/ApplicationResources.java:[3,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/ApplicationResources.java:[22,53] cannot find symbol
+[ERROR]   symbol:   class ServletContext
+[ERROR]   location: class br.com.asillos.migration.web.ApplicationResources
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/ApplicationResources.java:[31,51] cannot find symbol
+[ERROR]   symbol:   class ServletContext
+[ERROR]   location: class br.com.asillos.migration.web.ApplicationResources
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[8,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[9,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[10,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[11,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[12,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[26,42] cannot find symbol
+[ERROR]   symbol: class HttpServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[41,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[42,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[42,50] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[53,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[54,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[54,50] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[168,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[169,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[171,36] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java:[183,32] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.UploadServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[5,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[6,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[7,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[8,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[13,46] cannot find symbol
+[ERROR]   symbol: class HttpServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[18,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.PreferenceServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[19,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.PreferenceServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[30,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletRequest
+[ERROR]   location: class br.com.asillos.migration.web.PreferenceServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[31,13] cannot find symbol
+[ERROR]   symbol:   class HttpServletResponse
+[ERROR]   location: class br.com.asillos.migration.web.PreferenceServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/PreferenceServlet.java:[31,63] cannot find symbol
+[ERROR]   symbol:   class ServletException
+[ERROR]   location: class br.com.asillos.migration.web.PreferenceServlet
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/SessionPreferences.java:[3,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/SessionPreferences.java:[16,30] cannot find symbol
+[ERROR]   symbol:   class HttpSession
+[ERROR]   location: class br.com.asillos.migration.web.SessionPreferences
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/SessionPreferences.java:[23,30] cannot find symbol
+[ERROR]   symbol:   class HttpSession
+[ERROR]   location: class br.com.asillos.migration.web.SessionPreferences
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[7,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[8,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[9,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[10,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[11,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[12,21] package javax.servlet does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[13,26] package javax.servlet.http does not exist
+[ERROR] <repository>/app/src/main/java/br/com/asillos/migration/web/RequestContextFilter.java:[14,26] package javax.servlet.http does not exist
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

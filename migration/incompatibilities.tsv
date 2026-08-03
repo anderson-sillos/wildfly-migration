@@ -13,3 +13,4 @@ INC-011	CP-3A	Java8-Maven-Enforcer	Temurin-17.0.20	compilation	toolchain-policy	
 INC-012	CP-3A	Bytecode-audit-major-51-52	Java17-major-61	verification	verification-harness	natural	resolved	migration/steps/CP-3A-java17-bytecode-audit.md
 INC-013	CP-3A	H2-1.4.200-check-IN	H2-2.4.240-multiple-connections	execution	portable-sql-harness	natural	resolved	migration/steps/CP-3A-h2-2-check-constraint.md
 INC-014	CP-3C	ojdbc7-Java17	ojdbc17-23.26.2.0.0	execution	dependency	natural	resolved	migration/steps/CP-3C-ojdbc17.md
+INC-015	CP-3E	CP-3D-WAR-javax	WildFly41-Jakarta-modules	deployment	namespace-classloader	natural	observed	migration/steps/CP-3E-wildfly41-entry.md

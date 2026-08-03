@@ -1,0 +1,17 @@
+{
+  "schema": "wildfly-migration-cp3e-entry/v1",
+  "checkpoint": "CP-3E",
+  "sourceCheckpoint": "CP-3D",
+  "runtime": "java21-wildfly41.0.0",
+  "java": "Temurin 21.0.12+8",
+  "wildfly": "41.0.0.Final",
+  "warSha256": "0e431a2ec85e0918cc89ed91dcec5715e7872e18b8d57441d7ae781b4a5a5d5b",
+  "deploymentCommand": "unchanged WAR; no source or descriptor transformation",
+  "deploymentCommandStatus": "rejected",
+  "deploymentStatus": "not-readable",
+  "checks": {
+    "runtimeStarted": "passed",
+    "unchangedWarAttempted": "passed",
+    "compatibilityOutcomeCaptured": "passed"
+  }
+}
