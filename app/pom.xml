@@ -34,8 +34,9 @@
 
   <dependencies>
     <!--
-      O Jakarta EE 8 ainda usa pacotes javax.*. Esta API é fornecida pelo
-      WildFly 26 e nunca deve entrar em WEB-INF/lib.
+      O perfil padrão preserva o WAR EE 8 aprovado no CP-3D. O perfil
+      cp-3e-jakarta11 substitui a API fornecida por Jakarta EE 11 sem colocar
+      APIs do servidor em WEB-INF/lib; os imports permanecem javax até o CP-3F.
     -->
     <dependency>
       <groupId>jakarta.platform</groupId>
@@ -241,6 +242,15 @@
       <properties>
         <!-- O doctor fixa Temurin 17.0.20+8 nos dois perfis do CP-3A. -->
         <java.version.range>[17,18)</java.version.range>
+      </properties>
+    </profile>
+    <profile>
+      <id>cp-3e-jakarta11</id>
+      <properties>
+        <jakarta.ee.web.api.version>11.0.0</jakarta.ee.web.api.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <java.version.range>[21,22)</java.version.range>
       </properties>
     </profile>
   </profiles>

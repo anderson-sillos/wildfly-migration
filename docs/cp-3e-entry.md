@@ -26,7 +26,9 @@ são versionados. A tentativa e o diagnóstico sanitizado estão em
 [`CP-3E`](../migration/evidence/CP-3E/unchanged-war.json) e
 [`unchanged-war-server.txt`](../migration/evidence/CP-3E/unchanged-war-server.txt).
 
-O rollback é o estado verde do CP-3D. O próximo passo é declarar
-`jakarta.platform:jakarta.jakartaee-web-api:11.0.0` em `provided` e executar o
-CP-3F para migrar imports e descritores; nenhuma API EE deve ser empacotada no
-WAR.
+O rollback é o estado verde do CP-3D. O próximo passo é ativar o perfil
+`cp-3e-jakarta11`, que declara
+`jakarta.platform:jakarta.jakartaee-web-api:11.0.0` em `provided`, e executar o
+CP-3F para migrar imports e descritores. Nenhuma API EE deve ser empacotada no
+WAR; os perfis EE 8 permanecem somente para reproduzir os checkpoints já
+aprovados.

@@ -129,7 +129,7 @@
 - [x] 3.21 Tentar implantar o WAR aprovado em `CP-3D` sem transformação no WildFly 41.0.0.Final com OpenJDK 21 antes de corrigir código ou descritores.
 - [x] 3.22 Capturar incompatibilidades de Java, servidor, namespace, datasource, segurança, logging, JSP/TLD e classloader.
 - [x] 3.23 Provisionar OpenJDK 21, WildFly 41 comunitário e uma versão H2 de teste compatível, todos com origem, licença, versão e checksum registrados.
-- [ ] 3.24 Substituir as APIs EE 8 por `jakarta.platform:jakarta.jakartaee-web-api:11.0.0` em `provided`.
+- [x] 3.24 Substituir as APIs EE 8 por `jakarta.platform:jakarta.jakartaee-web-api:11.0.0` em `provided` no perfil explícito `cp-3e-jakarta11`, preservando os perfis EE 8 somente para reproduzir os gates já aprovados.
 - [ ] 3.25 Encerrar `CP-3E`: validar o runtime, o diagnóstico e o primeiro build Jakarta, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-3E): enter WildFly 41 and Jakarta EE 11`.
 
 ### Checkpoint CP-3F — Namespace e descritores Jakarta

@@ -226,6 +226,7 @@ public final class ValidateApplicationPom {
                 new LinkedHashMap<String, String>();
         expectedProfiles.put("oracle", "[17,18)");
         expectedProfiles.put("ci-h2", "[17,18)");
+        expectedProfiles.put("cp-3e-jakarta11", "[21,22)");
 
         Element profiles = child(project, "profiles");
         NodeList profileNodes = profiles.getChildNodes();

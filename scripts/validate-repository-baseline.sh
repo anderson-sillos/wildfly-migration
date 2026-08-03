@@ -67,6 +67,7 @@ shell_files=(
   scripts/validate-cp-3d.sh
   scripts/validate-cp-3d-tiles-tld.sh
   scripts/diagnose-cp-3e-unchanged.sh
+  scripts/build-cp-3e-jakarta.sh
   scripts/validate-cp-3e-entry.sh
   contract-tests/run.sh
 )

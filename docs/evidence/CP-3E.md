@@ -17,6 +17,7 @@ licença e os checksums estão no manifesto do gate.
 | Deploy do WAR EE 8 | rejeitado, como diagnóstico esperado |
 | Primeira causa | `ClassNotFoundException: javax.servlet.http.HttpServlet` |
 | TLD/Tiles | `javax.servlet.jsp.tagext.TryCatchFinally` ausente |
+| Primeiro build com Jakarta EE 11 | falha esperada enquanto os imports ainda são `javax.*` |
 
 O resultado legível por máquina é
 [`unchanged-war.json`](../../migration/evidence/CP-3E/unchanged-war.json) e o
@@ -26,6 +27,13 @@ O catálogo detalhado está em
 [`compatibility-observations.tsv`](../../migration/evidence/CP-3E/compatibility-observations.tsv)
 e a incompatibilidade natural em
 [`CP-3E-wildfly41-entry.md`](../../migration/steps/CP-3E-wildfly41-entry.md).
+
+O primeiro build do perfil `cp-3e-jakarta11` foi executado com Java 21 e
+Maven 3.9.16. Ele falhou na compilação porque o código ainda importa
+`javax.servlet*`; essa falha é a evidência de entrada que orienta o CP-3F, não
+um resultado verde de execução. A saída está em
+[`jakarta-build.json`](../../migration/evidence/CP-3E/jakarta-build.json) e
+[`jakarta-build.txt`](../../migration/evidence/CP-3E/jakarta-build.txt).
 
 ## Interpretação
 

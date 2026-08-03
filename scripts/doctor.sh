@@ -460,10 +460,13 @@ check_required_files() {
       "migration/evidence/CP-3E/compatibility-observations.tsv"
       "migration/evidence/CP-3E/unchanged-war.json"
       "migration/evidence/CP-3E/unchanged-war-server.txt"
+      "migration/evidence/CP-3E/jakarta-build.json"
+      "migration/evidence/CP-3E/jakarta-build.txt"
       "migration/steps/CP-3E-wildfly41-entry.md"
       "runtime/phase3/java21-wildfly41/README.md"
       "runtime/phase3/java21-wildfly41/runtime-manifest.tsv"
       "scripts/diagnose-cp-3e-unchanged.sh"
+      "scripts/build-cp-3e-jakarta.sh"
       "scripts/validate-cp-3e-entry.sh"
     )
   fi
