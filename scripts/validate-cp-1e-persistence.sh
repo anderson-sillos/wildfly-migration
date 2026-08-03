@@ -213,7 +213,9 @@ if [[ -n "$RESULT_FILE" ]]; then
     '"typeHandlers": "passed"' \
     '"reflection": "passed"' \
     '"mybatisCommit": "passed"' \
-    '"mybatisRollback": "passed"'; do
+    '"mybatisRollback": "passed"' \
+    '"timestampRoundTrip": "passed"' \
+    '"blobRoundTrip": "passed"'; do
     grep -Fq "$marker" "$RESULT_FILE" || {
       printf 'FALHA: resultado MyBatis H2 não contém: %s\n' "$marker" >&2
       exit 1

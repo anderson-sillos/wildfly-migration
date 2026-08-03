@@ -127,12 +127,12 @@ public final class ValidateApplicationPom {
                 values("2.1.4", "compile"));
         expected.put("org.apache.xmlbeans:xmlbeans",
                 values("5.3.0", "compile"));
-        expected.put("xml-apis:xml-apis",
-                values("1.3.02", "compile"));
-        expected.put(
-                "org.apache.geronimo.specs:geronimo-stax-api_1.0_spec",
-                values("1.0", "compile"));
         expected.put("org.dom4j:dom4j", values("2.2.0", "compile"));
+
+        require(!properties.containsKey("xml.apis.version"),
+                "propriedade removida xml.apis.version reapareceu");
+        require(!properties.containsKey("geronimo.stax.version"),
+                "propriedade removida geronimo.stax.version reapareceu");
 
         Element dependencies = child(project, "dependencies");
         NodeList dependencyNodes = dependencies.getChildNodes();

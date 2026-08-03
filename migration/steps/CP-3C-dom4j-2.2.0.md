@@ -28,4 +28,4 @@ entidades. A allowlist do gate Java 17 contém `dom4j-2.2.0.jar`.
 
 Reverter esta entrega restaura `dom4j:dom4j:1.6.1` sem alterar o XSD, os
 documentos legítimos ou os dados persistidos. A remoção das APIs XML duplicadas
-fica para a atividade 3.13.
+foi executada na atividade 3.13 e possui evidência própria.

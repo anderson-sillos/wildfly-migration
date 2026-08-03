@@ -25,8 +25,9 @@ A sonda compila contra o JAR efetivo do WAR e comprova:
 
 O resultado sanitizado é salvo em
 `migration/evidence/CP-3C/dom4j-ci-h2.json`. A remoção de `xml-apis` e
-Geronimo StAX permanece isolada na atividade 3.13, para que esta troca não
-misture a resolução das APIs do módulo `java.xml`.
+Geronimo StAX foi executada separadamente na atividade 3.13, cuja evidência
+está em cp-3c-java-xml-apis.md, para que esta troca não misturasse a
+resolução das APIs do módulo `java.xml`.
 
 ## Fontes
 

@@ -4,14 +4,6 @@
   },
   "java.configuration.runtimes": [
     {
-      "name": "JavaSE-1.7",
-      "path": "/opt/migration-lab/tools/zulu7.56.0.11-ca-jdk7.0.352-linux_x64"
-    },
-    {
-      "name": "JavaSE-1.8",
-      "path": "/opt/migration-lab/tools/jdk8u492-b09"
-    },
-    {
       "name": "JavaSE-17",
       "path": "/opt/migration-lab/tools/jdk-17.0.20+8",
       "default": true
@@ -20,5 +12,10 @@
   "java.jdt.ls.java.home": "/opt/migration-lab/tools/jdk-17.0.20+8",
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.autobuild.enabled": true,
-  "java.compile.nullAnalysis.mode": "automatic"
+  "java.diagnostic.filter": [
+    "**/target/**",
+    "**/scripts/**"
+  ],
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.dependency.packagePresentation": "flat"
 }

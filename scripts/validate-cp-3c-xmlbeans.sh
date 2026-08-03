@@ -6,6 +6,8 @@ REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPOSITORY_ROOT/.env"
 WAR_FILE="$REPOSITORY_ROOT/app/target/wildfly-migration.war"
 RESULT_FILE="$REPOSITORY_ROOT/app/target/contract-results/cp-3c-xmlbeans-ci-h2.json"
+CLASSES_DIRECTORY="$REPOSITORY_ROOT/app/target/classes"
+GENERATED_SOURCES_DIRECTORY="$REPOSITORY_ROOT/app/target/generated-sources"
 JAVA_HOME_VALUE="${JAVA17_HOME:-}"
 SKIP_BUILD=false
 TEMP_DIRECTORY="$(mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-cp3c-xmlbeans.XXXXXXXX")"
@@ -15,6 +17,8 @@ usage() {
 Uso:
   ./scripts/validate-cp-3c-xmlbeans.sh [--env ARQUIVO]
     [--war ARQUIVO] [--result ARQUIVO] [--skip-build]
+    [--classes-directory DIRETORIO]
+    [--generated-sources-directory DIRETORIO]
 
 Constrói o WAR do gate Java 17, confirma os tipos gerados pelo XMLBeans 5.3.0
 e executa o contrato de schema, namespace e serialização sem banco ou WildFly.
@@ -81,6 +85,16 @@ while [[ $# -gt 0 ]]; do
       RESULT_FILE="$2"
       shift 2
       ;;
+    --classes-directory)
+      [[ $# -ge 2 ]] || fail "--classes-directory exige um diretório"
+      CLASSES_DIRECTORY="$2"
+      shift 2
+      ;;
+    --generated-sources-directory)
+      [[ $# -ge 2 ]] || fail "--generated-sources-directory exige um diretório"
+      GENERATED_SOURCES_DIRECTORY="$2"
+      shift 2
+      ;;
     --skip-build)
       SKIP_BUILD=true
       shift
@@ -108,9 +122,9 @@ if [[ "$SKIP_BUILD" != true ]]; then
 fi
 
 [[ -f "$WAR_FILE" ]] || fail "WAR não encontrado: $WAR_FILE"
-[[ -f "$REPOSITORY_ROOT/app/target/classes/wildflyMigrationPedido1/PedidoDocument.class" ]] ||
+[[ -f "$CLASSES_DIRECTORY/wildflyMigrationPedido1/PedidoDocument.class" ]] ||
   fail "classe gerada PedidoDocument ausente em target/classes"
-[[ -f "$REPOSITORY_ROOT/app/target/generated-sources/wildflyMigrationPedido1/PedidoDocument.java" ]] ||
+[[ -f "$GENERATED_SOURCES_DIRECTORY/wildflyMigrationPedido1/PedidoDocument.java" ]] ||
   fail "fonte gerada PedidoDocument ausente"
 
 (cd "$TEMP_DIRECTORY" && "$JAVA_HOME_VALUE/bin/jar" xf "$WAR_FILE" WEB-INF/lib)
@@ -124,7 +138,7 @@ if find "$TEMP_DIRECTORY/WEB-INF/lib" -maxdepth 1 -name 'log4j-core-*.jar' -prin
 fi
 
 mkdir -p "$TEMP_DIRECTORY/classes" "$(dirname "$RESULT_FILE")"
-XMLBEANS_CLASSPATH="$REPOSITORY_ROOT/app/target/classes:$TEMP_DIRECTORY/WEB-INF/lib/*"
+XMLBEANS_CLASSPATH="$CLASSES_DIRECTORY:$TEMP_DIRECTORY/WEB-INF/lib/*"
 "$JAVA_HOME_VALUE/bin/javac" \
   -cp "$XMLBEANS_CLASSPATH" \
   -d "$TEMP_DIRECTORY/classes" \

@@ -18,6 +18,9 @@ required_paths=(
   "docs/cp-3b-reflections-bridge.md"
   "docs/cp-3c-xmlbeans.md"
   "docs/cp-3c-dom4j.md"
+  "docs/cp-3c-java-xml-apis.md"
+  "docs/cp-3c-ojdbc17.md"
+  "docs/evidence/CP-3C.md"
   "docs/evidence/CP-3B.md"
   "docs/evidence/CP-1F.md"
   "docs/environment-setup.md"
@@ -35,17 +38,48 @@ required_paths=(
   "scripts/follow-wildfly9-log.sh"
   "migration/steps/CP-3C-xmlbeans-5.3.0.md"
   "migration/steps/CP-3C-dom4j-2.2.0.md"
+  "migration/steps/CP-3C-java-xml-apis.md"
+  "migration/steps/CP-3C-ojdbc17.md"
+  "migration/steps/CP-3C-java-xml-apis.md"
   "migration/evidence/CP-3C/xmlbeans-ci-h2.json"
   "migration/evidence/CP-3C/dom4j-ci-h2.json"
+  "migration/evidence/CP-3C/java-xml-ci-h2.json"
+  "migration/evidence/CP-3C/ojdbc17-ci-h2.json"
+  "migration/evidence/CP-3C/ojdbc17-oracle.json"
+  "migration/evidence/CP-3C/closure.properties"
+  "migration/evidence/CP-3C/rollback.properties"
   "scripts/validate-cp-3c-xmlbeans.sh"
   "scripts/validate-cp-3c-dom4j.sh"
+  "scripts/validate-cp-3c-java-xml.sh"
+  "scripts/validate-cp-3c-ojdbc17.sh"
+  "scripts/validate-cp-3c.sh"
+  "scripts/qualify-cp-3c-h2.sh"
+  "scripts/qualify-cp-3c-oracle.sh"
   "scripts/ValidateXmlBeans53.java"
   "scripts/ValidateDom4j22.java"
+  "scripts/ValidateJavaXmlModule.java"
 )
 
 for path in "${required_paths[@]}"; do
   if [[ ! -f "$REPOSITORY_ROOT/$path" ]]; then
     printf 'FALHA: documentação obrigatória ausente: %s\n' "$path" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'ojdbc17' \
+  '23.26.2.0.0' \
+  'com.oracle.ojdbc17' \
+  'OJDBC17_JAR' \
+  'transações' \
+  'TIMESTAMP(6)' \
+  'BLOB' \
+  'fora do cache portátil'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3c-ojdbc17.md" \
+      "$REPOSITORY_ROOT/migration/steps/CP-3C-ojdbc17.md"; then
+    printf 'FALHA: documentação ojdbc17 do CP-3C não contém: %s\n' "$marker" >&2
     exit 1
   fi
 done
@@ -78,6 +112,20 @@ for marker in \
       "$REPOSITORY_ROOT/docs/cp-3c-dom4j.md" \
       "$REPOSITORY_ROOT/migration/steps/CP-3C-dom4j-2.2.0.md"; then
     printf 'FALHA: documentação dom4j do CP-3C não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'atividade 3.13' \
+  'módulo java.xml' \
+  'xml-apis' \
+  'Geronimo StAX' \
+  'validate-cp-3c-java-xml.sh'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3c-java-xml-apis.md" \
+      "$REPOSITORY_ROOT/migration/steps/CP-3C-java-xml-apis.md"; then
+    printf 'FALHA: documentação java.xml do CP-3C não contém: %s\n' "$marker" >&2
     exit 1
   fi
 done
@@ -162,6 +210,73 @@ for marker in \
   if ! grep -Fq -- "$marker" \
       "$REPOSITORY_ROOT/migration/evidence/CP-3C/xmlbeans-ci-h2.json"; then
     printf 'FALHA: evidência XMLBeans do CP-3C não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'wildfly-migration-java-xml-compatibility/v1' \
+  'directDependenciesAbsent' \
+  'transitiveApisAbsent' \
+  'warApisAbsent' \
+  'javaXmlRuntime' \
+  'java.base,java.xml'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/migration/evidence/CP-3C/java-xml-ci-h2.json"; then
+    printf 'FALHA: evidência java.xml do CP-3C não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'wildfly-migration-ojdbc17-compatibility/v1' \
+  'portable-ci' \
+  'oracle-qualified' \
+  'ojdbc17-23.26.2.0.0' \
+  'timestampRoundTrip' \
+  'blobRoundTrip'; do
+  if ! grep -Fq -- "$marker" \
+      "$REPOSITORY_ROOT/migration/evidence/CP-3C/ojdbc17-ci-h2.json" \
+      "$REPOSITORY_ROOT/migration/evidence/CP-3C/ojdbc17-oracle.json"; then
+    printf 'FALHA: evidência ojdbc17 do CP-3C não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  '## Auditoria de dependências e empacotamento' \
+  '0e431a2ec85e0918cc89ed91dcec5715e7872e18b8d57441d7ae781b4a5a5d5b' \
+  '84fb02f37e4eaf522d98de66697807b03dfa574a' \
+  'a tarefa 3.15 permanece'; do
+  if ! grep -Fq -- "$marker" "$REPOSITORY_ROOT/docs/evidence/CP-3C.md"; then
+    printf 'FALHA: evidência de fechamento CP-3C não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'schema=wildfly-migration-cp3c-closure/v1' \
+  'checkpoint=CP-3C' \
+  'portable-ci.result=passed' \
+  'oracle-qualified.result=passed' \
+  'dependency.audit=passed' \
+  'driver.cache=excluded' \
+  'result=ready-for-integration'; do
+  if ! grep -Fxq -- "$marker" \
+      "$REPOSITORY_ROOT/migration/evidence/CP-3C/closure.properties"; then
+    printf 'FALHA: propriedades de fechamento CP-3C não contêm: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'schema=wildfly-migration-cp3c-rollback/v1' \
+  'source.checkpoint=CP-3B' \
+  'database.schema.changed=false' \
+  'rollback.result=verified-by-source-comparison'; do
+  if ! grep -Fxq -- "$marker" \
+      "$REPOSITORY_ROOT/migration/evidence/CP-3C/rollback.properties"; then
+    printf 'FALHA: rollback CP-3C não contém: %s\n' "$marker" >&2
     exit 1
   fi
 done

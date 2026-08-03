@@ -107,7 +107,7 @@ load_env_file() {
       WILDFLY26_HOME|WILDFLY26_ARCHIVE|WILDFLY26_ARCHIVE_SHA256|\
       WILDFLY41_HOME|WILDFLY41_ARCHIVE|WILDFLY41_ARCHIVE_SHA256|\
       ORACLE_DB_URL|ORACLE_DB_USER|ORACLE_DB_PASSWORD|ORACLE_DB_WALLET|\
-      OJDBC7_JAR|OJDBC7_SHA256|H2_JAR|H2_SHA256)
+      OJDBC7_JAR|OJDBC7_SHA256|OJDBC17_JAR|OJDBC17_SHA256|H2_JAR|H2_SHA256)
         ;;
       *)
         fail "variável não permitida na linha $line_number de $file: $key"
@@ -411,6 +411,27 @@ check_required_files() {
       "scripts/qualify-cp-3b-oracle.sh"
       "scripts/smoke-cp-3b-datasource.sh"
       "scripts/validate-cp-3b.sh"
+    )
+  fi
+
+  if rank_at_least CP-3C; then
+    required+=(
+      "docs/cp-3c-ojdbc17.md"
+      "docs/evidence/CP-3C.md"
+      "migration/evidence/CP-3C/closure.properties"
+      "migration/evidence/CP-3C/rollback.properties"
+      "migration/steps/CP-3C-ojdbc17.md"
+      "migration/steps/CP-3C-java-xml-apis.md"
+      "runtime/phase3/java17-wildfly26/ojdbc17/module.xml.template"
+      "runtime/phase3/java17-wildfly26/ojdbc17/register-driver.cli"
+      "runtime/phase3/java17-wildfly26/ojdbc17/README.md"
+      "scripts/validate-cp-3c-ojdbc17.sh"
+      "scripts/validate-cp-3c.sh"
+      "scripts/validate-cp-3c-java-xml.sh"
+      "scripts/qualify-cp-3c-h2.sh"
+      "scripts/qualify-cp-3c-oracle.sh"
+      "migration/evidence/CP-3C/ojdbc17-ci-h2.json"
+      "migration/evidence/CP-3C/ojdbc17-oracle.json"
     )
   fi
 
@@ -1210,6 +1231,57 @@ check_ojdbc7() {
   fi
 }
 
+check_ojdbc17() {
+  local driver="${OJDBC17_JAR:-}"
+  local expected="${OJDBC17_SHA256:-}"
+  local actual=""
+  local frozen=""
+
+  if [[ -z "$driver" ]]; then
+    fail "Oracle JDBC: OJDBC17_JAR não definido"
+    return
+  fi
+  if [[ ! -f "$driver" ]]; then
+    fail "Oracle JDBC: arquivo externo ojdbc17 não encontrado"
+    return
+  fi
+  if [[ "$(basename "$driver")" != "ojdbc17.jar" ]]; then
+    fail "Oracle JDBC: o arquivo externo deve se chamar ojdbc17.jar"
+    return
+  fi
+  if [[ ! "$expected" =~ ^[[:xdigit:]]{64}$ ]]; then
+    fail "Oracle JDBC: OJDBC17_SHA256 deve conter 64 caracteres"
+    return
+  fi
+
+  frozen="$({
+    awk -F '\t' '
+      NR > 1 && $1 == "ojdbc17" {
+        print $6
+        found = 1
+        exit
+      }
+      END {
+        if (!found) {
+          exit 1
+        }
+      }
+    ' runtime/phase3/java17-wildfly26/runtime-manifest.tsv
+  } 2>/dev/null || true)"
+  if [[ ! "$frozen" =~ ^[[:xdigit:]]{64}$ ]] ||
+     [[ "${expected,,}" != "${frozen,,}" ]]; then
+    fail "Oracle JDBC: checksum do ojdbc17 diverge do manifesto CP-3C"
+    return
+  fi
+
+  actual="$(sha256sum "$driver" | awk '{print $1}')"
+  if [[ "${actual,,}" == "${expected,,}" ]]; then
+    pass "Oracle JDBC: ojdbc17 23.26.2.0.0 externo aprovado por SHA-256"
+  else
+    fail "Oracle JDBC: checksum do ojdbc17 diverge"
+  fi
+}
+
 check_modern_maven() {
   local maven_command="mvn"
   local output=""
@@ -1435,13 +1507,17 @@ fi
 
 if rank_at_least CP-1D && [[ "$DB_PROFILE" == "ci-h2" ]]; then
   check_h2
-  skip "variáveis Oracle 19c e ojdbc7 externo (perfil ci-h2)"
+  skip "variáveis Oracle 19c e drivers JDBC externos (perfil ci-h2)"
 elif rank_at_least CP-1D; then
   check_oracle_variables
-  check_ojdbc7
+  if rank_at_least CP-3C; then
+    check_ojdbc17
+  else
+    check_ojdbc7
+  fi
   skip "H2 portátil (perfil oracle)"
 else
-  skip "H2, variáveis Oracle 19c e ojdbc7 externo (entram no CP-1D)"
+  skip "H2, variáveis Oracle 19c e drivers JDBC externos (entram no CP-1D)"
 fi
 
 if rank_at_least CP-2A && ! rank_at_least CP-3A; then

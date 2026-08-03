@@ -112,8 +112,8 @@
 
 - [x] 3.11 Atualizar XMLBeans para 5.3.0, regenerar os tipos a partir do XSD e validar serialização, namespaces e schema.
 - [x] 3.12 Atualizar dom4j para 2.2.0 e configurar parsing seguro sem alterar documentos legítimos.
-- [ ] 3.13 Remover `xml-apis` e Geronimo StAX e comprovar o uso das APIs do módulo `java.xml`.
-- [ ] 3.14 Trocar `ojdbc7` por um driver mantido compatível com Java 17 e Oracle 19c, preservar o perfil H2 portátil e testar transações, timestamps e LOBs nos dois perfis com qualificação oficial no Oracle.
+- [x] 3.13 Remover `xml-apis` e Geronimo StAX e comprovar o uso das APIs do módulo `java.xml`.
+- [x] 3.14 Trocar `ojdbc7` por um driver mantido compatível com Java 17 e Oracle 19c, preservar o perfil H2 portátil e testar transações, timestamps e LOBs nos dois perfis com qualificação oficial no Oracle.
 - [ ] 3.15 Encerrar `CP-3C`: executar testes XML, H2 e Oracle, auditar dependências, registrar evidências separadas e rollback e integrar o PR pelo commit `checkpoint(CP-3C): modernize XML and JDBC`.
 
 ### Checkpoint CP-3D — Gate Java 17

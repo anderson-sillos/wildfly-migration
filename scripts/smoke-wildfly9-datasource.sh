@@ -21,6 +21,12 @@ SERVER_PID=""
 SERVER_STARTED=false
 ORACLE_SMOKE_CREATED=false
 RUNTIME_IDENTIFIER="java7-wildfly9.0.2"
+ORACLE_DRIVER_JAR_VALUE=""
+ORACLE_DRIVER_SHA256_VALUE=""
+ORACLE_DRIVER_FILE_NAME=""
+ORACLE_DRIVER_MODULE_DIRECTORY=""
+ORACLE_DRIVER_MODULE_FILE=""
+ORACLE_DRIVER_LABEL=""
 
 usage() {
   cat <<'USAGE'
@@ -168,7 +174,8 @@ cleanup() {
     ORACLE_DB_USER="$ORACLE_DB_USER_VALUE" \
     ORACLE_DB_PASSWORD="$ORACLE_DB_PASSWORD_VALUE" \
       "$REPOSITORY_ROOT/scripts/oracle-lab-schema.sh" \
-        cleanup-smokes --java-home "$SELECTED_JAVA_HOME" \
+        cleanup-smokes --java "$JAVA_RELEASE" \
+        --java-home "$SELECTED_JAVA_HOME" \
         --env "$ENV_FILE" >/dev/null 2>&1 || true
     ORACLE_SMOKE_CREATED=false
   fi
@@ -553,26 +560,40 @@ if [[ "$PROFILE" == "ci-h2" ]]; then
     PROFILE_FILE="$REPOSITORY_ROOT/runtime/legacy/profiles/ci-h2.cli"
   fi
 else
-  OJDBC7_JAR_VALUE="$(configuration_value OJDBC7_JAR)"
-  OJDBC7_SHA256_VALUE="$(configuration_value OJDBC7_SHA256)"
+  if [[ "$JAVA_RELEASE" == "17" ]]; then
+    ORACLE_DRIVER_JAR_VALUE="$(configuration_value OJDBC17_JAR)"
+    ORACLE_DRIVER_SHA256_VALUE="$(configuration_value OJDBC17_SHA256)"
+    ORACLE_DRIVER_FILE_NAME="ojdbc17.jar"
+    ORACLE_DRIVER_MODULE_DIRECTORY="com/oracle/ojdbc17/main"
+    ORACLE_DRIVER_MODULE_FILE="$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/ojdbc17/module.xml.template"
+    ORACLE_DRIVER_LABEL="ojdbc17"
+  else
+    ORACLE_DRIVER_JAR_VALUE="$(configuration_value OJDBC7_JAR)"
+    ORACLE_DRIVER_SHA256_VALUE="$(configuration_value OJDBC7_SHA256)"
+    ORACLE_DRIVER_FILE_NAME="ojdbc7.jar"
+    ORACLE_DRIVER_MODULE_DIRECTORY="com/oracle/ojdbc7/main"
+    ORACLE_DRIVER_MODULE_FILE="$REPOSITORY_ROOT/runtime/legacy/ojdbc7/module.xml.template"
+    ORACLE_DRIVER_LABEL="ojdbc7"
+  fi
   ORACLE_DB_URL_VALUE="$(configuration_value ORACLE_DB_URL)"
   ORACLE_DB_USER_VALUE="$(configuration_value ORACLE_DB_USER)"
   ORACLE_DB_PASSWORD_VALUE="$(configuration_value ORACLE_DB_PASSWORD)"
 
   if [[ ! -x "$SELECTED_JAVA_HOME/bin/java" ||
-        ! -f "$OJDBC7_JAR_VALUE" ||
+        ! -f "$ORACLE_DRIVER_JAR_VALUE" ||
         -z "$ORACLE_DB_URL_VALUE" ||
         -z "$ORACLE_DB_USER_VALUE" ||
         -z "$ORACLE_DB_PASSWORD_VALUE" ]]; then
-    printf 'FALHA: Java selecionado, ojdbc7 e configuração Oracle são obrigatórios\n' >&2
+    printf 'FALHA: Java selecionado, %s e configuração Oracle são obrigatórios\n' \
+      "$ORACLE_DRIVER_LABEL" >&2
     exit 1
   fi
-  actual_ojdbc7_checksum="$(
-    sha256sum "$OJDBC7_JAR_VALUE" | awk '{print $1}'
+  actual_oracle_driver_checksum="$(
+    sha256sum "$ORACLE_DRIVER_JAR_VALUE" | awk '{print $1}'
   )"
-  if [[ ! "$OJDBC7_SHA256_VALUE" =~ ^[[:xdigit:]]{64}$ ]] ||
-     [[ "$actual_ojdbc7_checksum" != "${OJDBC7_SHA256_VALUE,,}" ]]; then
-    printf 'FALHA: checksum do ojdbc7 não foi aprovado\n' >&2
+  if [[ ! "$ORACLE_DRIVER_SHA256_VALUE" =~ ^[[:xdigit:]]{64}$ ]] ||
+     [[ "$actual_oracle_driver_checksum" != "${ORACLE_DRIVER_SHA256_VALUE,,}" ]]; then
+    printf 'FALHA: checksum do %s não foi aprovado\n' "$ORACLE_DRIVER_LABEL" >&2
     exit 1
   fi
   if [[ "$JAVA_RELEASE" == "17" ]]; then
@@ -628,11 +649,12 @@ if [[ "$PROFILE" == "ci-h2" ]]; then
   install -m 0644 "$H2_JAR_VALUE" "$module_directory/$H2_EXPECTED_JAR"
   install -m 0644 "$H2_MODULE_FILE" "$module_directory/module.xml"
 else
-  module_directory="$RUNTIME_HOME/modules/com/oracle/ojdbc7/main"
+  module_directory="$RUNTIME_HOME/modules/$ORACLE_DRIVER_MODULE_DIRECTORY"
   install -d -m 0755 "$module_directory"
-  install -m 0644 "$OJDBC7_JAR_VALUE" "$module_directory/ojdbc7.jar"
+  install -m 0644 "$ORACLE_DRIVER_JAR_VALUE" \
+    "$module_directory/$ORACLE_DRIVER_FILE_NAME"
   install -m 0644 \
-    "$REPOSITORY_ROOT/runtime/legacy/ojdbc7/module.xml.template" \
+    "$ORACLE_DRIVER_MODULE_FILE" \
     "$module_directory/module.xml"
 fi
 

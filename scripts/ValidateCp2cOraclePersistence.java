@@ -38,7 +38,8 @@ import org.apache.ibatis.type.JdbcType;
 
 public final class ValidateCp2cOraclePersistence {
     private static final String DATABASE_VERSION = "19.3.0.0.0";
-    private static final String DRIVER_VERSION = "12.1.0.2.0";
+    private static final String DEFAULT_DRIVER_LABEL = "ojdbc7";
+    private static final String DEFAULT_DRIVER_VERSION = "12.1.0.2.0";
     private static final String MYBATIS_VERSION = "3.5.19";
 
     private ValidateCp2cOraclePersistence() {
@@ -86,7 +87,7 @@ public final class ValidateCp2cOraclePersistence {
                 System.currentTimeMillis(), 36).toUpperCase();
         String committedNumber = "LAB-CP2C-Q-" + suffix;
         String rolledBackNumber = "LAB-CP2C-R-" + suffix;
-        verifyRuntime(dataSource);
+        verifyRuntime(dataSource, configuredDriverVersion());
         cleanup(dataSource, committedNumber, rolledBackNumber);
 
         try {
@@ -102,7 +103,8 @@ public final class ValidateCp2cOraclePersistence {
             cleanup(dataSource, committedNumber, rolledBackNumber);
         }
 
-        writeResult(new File(args[1]), args[2], args[3], runtime);
+        writeResult(new File(args[1]), args[2], args[3], runtime,
+                configuredDriverLabel(), configuredDriverVersion());
         System.out.println(
                 "OK: Oracle 19c qualificou MyBatis, rollback, "
                 + "TIMESTAMP(6) e BLOB; dados transitórios removidos");
@@ -153,7 +155,8 @@ public final class ValidateCp2cOraclePersistence {
                 "reflexão não preservou leitura e escrita da propriedade");
     }
 
-    private static void verifyRuntime(UnpooledDataSource dataSource)
+    private static void verifyRuntime(
+            UnpooledDataSource dataSource, String expectedDriverVersion)
             throws Exception {
         Connection connection = dataSource.getConnection();
         try {
@@ -162,9 +165,9 @@ public final class ValidateCp2cOraclePersistence {
             require(product != null
                     && product.indexOf("Oracle Database 19c") >= 0,
                     "produto conectado não é Oracle Database 19c");
-            require(DRIVER_VERSION.equals(
+            require(expectedDriverVersion.equals(
                     connection.getMetaData().getDriverVersion()),
-                    "versão efetiva do ojdbc7 diverge");
+                    "versão efetiva do driver Oracle diverge");
 
             PreparedStatement statement = connection.prepareStatement(
                     "SELECT VERSION_FULL FROM PRODUCT_COMPONENT_VERSION "
@@ -372,7 +375,9 @@ public final class ValidateCp2cOraclePersistence {
             File file,
             String commit,
             String warSha256,
-            String runtime) throws Exception {
+            String runtime,
+            String driverLabel,
+            String driverVersion) throws Exception {
         File parent = file.getAbsoluteFile().getParentFile();
         require(parent != null
                 && (parent.isDirectory() || parent.mkdirs()),
@@ -391,8 +396,8 @@ public final class ValidateCp2cOraclePersistence {
             writer.write("  \"runtime\": \"" + runtime + "\",\n");
             writer.write("  \"databaseVersion\": \""
                     + DATABASE_VERSION + "\",\n");
-            writer.write("  \"jdbcDriver\": \"ojdbc7-"
-                    + DRIVER_VERSION + "\",\n");
+            writer.write("  \"jdbcDriver\": \""
+                    + driverLabel + "-" + driverVersion + "\",\n");
             writer.write("  \"mybatisVersion\": \""
                     + MYBATIS_VERSION + "\",\n");
             writer.write("  \"checks\": {\n");
@@ -417,6 +422,18 @@ public final class ValidateCp2cOraclePersistence {
         require(value != null && value.trim().length() > 0,
                 "configuração Oracle ausente");
         return value;
+    }
+
+    private static String configuredDriverLabel() {
+        String value = System.getenv("ORACLE_JDBC_DRIVER_LABEL");
+        return value == null || value.trim().length() == 0
+                ? DEFAULT_DRIVER_LABEL : value.trim();
+    }
+
+    private static String configuredDriverVersion() {
+        String value = System.getenv("ORACLE_JDBC_DRIVER_VERSION");
+        return value == null || value.trim().length() == 0
+                ? DEFAULT_DRIVER_VERSION : value.trim();
     }
 
     private static String safeSqlState(String value) {

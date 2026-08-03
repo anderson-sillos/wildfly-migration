@@ -196,6 +196,29 @@
         "focus": true,
         "clear": true
       }
+    },
+    {
+      "label": "Build: limpar bytecode e reconstruir (Java 17/H2)",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/build-cp-3b.sh",
+      "args": [
+        "--profile",
+        "ci-h2",
+        "--env",
+        "${workspaceFolder}/.env",
+        "--ide-rebuild"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true,
+        "clear": true
+      }
     }
   ]
 }

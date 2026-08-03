@@ -22,8 +22,8 @@ do JDT.
 
 A allowlist do WAR foi atualizada para `xmlbeans-5.3.0.jar` e
 `log4j-api-2.24.2.jar`; não há `log4j-core` e não há `stax-api` transitivo.
-As dependências XML diretas legadas ainda presentes são uma pendência
-explícita da atividade 3.13.
+As dependências XML diretas legadas foram removidas na atividade 3.13; a
+prova está em CP-3C-java-xml-apis.md.
 
 ## Verificação
 

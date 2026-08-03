@@ -1,0 +1,17 @@
+{
+  "schema": "wildfly-migration-java-xml-compatibility/v1",
+  "qualification": "portable-ci",
+  "profile": "ci-h2",
+  "sourceCommit": "39b156cc91627f54a1a7af17c7a0bb2e237c0710",
+  "sourceState": "working-tree changes for activity 3.13 are not committed",
+  "warSha256": "0b277886c54370e150310ba74117abd8bd1258fca9fe634dfc21383c5ba25063",
+  "runtime": "java17-wildfly26.1.3-ee8",
+  "warLibraries": 17,
+  "checks": {
+    "directDependenciesAbsent": "passed",
+    "transitiveApisAbsent": "passed",
+    "warApisAbsent": "passed",
+    "javaXmlRuntime": "passed",
+    "jdepsParserModules": "java.base,java.xml"
+  }
+}

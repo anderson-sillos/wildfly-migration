@@ -30,8 +30,8 @@ essa API, mas não empacota `log4j-core` nem outro backend: no WildFly, o
 backend continua sendo administrado pelo servidor. A mensagem de ausência de
 provider que pode aparecer ao executar a sonda fora do servidor é esperada e
 não muda a política de logging do WAR. A cópia transitiva `stax-api` deixa de
-ser gerada; `xml-apis` e Geronimo StAX diretos só serão removidos na atividade
-3.13.
+ser gerada; `xml-apis` e Geronimo StAX diretos foram removidos na atividade
+3.13. A comprovação do módulo `java.xml` está em cp-3c-java-xml-apis.md.
 
 ## Verificação reproduzível
 
