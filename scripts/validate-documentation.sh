@@ -133,7 +133,7 @@ done
 for marker in \
   '## Fechamento do CP-3B — atividade 3.10' \
   '14b9fbf23757c6cb721a4d9a809569d1b5c71b6b' \
-  'c6ed5ae93c5060815721084c2cb9beed9dd700f7' \
+  '84fb02f37e4eaf522d98de66697807b03dfa574a' \
   '30650580350' \
   '19 bibliotecas' \
   '14/14' \
