@@ -118,11 +118,11 @@
 
 ### Checkpoint CP-3D — Gate Java 17
 
-- [ ] 3.16 Manter Tiles e handlers TLD em `javax` somente como exceções temporárias documentadas, sem atualizar para outra versão descontinuada.
-- [ ] 3.17 Executar contratos H2 e Oracle e auditoria completos no Java 17/WildFly 26 e comparar com o baseline.
-- [ ] 3.18 Gerar manifesto do gate com dependências atualizadas, exceções adiadas, checksum do WAR e resultados.
-- [ ] 3.19 Documentar reprodução e rollback do gate para `migration/02-java8-wildfly26`.
-- [ ] 3.20 Encerrar `CP-3D`: aprovar evidências `portable-ci` e `oracle-qualified` do gate Java 17 sem criar fase ou tag pública e integrar o PR pelo commit `checkpoint(CP-3D): approve Java 17 gate`.
+- [x] 3.16 Manter Tiles e handlers TLD em `javax` somente como exceções temporárias documentadas, sem atualizar para outra versão descontinuada.
+- [x] 3.17 Executar contratos H2 e Oracle e auditoria completos no Java 17/WildFly 26 e comparar com o baseline.
+- [x] 3.18 Gerar manifesto do gate com dependências atualizadas, exceções adiadas, checksum do WAR e resultados.
+- [x] 3.19 Documentar reprodução e rollback do gate para `migration/02-java8-wildfly26`.
+- [x] 3.20 Encerrar `CP-3D`: aprovar evidências `portable-ci` e `oracle-qualified` do gate Java 17 sem criar fase ou tag pública e integrar o PR pelo commit `checkpoint(CP-3D): approve Java 17 gate`.
 
 ### Checkpoint CP-3E — Entrada no WildFly 41
 

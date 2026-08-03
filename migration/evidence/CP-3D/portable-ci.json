@@ -1,0 +1,36 @@
+{
+  "schema": "wildfly-migration-cp3d-gate/v1",
+  "checkpoint": "CP-3D",
+  "qualification": "portable-ci",
+  "profile": "ci-h2",
+  "sourceCommit": "7ece22c7e9adb8877589eb78a99b566553667a0e",
+  "warSha256": "0e431a2ec85e0918cc89ed91dcec5715e7872e18b8d57441d7ae781b4a5a5d5b",
+  "runtime": "java17-wildfly26.1.3-ee8",
+  "baseline": "migration/baselines/01-legacy",
+  "baselineComparison": "passed",
+  "scenarioCount": 14,
+  "scenarios": {
+    "health": "passed",
+    "list": "passed",
+    "create": "passed",
+    "detail": "passed",
+    "session": "passed",
+    "upload": "passed",
+    "uploadLimit": "passed",
+    "xmlForm": "passed",
+    "xmlValid": "passed",
+    "xmlInvalidXsd": "passed",
+    "xmlValidatorRejected": "passed",
+    "xmlXxe": "passed",
+    "xmlEntityExpansion": "passed",
+    "persistedState": "passed"
+  },
+  "checks": {
+    "mybatis": "passed",
+    "logging": "passed",
+    "upload": "passed",
+    "validatorDiscovery": "passed",
+    "tilesTldException": "passed"
+  },
+  "result": "passed"
+}

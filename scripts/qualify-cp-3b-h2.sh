@@ -6,6 +6,7 @@ REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPOSITORY_ROOT/.env"
 RESULT_DIRECTORY="$REPOSITORY_ROOT/app/target/contract-results"
 NON_INTERACTIVE=false
+QUALIFICATION_CHECKPOINT="${QUALIFICATION_CHECKPOINT:-CP-3B}"
 
 usage() {
   cat <<'USAGE'
@@ -90,14 +91,14 @@ H2_JAR_VALUE="${H2_JAR:-$(read_env_value H2_JAR || true)}"
 [[ -x "$JAVA17_HOME_VALUE/bin/java" && -f "$H2_JAR_VALUE" ]] ||
   fail "JAVA17_HOME e H2_JAR devem apontar para os componentes aprovados"
 
-doctor_arguments=(CP-3B --profile ci-h2 --env "$ENV_FILE")
+doctor_arguments=("$QUALIFICATION_CHECKPOINT" --profile ci-h2 --env "$ENV_FILE")
 if [[ "$NON_INTERACTIVE" == true ]]; then
   doctor_arguments+=(--non-interactive)
 fi
 
 "$REPOSITORY_ROOT/scripts/doctor.sh" "${doctor_arguments[@]}"
 "$REPOSITORY_ROOT/scripts/build-cp-3b.sh" \
-  --profile ci-h2 --env "$ENV_FILE"
+  --profile ci-h2 --env "$ENV_FILE" --ide-rebuild
 "$REPOSITORY_ROOT/scripts/validate-cp-1d-h2.sh" \
   --java-home "$JAVA17_HOME_VALUE" \
   --h2-jar "$H2_JAR_VALUE"

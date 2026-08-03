@@ -7,6 +7,7 @@ ENV_FILE="$REPOSITORY_ROOT/.env"
 RESULT_DIRECTORY="$REPOSITORY_ROOT/app/target/contract-results"
 NON_INTERACTIVE=false
 CLEANUP_REQUIRED=false
+QUALIFICATION_CHECKPOINT="${QUALIFICATION_CHECKPOINT:-CP-3B}"
 TEMP_DIRECTORY="$(
   mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-cp3b-oracle.XXXXXXXX"
 )"
@@ -96,7 +97,7 @@ cp "$H2_LOGGING_RESULT" "$TEMP_DIRECTORY/logging-ci-h2.json"
 cp "$H2_UPLOAD_RESULT" "$TEMP_DIRECTORY/upload-ci-h2.json"
 cp "$H2_DISCOVERY_RESULT" "$TEMP_DIRECTORY/discovery-ci-h2.json"
 
-doctor_arguments=(CP-3B --profile oracle --env "$ENV_FILE")
+doctor_arguments=("$QUALIFICATION_CHECKPOINT" --profile oracle --env "$ENV_FILE")
 if [[ "$NON_INTERACTIVE" == true ]]; then
   doctor_arguments+=(--non-interactive)
 fi
@@ -109,7 +110,7 @@ fi
 CLEANUP_REQUIRED=true
 
 "$REPOSITORY_ROOT/scripts/build-cp-3b.sh" \
-  --profile oracle --env "$ENV_FILE"
+  --profile oracle --env "$ENV_FILE" --ide-rebuild
 install -d -m 0755 "$RESULT_DIRECTORY"
 cp "$TEMP_DIRECTORY/mybatis-ci-h2.json" "$H2_MYBATIS_RESULT"
 cp "$TEMP_DIRECTORY/contract-ci-h2.json" "$H2_CONTRACT_RESULT"
@@ -127,6 +128,7 @@ cp "$TEMP_DIRECTORY/discovery-ci-h2.json" "$H2_DISCOVERY_RESULT"
   --preserve-oracle-smokes
 "$REPOSITORY_ROOT/scripts/validate-cp-2c-oracle-persistence.sh" \
   --java 17 \
+  --driver ojdbc17 \
   --env "$ENV_FILE" \
   --war "$WAR_FILE" \
   --result "$ORACLE_MYBATIS_RESULT"
