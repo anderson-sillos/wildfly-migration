@@ -75,8 +75,6 @@ public final class XmlImportServlet extends HttpServlet {
     protected void doPost(
             HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException {
-        JakartaFileUploadRequestContext requestContext =
-                new JakartaFileUploadRequestContext(request);
         boolean multipart = JakartaFileUploadRequestContext.isMultipartContent(request);
         if (!multipart && !isXmlContentType(request.getContentType())) {
             safeError(

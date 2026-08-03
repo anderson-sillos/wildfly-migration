@@ -53,8 +53,6 @@ public final class UploadServlet extends HttpServlet {
     protected void doPost(
             HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException {
-        JakartaFileUploadRequestContext requestContext =
-                new JakartaFileUploadRequestContext(request);
         if (!JakartaFileUploadRequestContext.isMultipartContent(request)) {
             safeError(
                     request,
