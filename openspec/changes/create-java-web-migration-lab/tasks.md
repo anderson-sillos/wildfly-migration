@@ -118,7 +118,7 @@
 
 ### Checkpoint CP-3D — Gate Java 17
 
-- [ ] 3.16 Manter Tiles e handlers TLD em `javax` somente como exceções temporárias documentadas, sem atualizar para outra versão descontinuada.
+- [x] 3.16 Manter Tiles e handlers TLD em `javax` somente como exceções temporárias documentadas, sem atualizar para outra versão descontinuada.
 - [ ] 3.17 Executar contratos H2 e Oracle e auditoria completos no Java 17/WildFly 26 e comparar com o baseline.
 - [ ] 3.18 Gerar manifesto do gate com dependências atualizadas, exceções adiadas, checksum do WAR e resultados.
 - [ ] 3.19 Documentar reprodução e rollback do gate para `migration/02-java8-wildfly26`.

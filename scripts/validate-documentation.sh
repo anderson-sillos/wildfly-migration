@@ -58,11 +58,29 @@ required_paths=(
   "scripts/ValidateXmlBeans53.java"
   "scripts/ValidateDom4j22.java"
   "scripts/ValidateJavaXmlModule.java"
+  "docs/cp-3d-java17-gate.md"
+  "migration/steps/CP-3D-tiles-tld-exception.md"
+  "scripts/validate-cp-3d-tiles-tld.sh"
 )
 
 for path in "${required_paths[@]}"; do
   if [[ ! -f "$REPOSITORY_ROOT/$path" ]]; then
     printf 'FALHA: documentação obrigatória ausente: %s\n' "$path" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'Tiles 2.1.4' \
+  'exceção temporária' \
+  'javax.servlet.jsp.tagext' \
+  'web-jsptaglibrary_2_0.xsd' \
+  'atividade 3.28' \
+  'atividade 3.31'; do
+  if ! grep -Fqi -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3d-java17-gate.md" \
+      "$REPOSITORY_ROOT/migration/steps/CP-3D-tiles-tld-exception.md"; then
+    printf 'FALHA: documentação CP-3D/Tiles/TLD não contém: %s\n' "$marker" >&2
     exit 1
   fi
 done

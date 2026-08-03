@@ -435,6 +435,14 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-3D; then
+    required+=(
+      "docs/cp-3d-java17-gate.md"
+      "migration/steps/CP-3D-tiles-tld-exception.md"
+      "scripts/validate-cp-3d-tiles-tld.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"

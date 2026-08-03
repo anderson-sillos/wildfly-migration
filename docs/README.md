@@ -58,6 +58,8 @@ passos.
     fornecimento externo, perfis H2/Oracle e qualificação de persistência.
 26. [Evidência CP-3C](evidence/CP-3C.md): auditoria consolidada de XML,
     dependências, H2, Oracle e rollback do checkpoint.
+27. [Gate Java 17 do CP-3D](cp-3d-java17-gate.md): exceção temporária de Tiles
+    2.1.4 e TLD `javax`, limites, validação e substituição planejada.
 
 ## Aplicação e arquitetura
 
@@ -73,6 +75,7 @@ passos.
 - [dom4j 2.2.0 e parsing seguro do CP-3C](cp-3c-dom4j.md);
 - [APIs XML do Java 17 no CP-3C](cp-3c-java-xml-apis.md);
 - [Oracle JDBC 17 do CP-3C](cp-3c-ojdbc17.md);
+- [Gate Java 17 do CP-3D](cp-3d-java17-gate.md);
 - [persistência MyBatis](mybatis-persistence.md);
 - [upload legado e metadados comparáveis](legacy-upload.md);
 - [importação XML legada](legacy-xml-import.md);
