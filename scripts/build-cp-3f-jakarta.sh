@@ -65,6 +65,7 @@ sed -E \
   -e "s#$ROOT#<repository>#g" \
   -e 's#/opt/migration-lab/tools/[^[:space:]]+#<runtime-tool>#g' \
   -e $'s/\x1B\\[[0-9;]*[[:alpha:]]//g' \
+  -e 's/[[:space:]]+$//' \
   "$TEMP_DIRECTORY/build.out" >"$OUTPUT_FILE"
 
 if [[ "$BUILD_STATUS" -eq 0 ]]; then

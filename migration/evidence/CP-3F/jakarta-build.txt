@@ -19,9 +19,9 @@
 [INFO]
 [INFO] --- xmlbeans.plugin:5.3.0:compile (generate-pedido-xml-types) @ wildfly-migration-lab ---
 SchemaCompiler  Metadata LOAD:org/apache/xmlbeans/metadata GEN:br/com/asillos/migration/metadata
-2026-08-03T21:28:22.026443882Z main ERROR Log4j API could not find a logging provider.
-Time to build schema type system: 0.214 seconds
-Time to generate code: 0.018 seconds
+2026-08-03T21:30:37.626104008Z main ERROR Log4j API could not find a logging provider.
+Time to build schema type system: 0.222 seconds
+Time to generate code: 0.019 seconds
 [INFO]
 [INFO] --- resources:3.4.0:resources (default-resources) @ wildfly-migration-lab ---
 [INFO] Copying 12 resources from src/main/resources to target/cp3f-jakarta11/classes
@@ -51,6 +51,6 @@ Time to generate code: 0.018 seconds
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  2.957 s
-[INFO] Finished at: 2026-08-03T18:28:24-03:00
+[INFO] Total time:  2.909 s
+[INFO] Finished at: 2026-08-03T18:30:39-03:00
 [INFO] ------------------------------------------------------------------------
