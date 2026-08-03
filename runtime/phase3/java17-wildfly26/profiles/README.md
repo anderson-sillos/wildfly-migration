@@ -5,7 +5,7 @@ Os dois perfis publicam o mesmo pool `MigrationDS` no JNDI
 
 - `ci-h2.cli` usa H2 2.4.240 como módulo externo, banco somente em memória e
   resultado `portable-ci`;
-- `oracle.cli` mantém temporariamente o módulo externo `ojdbc7` e pode produzir
+- `oracle.cli` usa o módulo externo `com.oracle.ojdbc17` e pode produzir
   resultado `oracle-qualified` somente após a suíte na rede interna.
 
 O H2 não abre console, listener TCP ou arquivo persistente. Nenhum driver pode

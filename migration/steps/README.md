@@ -27,3 +27,11 @@ Registros atuais:
   separação entre produto JDBC e Release Update observado no banco.
 - [`CP-3B-reflections-0.10.2.md`](CP-3B-reflections-0.10.2.md):
   scanners e classloader explícitos para preservar a descoberta anotada.
+- [`CP-3C-xmlbeans-5.3.0.md`](CP-3C-xmlbeans-5.3.0.md):
+  geração dos tipos pelo XSD e round-trip seguro de XMLBeans 5.3.0.
+- [`CP-3C-dom4j-2.2.0.md`](CP-3C-dom4j-2.2.0.md):
+  mudança de coordenada, parsing legítimo e rejeição de XXE/entidades.
+- [`CP-3C-java-xml-apis.md`](CP-3C-java-xml-apis.md):
+  remoção de APIs XML duplicadas e uso do módulo `java.xml`.
+- [`CP-3C-ojdbc17.md`](CP-3C-ojdbc17.md):
+  troca controlada do driver Oracle externo no gate Java 17.

@@ -1,0 +1,14 @@
+{
+  "schema": "wildfly-migration-dom4j-compatibility/v1",
+  "qualification": "portable-ci",
+  "profile": "ci-h2",
+  "sourceCommit": "fc513dc7c92280593925ea004bfaed2551d5eecb",
+  "warSha256": "6a5d3ba33b6bd1541d7a7aa59962daa5d719a48d973fd8062f800082094b59b3",
+  "runtime": "java17-wildfly26.1.3-ee8",
+  "dom4jVersion": "2.2.0",
+  "checks": {
+    "validDocument": "passed",
+    "xxeRejection": "passed",
+    "entityExpansionRejection": "passed"
+  }
+}

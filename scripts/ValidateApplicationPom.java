@@ -126,13 +126,13 @@ public final class ValidateApplicationPom {
         expected.put("org.apache.tiles:tiles-jsp",
                 values("2.1.4", "compile"));
         expected.put("org.apache.xmlbeans:xmlbeans",
-                values("2.3.0", "compile"));
-        expected.put("xml-apis:xml-apis",
-                values("1.3.02", "compile"));
-        expected.put(
-                "org.apache.geronimo.specs:geronimo-stax-api_1.0_spec",
-                values("1.0", "compile"));
-        expected.put("dom4j:dom4j", values("1.6.1", "compile"));
+                values("5.3.0", "compile"));
+        expected.put("org.dom4j:dom4j", values("2.2.0", "compile"));
+
+        require(!properties.containsKey("xml.apis.version"),
+                "propriedade removida xml.apis.version reapareceu");
+        require(!properties.containsKey("geronimo.stax.version"),
+                "propriedade removida geronimo.stax.version reapareceu");
 
         Element dependencies = child(project, "dependencies");
         NodeList dependencyNodes = dependencies.getChildNodes();
@@ -183,6 +183,7 @@ public final class ValidateApplicationPom {
         expectedPlugins.put("maven-compiler-plugin", "3.8.1");
         expectedPlugins.put("maven-war-plugin", "3.3.2");
         expectedPlugins.put("maven-dependency-plugin", "3.1.2");
+        expectedPlugins.put("xmlbeans", "${xmlbeans.version}");
 
         Element plugins = child(build, "plugins");
         NodeList pluginNodes = plugins.getChildNodes();
@@ -199,8 +200,13 @@ public final class ValidateApplicationPom {
             String expectedVersion = expectedPlugins.get(artifactId);
             require(expectedVersion != null,
                     "plugin inesperado: " + artifactId);
-            require(expectedVersion.equals(text(plugin, "version")),
-                    "versão divergente do plugin " + artifactId);
+            if ("xmlbeans".equals(artifactId)) {
+                require(expectedVersion.equals(text(plugin, "version")),
+                        "plugin XMLBeans deve usar a propriedade de versão");
+            } else {
+                require(expectedVersion.equals(text(plugin, "version")),
+                        "versão divergente do plugin " + artifactId);
+            }
             if ("maven-enforcer-plugin".equals(artifactId)) {
                 Element requireMaven =
                         uniqueDescendant(plugin, "requireMavenVersion");

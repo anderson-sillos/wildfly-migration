@@ -22,8 +22,8 @@ fora do WAR, é provisionado como módulo do WildFly e usa somente uma URL
 runtime histórico e no cache único para que as tags anteriores permaneçam
 reproduzíveis.
 
-O perfil `oracle` continua separado e ainda usa o `ojdbc7` externo nesta
-atividade. A atualização do driver pertence à atividade 3.14; nenhuma aprovação
+O perfil `oracle` continua separado e usa o módulo externo `com.oracle.ojdbc17`.
+O JAR é fornecido por `OJDBC17_JAR` e validado por SHA-256; nenhuma aprovação
 H2 pode ser promovida a `oracle-qualified`.
 
 Os perfis configuram categoria e MDC no subsistema de logging. O WAR contém

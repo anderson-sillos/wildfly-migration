@@ -1,0 +1,18 @@
+{
+  "schema": "wildfly-migration-ojdbc17-compatibility/v1",
+  "qualification": "oracle-qualified",
+  "profile": "oracle",
+  "sourceCommit": "39b156cc91627f54a1a7af17c7a0bb2e237c0710",
+  "warSha256": "0e431a2ec85e0918cc89ed91dcec5715e7872e18b8d57441d7ae781b4a5a5d5b",
+  "runtime": "java17-wildfly26.1.3-ee8",
+  "databaseVersion": "19.3.0.0.0",
+  "jdbcDriver": "ojdbc17-23.26.2.0.0",
+  "checks": {
+    "datasource": "passed",
+    "mybatisCommit": "passed",
+    "mybatisRollback": "passed",
+    "timestampRoundTrip": "passed",
+    "blobRoundTrip": "passed",
+    "transientDataCleanup": "passed"
+  }
+}

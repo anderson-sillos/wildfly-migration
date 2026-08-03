@@ -1,7 +1,7 @@
 # Codex handoff
 
-Atualizado em 31/07/2026 após a conclusão da atividade 3.10 e do checkpoint
-`CP-3B`. O trabalho deve permanecer pausado antes da atividade 3.11.
+Atualizado em 31/07/2026 após a conclusão da atividade 3.12. O trabalho deve
+permanecer pausado antes da atividade 3.13.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -11,12 +11,13 @@ URLs Oracle, endereços internos nem valores do `.env`.
 
 - Repositório: `anderson-sillos/wildfly-migration`.
 - Mudança OpenSpec: `create-java-web-migration-lab`.
-- Branch: `checkpoint/cp-3b-core-dependencies`.
+- Branch: `checkpoint/cp-3c-xml-jdbc`.
 - PR draft: [#20 — CP-3B: modernizar dependências centrais](https://github.com/anderson-sillos/wildfly-migration/pull/20).
 - Base do checkpoint: `6d94e5fc735575fa2ac644690a2a0635d921199f`, fechamento do CP-3A.
-- Progresso OpenSpec: 65 de 110 tarefas concluídas.
+- Progresso OpenSpec: 66 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
-- Próxima atividade: 3.11, atualizar XMLBeans para 5.3.0.
+- Atividades CP-3C concluídas: 3.11, XMLBeans 5.3.0; 3.12, dom4j 2.2.0.
+- Próxima atividade: 3.13, remover `xml-apis` e Geronimo StAX.
 - O PR #20 foi encerrado com squash merge pelo commit de checkpoint do CP-3B.
 
 ## Decisões permanentes
@@ -109,6 +110,38 @@ URLs Oracle, endereços internos nem valores do `.env`.
 As conclusões explicativas estão em `docs/evidence/CP-3B.md`; os relatórios
 sanitizados ficam em `migration/evidence/CP-3B/`.
 
+## CP-3C — atividade 3.11 concluída
+
+- XMLBeans foi atualizado de 2.3.0 para 5.3.0.
+- O plugin Maven regenera os tipos em cada build a partir de
+  `app/src/main/resources/xsd/pedido-importacao-v1.xsd`; o pacote gerado é
+  `wildflyMigrationPedido1` e os fontes em `target/` não são versionados.
+- O parser usa `PedidoDocument.Factory.parse` e `validate`, preservando as
+  proteções contra DTD e entidades externas; dom4j 1.6.1 permanece para a
+  atividade 3.12.
+- O WAR contém `xmlbeans-5.3.0.jar` e `log4j-api-2.24.2.jar`, não contém
+  `log4j-core` e não recebe mais `stax-api` como transitiva.
+- A sonda aprovou fixture válida, rejeição por schema, namespace e
+  `parse → xmlText → parse`; resultado sanitizado em
+  `migration/evidence/CP-3C/xmlbeans-ci-h2.json`.
+- WAR reproduzido com 19 bibliotecas, bytecode Java 17 e SHA-256
+  `9434ac0841a0af52c5cf53e3f5a4c2a345c5cc8ed47b357ec034036bf4f10de0`.
+- Detalhes e fontes oficiais: `docs/cp-3c-xmlbeans.md` e
+  `migration/steps/CP-3C-xmlbeans-5.3.0.md`.
+
+## CP-3C — atividade 3.12 concluída
+
+- A coordenada foi alterada de `dom4j:dom4j:1.6.1` para
+  `org.dom4j:dom4j:2.2.0`; nenhuma transitiva opcional foi adicionada ao WAR.
+- O parser continua usando XMLReader namespace-aware com processamento seguro,
+  DTD/entidades externas bloqueadas e `EntityResolver` de rejeição.
+- Documento legítimo, XXE e expansão de entidades foram validados pela sonda
+  `scripts/validate-cp-3c-dom4j.sh`.
+- WAR reproduzido com 19 bibliotecas e SHA-256
+  `6a5d3ba33b6bd1541d7a7aa59962daa5d719a48d973fd8062f800082094b59b3`.
+- Detalhes: `docs/cp-3c-dom4j.md` e
+  `migration/steps/CP-3C-dom4j-2.2.0.md`.
+
 ## Validações aprovadas
 
 - `repository-baseline` local: aprovado.
@@ -139,16 +172,16 @@ o build podem executar no sandbox.
 
 ## Próxima ação
 
-Retomar pela atividade 3.11 sem refazer a auditoria de CI já aprovada:
+Após integrar a entrega da 3.12, retomar pela atividade 3.13 sem refazer a
+auditoria histórica de CI já aprovada:
 
 ```bash
 git status --short --branch
 openspec status --change create-java-web-migration-lab --json
 openspec instructions apply --change create-java-web-migration-lab --json
 ./scripts/doctor.sh CP-3B --profile ci-h2 --env .env --non-interactive
-./scripts/validate-cp-3b.sh
+./scripts/validate-cp-3c-dom4j.sh --env .env --skip-build
 ```
 
-A atividade 3.11 inicia o CP-3C para XMLBeans. A troca de Reflections por
-`ServletContainerInitializer` em JAR separado continua reservada às subtarefas
-da atividade 3.33.
+A troca de Reflections por `ServletContainerInitializer` em JAR separado
+continua reservada às subtarefas da atividade 3.33.

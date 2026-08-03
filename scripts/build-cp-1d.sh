@@ -8,16 +8,21 @@ PROFILE=""
 JAVA_RELEASE="7"
 MAVEN_RELEASE="3.8.9"
 MAVEN_EXTRA_ARGUMENTS=()
+IDE_REBUILD=false
 
 usage() {
   cat <<'USAGE'
 Uso:
   ./scripts/build-cp-1d.sh --profile ci-h2|oracle [--java 7|8|17] \
-    [--maven 3.8.9|3.9.16] [--env ARQUIVO]
+    [--maven 3.8.9|3.9.16] [--env ARQUIVO] [--ide-rebuild]
 
 Valores já exportados no ambiente prevalecem sobre o arquivo informado.
 Os padrões Java 7/Maven 3.8.9 preservam o uso histórico. Os wrappers dos
 checkpoints selecionam explicitamente a combinação aprovada.
+
+--ide-rebuild executa clean verify em target/vscode-build, sem apagar a saída
+target/classes controlada pelo Java Language Server. Ao final, publica o WAR
+e a árvore de dependências aprovados nos caminhos usuais de target.
 USAGE
 }
 
@@ -101,6 +106,10 @@ while [[ $# -gt 0 ]]; do
       MAVEN_RELEASE="$2"
       shift 2
       ;;
+    --ide-rebuild)
+      IDE_REBUILD=true
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -180,6 +189,18 @@ if [[ "$maven_version" != *"Apache Maven $MAVEN_RELEASE"* ||
   exit 1
 fi
 
+BUILD_DIRECTORY="$REPOSITORY_ROOT/app/target"
+STANDARD_WAR="$REPOSITORY_ROOT/app/target/wildfly-migration.war"
+if [[ "$IDE_REBUILD" == "true" ]]; then
+  BUILD_DIRECTORY="$REPOSITORY_ROOT/app/target/vscode-build"
+  MAVEN_EXTRA_ARGUMENTS+=("-Dmigration.build.directory=$BUILD_DIRECTORY")
+  rm -f -- "$STANDARD_WAR"
+  printf 'IDE: build limpo isolado em app/target/vscode-build\n'
+fi
+
+BUILT_WAR="$BUILD_DIRECTORY/wildfly-migration.war"
+DEPENDENCY_TREE="$BUILD_DIRECTORY/dependency-tree.txt"
+
 JAVA_HOME="$JAVA_HOME_VALUE" \
 PATH="$JAVA_HOME_VALUE/bin:$PATH" \
 MAVEN_OPTS="$MAVEN_OPTIONS" \
@@ -189,7 +210,7 @@ MAVEN_OPTS="$MAVEN_OPTIONS" \
   "${MAVEN_EXTRA_ARGUMENTS[@]}" \
   clean verify \
   org.apache.maven.plugins:maven-dependency-plugin:3.1.2:tree \
-  -DoutputFile=target/dependency-tree.txt
+  -DoutputFile="$DEPENDENCY_TREE"
 
 "$REPOSITORY_ROOT/scripts/audit-legacy-war.sh" \
   --java-home "$JAVA_HOME_VALUE" \
@@ -202,7 +223,13 @@ MAVEN_OPTS="$MAVEN_OPTIONS" \
     esac
   )" \
   --expected-java-label "Java $JAVA_RELEASE" \
-  "$REPOSITORY_ROOT/app/target/wildfly-migration.war"
+  "$BUILT_WAR"
+
+if [[ "$IDE_REBUILD" == "true" ]]; then
+  cp -- "$BUILT_WAR" "$STANDARD_WAR"
+  cp -- "$DEPENDENCY_TREE" "$REPOSITORY_ROOT/app/target/dependency-tree.txt"
+  printf 'IDE: WAR e árvore de dependências publicados em app/target\n'
+fi
 
 printf 'OK: WAR construído e auditado com Java %s no perfil %s\n' \
   "$JAVA_RELEASE" "$PROFILE"

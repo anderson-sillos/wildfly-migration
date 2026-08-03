@@ -18,11 +18,8 @@ import br.com.asillos.migration.integration.validation.LegacyValidatorDiscovery;
 import br.com.asillos.migration.integration.validation.PedidoImportValidator;
 
 import org.apache.log4j.Logger;
-import org.apache.xmlbeans.SchemaTypeLoader;
-import org.apache.xmlbeans.XmlBeans;
 import org.apache.xmlbeans.XmlError;
 import org.apache.xmlbeans.XmlException;
-import org.apache.xmlbeans.XmlObject;
 import org.apache.xmlbeans.XmlOptions;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -33,8 +30,10 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import wildflyMigrationPedido1.PedidoDocument;
+
 /**
- * Valida com XMLBeans 2.3.0 e mapeia com dom4j 1.6.1.
+ * Valida com tipos gerados pelo XMLBeans 5.3.0 e mapeia com dom4j 2.2.0.
  */
 public final class LegacyPedidoXmlParser {
     private static final Logger LOGGER =
@@ -43,7 +42,6 @@ public final class LegacyPedidoXmlParser {
     public static final String NAMESPACE =
             "urn:wildfly-migration:pedido:1";
 
-    private final SchemaTypeLoader schemaTypes;
     private final List<PedidoImportValidator> validators;
 
     public LegacyPedidoXmlParser(InputStream schemaInput)
@@ -53,26 +51,20 @@ public final class LegacyPedidoXmlParser {
                     "XSD de importação não foi encontrado no WAR");
         }
         try {
-            XmlObject schema = XmlObject.Factory.parse(
-                    schemaInput, secureLoadOptions());
-            schemaTypes = XmlBeans.loadXsd(new XmlObject[] {schema});
-            validators = LegacyValidatorDiscovery.discover();
-            LOGGER.info(
-                    "legacy_validator_order="
-                    + LegacyValidatorDiscovery.describe(validators));
-        } catch (XmlException exception) {
-            throw new XmlImportException(
-                    "XSD de importação não pôde ser compilado", exception);
+            /*
+             * O XSD é consumido pelo plugin XMLBeans durante o build. Os
+             * tipos compilados carregam o TypeSystemHolder no classpath; não
+             * há mais compilação dinâmica do schema no primeiro request.
+             */
+            schemaInput.close();
         } catch (IOException exception) {
             throw new XmlImportException(
                     "XSD de importação não pôde ser lido", exception);
-        } finally {
-            try {
-                schemaInput.close();
-            } catch (IOException ignored) {
-                // O recurso já foi consumido; não há estado externo a preservar.
-            }
         }
+        validators = LegacyValidatorDiscovery.discover();
+        LOGGER.info(
+                "legacy_validator_order="
+                + LegacyValidatorDiscovery.describe(validators));
     }
 
     public Pedido parse(byte[] xml) throws XmlImportException {
@@ -95,8 +87,8 @@ public final class LegacyPedidoXmlParser {
             XmlOptions loadOptions = secureLoadOptions();
             loadOptions.setLoadLineNumbers();
             loadOptions.setErrorListener(errors);
-            XmlObject document = schemaTypes.parse(
-                    new ByteArrayInputStream(xml), null, loadOptions);
+            PedidoDocument document = PedidoDocument.Factory.parse(
+                    new ByteArrayInputStream(xml), loadOptions);
 
             XmlOptions validationOptions = new XmlOptions();
             validationOptions.setErrorListener(errors);

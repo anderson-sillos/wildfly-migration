@@ -215,6 +215,9 @@ public final class ValidateLegacyMyBatis {
         require(new BigDecimal("19.90").compareTo(
                 created.getValorTotal()) == 0,
                 "valor monetário divergiu");
+        require(created.getCriadoEm() != null
+                && created.getAtualizadoEm() != null,
+                "timestamps não foram retornados pelo insert Oracle/H2");
 
         List<Pedido> pedidos = repository.listar();
         require(pedidos.size() == 2,
@@ -344,7 +347,9 @@ public final class ValidateLegacyMyBatis {
             writer.write("    \"typeHandlers\": \"passed\",\n");
             writer.write("    \"reflection\": \"passed\",\n");
             writer.write("    \"mybatisCommit\": \"passed\",\n");
-            writer.write("    \"mybatisRollback\": \"passed\"\n");
+            writer.write("    \"mybatisRollback\": \"passed\",\n");
+            writer.write("    \"timestampRoundTrip\": \"passed\",\n");
+            writer.write("    \"blobRoundTrip\": \"passed\"\n");
             writer.write("  }\n");
             writer.write("}\n");
         } finally {

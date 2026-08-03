@@ -46,14 +46,27 @@ public final class ValidateLegacyXmlImport {
                 + "pedido-invalido-validador.xml"));
 
         require(pom.indexOf(
-                "<xmlbeans.version>2.3.0</xmlbeans.version>") >= 0,
-                "XMLBeans 2.3.0 não está fixado");
+                "<xmlbeans.version>5.3.0</xmlbeans.version>") >= 0,
+                "XMLBeans 5.3.0 não está fixado");
         require(pom.indexOf(
-                "<dom4j.version>1.6.1</dom4j.version>") >= 0,
-                "dom4j 1.6.1 não está fixado");
-        require(parser.indexOf("XmlBeans.loadXsd") >= 0
-                && parser.indexOf("document.validate") >= 0,
-                "parser não valida o documento com XMLBeans");
+                "<artifactId>xmlbeans</artifactId>") >= 0
+                && pom.indexOf("<goal>compile</goal>") >= 0
+                && pom.indexOf("<sourceSchemas>pedido-importacao-v1.xsd"
+                        + "</sourceSchemas>") >= 0
+                && pom.indexOf("<repackage>br.com.asillos.migration.metadata"
+                        + "</repackage>") >= 0,
+                "geração dos tipos XMLBeans não está configurada pelo XSD");
+        require(pom.indexOf("<groupId>org.eclipse.m2e</groupId>") >= 0
+                && pom.indexOf("<artifactId>lifecycle-mapping</artifactId>") >= 0
+                && pom.indexOf("<runOnIncremental>true</runOnIncremental>") >= 0,
+                "lifecycle mapping do m2e para XMLBeans está ausente");
+        require(pom.indexOf(
+                "<dom4j.version>2.2.0</dom4j.version>") >= 0,
+                "dom4j 2.2.0 não está fixado");
+        require(parser.indexOf("PedidoDocument.Factory.parse") >= 0
+                && parser.indexOf("document.validate") >= 0
+                && parser.indexOf("wildflyMigrationPedido1.PedidoDocument") >= 0,
+                "parser não usa os tipos gerados e valida o documento");
         require(parser.indexOf("new SAXReader(secureXmlReader())") >= 0,
                 "parser não mapeia com dom4j e XMLReader seguro");
         require(parser.indexOf("disallow-doctype-decl") >= 0
@@ -98,7 +111,7 @@ public final class ValidateLegacyXmlImport {
                         "data-page=\"pedidos-importacao-xml\"") >= 0,
                 "página de seleção do arquivo XML ausente");
         require(schema.indexOf("[A-Za-z0-9._\\-]*") >= 0,
-                "hífen do pattern deve estar escapado para XMLBeans 2.3.0");
+                "hífen do pattern deve estar escapado para XMLBeans");
         require(validatorFixture.indexOf(
                 "<numero>XML-VALIDATOR-0001</numero>") >= 0
                 && validatorFixture.indexOf(
@@ -106,7 +119,7 @@ public final class ValidateLegacyXmlImport {
                 "fixture válida no XSD e inválida no validador divergiu");
 
         System.out.println(
-                "OK: importação XMLBeans/dom4j, XSD e proteções validadas");
+                "OK: importação XMLBeans 5/dom4j, XSD e proteções validadas");
     }
 
     private static File file(File repository, String relativePath) {

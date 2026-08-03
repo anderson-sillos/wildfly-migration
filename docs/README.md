@@ -48,6 +48,16 @@ passos.
     scanners, TCCL, conjunto e ordem de validadores no WildFly 26.
 21. [Evidência CP-3B](evidence/CP-3B.md): resultados parciais das atualizações
     centrais e conclusão consolidada no fechamento do checkpoint.
+22. [XMLBeans 5.3.0 do CP-3C](cp-3c-xmlbeans.md): geração dos tipos a partir
+    do XSD, validação de namespace/serialização e auditoria do WAR.
+23. [dom4j 2.2.0 do CP-3C](cp-3c-dom4j.md): coordenada moderna, reader seguro
+   e rejeição de XXE/expansão de entidades.
+24. [APIs XML do Java 17 no CP-3C](cp-3c-java-xml-apis.md): remoção de
+    xml-apis/Geronimo StAX e comprovação do módulo java.xml.
+25. [Oracle JDBC do CP-3C](cp-3c-ojdbc17.md): troca do driver externo,
+    fornecimento externo, perfis H2/Oracle e qualificação de persistência.
+26. [Evidência CP-3C](evidence/CP-3C.md): auditoria consolidada de XML,
+    dependências, H2, Oracle e rollback do checkpoint.
 
 ## Aplicação e arquitetura
 
@@ -59,6 +69,10 @@ passos.
 - [ponte temporária de logging do CP-3B](cp-3b-logging-bridge.md);
 - [Commons FileUpload 1.x transitório no CP-3B](cp-3b-fileupload.md);
 - [Reflections 0.10.2 transitório no CP-3B](cp-3b-reflections-bridge.md);
+- [XMLBeans 5.3.0 e tipos gerados do CP-3C](cp-3c-xmlbeans.md);
+- [dom4j 2.2.0 e parsing seguro do CP-3C](cp-3c-dom4j.md);
+- [APIs XML do Java 17 no CP-3C](cp-3c-java-xml-apis.md);
+- [Oracle JDBC 17 do CP-3C](cp-3c-ojdbc17.md);
 - [persistência MyBatis](mybatis-persistence.md);
 - [upload legado e metadados comparáveis](legacy-upload.md);
 - [importação XML legada](legacy-xml-import.md);

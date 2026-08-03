@@ -140,26 +140,34 @@ else
   CONFIGURED_JAVA_HOME="$(configuration_value JAVA7_HOME)"
 fi
 SELECTED_JAVA_HOME="${JAVA_HOME_ARGUMENT:-$CONFIGURED_JAVA_HOME}"
-OJDBC7_JAR_VALUE="$(configuration_value OJDBC7_JAR)"
-OJDBC7_SHA256_VALUE="$(configuration_value OJDBC7_SHA256)"
+if [[ "$JAVA_RELEASE" == "17" ]]; then
+  ORACLE_DRIVER_JAR_VALUE="$(configuration_value OJDBC17_JAR)"
+  ORACLE_DRIVER_SHA256_VALUE="$(configuration_value OJDBC17_SHA256)"
+  ORACLE_DRIVER_LABEL="ojdbc17"
+else
+  ORACLE_DRIVER_JAR_VALUE="$(configuration_value OJDBC7_JAR)"
+  ORACLE_DRIVER_SHA256_VALUE="$(configuration_value OJDBC7_SHA256)"
+  ORACLE_DRIVER_LABEL="ojdbc7"
+fi
 export ORACLE_DB_URL="$(configuration_value ORACLE_DB_URL)"
 export ORACLE_DB_USER="$(configuration_value ORACLE_DB_USER)"
 export ORACLE_DB_PASSWORD="$(configuration_value ORACLE_DB_PASSWORD)"
 
 if [[ ! -x "$SELECTED_JAVA_HOME/bin/java" ||
       ! -x "$SELECTED_JAVA_HOME/bin/javac" ||
-      ! -f "$OJDBC7_JAR_VALUE" ||
+      ! -f "$ORACLE_DRIVER_JAR_VALUE" ||
       -z "$ORACLE_DB_URL" ||
       -z "$ORACLE_DB_USER" ||
       -z "$ORACLE_DB_PASSWORD" ]]; then
-  printf 'FALHA: JDK selecionado, ojdbc7 e configuração Oracle são obrigatórios\n' >&2
+  printf 'FALHA: JDK selecionado, %s e configuração Oracle são obrigatórios\n' \
+    "$ORACLE_DRIVER_LABEL" >&2
   exit 1
 fi
 
-actual_checksum="$(sha256sum "$OJDBC7_JAR_VALUE" | awk '{print $1}')"
-if [[ ! "$OJDBC7_SHA256_VALUE" =~ ^[[:xdigit:]]{64}$ ]] ||
-   [[ "$actual_checksum" != "${OJDBC7_SHA256_VALUE,,}" ]]; then
-  printf 'FALHA: checksum do ojdbc7 não foi aprovado\n' >&2
+actual_checksum="$(sha256sum "$ORACLE_DRIVER_JAR_VALUE" | awk '{print $1}')"
+if [[ ! "$ORACLE_DRIVER_SHA256_VALUE" =~ ^[[:xdigit:]]{64}$ ]] ||
+   [[ "$actual_checksum" != "${ORACLE_DRIVER_SHA256_VALUE,,}" ]]; then
+  printf 'FALHA: checksum do %s não foi aprovado\n' "$ORACLE_DRIVER_LABEL" >&2
   exit 1
 fi
 
@@ -169,5 +177,5 @@ fi
   "$REPOSITORY_ROOT/scripts/OracleLabSchema.java"
 
 "$SELECTED_JAVA_HOME/bin/java" \
-  -cp "$TEMP_DIRECTORY:$OJDBC7_JAR_VALUE" \
+  -cp "$TEMP_DIRECTORY:$ORACLE_DRIVER_JAR_VALUE" \
   OracleLabSchema "$ACTION" "$REPOSITORY_ROOT"

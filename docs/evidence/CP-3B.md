@@ -198,8 +198,8 @@ O fechamento consolidou as atividades 3.6 a 3.9 após reconstruir e auditar o
 WAR final em Java 17/Maven 3.9.16/WildFly 26.1.3. Os dois perfis reproduziram
 o mesmo artefato:
 
-- commit-fonte funcional testado: `14b9fbf23757c6cb721a4d9a809569d1b5c71b6b`;
-- commit de documentação e encerramento: `c6ed5ae93c5060815721084c2cb9beed9dd700f7`;
+- commit-fonte funcional reancorado: `84fb02f37e4eaf522d98de66697807b03dfa574a`;
+- commit de documentação e encerramento: `84fb02f37e4eaf522d98de66697807b03dfa574a`;
 - WAR SHA-256:
   `d3866778808f442b02691e1739ca7f0e8c1e6ec1c9dea7d99e72c9505362b5b5`;
 - árvore Maven SHA-256:
@@ -219,11 +219,17 @@ na rede interna; os registros transitórios `LAB-SMOKE-*` foram removidos.
 O relatório versionado do fechamento está em
 `migration/evidence/CP-3B/closure.properties`.
 
+Os commits de implementação individuais das atividades 3.6 a 3.9 continuam
+registrados nas seções históricas acima. Como o PR #20 foi integrado por squash
+e sua branch foi removida, as evidências legíveis por máquina foram reancoradas
+no commit integrado `84fb02f37e4eaf522d98de66697807b03dfa574a`, que contém o
+mesmo código qualificado e está disponível em checkout limpo.
+
 ### Rollback comprovado
 
 O rollback do CP-3B aponta para o último checkpoint verde do CP-3A,
-`28789b65964b6daf79082179893687140b84493b`, que preserva o estado anterior à
-atividade 3.9. A existência do commit, a divergência esperada de Reflections e
+`6d94e5fc735575fa2ac644690a2a0635d921199f`, que preserva o estado anterior ao
+checkpoint. A existência do commit, a divergência esperada de Reflections e
 a allowlist histórica foram verificadas; nenhum schema Oracle ou dado
 permanente é alterado pelo rollback.
 

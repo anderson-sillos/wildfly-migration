@@ -8,6 +8,7 @@ WAR_FILE=""
 RESULT_FILE=""
 COMPILE_ONLY=false
 JAVA_RELEASE="8"
+DRIVER_FAMILY="ojdbc7"
 TEMP_DIRECTORY="$(
   mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-cp2c-oracle.XXXXXXXX"
 )"
@@ -18,7 +19,8 @@ Uso:
   ./scripts/validate-cp-2c-oracle-persistence.sh \
     --war ARQUIVO --result ARQUIVO [--env ARQUIVO]
   ./scripts/validate-cp-2c-oracle-persistence.sh \
-    --compile-only --war ARQUIVO [--java 8|17] [--env ARQUIVO]
+    --compile-only --war ARQUIVO [--java 8|17] [--driver ojdbc7|ojdbc17]
+    [--env ARQUIVO]
 
 Executa uma sonda MyBatis externa ao WAR no schema Oracle descartável.
 O relatório é sanitizado e não registra URL, usuário ou senha.
@@ -111,6 +113,12 @@ while [[ $# -gt 0 ]]; do
       JAVA_RELEASE="$2"
       shift 2
       ;;
+    --driver)
+      [[ $# -ge 2 && ( "$2" == "ojdbc7" || "$2" == "ojdbc17" ) ]] ||
+        fail "--driver exige ojdbc7 ou ojdbc17"
+      DRIVER_FAMILY="$2"
+      shift 2
+      ;;
     -h|--help)
       usage
       exit 0
@@ -168,33 +176,43 @@ if [[ "$COMPILE_ONLY" == true ]]; then
   exit 0
 fi
 
-OJDBC7_JAR_VALUE="$(configuration_value OJDBC7_JAR)"
-OJDBC7_SHA256_VALUE="$(configuration_value OJDBC7_SHA256)"
+if [[ "$DRIVER_FAMILY" == "ojdbc17" ]]; then
+  ORACLE_DRIVER_JAR_VALUE="$(configuration_value OJDBC17_JAR)"
+  ORACLE_DRIVER_SHA256_VALUE="$(configuration_value OJDBC17_SHA256)"
+  ORACLE_DRIVER_VERSION="23.26.2.0.0"
+  ORACLE_DRIVER_EXPECTED_SHA256="96010f27fce64c285f9d1aab8f96357b8e00c49c9ad041ecf140c9d7d27eb3fb"
+else
+  ORACLE_DRIVER_JAR_VALUE="$(configuration_value OJDBC7_JAR)"
+  ORACLE_DRIVER_SHA256_VALUE="$(configuration_value OJDBC7_SHA256)"
+  ORACLE_DRIVER_VERSION="12.1.0.2.0"
+  ORACLE_DRIVER_EXPECTED_SHA256="0d34cddb5726232ad4c0e5db731e930c9c75d8f74b9c4aa449799cc43dd3e829"
+fi
 ORACLE_DB_URL_VALUE="$(configuration_value ORACLE_DB_URL)"
 ORACLE_DB_USER_VALUE="$(configuration_value ORACLE_DB_USER)"
 ORACLE_DB_PASSWORD_VALUE="$(configuration_value ORACLE_DB_PASSWORD)"
 
-[[ -f "$OJDBC7_JAR_VALUE" ]] ||
-  fail "OJDBC7_JAR não aponta para o driver externo"
+[[ -f "$ORACLE_DRIVER_JAR_VALUE" ]] ||
+  fail "$DRIVER_FAMILY não aponta para o driver externo"
 [[ -n "$ORACLE_DB_URL_VALUE" &&
    -n "$ORACLE_DB_USER_VALUE" &&
    -n "$ORACLE_DB_PASSWORD_VALUE" ]] ||
   fail "configuração Oracle está incompleta"
 
-expected_ojdbc_sha256="0d34cddb5726232ad4c0e5db731e930c9c75d8f74b9c4aa449799cc43dd3e829"
-actual_ojdbc_sha256="$(sha256sum "$OJDBC7_JAR_VALUE" | awk '{print $1}')"
-[[ "${OJDBC7_SHA256_VALUE,,}" == "$expected_ojdbc_sha256" &&
-   "$actual_ojdbc_sha256" == "$expected_ojdbc_sha256" ]] ||
-  fail "ojdbc7 não corresponde ao driver aprovado"
+actual_oracle_driver_sha256="$(sha256sum "$ORACLE_DRIVER_JAR_VALUE" | awk '{print $1}')"
+[[ "${ORACLE_DRIVER_SHA256_VALUE,,}" == "$ORACLE_DRIVER_EXPECTED_SHA256" &&
+   "$actual_oracle_driver_sha256" == "$ORACLE_DRIVER_EXPECTED_SHA256" ]] ||
+  fail "$DRIVER_FAMILY não corresponde ao driver aprovado"
 
 commit_sha="$(git -C "$REPOSITORY_ROOT" rev-parse HEAD)"
 war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
 ORACLE_DB_URL="$ORACLE_DB_URL_VALUE" \
 ORACLE_DB_USER="$ORACLE_DB_USER_VALUE" \
 ORACLE_DB_PASSWORD="$ORACLE_DB_PASSWORD_VALUE" \
+ORACLE_JDBC_DRIVER_LABEL="$DRIVER_FAMILY" \
+ORACLE_JDBC_DRIVER_VERSION="$ORACLE_DRIVER_VERSION" \
   "$JAVA_HOME_VALUE/bin/java" \
   -Dfile.encoding=UTF-8 \
-  -cp "$TEMP_DIRECTORY/classes:$probe_classpath:$OJDBC7_JAR_VALUE" \
+  -cp "$TEMP_DIRECTORY/classes:$probe_classpath:$ORACLE_DRIVER_JAR_VALUE" \
   ValidateCp2cOraclePersistence \
   "$REPOSITORY_ROOT" \
   "$RESULT_FILE" \
@@ -211,7 +229,7 @@ for marker in \
   "\"warSha256\": \"$war_sha256\"" \
   "\"runtime\": \"$RUNTIME_IDENTIFIER\"" \
   '"databaseVersion": "19.3.0.0.0"' \
-  '"jdbcDriver": "ojdbc7-12.1.0.2.0"' \
+  "\"jdbcDriver\": \"$DRIVER_FAMILY-$ORACLE_DRIVER_VERSION\"" \
   '"mybatisVersion": "3.5.19"' \
   '"mappers": "passed"' \
   '"aliases": "passed"' \
