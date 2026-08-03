@@ -70,6 +70,7 @@ shell_files=(
   scripts/build-cp-3e-jakarta.sh
   scripts/validate-cp-3e-entry.sh
   scripts/build-cp-3f-jakarta.sh
+  scripts/rebuild-cp-3f-ide.sh
   scripts/validate-cp-3f-namespace.sh
   contract-tests/run.sh
 )

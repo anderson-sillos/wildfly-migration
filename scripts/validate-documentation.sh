@@ -77,6 +77,7 @@ required_paths=(
   "migration/evidence/CP-3F/tld-migration.properties"
   "migration/evidence/CP-3F/deployment-tiles-blocked.txt"
   "scripts/build-cp-3f-jakarta.sh"
+  "scripts/rebuild-cp-3f-ide.sh"
   "scripts/validate-cp-3f-namespace.sh"
 )
 

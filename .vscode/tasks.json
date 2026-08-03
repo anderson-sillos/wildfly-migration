@@ -223,11 +223,10 @@
     {
       "label": "Build: limpar bytecode e reconstruir (Java 21/Jakarta/H2)",
       "type": "shell",
-      "command": "${workspaceFolder}/scripts/build-cp-3f-jakarta.sh",
+      "command": "${workspaceFolder}/scripts/rebuild-cp-3f-ide.sh",
       "args": [
         "--env",
-        "${workspaceFolder}/.env",
-        "--ide-rebuild"
+        "${workspaceFolder}/.env"
       ],
       "options": {
         "cwd": "${workspaceFolder}"

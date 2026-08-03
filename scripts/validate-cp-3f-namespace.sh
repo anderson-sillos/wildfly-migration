@@ -19,6 +19,7 @@ required=(
   "runtime/phase3/java21-wildfly41/h2/module.xml"
   "runtime/phase3/java21-wildfly41/profiles/ci-h2.cli"
   "app/src/main/java/br/com/asillos/migration/web/JakartaFileUploadRequestContext.java"
+  "scripts/rebuild-cp-3f-ide.sh"
 )
 
 for path in "${required[@]}"; do
@@ -68,8 +69,15 @@ grep -Fq '"name": "JavaSE-21"' "$ROOT/.vscode/settings.json" ||
 grep -Fq '"java.jdt.ls.java.home": "/opt/migration-lab/tools/jdk-21.0.12+8"' \
   "$ROOT/.vscode/settings.json" ||
   fail "JDT não aponta para o Temurin 21 do laboratório"
-grep -Fq -- '--ide-rebuild' "$ROOT/scripts/build-cp-3f-jakarta.sh" ||
-  fail "build do JDT não possui modo para target/generated-sources"
+grep -Fq 'migration/evidence/CP-3F/jakarta-build.json' \
+  "$ROOT/scripts/build-cp-3f-jakarta.sh" ||
+  fail "build de evidência não registra o resultado JSON do CP-3F"
+if grep -Fq -- 'migration/evidence/CP-3F' "$ROOT/scripts/rebuild-cp-3f-ide.sh"; then
+  fail "rebuild do JDT não pode escrever evidências versionadas"
+fi
+grep -Fq 'migration.build.directory="$ROOT/app/target"' \
+  "$ROOT/scripts/rebuild-cp-3f-ide.sh" ||
+  fail "rebuild do JDT não usa o target padrão com fontes geradas"
 
 for uri in jakarta.tags.core jakarta.tags.fmt; do
   grep -R -Fq "uri=\"$uri\"" "$ROOT/app/src/main/webapp" ||

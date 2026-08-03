@@ -484,6 +484,7 @@ check_required_files() {
       "runtime/phase3/java21-wildfly41/h2/module.xml"
       "runtime/phase3/java21-wildfly41/profiles/ci-h2.cli"
       "scripts/build-cp-3f-jakarta.sh"
+      "scripts/rebuild-cp-3f-ide.sh"
       "scripts/validate-cp-3f-namespace.sh"
     )
   fi
