@@ -58,6 +58,6 @@ executa DDL de rollback fora da limpeza transitória documentada.
 ## Estado de integração
 
 O PR #21 (checkpoint/cp-3c-xml-jdbc) contém a linha de evolução do checkpoint.
-Os artefatos desta atividade estão prontos para revisão e para o commit de
-fechamento checkpoint(CP-3C): modernize XML and JDBC; a tarefa 3.15 permanece
-pendente até esse commit ser criado e integrado.
+Os artefatos foram consolidados no commit local 539fbb5. O commit de fechamento
+checkpoint(CP-3C): modernize XML and JDBC registra a integração local; o
+push/merge remoto permanece dependente da disponibilidade do GitHub.

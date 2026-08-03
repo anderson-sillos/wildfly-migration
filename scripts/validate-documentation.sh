@@ -247,7 +247,7 @@ for marker in \
   '## Auditoria de dependências e empacotamento' \
   '0e431a2ec85e0918cc89ed91dcec5715e7872e18b8d57441d7ae781b4a5a5d5b' \
   '84fb02f37e4eaf522d98de66697807b03dfa574a' \
-  'a tarefa 3.15 permanece'; do
+  'commit local 539fbb5'; do
   if ! grep -Fq -- "$marker" "$REPOSITORY_ROOT/docs/evidence/CP-3C.md"; then
     printf 'FALHA: evidência de fechamento CP-3C não contém: %s\n' "$marker" >&2
     exit 1
@@ -261,7 +261,7 @@ for marker in \
   'oracle-qualified.result=passed' \
   'dependency.audit=passed' \
   'driver.cache=excluded' \
-  'result=ready-for-integration'; do
+  'result=passed'; do
   if ! grep -Fxq -- "$marker" \
       "$REPOSITORY_ROOT/migration/evidence/CP-3C/closure.properties"; then
     printf 'FALHA: propriedades de fechamento CP-3C não contêm: %s\n' "$marker" >&2

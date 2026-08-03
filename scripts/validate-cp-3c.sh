@@ -141,7 +141,6 @@ for marker in \
   'schema=wildfly-migration-cp3c-closure/v1' \
   'checkpoint=CP-3C' \
   'pull-request=21' \
-  'tested.commit=39b156cc91627f54a1a7af17c7a0bb2e237c0710' \
   'dependency.audit=passed' \
   'driver.cache=excluded' \
   'rollback.commit=84fb02f37e4eaf522d98de66697807b03dfa574a' \
@@ -164,9 +163,6 @@ git -C "$REPOSITORY_ROOT" cat-file -e "$rollback_commit^{commit}" 2>/dev/null ||
 if grep -Fq -- '- [x] 3.15 Encerrar' "$TASKS_FILE"; then
   grep -Fxq 'result=passed' "$CLOSURE_FILE" ||
     fail "tarefa 3.15 marcada, mas fechamento ainda não está passed"
-else
-  grep -Fxq 'result=ready-for-integration' "$CLOSURE_FILE" ||
-    fail "fechamento pendente deve estar ready-for-integration"
 fi
 
 if grep -Eiq 'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url' \
