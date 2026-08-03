@@ -107,9 +107,17 @@ jobs:
             fi
           fi
 
+          mode="cp3b"
+          if [[ "$run_portable" == "true" ]] &&
+             grep -Fq 'https://jakarta.ee/xml/ns/jakartaee' \
+               app/src/main/webapp/WEB-INF/web.xml; then
+            mode="cp3f"
+          fi
+
           echo "run=$run_portable" >> "$GITHUB_OUTPUT"
           echo "reason=$reason" >> "$GITHUB_OUTPUT"
-          echo "portable-ci completo: $run_portable ($reason)"
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+          echo "portable-ci completo: $run_portable ($reason; $mode)"
 
       - name: Keep the portable check lightweight
         if: steps.portable-selection.outputs.run != 'true'
@@ -157,8 +165,10 @@ jobs:
           cd "$archives"
 
           tar -xzf OpenJDK17U-jdk_x64_linux_hotspot_17.0.20_8.tar.gz -C "$tools"
+          tar -xzf OpenJDK21U-jdk_x64_linux_hotspot_21.0.12_8.tar.gz -C "$tools"
           tar -xzf apache-maven-3.9.16-bin.tar.gz -C "$tools"
           tar -xzf wildfly-26.1.3.Final.tar.gz -C "$tools"
+          tar -xzf wildfly-41.0.0.Final.tar.gz -C "$tools"
 
           {
             echo "MIGRATION_CHECKPOINT=CP-3B"
@@ -174,20 +184,46 @@ jobs:
             echo "WILDFLY26_HOME=$tools/wildfly-26.1.3.Final"
             echo "WILDFLY26_ARCHIVE=$archives/wildfly-26.1.3.Final.tar.gz"
             echo "WILDFLY26_ARCHIVE_SHA256=aadd317c62616f6b5735ae92151d06c1f03c46eba448958d982c61f02528ae59"
+            echo "JAVA21_HOME=$tools/jdk-21.0.12+8"
+            echo "JAVA21_ARCHIVE=$archives/OpenJDK21U-jdk_x64_linux_hotspot_21.0.12_8.tar.gz"
+            echo "JAVA21_ARCHIVE_SHA256=e4446ff06a276155697597cc0f1b15da004ff083f4964a35271ecee567177370"
+            echo "WILDFLY41_HOME=$tools/wildfly-41.0.0.Final"
+            echo "WILDFLY41_ARCHIVE=$archives/wildfly-41.0.0.Final.tar.gz"
+            echo "WILDFLY41_ARCHIVE_SHA256=d240795958e7d99b638cd4c3e0f9ba4b7d4c53b4f7996dfec1008250c4d48191"
             echo "H2_JAR=$archives/h2-2.4.240.jar"
             echo "H2_SHA256=29b70e427cc1c40cdc376283adbb0cc62853073797bb5fe5761f81fe73d57ce0"
           } >> "$GITHUB_ENV"
 
+      - name: Build and validate CP-3F Jakarta
+        if: steps.portable-selection.outputs.mode == 'cp3f'
+        run: |
+          ./scripts/doctor.sh CP-3F --profile ci-h2 --ci
+          ./scripts/build-cp-3f-jakarta.sh \
+            --env /dev/null
+          ./scripts/validate-cp-3f-namespace.sh
+
+      - name: Upload CP-3F portable evidence
+        if: steps.portable-selection.outputs.mode == 'cp3f'
+        uses: actions/upload-artifact@v6
+        with:
+          name: cp-3f-portable-evidence
+          path: |
+            migration/evidence/CP-3F/jakarta-build.json
+            migration/evidence/CP-3F/jakarta-build.txt
+            migration/evidence/CP-3F/deployment-tiles-blocked.txt
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Run portable doctor
-        if: steps.portable-selection.outputs.run == 'true'
+        if: steps.portable-selection.outputs.run == 'true' && steps.portable-selection.outputs.mode != 'cp3f'
         run: ./scripts/doctor.sh CP-3B --profile ci-h2 --ci
 
       - name: Build and audit portable WAR
-        if: steps.portable-selection.outputs.run == 'true'
+        if: steps.portable-selection.outputs.run == 'true' && steps.portable-selection.outputs.mode != 'cp3f'
         run: ./scripts/build-cp-3b.sh --profile ci-h2
 
       - name: Compile Oracle probes without credentials
-        if: steps.portable-selection.outputs.run == 'true'
+        if: steps.portable-selection.outputs.run == 'true' && steps.portable-selection.outputs.mode != 'cp3f'
         run: |
           ./scripts/validate-cp-2c-oracle-persistence.sh \
             --compile-only \
@@ -199,7 +235,7 @@ jobs:
             --war app/target/wildfly-migration.war
 
       - name: Execute MyBatis portable persistence probe
-        if: steps.portable-selection.outputs.run == 'true'
+        if: steps.portable-selection.outputs.run == 'true' && steps.portable-selection.outputs.mode != 'cp3f'
         run: |
           ./scripts/validate-cp-1e-persistence.sh \
             --java-home "$JAVA17_HOME" \
@@ -209,14 +245,14 @@ jobs:
               app/target/contract-results/cp-3b-mybatis-ci-h2.json
 
       - name: Execute H2 schema lifecycle
-        if: steps.portable-selection.outputs.run == 'true'
+        if: steps.portable-selection.outputs.run == 'true' && steps.portable-selection.outputs.mode != 'cp3f'
         run: |
           ./scripts/validate-cp-1d-h2.sh \
             --java-home "$JAVA17_HOME" \
             --h2-jar "$H2_JAR"
 
       - name: Smoke WildFly 26 H2 datasource
-        if: steps.portable-selection.outputs.run == 'true'
+        if: steps.portable-selection.outputs.run == 'true' && steps.portable-selection.outputs.mode != 'cp3f'
         run: |
           ./scripts/smoke-cp-3b-datasource.sh \
             --profile ci-h2 \
@@ -230,7 +266,7 @@ jobs:
               app/target/contract-results/cp-3b-discovery-ci-h2.json
 
       - name: Validate Java 17 and CP-3B dependencies
-        if: steps.portable-selection.outputs.run == 'true'
+        if: steps.portable-selection.outputs.run == 'true' && steps.portable-selection.outputs.mode != 'cp3f'
         run: |
           ./scripts/validate-cp-3a.sh \
             --promoted-war app/target/wildfly-migration.war \
@@ -249,7 +285,7 @@ jobs:
               app/target/contract-results/cp-3b-discovery-ci-h2.json
 
       - name: Upload sanitized CP-3B portable evidence
-        if: steps.portable-selection.outputs.run == 'true'
+        if: steps.portable-selection.outputs.run == 'true' && steps.portable-selection.outputs.mode != 'cp3f'
         uses: actions/upload-artifact@v6
         with:
           name: cp-3b-portable-evidence

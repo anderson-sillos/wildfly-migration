@@ -5,11 +5,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import br.com.asillos.migration.persistence.AnexoRepository;
 
@@ -52,7 +53,9 @@ public final class UploadServlet extends HttpServlet {
     protected void doPost(
             HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException {
-        if (!ServletFileUpload.isMultipartContent(request)) {
+        JakartaFileUploadRequestContext requestContext =
+                new JakartaFileUploadRequestContext(request);
+        if (!JakartaFileUploadRequestContext.isMultipartContent(request)) {
             safeError(
                     request,
                     response,
@@ -74,7 +77,7 @@ public final class UploadServlet extends HttpServlet {
         List<FileItem> parsedItems = new ArrayList<FileItem>();
         try {
             File temporaryRepository = (File) getServletContext()
-                    .getAttribute("javax.servlet.context.tempdir");
+                    .getAttribute(ServletContext.TEMPDIR);
             if (temporaryRepository == null
                     || !temporaryRepository.isDirectory()) {
                 throw new IllegalStateException(
@@ -88,7 +91,8 @@ public final class UploadServlet extends HttpServlet {
             upload.setFileSizeMax(AnexoRepository.MAX_FILE_BYTES);
             upload.setSizeMax(MAX_REQUEST_BYTES);
 
-            List<?> rawItems = upload.parseRequest(request);
+            List<?> rawItems = JakartaFileUploadRequestContext.parseRequest(
+                    upload, request);
             FileItem fileItem = null;
             for (Object value : rawItems) {
                 if (!(value instanceof FileItem)) {

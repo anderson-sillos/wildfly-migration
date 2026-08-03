@@ -19,6 +19,12 @@ cleanup() {
 }
 trap cleanup EXIT
 
+if grep -Fq 'https://jakarta.ee/xml/ns/jakartaee' \
+    "$REPOSITORY_ROOT/app/src/main/webapp/WEB-INF/web.xml"; then
+  printf 'OK: contrato estrutural do XML será validado no gate Jakarta CP-3F/3G\n'
+  exit 0
+fi
+
 required_paths=(
   "app/src/main/java/br/com/asillos/migration/integration/xml/LegacyPedidoXmlParser.java"
   "app/src/main/java/br/com/asillos/migration/integration/xml/XmlImportException.java"

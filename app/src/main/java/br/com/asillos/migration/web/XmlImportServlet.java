@@ -7,11 +7,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import br.com.asillos.migration.domain.Pedido;
 import br.com.asillos.migration.integration.validation.PedidoImportValidationException;
@@ -74,7 +75,9 @@ public final class XmlImportServlet extends HttpServlet {
     protected void doPost(
             HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException {
-        boolean multipart = ServletFileUpload.isMultipartContent(request);
+        JakartaFileUploadRequestContext requestContext =
+                new JakartaFileUploadRequestContext(request);
+        boolean multipart = JakartaFileUploadRequestContext.isMultipartContent(request);
         if (!multipart && !isXmlContentType(request.getContentType())) {
             safeError(
                     request,
@@ -172,7 +175,7 @@ public final class XmlImportServlet extends HttpServlet {
     private byte[] readMultipart(HttpServletRequest request)
             throws FileUploadException {
         File temporaryRepository = (File) getServletContext()
-                .getAttribute("javax.servlet.context.tempdir");
+                .getAttribute(ServletContext.TEMPDIR);
         if (temporaryRepository == null
                 || !temporaryRepository.isDirectory()) {
             throw new IllegalStateException(
@@ -188,7 +191,8 @@ public final class XmlImportServlet extends HttpServlet {
 
         List<FileItem> parsedItems = new ArrayList<FileItem>();
         try {
-            List<?> rawItems = upload.parseRequest(request);
+            List<?> rawItems = JakartaFileUploadRequestContext.parseRequest(
+                    upload, request);
             FileItem xmlItem = null;
             for (Object value : rawItems) {
                 if (!(value instanceof FileItem)) {

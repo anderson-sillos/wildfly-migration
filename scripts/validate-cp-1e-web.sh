@@ -17,6 +17,13 @@ cleanup() {
 }
 trap cleanup EXIT
 
+if grep -Fq 'https://jakarta.ee/xml/ns/jakartaee' \
+    "$REPOSITORY_ROOT/app/src/main/webapp/WEB-INF/web.xml"; then
+  "$REPOSITORY_ROOT/scripts/validate-cp-3f-namespace.sh"
+  printf 'OK: validação histórica CP-1E delegada ao gate Jakarta ativo\n'
+  exit 0
+fi
+
 install -d -m 0755 "$TEMP_DIRECTORY/classes"
 javac -Xlint:-options -source 1.7 -target 1.7 \
   -d "$TEMP_DIRECTORY/classes" \

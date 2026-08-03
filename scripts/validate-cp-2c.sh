@@ -289,7 +289,10 @@ for forbidden_coordinate in \
   fi
 done
 
-if grep -R -E \
+if grep -Fq 'https://jakarta.ee/xml/ns/jakartaee' \
+    "$REPOSITORY_ROOT/app/src/main/webapp/WEB-INF/web.xml"; then
+  printf 'INFO: CP-2C histórico permanece preservado; namespace ativo já está no CP-3F\n'
+elif grep -R -E \
     '^[[:space:]]*import[[:space:]]+jakarta\.(servlet|el)\.' \
     "$REPOSITORY_ROOT/app/src/main/java"; then
   fail "CP-2C não deve antecipar a migração de namespace do gate Jakarta"

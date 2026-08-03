@@ -9,8 +9,8 @@
   <version>1.0.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
-  <name>WildFly Migration Lab — Java 17 and Jakarta EE 8 on WildFly 26</name>
-  <description>Aplicação no gate Java 17/WildFly 26, preservando Jakarta EE 8 e o namespace javax.</description>
+  <name>WildFly Migration Lab</name>
+  <description>Aplicação evolutiva do baseline legado ao destino Jakarta EE.</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -34,9 +34,9 @@
 
   <dependencies>
     <!--
-      O perfil padrão preserva o WAR EE 8 aprovado no CP-3D. O perfil
-      cp-3e-jakarta11 substitui a API fornecida por Jakarta EE 11 sem colocar
-      APIs do servidor em WEB-INF/lib; os imports permanecem javax até o CP-3F.
+      O perfil padrão permanece como referência EE 8 para os gates históricos.
+      O perfil cp-3e-jakarta11 fornece Jakarta EE 11 sem colocar APIs do
+      servidor em WEB-INF/lib; o código web moderno é ativado no CP-3F.
     -->
     <dependency>
       <groupId>jakarta.platform</groupId>

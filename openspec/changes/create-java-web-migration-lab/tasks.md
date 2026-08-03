@@ -134,9 +134,9 @@
 
 ### Checkpoint CP-3F — Namespace e descritores Jakarta
 
-- [ ] 3.26 Migrar Servlets, filtros, listeners, sessão, tag handlers e EL de `javax.*` para `jakarta.*`, preservando `javax.sql`, `javax.naming` e `javax.xml`.
-- [ ] 3.27 Atualizar `web.xml`, JSPs, JSTL e demais descritores para Jakarta EE 11 e URIs `jakarta.tags.*`.
-- [ ] 3.28 Implantar primeiro o TLD histórico, capturar o comportamento e concluir o handler em `jakarta.servlet.jsp.tagext`.
+- [x] 3.26 Migrar Servlets, filtros, listeners, sessão, tag handlers e EL de `javax.*` para `jakarta.*`, preservando `javax.sql`, `javax.naming` e `javax.xml`.
+- [x] 3.27 Atualizar `web.xml`, JSPs, JSTL e demais descritores para Jakarta EE 11 e URIs `jakarta.tags.*`.
+- [x] 3.28 Implantar primeiro o TLD histórico, capturar o comportamento e concluir o handler em `jakarta.servlet.jsp.tagext`.
 - [ ] 3.29 Compilar, implantar e executar contratos H2 e Oracle de listagem, criação, consulta e sessão no Java 21/WildFly 41.
 - [ ] 3.30 Encerrar `CP-3F`: validar ausência dos namespaces EE `javax` proibidos, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-3F): migrate Jakarta namespaces`.
 

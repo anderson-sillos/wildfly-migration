@@ -71,6 +71,13 @@ required_paths=(
   "scripts/qualify-cp-3d-oracle.sh"
   "scripts/validate-cp-3d.sh"
   "scripts/validate-cp-3d-tiles-tld.sh"
+  "docs/cp-3f-jakarta-namespaces.md"
+  "docs/evidence/CP-3F.md"
+  "migration/evidence/CP-3F/tld-historical.xml"
+  "migration/evidence/CP-3F/tld-migration.properties"
+  "migration/evidence/CP-3F/deployment-tiles-blocked.txt"
+  "scripts/build-cp-3f-jakarta.sh"
+  "scripts/validate-cp-3f-namespace.sh"
 )
 
 for path in "${required_paths[@]}"; do
@@ -105,6 +112,21 @@ for marker in \
   'sem criar fase ou tag pública'; do
   if ! grep -Fqi -- "$marker" "$REPOSITORY_ROOT/docs/evidence/CP-3D.md"; then
     printf 'FALHA: fechamento CP-3D não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'jakarta.servlet' \
+  'web-app_6_1.xsd' \
+  'jakarta.tags.core' \
+  'TLD histórico' \
+  'TilesListener' \
+  'atividade 3.31'; do
+  if ! grep -Fqi -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3f-jakarta-namespaces.md" \
+      "$REPOSITORY_ROOT/docs/evidence/CP-3F.md"; then
+    printf 'FALHA: documentação CP-3F não contém: %s\n' "$marker" >&2
     exit 1
   fi
 done

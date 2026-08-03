@@ -256,11 +256,17 @@ public final class ValidateApplicationPom {
         Element webApp = document.getDocumentElement();
         require("web-app".equals(webApp.getLocalName()),
                 "raiz de web.xml inválida");
-        require("http://java.sun.com/xml/ns/j2ee".equals(
-                webApp.getNamespaceURI()),
-                "namespace legado de web.xml divergente");
-        require("2.4".equals(webApp.getAttribute("version")),
-                "web.xml deve declarar Servlet 2.4");
+        String namespace = webApp.getNamespaceURI();
+        String version = webApp.getAttribute("version");
+        if ("http://java.sun.com/xml/ns/j2ee".equals(namespace)) {
+            require("2.4".equals(version),
+                    "web.xml legado deve declarar Servlet 2.4");
+        } else {
+            require("https://jakarta.ee/xml/ns/jakartaee".equals(namespace),
+                    "namespace de web.xml deve ser legado ou Jakarta");
+            require("6.1".equals(version),
+                    "web.xml Jakarta deve declarar Servlet 6.1");
+        }
     }
 
     private static void validateDeploymentStructure(Document document) {

@@ -23,6 +23,12 @@ for required in "$POM" "$ALLOWLIST" "$TLD" "$WEB_XML" "$TILES_DEFS" \
   [[ -f "$required" ]] || fail "arquivo obrigatório ausente: ${required#"$REPOSITORY_ROOT/"}"
 done
 
+if grep -Fq 'https://jakarta.ee/xml/ns/jakartaee' "$WEB_XML"; then
+  "$REPOSITORY_ROOT/scripts/validate-cp-3f-namespace.sh"
+  printf 'INFO: exceção histórica Tiles/TLD preservada no CP-3D; namespace ativo validado pelo CP-3F\n'
+  exit 0
+fi
+
 grep -Fq -- '- [x] 3.16 Manter Tiles e handlers TLD em `javax`' "$TASKS" ||
   fail 'a tarefa 3.16 não está marcada como concluída'
 

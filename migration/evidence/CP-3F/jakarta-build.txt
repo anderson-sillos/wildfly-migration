@@ -1,0 +1,56 @@
+[INFO] Scanning for projects...
+[INFO]
+[INFO] -----------< br.com.asillos.migration:wildfly-migration-lab >-----------
+[INFO] Building WildFly Migration Lab 1.0.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ war ]---------------------------------
+[INFO]
+[INFO] --- clean:3.2.0:clean (default-clean) @ wildfly-migration-lab ---
+[INFO] Deleting <repository>/app/target/cp3f-jakarta11
+[INFO]
+[INFO] --- enforcer:3.0.0-M3:enforce (enforce-java17-toolchain) @ wildfly-migration-lab ---
+[INFO]
+[INFO] >>> xmlbeans.plugin:5.3.0:compile (generate-pedido-xml-types) > generate-sources @ wildfly-migration-lab >>>
+[INFO]
+[INFO] --- enforcer:3.0.0-M3:enforce (enforce-java17-toolchain) @ wildfly-migration-lab ---
+[INFO]
+[INFO] <<< xmlbeans.plugin:5.3.0:compile (generate-pedido-xml-types) < generate-sources @ wildfly-migration-lab <<<
+[INFO]
+[INFO]
+[INFO] --- xmlbeans.plugin:5.3.0:compile (generate-pedido-xml-types) @ wildfly-migration-lab ---
+SchemaCompiler  Metadata LOAD:org/apache/xmlbeans/metadata GEN:br/com/asillos/migration/metadata
+2026-08-03T21:28:22.026443882Z main ERROR Log4j API could not find a logging provider.
+Time to build schema type system: 0.214 seconds
+Time to generate code: 0.018 seconds
+[INFO]
+[INFO] --- resources:3.4.0:resources (default-resources) @ wildfly-migration-lab ---
+[INFO] Copying 12 resources from src/main/resources to target/cp3f-jakarta11/classes
+[INFO] Copying 25 resources from target/cp3f-jakarta11/generated-resources to target/cp3f-jakarta11/classes
+[INFO]
+[INFO] --- compiler:3.8.1:compile (default-compile) @ wildfly-migration-lab ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 49 source files to <repository>/app/target/cp3f-jakarta11/classes
+[INFO] <repository>/app/src/main/java/br/com/asillos/migration/web/JakartaFileUploadRequestContext.java: <repository>/app/src/main/java/br/com/asillos/migration/web/JakartaFileUploadRequestContext.java uses or overrides a deprecated API.
+[INFO] <repository>/app/src/main/java/br/com/asillos/migration/web/JakartaFileUploadRequestContext.java: Recompile with -Xlint:deprecation for details.
+[INFO]
+[INFO] --- resources:3.4.0:testResources (default-testResources) @ wildfly-migration-lab ---
+[INFO] skip non existing resourceDirectory <repository>/app/src/test/resources
+[INFO]
+[INFO] --- compiler:3.8.1:testCompile (default-testCompile) @ wildfly-migration-lab ---
+[INFO] No sources to compile
+[INFO]
+[INFO] --- surefire:3.5.4:test (default-test) @ wildfly-migration-lab ---
+[INFO] No tests to run.
+[INFO]
+[INFO] --- war:3.3.2:war (default-war) @ wildfly-migration-lab ---
+[INFO] Packaging webapp
+[INFO] Assembling webapp [wildfly-migration-lab] in [<repository>/app/target/cp3f-jakarta11/wildfly-migration]
+[INFO] Processing war project
+[INFO] Copying webapp resources [<repository>/app/src/main/webapp]
+[INFO] Building war: <repository>/app/target/cp3f-jakarta11/wildfly-migration.war
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.957 s
+[INFO] Finished at: 2026-08-03T18:28:24-03:00
+[INFO] ------------------------------------------------------------------------

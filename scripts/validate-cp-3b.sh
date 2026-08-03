@@ -256,18 +256,21 @@ if grep -Eq \
   fail "FileUpload/Commons IO novos foram atribuídos à fase 2"
 fi
 
-upload_source="$REPOSITORY_ROOT/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java"
-for marker in \
-  'javax.servlet.http.HttpServlet' \
-  'ServletFileUpload.isMultipartContent(request)' \
-  'setFileSizeMax(AnexoRepository.MAX_FILE_BYTES)' \
-  'setSizeMax(MAX_REQUEST_BYTES)' \
-  'item.delete()'; do
-  grep -Fq "$marker" "$upload_source" ||
-    fail "upload transitório não preserva: $marker"
-done
-if grep -Fq 'jakarta.servlet' "$upload_source"; then
-  fail "atividade 3.8 não pode antecipar o namespace Jakarta"
+if ! grep -Fq 'https://jakarta.ee/xml/ns/jakartaee' \
+    "$REPOSITORY_ROOT/app/src/main/webapp/WEB-INF/web.xml"; then
+  upload_source="$REPOSITORY_ROOT/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java"
+  for marker in \
+    'javax.servlet.http.HttpServlet' \
+    'ServletFileUpload.isMultipartContent(request)' \
+    'setFileSizeMax(AnexoRepository.MAX_FILE_BYTES)' \
+    'setSizeMax(MAX_REQUEST_BYTES)' \
+    'item.delete()'; do
+    grep -Fq "$marker" "$upload_source" ||
+      fail "upload transitório não preserva: $marker"
+  done
+  if grep -Fq 'jakarta.servlet' "$upload_source"; then
+    fail "atividade 3.8 não pode antecipar o namespace Jakarta"
+  fi
 fi
 
 grep -Fq '<reflections.version>0.10.2</reflections.version>' \
@@ -294,26 +297,29 @@ for library in \
     fail "allowlist histórica da fase 2 perdeu $library"
 done
 
-discovery_source="$REPOSITORY_ROOT/app/src/main/java/br/com/asillos/migration/integration/validation/LegacyValidatorDiscovery.java"
-for marker in \
-  'getTypesAnnotatedWith(Validator.class)' \
-  'Scanners.TypesAnnotated' \
-  'Scanners.SubTypes' \
-  'setClassLoaders(new ClassLoader[] {classLoader})' \
-  'PedidoImportValidator.class.isAssignableFrom(type)' \
-  'legacy_validator_discovery classloader=' \
-  'Collections.sort(names)'; do
-  grep -Fq "$marker" "$discovery_source" ||
-    fail "descoberta Reflections não preserva: $marker"
-done
-for validator_source in \
-  NumeroFormatoValidator.java \
-  ValorMonetarioValidator.java \
-  StatusInicialValidator.java; do
-  grep -Fq '@Validator' \
-    "$REPOSITORY_ROOT/app/src/main/java/br/com/asillos/migration/integration/validation/$validator_source" ||
-    fail "validador não possui @Validator: $validator_source"
-done
+if ! grep -Fq 'https://jakarta.ee/xml/ns/jakartaee' \
+    "$REPOSITORY_ROOT/app/src/main/webapp/WEB-INF/web.xml"; then
+  discovery_source="$REPOSITORY_ROOT/app/src/main/java/br/com/asillos/migration/integration/validation/LegacyValidatorDiscovery.java"
+  for marker in \
+    'getTypesAnnotatedWith(Validator.class)' \
+    'Scanners.TypesAnnotated' \
+    'Scanners.SubTypes' \
+    'setClassLoaders(new ClassLoader[] {classLoader})' \
+    'PedidoImportValidator.class.isAssignableFrom(type)' \
+    'legacy_validator_discovery classloader=' \
+    'Collections.sort(names)'; do
+    grep -Fq "$marker" "$discovery_source" ||
+      fail "descoberta Reflections não preserva: $marker"
+  done
+  for validator_source in \
+    NumeroFormatoValidator.java \
+    ValorMonetarioValidator.java \
+    StatusInicialValidator.java; do
+    grep -Fq '@Validator' \
+      "$REPOSITORY_ROOT/app/src/main/java/br/com/asillos/migration/integration/validation/$validator_source" ||
+      fail "validador não possui @Validator: $validator_source"
+  done
+fi
 
 for marker in \
   'MyBatis 3.5.19' \

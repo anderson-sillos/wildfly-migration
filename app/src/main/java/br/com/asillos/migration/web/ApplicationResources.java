@@ -1,6 +1,6 @@
 package br.com.asillos.migration.web;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import br.com.asillos.migration.persistence.AnexoRepository;
 import br.com.asillos.migration.persistence.PedidoRepository;

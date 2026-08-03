@@ -472,6 +472,22 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-3F; then
+    required+=(
+      "docs/cp-3f-jakarta-namespaces.md"
+      "docs/evidence/CP-3F.md"
+      "migration/evidence/CP-3F/jakarta-build.json"
+      "migration/evidence/CP-3F/jakarta-build.txt"
+      "migration/evidence/CP-3F/tld-historical.xml"
+      "migration/evidence/CP-3F/tld-migration.properties"
+      "migration/evidence/CP-3F/deployment-tiles-blocked.txt"
+      "runtime/phase3/java21-wildfly41/h2/module.xml"
+      "runtime/phase3/java21-wildfly41/profiles/ci-h2.cli"
+      "scripts/build-cp-3f-jakarta.sh"
+      "scripts/validate-cp-3f-namespace.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"

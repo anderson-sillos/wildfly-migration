@@ -1,0 +1,17 @@
+CP-3F deployment probe
+runtime=Temurin 21.0.12+8/WildFly 41.0.0.Final
+profile=ci-h2
+war=app/target/cp3f-jakarta11/wildfly-migration.war
+bind=127.0.0.1
+result=rejected-before-contracts
+
+WFLYCTL0062: Composite operation failed and was rolled back.
+WFLYCTL0080: Failed services
+org.wildfly.undertow.deployment.default-server.default-host./wildfly-migration.UndertowDeploymentInfoService
+Caused by: java.lang.NoClassDefFoundError: Failed to link
+org/apache/tiles/web/startup/TilesListener
+Module "deployment.wildfly-migration.war" from Service Module Loader
+Caused by: java.lang.ClassNotFoundException:
+javax.servlet.ServletContextListener from Module "deployment.wildfly-migration.war"
+
+interpretation=expected Tiles javax incompatibility; defer runtime contracts until activity 3.31
