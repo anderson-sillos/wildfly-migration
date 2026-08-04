@@ -33,7 +33,7 @@ done
 [[ ! -e "$WEBAPP/WEB-INF/layout/base.jsp" ]] ||
   fail 'layout/base.jsp ainda usa o template Tiles'
 
-if rg -n -i 'tiles|org\.apache\.tiles|tiles-defs' "$WEBAPP" "$POM"; then
+if grep -Erni 'tiles|org\.apache\.tiles|tiles-defs' "$WEBAPP" "$POM"; then
   fail 'referência Tiles permaneceu na aplicação moderna'
 fi
 

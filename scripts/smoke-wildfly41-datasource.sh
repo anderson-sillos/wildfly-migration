@@ -126,7 +126,9 @@ done
 
 [[ "$PROFILE" == "ci-h2" || "$PROFILE" == "oracle" ]] || fail 'informe --profile ci-h2 ou oracle'
 [[ -f "$WAR_FILE" ]] || fail 'WAR não encontrado'
-[[ -f "$ENV_FILE" ]] || fail 'arquivo .env não encontrado'
+if [[ "$PROFILE" == "oracle" && ! -f "$ENV_FILE" ]]; then
+  fail 'arquivo .env não encontrado'
+fi
 
 JAVA_HOME_VALUE="$(configuration_value JAVA21_HOME)"
 JAVA_ARCHIVE_VALUE="$(configuration_value JAVA21_ARCHIVE)"

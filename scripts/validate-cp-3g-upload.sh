@@ -70,7 +70,7 @@ oracle_war="$(sed -n 's/.*"warSha256": "\([^"]*\)".*/\1/p' \
 if grep -Eq 'commons\.fileupload|commons\.io' "$ROOT/app/pom.xml"; then
   fail 'POM ainda declara Commons FileUpload ou Commons IO'
 fi
-if rg -n 'org\.apache\.commons\.fileupload|ServletFileUpload|FileItem|DiskFileItemFactory|JakartaFileUploadRequestContext' \
+if grep -Ern 'org\.apache\.commons\.fileupload|ServletFileUpload|FileItem|DiskFileItemFactory|JakartaFileUploadRequestContext' \
     "$ROOT/app/src/main/java"; then
   fail 'código ativo ainda referencia Commons FileUpload'
 fi
