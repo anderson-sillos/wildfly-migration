@@ -100,6 +100,8 @@ cat >"$RESULT_FILE" <<EOF
 EOF
 
 if [[ "$BUILD_STATUS" -ne 0 ]]; then
+  printf '%s\n' '--- últimas linhas do build Java 25 ---' >&2
+  tail -n 120 "$OUTPUT_FILE" >&2
   printf 'FALHA CP-3J/3.47: build Java 25 não passou; saída em %s\n' "$OUTPUT_FILE" >&2
   exit "$BUILD_STATUS"
 fi
