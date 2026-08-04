@@ -572,6 +572,12 @@ check_required_files() {
       "scripts/validate-cp-3i-manifest.sh"
       "docs/cp-3d-reproduction.md"
       "scripts/validate-cp-3i-java17-runbook.sh"
+      "migration/steps/CP-3I-closure.md"
+      "migration/evidence/CP-3I/closure-portable-ci.json"
+      "migration/evidence/CP-3I/closure-oracle-qualified.json"
+      "migration/evidence/CP-3I/closure.properties"
+      "migration/evidence/CP-3I/rollback.properties"
+      "scripts/validate-cp-3i-closure.sh"
     )
   fi
 

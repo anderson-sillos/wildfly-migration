@@ -69,6 +69,19 @@ confere as seções operacionais, a correspondência com os scripts do CP-3D, a
 referência ao rollback versionado e a ausência de segredos e operações
 destrutivas.
 
+## Atividade 3.45 — fechamento do CP-3I
+
+As evidências de fechamento [`closure-portable-ci.json`](../../migration/evidence/CP-3I/closure-portable-ci.json)
+e [`closure-oracle-qualified.json`](../../migration/evidence/CP-3I/closure-oracle-qualified.json)
+aprovam 15/15 contratos, persistência, manifesto e rollback nos dois perfis.
+O resumo [`closure.properties`](../../migration/evidence/CP-3I/closure.properties)
+registra PR #28, `public.tag=none` e o assunto de squash obrigatório;
+`rollback.properties` aponta de forma não destrutiva ao CP-3H.
+
+O CP-3I é um gate interno, portanto não cria tag pública. O PR deve ser
+integrado com `checkpoint(CP-3I): approve Java 21 Jakarta gate`; as tags
+continuam reservadas aos três checkpoints públicos das fases.
+
 ## Rollback
 
 O rollback técnico retorna ao CP-3H por checkout do commit integrado anterior.

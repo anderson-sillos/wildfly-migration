@@ -90,6 +90,7 @@ shell_files=(
   scripts/generate-cp-3i-manifest.sh
   scripts/validate-cp-3i-manifest.sh
   scripts/validate-cp-3i-java17-runbook.sh
+  scripts/validate-cp-3i-closure.sh
   scripts/smoke-wildfly41-datasource.sh
   contract-tests/run.sh
 )
@@ -175,5 +176,7 @@ run_step "Validar manifesto do CP-3I/3.43" \
   ./scripts/validate-cp-3i-manifest.sh
 run_step "Validar roteiro do CP-3I/3.44" \
   ./scripts/validate-cp-3i-java17-runbook.sh
+run_step "Validar fechamento do CP-3I/3.45" \
+  ./scripts/validate-cp-3i-closure.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'

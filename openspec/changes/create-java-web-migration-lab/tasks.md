@@ -162,7 +162,7 @@
 - [x] 3.42 Executar contratos completos H2 e Oracle no Java 21/WildFly 41 e comparar respostas, estado persistido e limitações com o baseline.
 - [x] 3.43 Gerar manifesto do gate Java 21 com runtime, licenças, checksums, WAR, dependências e evidências.
 - [x] 3.44 Documentar reprodução, implantação equivalente em produção e rollback para o gate Java 17.
-- [ ] 3.45 Encerrar `CP-3I`: aprovar evidências `portable-ci` e `oracle-qualified` do gate Java 21 sem criar tag pública e integrar o PR pelo commit `checkpoint(CP-3I): approve Java 21 Jakarta gate`.
+- [x] 3.45 Encerrar `CP-3I`: aprovar evidências `portable-ci` e `oracle-qualified` do gate Java 21 sem criar tag pública e integrar o PR pelo commit `checkpoint(CP-3I): approve Java 21 Jakarta gate`.
 
 ### Checkpoint CP-3J — OpenJDK 25
 

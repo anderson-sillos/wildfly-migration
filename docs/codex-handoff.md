@@ -1,9 +1,8 @@
 # Codex handoff
 
-Atualizado em 04/08/2026 após a conclusão da atividade 3.44. O CP-3H foi
-fechado e os gates de persistência, contratos e manifesto do CP-3I passaram em
-H2 e Oracle; o roteiro de reprodução e rollback do gate Java 17 foi
-consolidado.
+Atualizado em 04/08/2026 após a conclusão da atividade 3.45. O CP-3H foi
+fechado e o CP-3I foi aprovado em H2 e Oracle; o roteiro de reprodução,
+rollback e o fechamento sem tag pública foram consolidados.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -21,13 +20,13 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - PR incremental do CP-3I: #28, `feat(CP-3I): qualify persistence semantics`,
   aberta após a conclusão da atividade 3.41.
 - CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
-- Progresso OpenSpec: 99 de 110 tarefas concluídas.
+- Progresso OpenSpec: 100 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
   3.35, fechamento do checkpoint.
-- Próxima atividade OpenSpec: 3.45, encerrar o CP-3I com a aprovação das
-  evidências `portable-ci` e `oracle-qualified` do gate Java 21.
+- Próxima atividade OpenSpec: 3.46, verificar atualizações open source e
+  fixar a distribuição OpenJDK 25 do CP-3J.
 
 ## Decisões permanentes
 
@@ -221,7 +220,7 @@ URLs Oracle, endereços internos nem valores do `.env`.
 ### 3.43 — manifesto do gate Java 21
 
 - O manifesto `migration/evidence/CP-3I/manifest.properties` registra o
-  commit-fonte `a90b1d8ea32d3724b67f8be35d02b6aee3e0c0f4`,
+  commit-fonte integrado `30cb9f051046dd9eed2fa096ffc9986b3ec63dfa`,
   `workingTree=false`, Temurin 21.0.12+8, WildFly comunitário 41.0.0.Final,
   Jakarta EE 11, Maven 3.9.16, H2 2.4.240 e Oracle 19.3.0.0.0 com
   `ojdbc17` 23.26.2.0.0.
@@ -244,6 +243,17 @@ URLs Oracle, endereços internos nem valores do `.env`.
   `portable-ci` de `oracle-qualified`.
 - O validador `scripts/validate-cp-3i-java17-runbook.sh` foi integrado ao
   baseline e ao job portátil; a evidência CP-3I registra a atividade.
+
+### 3.45 — fechamento do CP-3I
+
+- As evidências `closure-portable-ci.json` e `closure-oracle-qualified.json`
+  consolidam 15/15 contratos, persistência, manifesto, runtime e rollback.
+- O resumo registra PR #28, `public.tag=none` e a mensagem obrigatória
+  `checkpoint(CP-3I): approve Java 21 Jakarta gate`; o retorno aponta ao
+  commit integrado do CP-3H sem mutação de banco.
+- O validador `scripts/validate-cp-3i-closure.sh` foi integrado ao baseline e
+  ao portable CI. Após os checks verdes, o PR deve ser squash-mergeado com o
+  assunto exato, sem criar tag pública.
 
 ### 3.9 — descoberta de validadores
 
