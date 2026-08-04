@@ -81,6 +81,7 @@ shell_files=(
   scripts/validate-cp-3h-datasource.sh
   scripts/qualify-cp-3h-oracle.sh
   scripts/validate-cp-3h-oracle-qualification.sh
+  scripts/audit-cp-3h-final-packaging.sh
   scripts/smoke-wildfly41-datasource.sh
   contract-tests/run.sh
 )
@@ -154,5 +155,7 @@ run_step "Validar datasource H2/Oracle do CP-3H" \
   ./scripts/validate-cp-3h-datasource.sh
 run_step "Validar qualificação Oracle do CP-3H" \
   ./scripts/validate-cp-3h-oracle-qualification.sh
+run_step "Auditar empacotamento final do CP-3H" \
+  ./scripts/audit-cp-3h-final-packaging.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'

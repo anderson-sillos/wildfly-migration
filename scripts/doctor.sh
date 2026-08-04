@@ -539,6 +539,9 @@ check_required_files() {
       "scripts/ValidateCp3hOracleVersion.java"
       "migration/evidence/CP-3H/oracle-qualification.json"
       "scripts/validate-cp-3h-oracle-qualification.sh"
+      "migration/steps/CP-3H-final-packaging-audit.md"
+      "migration/evidence/CP-3H/packaging-audit.json"
+      "scripts/audit-cp-3h-final-packaging.sh"
     )
   fi
 
