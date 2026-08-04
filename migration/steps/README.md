@@ -42,5 +42,7 @@ Registros atuais:
   substituição de Tiles por tag file e includes JSP protegidos.
 - [`CP-3G-servlet-multipart.md`](CP-3G-servlet-multipart.md): substituição do
   Commons FileUpload pelo multipart nativo do Servlet/Jakarta.
+- [`CP-3G-servlet-container-initializer.md`](CP-3G-servlet-container-initializer.md):
+  substituição de Reflections pelo SCI padrão com JAR interno e fachada.
 - [`CP-3F-oracle-jdbc17-module.md`](CP-3F-oracle-jdbc17-module.md):
   módulos Java SE exigidos pelo ojdbc17 no WildFly 41.

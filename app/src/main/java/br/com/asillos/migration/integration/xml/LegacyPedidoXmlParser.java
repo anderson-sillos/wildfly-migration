@@ -12,10 +12,12 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
+import jakarta.servlet.ServletContext;
+
 import br.com.asillos.migration.domain.Pedido;
 import br.com.asillos.migration.domain.StatusPedido;
-import br.com.asillos.migration.integration.validation.LegacyValidatorDiscovery;
 import br.com.asillos.migration.integration.validation.PedidoImportValidator;
+import br.com.asillos.migration.integration.validation.ValidatorDiscovery;
 
 import org.apache.log4j.Logger;
 import org.apache.xmlbeans.XmlError;
@@ -44,7 +46,9 @@ public final class LegacyPedidoXmlParser {
 
     private final List<PedidoImportValidator> validators;
 
-    public LegacyPedidoXmlParser(InputStream schemaInput)
+    public LegacyPedidoXmlParser(
+            InputStream schemaInput,
+            ServletContext servletContext)
             throws XmlImportException {
         if (schemaInput == null) {
             throw new XmlImportException(
@@ -61,10 +65,10 @@ public final class LegacyPedidoXmlParser {
             throw new XmlImportException(
                     "XSD de importação não pôde ser lido", exception);
         }
-        validators = LegacyValidatorDiscovery.discover();
+        validators = ValidatorDiscovery.discover(servletContext);
         LOGGER.info(
                 "legacy_validator_order="
-                + LegacyValidatorDiscovery.describe(validators));
+                + ValidatorDiscovery.describe(validators));
     }
 
     public Pedido parse(byte[] xml) throws XmlImportException {

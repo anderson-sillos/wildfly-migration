@@ -57,6 +57,30 @@ preservados estão em
 As atividades 3.33–3.34 permanecem separadas para não misturar seus
 diagnósticos com as substituições web anteriores.
 
+## Atividade 3.33: descoberta por ServletContainerInitializer
+
+Depois da migração para Jakarta EE 11, Reflections deixa de ser uma
+dependência ativa. O mecanismo padrão Servlet `ServletContainerInitializer`
+usa `@HandlesTypes(Validator.class)` para entregar ao projeto as classes
+anotadas. A fachada `ValidatorDiscovery` mantém a regra já comprovada no
+gate Java 17: descarta interfaces, classes abstratas e tipos que não
+implementam `PedidoImportValidator`, exige construtores padrão, rejeita
+identificadores duplicados e ordena por `order()` e nome completo.
+
+A implementação do SCI, a annotation, o contrato, a fachada e o descritor de
+serviço são empacotados em
+`WEB-INF/lib/wildfly-migration-validator-sci.jar`. Os validators concretos
+permanecem em `WEB-INF/classes` ou em JARs aprovados da aplicação. O registro
+é armazenado no `ServletContext` do módulo web, sem dependência de API
+exclusiva do WildFly e sem manter um cadastro manual de classes.
+
+O smoke do WildFly 41 exige os marcadores de inicialização do SCI e da ordem
+funcional no `server.log`; a auditoria estrutural verifica o conteúdo do JAR,
+o descritor `META-INF/services/jakarta.servlet.ServletContainerInitializer`,
+a ausência de Reflections e a ausência de cópias da infraestrutura em
+`WEB-INF/classes`. O procedimento completo está em
+[`CP-3G-servlet-container-initializer.md`](../migration/steps/CP-3G-servlet-container-initializer.md).
+
 ## Rollback
 
 Para retornar somente o layout, restaure os wrappers, `WEB-INF/layout/base.jsp`,

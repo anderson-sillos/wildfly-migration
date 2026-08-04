@@ -115,8 +115,6 @@ public final class ValidateApplicationPom {
                 values("1.7.36", "compile"));
         expected.put("org.slf4j:slf4j-api",
                 values("1.7.36", "provided"));
-        expected.put("org.reflections:reflections",
-                values("0.10.2", "compile"));
         expected.put("org.apache.xmlbeans:xmlbeans",
                 values("5.3.0", "compile"));
         expected.put("org.dom4j:dom4j", values("2.2.0", "compile"));
@@ -173,6 +171,7 @@ public final class ValidateApplicationPom {
                 new LinkedHashMap<String, String>();
         expectedPlugins.put("maven-enforcer-plugin", "3.0.0-M3");
         expectedPlugins.put("maven-compiler-plugin", "3.8.1");
+        expectedPlugins.put("maven-jar-plugin", "3.4.2");
         expectedPlugins.put("maven-war-plugin", "3.3.2");
         expectedPlugins.put("maven-dependency-plugin", "3.1.2");
         expectedPlugins.put("xmlbeans", "${xmlbeans.version}");

@@ -50,7 +50,8 @@ public final class XmlImportServlet extends HttpServlet {
     public void init() throws ServletException {
         try {
             parser = new LegacyPedidoXmlParser(
-                    getServletContext().getResourceAsStream(XSD_RESOURCE));
+                    getServletContext().getResourceAsStream(XSD_RESOURCE),
+                    getServletContext());
         } catch (XmlImportException exception) {
             throw new ServletException(
                     "Falha ao inicializar contrato XML", exception);

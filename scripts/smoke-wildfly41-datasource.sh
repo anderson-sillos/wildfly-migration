@@ -268,4 +268,10 @@ if [[ "$PROFILE" == "oracle" ]]; then ORACLE_SMOKES_CREATED=true; fi
   --war "$WAR_FILE" --result "$RESULT_FILE" --commit "$COMMIT_SHA" \
   --source-commit "$SOURCE_COMMIT_SHA" --runtime 'java21-wildfly41.0.0' \
   --correlation-id "$CONTRACT_CORRELATION"
+grep -Fq 'validator_sci_discovery' "$TEMP_DIRECTORY/server.log" ||
+  fail 'WildFly não registrou a inicialização do SCI de validadores'
+grep -Fq \
+  'legacy_validator_order=numero-formato,valor-monetario,status-inicial' \
+  "$TEMP_DIRECTORY/server.log" ||
+  fail 'ordem funcional dos validadores não foi preservada pelo SCI'
 printf 'OK: contratos CP-3F %s concluídos; resultado em %s\n' "$PROFILE" "$RESULT_FILE"

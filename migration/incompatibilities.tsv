@@ -19,3 +19,4 @@ INC-017	CP-3F	Commons-FileUpload-1.6.0-javax-overloads	Jakarta-Servlet-6.1	execu
 INC-018	CP-3F	OJDBC17-java21-module	WildFly41-module-loader	deployment	classloader	natural	resolved	migration/steps/CP-3F-oracle-jdbc17-module.md
 INC-019	CP-3F	OJDBC17-JGSS-module	WildFly41-datasource	execution	classloader	natural	resolved	migration/steps/CP-3F-oracle-jdbc17-module.md
 INC-020	CP-3G	Commons-FileUpload-1.x	Jakarta-Servlet-Part	execution	dependency	natural	resolved	migration/steps/CP-3G-servlet-multipart.md
+INC-021	CP-3G	Reflections-0.10.2	ServletContainerInitializer-HandlesTypes	startup	class-discovery	natural	resolved	migration/steps/CP-3G-servlet-container-initializer.md

@@ -7,6 +7,12 @@ TEMP_DIRECTORY="$(
   mktemp -d "${TMPDIR:-/tmp}/wildfly-migration-cp1f-discovery.XXXXXXXX"
 )"
 
+if grep -Fq 'https://jakarta.ee/xml/ns/jakartaee' \
+    "$REPOSITORY_ROOT/app/src/main/webapp/WEB-INF/web.xml"; then
+  printf 'OK: contrato histórico de descoberta/logging será validado pelos gates Jakarta CP-3F/3G\n'
+  exit 0
+fi
+
 cleanup() {
   case "$TEMP_DIRECTORY" in
     "${TMPDIR:-/tmp}"/wildfly-migration-cp1f-discovery.*)

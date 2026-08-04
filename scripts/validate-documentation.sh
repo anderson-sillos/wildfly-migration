@@ -88,10 +88,12 @@ required_paths=(
   "scripts/validate-cp-3f-closure.sh"
   "scripts/validate-cp-3g-tiles.sh"
   "scripts/validate-cp-3g-upload.sh"
+  "scripts/validate-cp-3g-discovery.sh"
   "migration/steps/CP-3F-fileupload-jakarta-linkage.md"
   "migration/steps/CP-3F-oracle-jdbc17-module.md"
   "migration/steps/CP-3G-tiles-jsp-layout.md"
   "migration/steps/CP-3G-servlet-multipart.md"
+  "migration/steps/CP-3G-servlet-container-initializer.md"
   "migration/evidence/CP-3G/upload-ci-h2.json"
   "migration/evidence/CP-3G/upload-oracle.json"
 )
