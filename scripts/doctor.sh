@@ -588,6 +588,8 @@ check_required_files() {
       "docs/evidence/CP-3J.md"
       "migration/evidence/CP-3J/runtime-selection.properties"
       "scripts/validate-cp-3j-runtime-selection.sh"
+      "scripts/build-cp-3j-java25.sh"
+      "scripts/validate-cp-3j-java25.sh"
     )
   fi
 

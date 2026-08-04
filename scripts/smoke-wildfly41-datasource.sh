@@ -13,21 +13,29 @@ RUNTIME_HOME=""
 SERVER_PID=""
 SERVER_STARTED=false
 ORACLE_SMOKES_CREATED=false
+JAVA_VERSION="21"
+JAVA_HOME_KEY="JAVA21_HOME"
+JAVA_ARCHIVE_KEY="JAVA21_ARCHIVE"
+RUNTIME_MANIFEST_DIR="java21-wildfly41"
+RUNTIME_LABEL="java21-wildfly41.0.0"
+TEMP_PREFIX="cp3f41"
+CHECKPOINT="CP-3F"
 
 usage() {
   cat <<'USAGE'
 Uso:
-  ./scripts/smoke-wildfly41-datasource.sh --profile ci-h2|oracle \
+  ./scripts/smoke-wildfly41-datasource.sh --profile ci-h2|oracle [--java 21|25] \
     --war ARQUIVO [--env ARQUIVO] [--result ARQUIVO] \
     [--diagnostic-log ARQUIVO]
 
-Executa WildFly 41/Java 21 em loopback, configura java:/jdbc/MigrationDS,
-implanta o WAR e executa a suíte HTTP externa. O relatório é sanitizado.
+Executa WildFly 41 em loopback com Java 21 (ou 25), configura
+java:/jdbc/MigrationDS, implanta o WAR e executa a suíte HTTP externa. O
+relatório é sanitizado.
 USAGE
 }
 
 fail() {
-  printf 'FALHA CP-3F WildFly 41: %s\n' "$1" >&2
+  printf 'FALHA %s WildFly 41: %s\n' "$CHECKPOINT" "$1" >&2
   exit 1
 }
 
@@ -91,7 +99,7 @@ cleanup() {
   if [[ "$ORACLE_SMOKES_CREATED" == true ]]; then
     ORACLE_DB_URL="$ORACLE_DB_URL_VALUE" ORACLE_DB_USER="$ORACLE_DB_USER_VALUE" \
     ORACLE_DB_PASSWORD="$ORACLE_DB_PASSWORD_VALUE" \
-      "$ROOT/scripts/oracle-lab-schema.sh" cleanup-smokes --java 21 \
+      "$ROOT/scripts/oracle-lab-schema.sh" cleanup-smokes --java "$JAVA_VERSION" \
         --java-home "$JAVA_HOME_VALUE" --env "$ENV_FILE" >/dev/null 2>&1 || true
   fi
   if [[ "$SERVER_STARTED" == true && -n "$RUNTIME_HOME" ]]; then
@@ -105,7 +113,7 @@ cleanup() {
   if [[ -n "$SERVER_PID" ]]; then wait "$SERVER_PID" >/dev/null 2>&1 || true; fi
   if [[ -n "$TEMP_DIRECTORY" ]]; then
     case "$TEMP_DIRECTORY" in
-      /tmp/wildfly-migration-cp3f41.*) rm -rf -- "$TEMP_DIRECTORY" ;;
+      "/tmp/wildfly-migration-${TEMP_PREFIX}.*") rm -rf -- "$TEMP_DIRECTORY" ;;
       *) printf 'AVISO: diretório temporário inesperado não removido\n' >&2 ;;
     esac
   fi
@@ -115,6 +123,14 @@ trap cleanup EXIT
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --profile) [[ $# -ge 2 ]] || { usage >&2; exit 2; }; PROFILE="$2"; shift 2 ;;
+    --java)
+      [[ $# -ge 2 && ( "$2" == "21" || "$2" == "25" ) ]] || {
+        usage >&2
+        exit 2
+      }
+      JAVA_VERSION="$2"
+      shift 2
+      ;;
     --env) [[ $# -ge 2 ]] || { usage >&2; exit 2; }; ENV_FILE="$2"; shift 2 ;;
     --war) [[ $# -ge 2 ]] || { usage >&2; exit 2; }; WAR_FILE="$2"; shift 2 ;;
     --result) [[ $# -ge 2 ]] || { usage >&2; exit 2; }; RESULT_FILE="$2"; shift 2 ;;
@@ -124,14 +140,23 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if [[ "$JAVA_VERSION" == "25" ]]; then
+  JAVA_HOME_KEY="JAVA25_HOME"
+  JAVA_ARCHIVE_KEY="JAVA25_ARCHIVE"
+  RUNTIME_MANIFEST_DIR="java25-wildfly41"
+  RUNTIME_LABEL="java25-wildfly41.0.0"
+  TEMP_PREFIX="cp3j41"
+  CHECKPOINT="CP-3J"
+fi
+
 [[ "$PROFILE" == "ci-h2" || "$PROFILE" == "oracle" ]] || fail 'informe --profile ci-h2 ou oracle'
 [[ -f "$WAR_FILE" ]] || fail 'WAR não encontrado'
 if [[ "$PROFILE" == "oracle" && ! -f "$ENV_FILE" ]]; then
   fail 'arquivo .env não encontrado'
 fi
 
-JAVA_HOME_VALUE="$(configuration_value JAVA21_HOME)"
-JAVA_ARCHIVE_VALUE="$(configuration_value JAVA21_ARCHIVE)"
+JAVA_HOME_VALUE="$(configuration_value "$JAVA_HOME_KEY")"
+JAVA_ARCHIVE_VALUE="$(configuration_value "$JAVA_ARCHIVE_KEY")"
 WILDFLY_HOME_VALUE="$(configuration_value WILDFLY41_HOME)"
 WILDFLY_ARCHIVE_VALUE="$(configuration_value WILDFLY41_ARCHIVE)"
 H2_JAR_VALUE="$(configuration_value H2_JAR)"
@@ -141,22 +166,27 @@ ORACLE_DB_URL_VALUE="$(configuration_value ORACLE_DB_URL)"
 ORACLE_DB_USER_VALUE="$(configuration_value ORACLE_DB_USER)"
 ORACLE_DB_PASSWORD_VALUE="$(configuration_value ORACLE_DB_PASSWORD)"
 
-[[ -x "$JAVA_HOME_VALUE/bin/java" ]] || fail 'JAVA21_HOME não aponta para um JDK'
+[[ -x "$JAVA_HOME_VALUE/bin/java" ]] || fail "$JAVA_HOME_KEY não aponta para um JDK"
 [[ -x "$WILDFLY_HOME_VALUE/bin/standalone.sh" &&
    -x "$WILDFLY_HOME_VALUE/bin/jboss-cli.sh" ]] || fail 'WILDFLY41_HOME inválido'
 [[ -f "$JAVA_ARCHIVE_VALUE" && -f "$WILDFLY_ARCHIVE_VALUE" ]] ||
-  fail 'arquivos de runtime Java 21/WildFly 41 ausentes'
+  fail "arquivos de runtime Java $JAVA_VERSION/WildFly 41 ausentes"
 
-MANIFEST="$ROOT/runtime/phase3/java21-wildfly41/runtime-manifest.tsv"
+MANIFEST="$ROOT/runtime/phase3/$RUNTIME_MANIFEST_DIR/runtime-manifest.tsv"
 expected_java_sha256="$(awk -F '\t' '$1 == "temurin-openjdk" {print $6; exit}' "$MANIFEST")"
 expected_wildfly_sha256="$(awk -F '\t' '$1 == "wildfly-community-41" {print $6; exit}' "$MANIFEST")"
 [[ "$(sha256sum "$JAVA_ARCHIVE_VALUE" | awk '{print $1}')" == "$expected_java_sha256" ]] ||
-  fail 'checksum do OpenJDK 21 diverge do manifesto'
+  fail "checksum do OpenJDK $JAVA_VERSION diverge do manifesto"
 [[ "$(sha256sum "$WILDFLY_ARCHIVE_VALUE" | awk '{print $1}')" == "$expected_wildfly_sha256" ]] ||
   fail 'checksum do WildFly 41 diverge do manifesto'
 java_version="$("$JAVA_HOME_VALUE/bin/java" -version 2>&1)"
-[[ "$java_version" == *'openjdk version "21.0.12"'* &&
-   "$java_version" == *'Temurin-21.0.12+8'* ]] || fail 'Temurin 21.0.12+8 não detectado'
+if [[ "$JAVA_VERSION" == "21" ]]; then
+  [[ "$java_version" == *'openjdk version "21.0.12"'* &&
+     "$java_version" == *'Temurin-21.0.12+8'* ]] || fail 'Temurin 21.0.12+8 não detectado'
+else
+  [[ "$java_version" == *'openjdk version "25.0.4"'* &&
+     "$java_version" == *'Temurin-25.0.4+7'* ]] || fail 'Temurin 25.0.4+7 não detectado'
+fi
 
 if [[ "$PROFILE" == "ci-h2" ]]; then
   [[ -f "$H2_JAR_VALUE" && "$(basename "$H2_JAR_VALUE")" == 'h2-2.4.240.jar' ]] ||
@@ -177,7 +207,7 @@ HTTP_PORT="$(configuration_value WILDFLY_HTTP_PORT)"
 MANAGEMENT_PORT="$(configuration_value WILDFLY_MANAGEMENT_PORT)"
 HTTP_PORT="${HTTP_PORT:-18080}"
 MANAGEMENT_PORT="${MANAGEMENT_PORT:-19990}"
-TEMP_DIRECTORY="$(mktemp -d /tmp/wildfly-migration-cp3f41.XXXXXXXX)"
+TEMP_DIRECTORY="$(mktemp -d "/tmp/wildfly-migration-${TEMP_PREFIX}.XXXXXXXX")"
 RUNTIME_HOME="$TEMP_DIRECTORY/wildfly-41.0.0.Final"
 cp -a "$WILDFLY_HOME_VALUE/." "$RUNTIME_HOME/"
 mkdir -p -- "$RUNTIME_HOME/standalone/log"
@@ -186,8 +216,8 @@ if [[ "$PROFILE" == "ci-h2" ]]; then
   module_dir="$RUNTIME_HOME/modules/com/h2database/h2/cp3f/main"
   mkdir -p -- "$module_dir"
   install -m 0644 "$H2_JAR_VALUE" "$module_dir/h2-2.4.240.jar"
-  install -m 0644 "$ROOT/runtime/phase3/java21-wildfly41/h2/module.xml" "$module_dir/module.xml"
-  PROFILE_FILE="$ROOT/runtime/phase3/java21-wildfly41/profiles/ci-h2.cli"
+    install -m 0644 "$ROOT/runtime/phase3/java21-wildfly41/h2/module.xml" "$module_dir/module.xml"
+    PROFILE_FILE="$ROOT/runtime/phase3/java21-wildfly41/profiles/ci-h2.cli"
 else
   module_dir="$RUNTIME_HOME/modules/com/oracle/ojdbc17/main"
   mkdir -p -- "$module_dir"
@@ -266,7 +296,7 @@ CONTRACT_CORRELATION="cp3f-contract-$$"
 if [[ "$PROFILE" == "oracle" ]]; then ORACLE_SMOKES_CREATED=true; fi
 "$ROOT/contract-tests/run.sh" --base-url "$BASE_URL" --profile "$PROFILE" \
   --war "$WAR_FILE" --result "$RESULT_FILE" --commit "$COMMIT_SHA" \
-  --source-commit "$SOURCE_COMMIT_SHA" --runtime 'java21-wildfly41.0.0' \
+  --source-commit "$SOURCE_COMMIT_SHA" --runtime "$RUNTIME_LABEL" \
   --correlation-id "$CONTRACT_CORRELATION"
 
 # Depois dos contratos funcionais, tenta uma inclusão com número duplicado
@@ -308,4 +338,4 @@ awk '
   END { exit(found && stack ? 0 : 1) }
 ' "$TEMP_DIRECTORY/server.log" ||
   fail 'logging não registrou a cadeia completa da exceção'
-printf 'OK: contratos CP-3F %s concluídos; resultado em %s\n' "$PROFILE" "$RESULT_FILE"
+printf 'OK: contratos %s %s concluídos; resultado em %s\n' "$CHECKPOINT" "$PROFILE" "$RESULT_FILE"

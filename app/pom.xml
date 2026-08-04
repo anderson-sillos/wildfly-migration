@@ -262,5 +262,22 @@
         <java.version.range>[21,22)</java.version.range>
       </properties>
     </profile>
+    <profile>
+      <id>cp-3j-java25</id>
+      <!--
+        O CP-3J troca somente a JVM do WildFly 41. O bytecode e a API
+        Jakarta permanecem no mesmo nível do gate Java 21; este perfil apenas
+        permite executar o enforcer com o JDK 25 e ativa o perfil no JDT.
+      -->
+      <activation>
+        <jdk>[25,26)</jdk>
+      </activation>
+      <properties>
+        <jakarta.ee.web.api.version>11.0.0</jakarta.ee.web.api.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <java.version.range>[25,26)</java.version.range>
+      </properties>
+    </profile>
   </profiles>
 </project>
