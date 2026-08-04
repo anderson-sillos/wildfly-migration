@@ -17,6 +17,8 @@ URLs Oracle, endereços internos nem valores do `.env`.
   `a46c56a0c4a47b1fdcaca78b0ea7bd6d5e3a5bbe`.
 - PR incremental do CP-3G: #25, `feat(CP-3G): replace Reflections with Servlet SCI`,
   encerrada por squash com a mensagem `checkpoint(CP-3G): replace legacy web libraries`.
+- PR incremental do CP-3I: #28, `feat(CP-3I): qualify persistence semantics`,
+  aberta após a conclusão da atividade 3.41.
 - CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
 - Progresso OpenSpec: 96 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
