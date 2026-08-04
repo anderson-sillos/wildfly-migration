@@ -1,8 +1,9 @@
 # Codex handoff
 
-Atualizado em 04/08/2026 após a conclusão da atividade 3.43. O CP-3H foi
+Atualizado em 04/08/2026 após a conclusão da atividade 3.44. O CP-3H foi
 fechado e os gates de persistência, contratos e manifesto do CP-3I passaram em
-H2 e Oracle.
+H2 e Oracle; o roteiro de reprodução e rollback do gate Java 17 foi
+consolidado.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -20,13 +21,13 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - PR incremental do CP-3I: #28, `feat(CP-3I): qualify persistence semantics`,
   aberta após a conclusão da atividade 3.41.
 - CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
-- Progresso OpenSpec: 98 de 110 tarefas concluídas.
+- Progresso OpenSpec: 99 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
   3.35, fechamento do checkpoint.
-- Próxima atividade OpenSpec: 3.44, documentar reprodução, implantação
-  equivalente em produção e rollback para o gate Java 17.
+- Próxima atividade OpenSpec: 3.45, encerrar o CP-3I com a aprovação das
+  evidências `portable-ci` e `oracle-qualified` do gate Java 21.
 
 ## Decisões permanentes
 
@@ -231,6 +232,18 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Geração e validação: `scripts/generate-cp-3i-manifest.sh`,
   `scripts/validate-cp-3i-manifest.sh`; runbook:
   `migration/steps/CP-3I-manifest.md`.
+
+### 3.44 — reprodução e implantação equivalente do gate Java 17
+
+- `docs/cp-3d-reproduction.md` agora cobre a preparação do runtime Java
+  17/WildFly 26.1.3, a implantação blue/green equivalente em produção, os
+  critérios go/no-go e o retorno seguro ao Blue ou a
+  `migration/02-java8-wildfly26`.
+- O roteiro mantém `java:/jdbc/MigrationDS`, drivers e segredos externos,
+  impede atualização in-place ou alteração destrutiva do Oracle e separa
+  `portable-ci` de `oracle-qualified`.
+- O validador `scripts/validate-cp-3i-java17-runbook.sh` foi integrado ao
+  baseline e ao job portátil; a evidência CP-3I registra a atividade.
 
 ### 3.9 — descoberta de validadores
 

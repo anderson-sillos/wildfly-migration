@@ -22,9 +22,9 @@ específicas.
 
 ## Limites
 
-Esta atividade não é o fechamento do CP-3I. Ainda falta a documentação de
-reprodução do gate e a aprovação final do checkpoint. Os arquivos de evidência
-são vinculados ao WAR e ao commit-fonte; não contêm segredos.
+Esta atividade não é o fechamento do CP-3I. Ainda falta a aprovação final do
+checkpoint. Os arquivos de evidência são vinculados ao WAR e ao commit-fonte;
+não contêm segredos.
 
 ## Atividade 3.42 — contratos completos
 
@@ -55,6 +55,19 @@ O runbook [`CP-3I-manifest.md`](../../migration/steps/CP-3I-manifest.md)
 descreve geração, validação, proveniência, proteção contra segredos e
 rollback. O resultado `portable-ci` continua separado do `oracle-qualified`;
 o manifesto apenas rastreia ambos os resultados já aprovados.
+
+## Atividade 3.44 — reprodução e implantação equivalente do gate Java 17
+
+O roteiro [`cp-3d-reproduction.md`](../cp-3d-reproduction.md) foi ampliado
+para cobrir a reprodução do gate Java 17/WildFly 26.1.3, a implantação
+blue/green equivalente em uma aplicação real e os critérios de go/no-go e
+rollback sem mutação destrutiva do Oracle. Ele preserva a distinção entre
+`portable-ci` com H2 e `oracle-qualified` na rede interna.
+
+O validador [`validate-cp-3i-java17-runbook.sh`](../../scripts/validate-cp-3i-java17-runbook.sh)
+confere as seções operacionais, a correspondência com os scripts do CP-3D, a
+referência ao rollback versionado e a ausência de segredos e operações
+destrutivas.
 
 ## Rollback
 

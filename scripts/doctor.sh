@@ -570,6 +570,8 @@ check_required_files() {
       "migration/evidence/CP-3I/manifest.properties"
       "scripts/generate-cp-3i-manifest.sh"
       "scripts/validate-cp-3i-manifest.sh"
+      "docs/cp-3d-reproduction.md"
+      "scripts/validate-cp-3i-java17-runbook.sh"
     )
   fi
 
