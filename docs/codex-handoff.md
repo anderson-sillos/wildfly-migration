@@ -1,9 +1,9 @@
 # Codex handoff
 
-Atualizado em 04/08/2026 após a conclusão da atividade 3.46. O CP-3H foi
-fechado, o CP-3I foi aprovado em H2 e Oracle e o runtime do CP-3J foi fixado;
-os roteiros de reprodução, rollback e os fechamentos sem tag pública foram
-consolidados.
+Atualizado em 04/08/2026 após a conclusão da atividade 3.47. O CP-3H foi
+fechado, o CP-3I foi aprovado em H2 e Oracle, o runtime do CP-3J foi fixado e
+a incompatibilidade natural do javac 25 foi capturada; os roteiros de
+reprodução, rollback e os fechamentos sem tag pública foram consolidados.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -21,13 +21,13 @@ URLs Oracle, endereços internos nem valores do `.env`.
   integrada por squash com a mensagem `checkpoint(CP-3I): approve Java 21
   Jakarta gate`; não foi criada tag pública.
 - CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
-- Progresso OpenSpec: 101 de 110 tarefas concluídas.
+- Progresso OpenSpec: 102 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
   3.35, fechamento do checkpoint.
-- Próxima atividade OpenSpec: 3.47, alterar somente a JVM do WildFly 41 para
-  OpenJDK 25.
+- Próxima atividade OpenSpec: 3.48, corrigir a incompatibilidade mínima do JDK
+  25 sem alterar o contrato funcional.
 
 ## Decisões permanentes
 
@@ -274,6 +274,20 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Evidências: `docs/evidence/CP-3J.md` e
   `migration/evidence/CP-3J/runtime-selection.properties`; validador:
   `scripts/validate-cp-3j-runtime-selection.sh`.
+
+### 3.47 — tentativa do WildFly 41 com OpenJDK 25
+
+- O build usou Temurin 25.0.4+7, manteve o perfil Jakarta 11, bytecode alvo
+  21 e todas as dependências do gate Java 21. Nenhuma classe ou biblioteca da
+  aplicação foi alterada.
+- O `javac` 25 emitiu `location of system modules is not set in conjunction
+  with -source 21`; como o POM mantém `-Werror`, o build terminou com falha
+  esperada antes de produzir um WAR aprovado.
+- O smoke funcional não foi executado nesta atividade. A evidência está em
+  `migration/evidence/CP-3J/java25-build-expected.properties`; a atividade
+  3.48 deverá aplicar a correção mínima e reexecutar o build.
+- O `portable-ci` registra essa incompatibilidade como resultado esperado e
+  permanece verde; a correção não foi mascarada nem antecipada.
 
 ### 3.9 — descoberta de validadores
 

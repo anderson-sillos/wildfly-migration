@@ -27,6 +27,20 @@ de compatibilidade da aplicação. A prova será produzida nas atividades 3.47 a
 Oracle JDK, JBoss EAP, WildFly Preview e builds nightly foram rejeitados por
 não atenderem ao destino comunitário/open source reproduzível do laboratório.
 
+## Atividade 3.47 — tentativa com a JVM Java 25
+
+O WAR, as dependências e o nível de bytecode permaneceram no mesmo perfil
+Jakarta/Java 21. Somente a JVM usada pelo Maven e pelo WildFly foi trocada para
+Temurin 25.0.4+7. O build revelou uma incompatibilidade natural: `javac` 25
+emite o aviso de localização dos módulos do sistema quando recebe
+`-source 21 -target 21`; o `-Werror` já existente transforma esse aviso em erro.
+
+Essa falha é a evidência esperada da 3.47, não uma correção aplicada
+antecipadamente. O smoke funcional não foi executado porque não houve WAR
+aprovado. O diagnóstico sanitizado e o próximo passo estão em
+[`java25-build-expected.properties`](../../migration/evidence/CP-3J/java25-build-expected.properties)
+e a correção mínima será tratada exclusivamente na atividade 3.48.
+
 ## Fontes oficiais
 
 - [Eclipse Temurin 25.0.4+7](https://github.com/adoptium/temurin25-binaries/releases/tag/jdk-25.0.4%2B7);

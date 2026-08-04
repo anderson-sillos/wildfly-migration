@@ -275,17 +275,17 @@ jobs:
         if: steps.portable-selection.outputs.mode == 'cp3f'
         run: |
           ./scripts/doctor.sh CP-3J --profile ci-h2 --ci
+          set +e
           ./scripts/build-cp-3j-java25.sh \
             --env /dev/null \
             --result migration/evidence/CP-3J/java25-build.json \
             --output migration/evidence/CP-3J/java25-build.txt
-          ./scripts/smoke-wildfly41-datasource.sh \
-            --java 25 \
-            --profile ci-h2 \
-            --env /dev/null \
-            --war app/target/cp3j-java25/wildfly-migration.war \
-            --result migration/evidence/CP-3J/java25-smoke-ci-h2.json \
-            --diagnostic-log migration/evidence/CP-3J/java25-wildfly41.log
+          build_status="$?"
+          set -e
+          if [[ "$build_status" -eq 0 ]]; then
+            echo "FALHA: a 3.47 deveria capturar o aviso javac 25/-Werror antes da 3.48" >&2
+            exit 1
+          fi
           ./scripts/validate-cp-3j-java25.sh
 
       - name: Upload CP-3F portable evidence
@@ -338,10 +338,9 @@ jobs:
             runtime/phase3/java25-wildfly41/runtime-manifest.tsv
             docs/evidence/CP-3J.md
             migration/evidence/CP-3J/runtime-selection.properties
+            migration/evidence/CP-3J/java25-build-expected.properties
             migration/evidence/CP-3J/java25-build.json
             migration/evidence/CP-3J/java25-build.txt
-            migration/evidence/CP-3J/java25-smoke-ci-h2.json
-            migration/evidence/CP-3J/java25-wildfly41.log
             runtime/phase3/java21-wildfly41/runtime-manifest.tsv
             app/target/contract-results/cp-3f-ci-h2.json
             app/target/contract-results/cp-3f-wildfly41.log
