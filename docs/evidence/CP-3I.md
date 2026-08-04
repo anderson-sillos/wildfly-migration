@@ -42,6 +42,20 @@ que fragmentos sob `WEB-INF` continuam protegidos.
 O smoke remove os registros transitórios criados pela própria suíte. A
 comparação não é teste de carga e não transforma H2 em substituto do Oracle.
 
+## Atividade 3.43 — manifesto do gate
+
+O manifesto [`manifest.properties`](../../migration/evidence/CP-3I/manifest.properties)
+vincula o gate Java 21 ao commit, ao WAR, ao runtime Java 21/WildFly 41,
+às licenças e checksums registrados em `runtime-manifest.tsv`, às dependências
+finais e às evidências 3.41, 3.42 e CP-3H. O WAR foi contado e teve seu
+SHA-256 calculado no momento da geração; drivers Oracle e H2 permanecem fora
+do WAR.
+
+O runbook [`CP-3I-manifest.md`](../../migration/steps/CP-3I-manifest.md)
+descreve geração, validação, proveniência, proteção contra segredos e
+rollback. O resultado `portable-ci` continua separado do `oracle-qualified`;
+o manifesto apenas rastreia ambos os resultados já aprovados.
+
 ## Rollback
 
 O rollback técnico retorna ao CP-3H por checkout do commit integrado anterior.

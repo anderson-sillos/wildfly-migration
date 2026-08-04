@@ -566,6 +566,10 @@ check_required_files() {
       "migration/evidence/CP-3I/contract-oracle.json"
       "scripts/qualify-cp-3i-contracts.sh"
       "scripts/validate-cp-3i-contracts.sh"
+      "migration/steps/CP-3I-manifest.md"
+      "migration/evidence/CP-3I/manifest.properties"
+      "scripts/generate-cp-3i-manifest.sh"
+      "scripts/validate-cp-3i-manifest.sh"
     )
   fi
 
