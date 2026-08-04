@@ -85,6 +85,8 @@ shell_files=(
   scripts/validate-cp-3h-closure.sh
   scripts/qualify-cp-3i-persistence.sh
   scripts/validate-cp-3i-persistence.sh
+  scripts/qualify-cp-3i-contracts.sh
+  scripts/validate-cp-3i-contracts.sh
   scripts/smoke-wildfly41-datasource.sh
   contract-tests/run.sh
 )
@@ -164,5 +166,7 @@ run_step "Validar fechamento do CP-3H" \
   ./scripts/validate-cp-3h-closure.sh --skip-war
 run_step "Validar persistência do CP-3I/3.41" \
   ./scripts/validate-cp-3i-persistence.sh
+run_step "Validar contratos do CP-3I/3.42" \
+  ./scripts/validate-cp-3i-contracts.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'

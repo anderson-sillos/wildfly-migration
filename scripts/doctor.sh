@@ -561,6 +561,11 @@ check_required_files() {
       "scripts/ValidateCp3iPersistence.java"
       "scripts/qualify-cp-3i-persistence.sh"
       "scripts/validate-cp-3i-persistence.sh"
+      "migration/steps/CP-3I-contract-comparison.md"
+      "migration/evidence/CP-3I/contract-ci-h2.json"
+      "migration/evidence/CP-3I/contract-oracle.json"
+      "scripts/qualify-cp-3i-contracts.sh"
+      "scripts/validate-cp-3i-contracts.sh"
     )
   fi
 

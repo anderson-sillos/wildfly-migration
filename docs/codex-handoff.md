@@ -1,8 +1,8 @@
 # Codex handoff
 
-Atualizado em 04/08/2026 após a conclusão da atividade 3.41. O CP-3H foi
-fechado e o primeiro gate do CP-3I qualificou a semântica de persistência em
-H2 e Oracle.
+Atualizado em 04/08/2026 após a conclusão da atividade 3.42. O CP-3H foi
+fechado e os gates de persistência e contratos do CP-3I passaram em H2 e
+Oracle.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -20,13 +20,12 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - PR incremental do CP-3I: #28, `feat(CP-3I): qualify persistence semantics`,
   aberta após a conclusão da atividade 3.41.
 - CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
-- Progresso OpenSpec: 96 de 110 tarefas concluídas.
+- Progresso OpenSpec: 97 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
   3.35, fechamento do checkpoint.
-- Próxima atividade OpenSpec: 3.42, executar os contratos completos e comparar
-  com o baseline no Java 21/WildFly 41.
+- Próxima atividade OpenSpec: 3.43, gerar o manifesto do gate Java 21.
 
 ## Decisões permanentes
 
@@ -206,6 +205,17 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Runbook: `migration/steps/CP-3I-persistence-semantics.md`; validador:
   `scripts/validate-cp-3i-persistence.sh`.
 
+### 3.42 — contratos e comparação do CP-3I
+
+- Os 14 cenários do baseline e o cenário adicional `protectedFragments`
+  passaram no Java 21/WildFly 41, H2 e Oracle, totalizando 15/15 em cada
+  perfil.
+- Os resultados registram o mesmo WAR SHA-256
+  `83c60d4b509b8bfea3c869c6e2f7f4ecf2b49129cd2e61f292d06315251dde81` e
+  removem os dados transitórios da suíte.
+- Evidências: `migration/evidence/CP-3I/contract-{ci-h2,oracle}.json`;
+  validador: `scripts/validate-cp-3i-contracts.sh`.
+
 ### 3.9 — descoberta de validadores
 
 - Reflections foi atualizado de 0.9.10 para 0.10.2.
@@ -301,7 +311,7 @@ o build podem executar no sandbox.
 
 ## Próxima ação
 
-Após abrir a PR do CP-3I, iniciar a atividade 3.42 sem refazer auditorias
+Após abrir a PR do CP-3I, iniciar a atividade 3.43 sem refazer auditorias
 históricas de CI já aprovadas:
 
 ```bash

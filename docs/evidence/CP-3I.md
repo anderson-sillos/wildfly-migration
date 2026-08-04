@@ -22,10 +22,25 @@ específicas.
 
 ## Limites
 
-Esta atividade não é o fechamento do CP-3I. Ainda faltam os contratos web
-completos, comparação com o baseline, manifesto e documentação de reprodução
-do gate. Os arquivos de evidência são vinculados ao WAR e ao commit-fonte;
-não contêm segredos.
+Esta atividade não é o fechamento do CP-3I. Ainda faltam o manifesto e a
+documentação de reprodução do gate. Os arquivos de evidência são vinculados ao
+WAR e ao commit-fonte; não contêm segredos.
+
+## Atividade 3.42 — contratos completos
+
+Os 15 cenários foram executados novamente no WildFly 41/Java 21 com o mesmo
+WAR nos dois perfis. Os 14 nomes e resultados do baseline legado permaneceram
+`passed`; o cenário adicional `protectedFragments` também passou, confirmando
+que fragmentos sob `WEB-INF` continuam protegidos.
+
+- H2: [`contract-ci-h2.json`](../../migration/evidence/CP-3I/contract-ci-h2.json),
+  `portable-ci`, 15/15;
+- Oracle: [`contract-oracle.json`](../../migration/evidence/CP-3I/contract-oracle.json),
+  `oracle-qualified`, 15/15;
+- Runbook e comparação: [`CP-3I-contract-comparison.md`](../../migration/steps/CP-3I-contract-comparison.md).
+
+O smoke remove os registros transitórios criados pela própria suíte. A
+comparação não é teste de carga e não transforma H2 em substituto do Oracle.
 
 ## Rollback
 
