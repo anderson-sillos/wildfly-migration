@@ -46,5 +46,7 @@ Registros atuais:
   substituição de Reflections pelo SCI padrão com JAR interno e fachada.
 - [`CP-3G-slf4j-mybatis.md`](CP-3G-slf4j-mybatis.md): remoção da ponte Log4j,
   configuração explícita do MyBatis e validação dos logs no WildFly 41.
+- [`docs/evidence/CP-3G.md`](../../docs/evidence/CP-3G.md): fechamento,
+  auditoria consolidada e rollback do checkpoint.
 - [`CP-3F-oracle-jdbc17-module.md`](CP-3F-oracle-jdbc17-module.md):
   módulos Java SE exigidos pelo ojdbc17 no WildFly 41.

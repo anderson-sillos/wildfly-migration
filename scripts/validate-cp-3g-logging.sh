@@ -88,9 +88,9 @@ fi
 
 for profile in "$CI_PROFILE" "$ORACLE_PROFILE"; do
   grep -Fq 'br.com.asillos.migration.persistence:add(level=TRACE' "$profile" ||
-    fail "perfil sem categoria DEBUG dos mappers: ${profile##*/}"
+    fail "perfil sem categoria TRACE dos mappers: ${profile##*/}"
   grep -Fq 'org.apache.ibatis:add(level=TRACE' "$profile" ||
-    fail "perfil sem categoria DEBUG do MyBatis: ${profile##*/}"
+    fail "perfil sem categoria TRACE do MyBatis: ${profile##*/}"
   grep -Fq '%X{correlationId}' "$profile" ||
     fail "perfil sem MDC de correlação: ${profile##*/}"
 done

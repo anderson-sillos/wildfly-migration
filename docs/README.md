@@ -69,6 +69,8 @@ passos.
 31. [CP-3G — Substituições web](cp-3g-web-substitutions.md): remoção de Tiles
     por tag file/includes JSP, multipart nativo, SCI, logging SLF4J e validação
     no WildFly 41.
+32. [Evidência CP-3G](evidence/CP-3G.md): contratos web, auditoria de WAR,
+    dependências, segurança e rollback do checkpoint.
 
 ## Aplicação e arquitetura
 
@@ -89,6 +91,7 @@ passos.
 - [Evidência CP-3D](evidence/CP-3D.md);
 - [Namespaces Jakarta do CP-3F](cp-3f-jakarta-namespaces.md);
 - [Substituições web do CP-3G](cp-3g-web-substitutions.md);
+- [Evidência CP-3G](evidence/CP-3G.md);
 - [Logging final SLF4J/MyBatis do CP-3G](../migration/steps/CP-3G-slf4j-mybatis.md);
 - [multipart nativo do Servlet no CP-3G](../migration/steps/CP-3G-servlet-multipart.md);
 - [descoberta SCI de validadores no CP-3G](../migration/steps/CP-3G-servlet-container-initializer.md);

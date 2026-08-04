@@ -219,6 +219,8 @@ jobs:
           ./scripts/validate-cp-3g-logging.sh \
             --war app/target/cp3f-jakarta11/wildfly-migration.war \
             --server-log app/target/contract-results/cp-3f-wildfly41.log
+          ./scripts/validate-cp-3g-closure.sh \
+            --war app/target/cp3f-jakarta11/wildfly-migration.war
 
       - name: Upload CP-3F portable evidence
         if: steps.portable-selection.outputs.mode == 'cp3f'
@@ -231,6 +233,11 @@ jobs:
             migration/evidence/CP-3F/deployment-tiles-blocked.txt
             migration/evidence/CP-3G/upload-ci-h2.json
             migration/evidence/CP-3G/upload-oracle.json
+            migration/evidence/CP-3G/discovery-ci-h2.json
+            migration/evidence/CP-3G/logging-ci-h2.json
+            migration/evidence/CP-3G/closure.properties
+            migration/evidence/CP-3G/rollback.properties
+            docs/evidence/CP-3G.md
             app/target/contract-results/cp-3f-ci-h2.json
             app/target/contract-results/cp-3f-wildfly41.log
           if-no-files-found: error

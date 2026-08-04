@@ -142,5 +142,7 @@ run_step "Validar descoberta SCI do CP-3G" \
   ./scripts/validate-cp-3g-discovery.sh
 run_step "Validar logging SLF4J/MyBatis do CP-3G" \
   ./scripts/validate-cp-3g-logging.sh
+run_step "Validar fechamento do CP-3G" \
+  ./scripts/validate-cp-3g-closure.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'

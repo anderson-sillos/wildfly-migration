@@ -1,8 +1,8 @@
 # Codex handoff
 
-Atualizado em 04/08/2026 após a conclusão da atividade 3.34. A PR incremental
-do CP-3G está aberta e o próximo passo é executar a atividade 3.35 somente
-depois da revisão dos checks remotos.
+Atualizado em 04/08/2026 após a conclusão da atividade 3.35. A PR incremental
+do CP-3G está aberta, com checks remotos verdes, aguardando a integração pelo
+commit de fechamento do checkpoint.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -15,11 +15,11 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Branch atual: `checkpoint/cp-3g-entry`; a implementação da atividade 3.34 está no commit local `68aa97d5702666ff5c76c440acab555af9bb8fb1`.
 - PR incremental do CP-3G: #25, `feat(CP-3G): replace Reflections with Servlet SCI`, aberta contra `main`.
 - CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
-- Progresso OpenSpec: 89 de 110 tarefas concluídas.
+- Progresso OpenSpec: 90 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`.
-- Próxima atividade: 3.35, encerrar o CP-3G após os checks remotos.
+- Próxima atividade: integrar e fechar a PR #25; depois iniciar o CP-3H.
 
 ## Decisões permanentes
 
@@ -116,6 +116,18 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Evidência: `migration/evidence/CP-3G/logging-ci-h2.json`; validação estática:
   `scripts/validate-cp-3g-logging.sh`.
 - Commit de implementação: `68aa97d5702666ff5c76c440acab555af9bb8fb1`.
+
+### 3.35 — fechamento do CP-3G
+
+- O gate portátil executa 15/15 contratos no H2 e valida layout JSP, multipart
+  Servlet, descoberta SCI, logging SLF4J/MyBatis, conteúdo do WAR,
+  dependências e segurança.
+- O fechamento e o rollback estão em `docs/evidence/CP-3G.md` e em
+  `migration/evidence/CP-3G/{closure,rollback}.properties`.
+- A evidência Oracle existente da atividade 3.32 continua limitada ao upload e
+  importação XML; não foi tratada como qualificação Oracle completa do CP-3G.
+- Validação: `scripts/validate-cp-3g-closure.sh`; PR #25 com
+  `repository-baseline` e `portable-ci` verdes.
 
 ### 3.9 — descoberta de validadores
 

@@ -47,15 +47,17 @@ e
 Ambos registram 15/15 cenários aprovados, o mesmo WAR e `workingTree=false` no
 commit integrado do CP-3F.
 
-## Fronteira das próximas atividades
+## Fechamento do checkpoint
 
 Reflections e a ponte temporária de logging continuam transições deliberadas.
 Commons FileUpload já foi removido na atividade 3.32 e substituído por
 `@MultipartConfig`/`jakarta.servlet.http.Part`; a decisão e os limites
 preservados estão em
 [`CP-3G-servlet-multipart.md`](../migration/steps/CP-3G-servlet-multipart.md).
-As atividades 3.33–3.34 permanecem separadas para não misturar seus
-diagnósticos com as substituições web anteriores.
+As atividades 3.33–3.34 foram mantidas separadas para não misturar seus
+diagnósticos com as substituições web anteriores. O fechamento consolidado,
+com 15/15 contratos H2, auditoria do WAR, dependências, segurança e rollback,
+está em [`Evidência CP-3G`](evidence/CP-3G.md).
 
 ## Atividade 3.33: descoberta por ServletContainerInitializer
 
@@ -89,7 +91,7 @@ passaram a usar diretamente `org.slf4j`. O MyBatis define
 classloader. A API SLF4J fica em `provided` e é fornecida pelo módulo do
 WildFly 41; o WAR não contém ponte, API duplicada ou backend concorrente.
 
-Os perfis H2 e Oracle configuram a categoria de persistência em `DEBUG` e
+Os perfis H2 e Oracle configuram a categoria de persistência em `TRACE` e
 mantêm o `correlationId` no padrão do servidor. Depois dos contratos, o smoke
 tenta inserir um pedido com número duplicado; a transação sofre rollback e a
 requisição deve falhar com HTTP 503. A auditoria confirma no `server.log` as categorias
@@ -101,7 +103,8 @@ O procedimento detalhado está em
 
 ## Rollback
 
-Para retornar somente o layout, restaure os wrappers, `WEB-INF/layout/base.jsp`,
-`WEB-INF/tiles-defs.xml`, o listener Tiles e as duas dependências Tiles do
-último estado aprovado do CP-3D. Não altere o schema Oracle nem adicione APIs
-`javax` ao WAR Jakarta.
+O rollback do checkpoint retorna ao estado integrado do CP-3F e ao WAR Jakarta
+anterior. Não restaura Tiles, Commons FileUpload, Reflections ou a ponte de
+logging no código moderno, não altera o schema Oracle e não adiciona APIs
+`javax` ao WAR Jakarta. O alvo e a verificação estão em
+[`rollback.properties`](../migration/evidence/CP-3G/rollback.properties).
