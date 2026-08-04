@@ -1,0 +1,18 @@
+{
+  "schema": "wildfly-migration-cp3h-closure/v1",
+  "checkpoint": "CP-3H",
+  "activity": "3.40",
+  "qualification": "portable-ci",
+  "profile": "ci-h2",
+  "sourceCommit": "b55ff7b6702329af0083f189287928bcff7ed55d",
+  "workingTree": false,
+  "warSha256": "83c60d4b509b8bfea3c869c6e2f7f4ecf2b49129cd2e61f292d06315251dde81",
+  "runtime": "java21-wildfly41.0.0",
+  "contractScenarios": 15,
+  "contractResult": "passed",
+  "xmlAudit": "passed",
+  "dependencyAudit": "passed",
+  "warAudit": "passed",
+  "rollback": "documented",
+  "result": "passed"
+}

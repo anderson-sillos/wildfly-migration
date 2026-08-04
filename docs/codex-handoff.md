@@ -1,8 +1,8 @@
 # Codex handoff
 
-Atualizado em 04/08/2026 após a integração da atividade 3.35. A PR #25 do
-CP-3G foi encerrada com checks remotos verdes pelo squash
-`a46c56a0c4a47b1fdcaca78b0ea7bd6d5e3a5bbe`.
+Atualizado em 04/08/2026 após a conclusão da atividade 3.40. O CP-3H foi
+fechado com gates XML, datasource, Oracle, dependências e empacotamento; a PR
+#27 aguarda apenas os checks finais para integração.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -12,17 +12,17 @@ URLs Oracle, endereços internos nem valores do `.env`.
 
 - Repositório: `anderson-sillos/wildfly-migration`.
 - Mudança OpenSpec: `create-java-web-migration-lab`.
-- Branch atual: `main`; o CP-3G está integrado no commit
+- Branch atual: `checkpoint/cp-3h-entry`; o CP-3G está integrado no commit
   `a46c56a0c4a47b1fdcaca78b0ea7bd6d5e3a5bbe`.
 - PR incremental do CP-3G: #25, `feat(CP-3G): replace Reflections with Servlet SCI`,
   encerrada por squash com a mensagem `checkpoint(CP-3G): replace legacy web libraries`.
 - CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
-- Progresso OpenSpec: 90 de 110 tarefas concluídas.
+- Progresso OpenSpec: 95 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
   3.35, fechamento do checkpoint.
-- Próxima atividade OpenSpec: 3.36, início do CP-3H. Ela ainda não foi iniciada.
+- Próxima atividade OpenSpec: 3.41, iniciar o gate Java 21 do CP-3I.
 
 ## Decisões permanentes
 
@@ -135,6 +135,61 @@ URLs Oracle, endereços internos nem valores do `.env`.
   `repository-baseline` e `portable-ci` verdes, integrada no squash
   `a46c56a0c4a47b1fdcaca78b0ea7bd6d5e3a5bbe`.
 
+### 3.36 — XML moderno e seguro
+
+- O POM mantém MyBatis `3.5.19`, XMLBeans `5.3.0` e dom4j `2.2.0`.
+- O gate `scripts/validate-cp-3h-xml.sh` recompila o perfil Jakarta/Java 21,
+  regenera `wildflyMigrationPedido1` e valida fixture legítima, XSD,
+  namespace, round-trip, XXE e expansão de entidades.
+- Evidência: `migration/evidence/CP-3H/xml-ci-h2.json`; resultado `passed`,
+  WAR SHA-256 `83c60d4b509b8bfea3c869c6e2f7f4ecf2b49129cd2e61f292d06315251dde81`.
+
+### 3.37 — datasource final Oracle/H2
+
+- OJDBC17 `23.26.2.0.0` foi registrado no manifesto final e provisionado
+  somente como módulo `com.oracle.ojdbc17`; H2 2.4.240 permanece externo e em
+  memória no perfil `ci-h2`.
+- Os dois perfis publicam `java:/jdbc/MigrationDS`, sem drivers no WAR ou no
+  cache portátil. Evidências: `migration/evidence/CP-3H/datasource-*.json`.
+
+### 3.38 — qualificação Oracle 19c
+
+- A sonda confirmou Oracle Database 19c, `VERSION_FULL=19.3.0.0.0`,
+  `ojdbc17-23.26.2.0.0`, Temurin 21.0.12+8 e WildFly 41.0.0.Final.
+- Os 15 contratos Oracle passaram com o WAR SHA-256
+  `83c60d4b509b8bfea3c869c6e2f7f4ecf2b49129cd2e61f292d06315251dde81`.
+- Evidência: `migration/evidence/CP-3H/oracle-qualification.json`.
+- Commits da sequência: `d1523cb` (gate) e `5e41273` (evidência/tarefa).
+
+### 3.39 — auditoria final de empacotamento
+
+- A auditoria rejeita APIs do contêiner, Log4j 1/ponte, Tiles, Commons
+  FileUpload, Reflections/scanners externos, `xml-apis`, Geronimo StAX e
+  `ojdbc7` no POM, código ativo ou WAR.
+- O WAR contém o JAR interno do SCI e o descritor de serviço esperado, com os
+  validadores concretos em `WEB-INF/classes`.
+- A auditoria estática também pode ser executada antes da montagem do WAR no
+  `repository-baseline` com `--skip-war`.
+- Evidência: `migration/evidence/CP-3H/packaging-audit.json`.
+
+### 3.40 — fechamento do CP-3H
+
+- O gate H2 executou 15/15 cenários no WAR `83c60d4b509b8bfea3c869c6e2f7f4ecf2b49129cd2e61f292d06315251dde81`.
+- A qualificação Oracle versionada comprova Oracle 19c/RU 19.3.0.0.0,
+  `ojdbc17-23.26.2.0.0`, Temurin 21.0.12+8 e WildFly 41.0.0.Final, também
+  com 15/15 cenários. A tentativa de repetição nesta sessão foi bloqueada
+  somente pela política de rede do executor; a evidência Oracle já aprovada
+  foi reutilizada e permanece sanitizada.
+- O fechamento separa as evidências H2 e Oracle, consolida XML, datasource,
+  dependências e WAR e registra rollback sem DDL, remoção de schema ou
+  alteração de dados.
+- Evidências: `migration/evidence/CP-3H/closure-*.json`,
+  `closure.properties`, `rollback.properties` e `docs/evidence/CP-3H.md`.
+- Validador: `scripts/validate-cp-3h-closure.sh` (com `--skip-war` no
+  baseline remoto e com `--war` após o build).
+- Commit local de implementação do gate: `b55ff7b`; integração prevista com a
+  mensagem `checkpoint(CP-3H): finalize Oracle and packaging`.
+
 ### 3.9 — descoberta de validadores
 
 - Reflections foi atualizado de 0.9.10 para 0.10.2.
@@ -230,15 +285,15 @@ o build podem executar no sandbox.
 
 ## Próxima ação
 
-Após integrar a entrega da 3.12, retomar pela atividade 3.13 sem refazer a
-auditoria histórica de CI já aprovada:
+Após a integração da PR #27, iniciar a atividade 3.41 sem refazer auditorias
+históricas de CI já aprovadas:
 
 ```bash
 git status --short --branch
 openspec status --change create-java-web-migration-lab --json
 openspec instructions apply --change create-java-web-migration-lab --json
-./scripts/doctor.sh CP-3B --profile ci-h2 --env .env --non-interactive
-./scripts/validate-cp-3c-dom4j.sh --env .env --skip-build
+./scripts/doctor.sh CP-3I --profile ci-h2 --env .env --non-interactive
+openspec instructions apply --change create-java-web-migration-lab --json
 ```
 
 A troca de Reflections por `ServletContainerInitializer` em JAR separado

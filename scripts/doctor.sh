@@ -525,6 +525,33 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-3H; then
+    required+=(
+      "migration/steps/CP-3H-xml-safe.md"
+      "migration/evidence/CP-3H/xml-ci-h2.json"
+      "scripts/validate-cp-3h-xml.sh"
+      "migration/steps/CP-3H-ojdbc17-datasource.md"
+      "migration/evidence/CP-3H/datasource-ci-h2.json"
+      "migration/evidence/CP-3H/datasource-oracle.json"
+      "scripts/validate-cp-3h-datasource.sh"
+      "migration/steps/CP-3H-oracle-qualification.md"
+      "scripts/qualify-cp-3h-oracle.sh"
+      "scripts/ValidateCp3hOracleVersion.java"
+      "migration/evidence/CP-3H/oracle-qualification.json"
+      "scripts/validate-cp-3h-oracle-qualification.sh"
+      "migration/steps/CP-3H-final-packaging-audit.md"
+      "migration/evidence/CP-3H/packaging-audit.json"
+      "scripts/audit-cp-3h-final-packaging.sh"
+      "migration/steps/CP-3H-closure.md"
+      "docs/evidence/CP-3H.md"
+      "migration/evidence/CP-3H/closure-portable-ci.json"
+      "migration/evidence/CP-3H/closure-oracle-qualified.json"
+      "migration/evidence/CP-3H/closure.properties"
+      "migration/evidence/CP-3H/rollback.properties"
+      "scripts/validate-cp-3h-closure.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"

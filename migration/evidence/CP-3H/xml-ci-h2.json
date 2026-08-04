@@ -1,0 +1,23 @@
+{
+  "schema": "wildfly-migration-cp3h-xml/v1",
+  "checkpoint": "CP-3H",
+  "activity": "3.36",
+  "qualification": "portable-ci",
+  "profile": "ci-h2",
+  "sourceCommit": "2f43a69b0fffd98d2ee6ac5e324c6203abe2376d",
+  "workingTree": false,
+  "warSha256": "83c60d4b509b8bfea3c869c6e2f7f4ecf2b49129cd2e61f292d06315251dde81",
+  "runtime": "java21-wildfly41.0.0",
+  "mybatisVersion": "3.5.19",
+  "xmlbeansVersion": "5.3.0",
+  "dom4jVersion": "2.2.0",
+  "generatedTypes": "passed",
+  "validFixture": "passed",
+  "schemaRejection": "passed",
+  "namespaceRoundTrip": "passed",
+  "serializationRoundTrip": "passed",
+  "validDocument": "passed",
+  "xxeRejection": "passed",
+  "entityExpansionRejection": "passed",
+  "result": "passed"
+}

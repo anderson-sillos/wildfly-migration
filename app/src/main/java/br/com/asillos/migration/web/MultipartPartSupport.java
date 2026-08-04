@@ -13,7 +13,7 @@ import jakarta.servlet.http.Part;
  * Pequena fachada para o multipart nativo do Servlet.
  *
  * <p>Concentra os limites defensivos que antes ficavam espalhados no
- * Commons FileUpload e mantém a aplicação independente de bibliotecas de
+ * implementação mantém a aplicação independente de bibliotecas externas de
  * parsing multipart.</p>
  */
 final class MultipartPartSupport {

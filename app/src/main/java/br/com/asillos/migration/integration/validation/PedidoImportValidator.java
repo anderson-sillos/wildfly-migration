@@ -3,7 +3,7 @@ package br.com.asillos.migration.integration.validation;
 import br.com.asillos.migration.domain.Pedido;
 
 /**
- * Extensão legada descoberta em runtime pelo Reflections.
+ * Extensão descoberta em runtime pelo ServletContainerInitializer.
  */
 public interface PedidoImportValidator {
     int order();

@@ -18,6 +18,25 @@ no WAR. O MyBatis fixa `logImpl=SLF4J`; os perfis configuram a categoria de
 persistência para permitir a verificação das categorias dos mappers no
 `server.log`.
 
+## Datasources do CP-3H
+
+Os dois perfis publicam o mesmo JNDI `java:/jdbc/MigrationDS` e deixam o pool
+sob responsabilidade do WildFly. O código da aplicação não escolhe o banco e
+o WAR não contém driver H2 nem Oracle.
+
+- `ci-h2`: usa o módulo de teste `com.h2database.h2` (slot `cp3f`) e H2
+  `2.4.240` em memória, sem listener ou console de rede. Esse é o caminho
+  `portable-ci` para o CI hospedado.
+- `oracle`: usa o módulo externo `com.oracle.ojdbc17` com
+  `ojdbc17:23.26.2.0.0`. O JAR é fornecido por `OJDBC17_JAR`, validado pelo
+  `OJDBC17_SHA256` e instalado como `ojdbc17.jar` somente em
+  `modules/com/oracle/ojdbc17/main`. URL, usuário e senha permanecem no
+  `.env`; a origem e o checksum aprovados estão no
+  [manifesto](runtime-manifest.tsv).
+
+O provisionamento reproduzível, incluindo comandos de smoke e rollback, está
+em [`CP-3H-ojdbc17-datasource.md`](../../../migration/steps/CP-3H-ojdbc17-datasource.md).
+
 A reprodução do primeiro diagnóstico usa:
 
 ```bash
