@@ -47,6 +47,8 @@ não remove schema e não altera dados do Oracle.
 
 O resumo dos gates e o resultado `passed` estão em
 [`closure.properties`](../../migration/evidence/CP-3H/closure.properties).
-Ambos os relatórios finais apontam para o mesmo commit-fonte e WAR e registram
+Ambos os relatórios finais apontam para commits-fonte existentes e para o mesmo
+WAR. Os commits podem ser diferentes porque a qualificação Oracle é executada
+em uma rede interna separada da execução portátil H2. Cada relatório registra
 `workingTree=false`, permitindo reproduzir o estado sem depender de alterações
 locais não versionadas.

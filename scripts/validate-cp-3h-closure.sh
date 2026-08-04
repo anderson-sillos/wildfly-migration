@@ -108,8 +108,10 @@ for report in \
       fail "evidência não contém $marker: ${report##*/}"
   done
   source_commit="$(sed -n 's/.*"sourceCommit": "\([0-9a-f]\{40\}\)".*/\1/p' "$report" | head -n 1)"
-  [[ "$source_commit" == "$tested_commit" ]] ||
-    fail "sourceCommit diverge de tested.commit: ${report##*/}"
+  [[ "$source_commit" =~ ^[0-9a-f]{40}$ ]] ||
+    fail "sourceCommit inválido: ${report##*/}"
+  git -C "$ROOT" cat-file -e "$source_commit^{commit}" 2>/dev/null ||
+    fail "sourceCommit não existe: ${report##*/}"
   if grep -Eiq 'jdbc:oracle:|ORACLE_DB_|ORACLE_DB_PASSWORD|password|user-name|connection-url|senha' "$report"; then
     fail "evidência contém configuração sensível: ${report##*/}"
   fi
