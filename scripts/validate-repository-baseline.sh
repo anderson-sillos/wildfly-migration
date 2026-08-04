@@ -91,6 +91,7 @@ shell_files=(
   scripts/validate-cp-3i-manifest.sh
   scripts/validate-cp-3i-java17-runbook.sh
   scripts/validate-cp-3i-closure.sh
+  scripts/validate-cp-3j-runtime-selection.sh
   scripts/smoke-wildfly41-datasource.sh
   contract-tests/run.sh
 )
@@ -178,5 +179,7 @@ run_step "Validar roteiro do CP-3I/3.44" \
   ./scripts/validate-cp-3i-java17-runbook.sh
 run_step "Validar fechamento do CP-3I/3.45" \
   ./scripts/validate-cp-3i-closure.sh --skip-war
+run_step "Validar seleção de runtime do CP-3J/3.46" \
+  ./scripts/validate-cp-3j-runtime-selection.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'
