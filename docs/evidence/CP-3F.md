@@ -28,7 +28,7 @@ O bloqueio foi registrado, não mascarado por uma dependência `javax` adicional
 no WAR. A atividade 3.31 removeu Tiles por tag file JSP/includes sob `WEB-INF`.
 A execução posterior em H2 e Oracle no WildFly 41 concluiu os contratos de
 listagem, criação, consulta, sessão, upload e importação XML. Os relatórios
-sanitizados ainda serão versionados no fechamento do CP-3F.
+sanitizados foram versionados com o commit testado `39b8be7`.
 
 ## Evidências versionadas
 
@@ -45,8 +45,7 @@ sanitizados ainda serão versionados no fechamento do CP-3F.
 - [`validate-cp-3g-tiles.sh`](../../scripts/validate-cp-3g-tiles.sh)
 - [`validate-cp-3f-closure.sh`](../../scripts/validate-cp-3f-closure.sh)
 
-O CP-3F ainda não está encerrado. As evidências foram preparadas com
-`workingTree=true` para revisão; o estado `pending-integration-review` será
-alterado para `passed` somente após o commit integrado. Seu rollback é o estado
-verde do CP-3E, e o commit esperado é
+O CP-3F está encerrado. As evidências H2 e Oracle foram executadas com
+`workingTree=false`, no commit integrado `39b8be7`, e o rollback é o estado
+verde do CP-3E. O commit de integração é
 `checkpoint(CP-3F): migrate Jakarta namespaces`.

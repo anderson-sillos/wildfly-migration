@@ -27,9 +27,9 @@ done
 for report in "$EVIDENCE/contract-ci-h2.json" "$EVIDENCE/contract-oracle.json"; do
   grep -Fq '"schema": "wildfly-migration-cp3f-contract-result/v1"' "$report" ||
     fail "schema de contrato divergente: ${report##*/}"
-  grep -Fq '"sourceCommit": "117427ce659a1e4c134943fa2af7b7d45b6c44ad"' "$report" ||
+  grep -Fq '"sourceCommit": "39b8be79a3e6e80006b3a64090a3a5fd195c1a2e"' "$report" ||
     fail "commit testado divergente: ${report##*/}"
-  grep -Fq '"workingTree": true' "$report" ||
+  grep -Fq '"workingTree": false' "$report" ||
     fail "proveniência workingTree ausente: ${report##*/}"
   grep -Fq '"scenarioCount": 15' "$report" ||
     fail "quantidade de cenários divergente: ${report##*/}"
@@ -58,7 +58,7 @@ for marker in \
   'namespace.audit=passed' \
   'layout.audit=passed' \
   'transient.oracle.data.cleanup=passed' \
-  'result=pending-integration-review'; do
+  'result=passed'; do
   grep -Fxq "$marker" "$EVIDENCE/closure.properties" ||
     fail "fechamento não contém: $marker"
 done
@@ -71,4 +71,4 @@ grep -Fxq 'rollback.result=verified-by-documented-checkout' \
   "$EVIDENCE/rollback.properties" ||
   fail 'rollback não foi validado por checkout documentado'
 
-printf 'OK: CP-3F preparado para fechamento; evidências H2/Oracle e rollback válidos\n'
+printf 'OK: CP-3F encerrado; evidências H2/Oracle e rollback válidos\n'

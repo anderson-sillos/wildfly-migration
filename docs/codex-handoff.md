@@ -82,10 +82,11 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Commons FileUpload e Commons IO foram removidos do WAR Jakarta.
 - `UploadServlet` e `XmlImportServlet` usam `@MultipartConfig` e `Part`, com
   limites, basename normalizado, leitura limitada e limpeza explícita.
-- H2 e Oracle no WildFly 41 aprovaram os 15 cenários HTTP; evidências locais
-  estão em `migration/evidence/CP-3G/upload-*.json` e usam `workingTree=true`.
-- A próxima integração deve ocorrer somente após revisão do worktree; não há
-  commit ou push desta atividade.
+- H2 e Oracle no WildFly 41 aprovaram os 15 cenários HTTP; evidências
+  versionadas estão em `migration/evidence/CP-3G/upload-*.json` e usam
+  `workingTree=false`.
+- O CP-3F foi integrado no commit `39b8be7`; a atividade 3.33 ainda não foi
+  iniciada.
 
 ### 3.9 — descoberta de validadores
 

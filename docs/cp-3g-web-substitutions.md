@@ -44,8 +44,8 @@ Para a atividade 3.32, os relatórios sanitizados H2 e Oracle ficam em
 [`migration/evidence/CP-3G/upload-ci-h2.json`](../migration/evidence/CP-3G/upload-ci-h2.json)
 e
 [`migration/evidence/CP-3G/upload-oracle.json`](../migration/evidence/CP-3G/upload-oracle.json).
-Ambos registram 15/15 cenários aprovados, o mesmo WAR e `workingTree=true`
-enquanto o conjunto aguarda revisão e integração.
+Ambos registram 15/15 cenários aprovados, o mesmo WAR e `workingTree=false` no
+commit integrado do CP-3F.
 
 ## Fronteira das próximas atividades
 

@@ -104,8 +104,8 @@ for path in "${required_paths[@]}"; do
 done
 
 for marker in \
-  'workingTree=true' \
-  'pending-integration-review' \
+  'workingTree=false' \
+  'result=passed' \
   'checkpoint(CP-3F): migrate Jakarta namespaces'; do
   if ! grep -Fqi -- "$marker" \
       "$REPOSITORY_ROOT/docs/evidence/CP-3F.md" \

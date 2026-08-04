@@ -33,7 +33,7 @@ validate_evidence() {
     '"activity": "3.32"' \
     "\"qualification\": \"$qualification\"" \
     "\"profile\": \"$profile\"" \
-    '"workingTree": true' \
+    '"workingTree": false' \
     '"api": "jakarta.servlet.http.Part"' \
     '"fileUploadDependency": "absent"' \
     '"commonsIoDependency": "absent"' \
