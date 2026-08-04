@@ -22,8 +22,10 @@ Depois de construir o WAR Jakarta, execute:
 O gerador lê versões, licenças, origem e checksums do runtime em
 `runtime/phase3/java21-wildfly41/runtime-manifest.tsv`, calcula o SHA-256 e a
 quantidade de bibliotecas do WAR e registra o commit Git usado. O campo
-`workingTree=false` somente é válido para uma execução sem alterações
-pendentes além do próprio arquivo de evidência.
+`workingTree=false` permite apenas alterações derivadas em `migration/evidence`
+ou `app/target`, que são regeneradas pelos gates; qualquer alteração pendente
+em código, scripts, documentação, configuração ou runtime torna o campo
+`true`.
 
 ## Conteúdo e proveniência
 

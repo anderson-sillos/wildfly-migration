@@ -67,7 +67,7 @@ working_tree=false
 while IFS= read -r status_line; do
   status_path="${status_line:3}"
   case "$status_path" in
-    "$relative_output"|migration/evidence/CP-3I/*|app/target/*)
+    "$relative_output"|migration/evidence/*|app/target/*)
       continue
       ;;
   esac
