@@ -268,10 +268,44 @@ if [[ "$PROFILE" == "oracle" ]]; then ORACLE_SMOKES_CREATED=true; fi
   --war "$WAR_FILE" --result "$RESULT_FILE" --commit "$COMMIT_SHA" \
   --source-commit "$SOURCE_COMMIT_SHA" --runtime 'java21-wildfly41.0.0' \
   --correlation-id "$CONTRACT_CORRELATION"
+
+# Depois dos contratos funcionais, tenta uma inclusão com número duplicado
+# para comprovar que SLF4J encaminha a categoria e o Throwable completo ao
+# logging administrado pelo WildFly. A transação deve sofrer rollback e não
+# altera o schema nem os dados persistidos do laboratório.
+LOGGING_PROBE_STATUS="$(
+  curl --silent --show-error \
+    --data-urlencode 'numero=LAB-0001' \
+    --data-urlencode 'clienteNome=Sonda de logging' \
+    --data-urlencode 'descricao=Falha controlada de logging' \
+    --data-urlencode 'valorTotal=1.00' \
+    --output "$TEMP_DIRECTORY/logging-probe-body.out" \
+    --write-out '%{http_code}' \
+    "$BASE_URL/pedidos"
+)" || fail 'sonda de logging não recebeu resposta HTTP'
+[[ "$LOGGING_PROBE_STATUS" == '503' ]] ||
+  fail "sonda de logging esperava HTTP 503, recebeu $LOGGING_PROBE_STATUS"
 grep -Fq 'validator_sci_discovery' "$TEMP_DIRECTORY/server.log" ||
   fail 'WildFly não registrou a inicialização do SCI de validadores'
 grep -Fq \
   'legacy_validator_order=numero-formato,valor-monetario,status-inicial' \
   "$TEMP_DIRECTORY/server.log" ||
   fail 'ordem funcional dos validadores não foi preservada pelo SCI'
+grep -Fq 'br.com.asillos.migration.persistence.PedidoMapper' \
+  "$TEMP_DIRECTORY/server.log" ||
+  fail 'logging não registrou a categoria do PedidoMapper'
+grep -Fq 'br.com.asillos.migration.persistence.AnexoMapper' \
+  "$TEMP_DIRECTORY/server.log" ||
+  fail 'logging não registrou a categoria do AnexoMapper'
+grep -Fq 'legacy_order persistence_failure' "$TEMP_DIRECTORY/server.log" ||
+  fail 'logging não registrou a falha controlada do pedido'
+awk '
+  /legacy_order persistence_failure/ { window=25; found=1 }
+  window > 0 {
+    if ($0 ~ /Exception|Error/ || $0 ~ /^[[:space:]]+at /) stack=1
+    window--
+  }
+  END { exit(found && stack ? 0 : 1) }
+' "$TEMP_DIRECTORY/server.log" ||
+  fail 'logging não registrou a cadeia completa da exceção'
 printf 'OK: contratos CP-3F %s concluídos; resultado em %s\n' "$PROFILE" "$RESULT_FILE"

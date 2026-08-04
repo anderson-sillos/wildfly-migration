@@ -63,12 +63,10 @@ o relatório executado no Oracle 19c recebe `oracle-qualified`.
 
 ## Logging
 
-MyBatis 3.5.19 mantém autodetecção da implementação de logging. Nesta
-atividade, `logImpl` permanece sem valor explícito para não misturar a troca do
-MyBatis com a remoção do Log4j 1. A atividade 3.7 introduzirá a ponte temporária
-necessária ao gate Java 17 e a atividade 3.34 definirá explicitamente
-`logImpl=SLF4J` no destino final, integrado ao logging do WildFly e sem backend
-concorrente dentro do WAR.
+MyBatis 3.5.19 usa explicitamente `logImpl=SLF4J` no destino Jakarta. A
+autodetecção deixa de participar da seleção, evitando que a ordem dos módulos
+do servidor altere o comportamento. A API SLF4J é fornecida pelo WildFly 41 e
+o WAR não empacota ponte, API duplicada ou backend concorrente.
 
 ## Limites da validação
 

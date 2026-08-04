@@ -76,6 +76,7 @@ shell_files=(
   scripts/validate-cp-3g-tiles.sh
   scripts/validate-cp-3g-upload.sh
   scripts/validate-cp-3g-discovery.sh
+  scripts/validate-cp-3g-logging.sh
   scripts/smoke-wildfly41-datasource.sh
   contract-tests/run.sh
 )
@@ -139,5 +140,7 @@ run_step "Validar multipart nativo do CP-3G" \
   ./scripts/validate-cp-3g-upload.sh
 run_step "Validar descoberta SCI do CP-3G" \
   ./scripts/validate-cp-3g-discovery.sh
+run_step "Validar logging SLF4J/MyBatis do CP-3G" \
+  ./scripts/validate-cp-3g-logging.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'

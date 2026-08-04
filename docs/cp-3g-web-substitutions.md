@@ -81,6 +81,24 @@ a ausência de Reflections e a ausência de cópias da infraestrutura em
 `WEB-INF/classes`. O procedimento completo está em
 [`CP-3G-servlet-container-initializer.md`](../migration/steps/CP-3G-servlet-container-initializer.md).
 
+## Atividade 3.34: logging final
+
+A ponte `log4j-over-slf4j` foi removida depois que os imports da aplicação
+passaram a usar diretamente `org.slf4j`. O MyBatis define
+`<setting name="logImpl" value="SLF4J"/>`, eliminando a autodetecção baseada no
+classloader. A API SLF4J fica em `provided` e é fornecida pelo módulo do
+WildFly 41; o WAR não contém ponte, API duplicada ou backend concorrente.
+
+Os perfis H2 e Oracle configuram a categoria de persistência em `DEBUG` e
+mantêm o `correlationId` no padrão do servidor. Depois dos contratos, o smoke
+tenta inserir um pedido com número duplicado; a transação sofre rollback e a
+requisição deve falhar com HTTP 503. A auditoria confirma no `server.log` as categorias
+`PedidoMapper`/`AnexoMapper`, o evento `legacy_order persistence_failure` e a
+exceção completa, sem expor credenciais.
+
+O procedimento detalhado está em
+[`CP-3G-slf4j-mybatis.md`](../migration/steps/CP-3G-slf4j-mybatis.md).
+
 ## Rollback
 
 Para retornar somente o layout, restaure os wrappers, `WEB-INF/layout/base.jsp`,

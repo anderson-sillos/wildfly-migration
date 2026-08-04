@@ -23,7 +23,7 @@
 
     <jakarta.ee.web.api.version>8.0.0</jakarta.ee.web.api.version>
     <mybatis.version>3.5.19</mybatis.version>
-    <slf4j.version>1.7.36</slf4j.version>
+    <slf4j.version>2.0.18</slf4j.version>
     <xmlbeans.version>5.3.0</xmlbeans.version>
     <dom4j.version>2.2.0</dom4j.version>
   </properties>
@@ -46,15 +46,6 @@
       <groupId>org.mybatis</groupId>
       <artifactId>mybatis</artifactId>
       <version>${mybatis.version}</version>
-    </dependency>
-    <!--
-      Ponte temporária para os imports org.apache.log4j ainda existentes.
-      O backend e a API SLF4J são fornecidos pelo WildFly 26.
-    -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>log4j-over-slf4j</artifactId>
-      <version>${slf4j.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

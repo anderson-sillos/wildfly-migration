@@ -111,10 +111,8 @@ public final class ValidateApplicationPom {
         expected.put("jakarta.platform:jakarta.jakartaee-web-api",
                 values("8.0.0", "provided"));
         expected.put("org.mybatis:mybatis", values("3.5.19", "compile"));
-        expected.put("org.slf4j:log4j-over-slf4j",
-                values("1.7.36", "compile"));
         expected.put("org.slf4j:slf4j-api",
-                values("1.7.36", "provided"));
+                values("2.0.18", "provided"));
         expected.put("org.apache.xmlbeans:xmlbeans",
                 values("5.3.0", "compile"));
         expected.put("org.dom4j:dom4j", values("2.2.0", "compile"));
@@ -295,8 +293,11 @@ public final class ValidateApplicationPom {
                 "raiz de jboss-deployment-structure.xml inválida");
         NodeList modules =
                 document.getElementsByTagNameNS("*", "module");
+        if (modules.getLength() == 0) {
+            return;
+        }
         require(modules.getLength() == 1,
-                "deployment deve excluir somente um módulo");
+                "deployment deve excluir no máximo um módulo");
         Element module = (Element) modules.item(0);
         require("org.apache.log4j".equals(module.getAttribute("name")),
                 "módulo Log4j 1 do WildFly deve ser excluído");

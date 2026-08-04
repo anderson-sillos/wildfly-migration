@@ -67,7 +67,8 @@ passos.
 30. [CP-3F — Namespaces Jakarta](cp-3f-jakarta-namespaces.md): migração dos
     descritores, JSPs e handlers, com o bloqueio histórico de Tiles registrado.
 31. [CP-3G — Substituições web](cp-3g-web-substitutions.md): remoção de Tiles
-    por tag file/includes JSP, multipart nativo, SCI e validação no WildFly 41.
+    por tag file/includes JSP, multipart nativo, SCI, logging SLF4J e validação
+    no WildFly 41.
 
 ## Aplicação e arquitetura
 
@@ -88,6 +89,7 @@ passos.
 - [Evidência CP-3D](evidence/CP-3D.md);
 - [Namespaces Jakarta do CP-3F](cp-3f-jakarta-namespaces.md);
 - [Substituições web do CP-3G](cp-3g-web-substitutions.md);
+- [Logging final SLF4J/MyBatis do CP-3G](../migration/steps/CP-3G-slf4j-mybatis.md);
 - [multipart nativo do Servlet no CP-3G](../migration/steps/CP-3G-servlet-multipart.md);
 - [descoberta SCI de validadores no CP-3G](../migration/steps/CP-3G-servlet-container-initializer.md);
 - [persistência MyBatis](mybatis-persistence.md);

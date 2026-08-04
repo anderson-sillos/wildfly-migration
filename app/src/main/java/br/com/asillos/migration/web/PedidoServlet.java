@@ -13,7 +13,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import br.com.asillos.migration.domain.Pedido;
 import br.com.asillos.migration.persistence.PedidoRepository;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Endpoints de listagem, formulário, criação e detalhe de pedidos.
@@ -22,7 +23,7 @@ public final class PedidoServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER =
-            Logger.getLogger(PedidoServlet.class);
+            LoggerFactory.getLogger(PedidoServlet.class);
 
     private static final String LIST_VIEW =
             "/WEB-INF/views/pedidos/lista.jsp";

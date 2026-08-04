@@ -10,12 +10,19 @@ import br.com.asillos.migration.domain.Anexo;
 
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Persiste anexos com metadados normalizados e calculados pelo servidor.
  */
 public final class AnexoRepository {
     public static final long MAX_FILE_BYTES = 512L * 1024L;
+
+    private static final Logger ANEXO_MAPPER_LOGGER =
+            LoggerFactory.getLogger(AnexoMapper.class);
+    private static final Logger PEDIDO_MAPPER_LOGGER =
+            LoggerFactory.getLogger(PedidoMapper.class);
 
     private static final String DEFAULT_CONTENT_TYPE =
             "application/octet-stream";
@@ -31,6 +38,8 @@ public final class AnexoRepository {
         return transactions.execute(new TransactionWork<List<Anexo>>() {
             @Override
             public List<Anexo> execute(SqlSession session) {
+                ANEXO_MAPPER_LOGGER.info(
+                        "mybatis_mapper=AnexoMapper operation=listarPorPedido");
                 return session.getMapper(AnexoMapper.class)
                         .listarPorPedido(pedidoId);
             }
@@ -45,6 +54,8 @@ public final class AnexoRepository {
         return transactions.execute(new TransactionWork<Anexo>() {
             @Override
             public Anexo execute(SqlSession session) {
+                ANEXO_MAPPER_LOGGER.info(
+                        "mybatis_mapper=AnexoMapper operation=buscarPorId");
                 return session.getMapper(AnexoMapper.class).buscarPorId(id);
             }
         });
@@ -73,6 +84,8 @@ public final class AnexoRepository {
             public Anexo execute(SqlSession session) {
                 PedidoMapper pedidoMapper =
                         session.getMapper(PedidoMapper.class);
+                PEDIDO_MAPPER_LOGGER.info(
+                        "mybatis_mapper=PedidoMapper operation=buscarPorId");
                 if (pedidoMapper.buscarPorId(pedidoId) == null) {
                     throw new IllegalArgumentException(
                             "Pedido do anexo não foi encontrado");
@@ -80,6 +93,8 @@ public final class AnexoRepository {
 
                 AnexoMapper anexoMapper =
                         session.getMapper(AnexoMapper.class);
+                ANEXO_MAPPER_LOGGER.info(
+                        "mybatis_mapper=AnexoMapper operation=criar");
                 Anexo anexo = new Anexo();
                 anexo.setId(anexoMapper.proximoId());
                 anexo.setPedidoId(pedidoId);

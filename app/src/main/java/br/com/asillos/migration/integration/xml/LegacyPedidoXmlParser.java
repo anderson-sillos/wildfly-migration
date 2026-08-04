@@ -19,7 +19,8 @@ import br.com.asillos.migration.domain.StatusPedido;
 import br.com.asillos.migration.integration.validation.PedidoImportValidator;
 import br.com.asillos.migration.integration.validation.ValidatorDiscovery;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.xmlbeans.XmlError;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlOptions;
@@ -39,7 +40,7 @@ import wildflyMigrationPedido1.PedidoDocument;
  */
 public final class LegacyPedidoXmlParser {
     private static final Logger LOGGER =
-            Logger.getLogger(LegacyPedidoXmlParser.class);
+            LoggerFactory.getLogger(LegacyPedidoXmlParser.class);
 
     public static final String NAMESPACE =
             "urn:wildfly-migration:pedido:1";
