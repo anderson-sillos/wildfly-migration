@@ -542,6 +542,13 @@ check_required_files() {
       "migration/steps/CP-3H-final-packaging-audit.md"
       "migration/evidence/CP-3H/packaging-audit.json"
       "scripts/audit-cp-3h-final-packaging.sh"
+      "migration/steps/CP-3H-closure.md"
+      "docs/evidence/CP-3H.md"
+      "migration/evidence/CP-3H/closure-portable-ci.json"
+      "migration/evidence/CP-3H/closure-oracle-qualified.json"
+      "migration/evidence/CP-3H/closure.properties"
+      "migration/evidence/CP-3H/rollback.properties"
+      "scripts/validate-cp-3h-closure.sh"
     )
   fi
 
