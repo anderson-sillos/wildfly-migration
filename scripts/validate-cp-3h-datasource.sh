@@ -92,12 +92,14 @@ IFS=$'\t' read -r component version archive origin license sha published lifecyc
    "$published" == 'sha256:96010f27fce64c285f9d1aab8f96357b8e00c49c9ad041ecf140c9d7d27eb3fb' ]] ||
   fail 'checksum do ojdbc17 diverge do valor fixado'
 [[ "$scope" == 'CP-3H-to-CP-3K' ]] || fail 'escopo do ojdbc17 não cobre CP-3H até CP-3K'
+ojdbc_manifest_sha="$sha"
 
 h2_row="$(manifest_row h2 || true)"
 [[ -n "$h2_row" ]] || fail 'H2 não está no manifesto final'
 IFS=$'\t' read -r component version archive origin license sha published lifecycle scope <<< "$h2_row"
 [[ "$version" == '2.4.240' && "$archive" == 'h2-2.4.240.jar' ]] ||
   fail 'H2 do perfil portátil diverge do manifesto'
+h2_manifest_sha="$sha"
 
 grep -Fq 'driver-module-name=com.oracle.ojdbc17' "$ORACLE_PROFILE" ||
   fail 'perfil Oracle não registra o módulo com.oracle.ojdbc17'
@@ -107,8 +109,8 @@ grep -Fq 'check-valid-connection-sql="SELECT 1 FROM DUAL"' "$ORACLE_PROFILE" ||
   fail 'perfil Oracle não valida a conexão com SELECT 1 FROM DUAL'
 grep -Fq 'min-pool-size=1,max-pool-size=10' "$ORACLE_PROFILE" ||
   fail 'pool Oracle não está delimitado entre 1 e 10 conexões'
-grep -Fq 'driver-module-name=h2-cp3f' "$H2_PROFILE" ||
-  fail 'perfil H2 não registra o driver h2-cp3f'
+grep -Fq 'driver-name=h2-cp3f,driver-module-name=com.h2database.h2' "$H2_PROFILE" ||
+  fail 'perfil H2 não registra o módulo com.h2database.h2 no driver h2-cp3f'
 grep -Fq 'jndi-name=java:/jdbc/MigrationDS' "$H2_PROFILE" ||
   fail 'perfil H2 não publica java:/jdbc/MigrationDS'
 grep -Fq 'jdbc:h2:mem:migration;MODE=Oracle;DB_CLOSE_DELAY=-1' "$H2_PROFILE" ||
@@ -150,6 +152,22 @@ for evidence in "$H2_EVIDENCE" "$ORACLE_EVIDENCE"; do
     fail "evidência contém segredo ou URL Oracle: ${evidence##*/}"
   fi
 done
+for marker in \
+  '"profile": "ci-h2"' \
+  '"driverModule": "com.h2database.h2.cp3f"' \
+  '"driverVersion": "2.4.240"' \
+  '"contractScenarios": 15'; do
+  grep -Fq "$marker" "$H2_EVIDENCE" || fail "evidência H2 não contém: $marker"
+done
+for marker in \
+  '"profile": "oracle"' \
+  '"qualification": "oracle-qualified-smoke"' \
+  '"driverModule": "com.oracle.ojdbc17"' \
+  '"driverVersion": "23.26.2.0.0"' \
+  '"contractScenarios": 15' \
+  '"versionInventory": "deferred-to-3.38"'; do
+  grep -Fq "$marker" "$ORACLE_EVIDENCE" || fail "evidência Oracle não contém: $marker"
+done
 
 if [[ -f "$WAR_FILE" ]]; then
   war_entries="$(mktemp)"
@@ -167,11 +185,11 @@ if [[ "$VERIFY_EXTERNAL" == true ]]; then
   h2_path="$(read_env_value H2_JAR "$ENV_FILE" || true)"
   [[ -f "$ojdbc_path" ]] || fail 'OJDBC17_JAR não aponta para um arquivo existente'
   [[ "$(basename "$ojdbc_path")" == 'ojdbc17.jar' ]] || fail 'OJDBC17_JAR deve terminar em ojdbc17.jar'
-  [[ "$ojdbc_configured_sha" == "$sha" ]] || fail 'OJDBC17_SHA256 diverge do manifesto'
-  [[ "$(sha256sum "$ojdbc_path" | awk '{print $1}')" == "$sha" ]] ||
+  [[ "$ojdbc_configured_sha" == "$ojdbc_manifest_sha" ]] || fail 'OJDBC17_SHA256 diverge do manifesto'
+  [[ "$(sha256sum "$ojdbc_path" | awk '{print $1}')" == "$ojdbc_manifest_sha" ]] ||
     fail 'checksum efetivo do ojdbc17 diverge do manifesto'
   [[ -f "$h2_path" ]] || fail 'H2_JAR não aponta para um arquivo existente'
-  [[ "$(sha256sum "$h2_path" | awk '{print $1}')" == "$(awk -F '\t' '$1 == "h2" {print $6; exit}' "$MANIFEST")" ]] ||
+  [[ "$(sha256sum "$h2_path" | awk '{print $1}')" == "$h2_manifest_sha" ]] ||
     fail 'checksum efetivo do H2 diverge do manifesto'
 fi
 

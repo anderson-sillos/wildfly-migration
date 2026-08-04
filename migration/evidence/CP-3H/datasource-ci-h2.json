@@ -1,0 +1,21 @@
+{
+  "schema": "wildfly-migration-cp3h-datasource/v1",
+  "checkpoint": "CP-3H",
+  "activity": "3.37",
+  "qualification": "portable-ci",
+  "profile": "ci-h2",
+  "sourceCommit": "98b7ad13e86edeb03eb5940b4b02d99d959dddfa",
+  "workingTree": false,
+  "warSha256": "83c60d4b509b8bfea3c869c6e2f7f4ecf2b49129cd2e61f292d06315251dde81",
+  "runtime": "java21-wildfly41.0.0",
+  "driverModule": "com.h2database.h2.cp3f",
+  "driverVersion": "2.4.240",
+  "jndiName": "java:/jdbc/MigrationDS",
+  "pool": "min=1,max=5,prefill=true,validate-on-match=true",
+  "connection": "h2-memory-oracle-mode",
+  "contractScenarios": 15,
+  "contractResult": "passed",
+  "driverProvisioning": "passed",
+  "warDrivers": "absent",
+  "result": "passed"
+}

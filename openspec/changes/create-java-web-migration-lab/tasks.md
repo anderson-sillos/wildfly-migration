@@ -151,7 +151,7 @@
 ### Checkpoint CP-3H — Oracle e auditoria final
 
 - [x] 3.36 Fixar MyBatis 3.5.19, XMLBeans 5.3.0 e dom4j 2.2.0 e reexecutar geração e testes XML seguros.
-- [ ] 3.37 Provisionar `com.oracle.database.jdbc:ojdbc17:23.26.2.0.0` no WildFly, preservar o perfil H2 em memória e publicar `java:/jdbc/MigrationDS` nos dois perfis sem empacotar drivers no WAR.
+- [x] 3.37 Provisionar `com.oracle.database.jdbc:ojdbc17:23.26.2.0.0` no WildFly, preservar o perfil H2 em memória e publicar `java:/jdbc/MigrationDS` nos dois perfis sem empacotar drivers no WAR.
 - [ ] 3.38 Executar a suíte Oracle 19c e registrar versão completa, Release Update, driver, JVM e WildFly observados.
 - [ ] 3.39 Implementar a auditoria que rejeite APIs do contêiner, Log4j 1/ponte, Tiles, Commons FileUpload 1, Reflections, bibliotecas externas de scanning, `xml-apis`, Geronimo StAX e `ojdbc7` e valide o JAR interno e o descritor de serviço do SCI definidos na atividade `3.33`.
 - [ ] 3.40 Encerrar `CP-3H`: validar H2, Oracle, XML, dependências e WAR, registrar evidências separadas e rollback e integrar o PR pelo commit `checkpoint(CP-3H): finalize Oracle and packaging`.
