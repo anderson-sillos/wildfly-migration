@@ -78,6 +78,7 @@ shell_files=(
   scripts/validate-cp-3g-discovery.sh
   scripts/validate-cp-3g-logging.sh
   scripts/validate-cp-3h-xml.sh
+  scripts/validate-cp-3h-datasource.sh
   scripts/smoke-wildfly41-datasource.sh
   contract-tests/run.sh
 )
@@ -147,5 +148,7 @@ run_step "Validar fechamento do CP-3G" \
   ./scripts/validate-cp-3g-closure.sh
 run_step "Validar XML moderno do CP-3H" \
   ./scripts/validate-cp-3h-xml.sh
+run_step "Validar datasource H2/Oracle do CP-3H" \
+  ./scripts/validate-cp-3h-datasource.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'

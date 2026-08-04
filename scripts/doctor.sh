@@ -530,6 +530,10 @@ check_required_files() {
       "migration/steps/CP-3H-xml-safe.md"
       "migration/evidence/CP-3H/xml-ci-h2.json"
       "scripts/validate-cp-3h-xml.sh"
+      "migration/steps/CP-3H-ojdbc17-datasource.md"
+      "migration/evidence/CP-3H/datasource-ci-h2.json"
+      "migration/evidence/CP-3H/datasource-oracle.json"
+      "scripts/validate-cp-3h-datasource.sh"
     )
   fi
 
