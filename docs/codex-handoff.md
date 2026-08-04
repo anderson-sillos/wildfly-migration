@@ -1,8 +1,8 @@
 # Codex handoff
 
-Atualizado em 04/08/2026 após a integração da atividade 3.35. A PR #25 do
-CP-3G foi encerrada com checks remotos verdes pelo squash
-`a46c56a0c4a47b1fdcaca78b0ea7bd6d5e3a5bbe`.
+Atualizado em 04/08/2026 após a conclusão da atividade 3.36. A branch
+incremental do CP-3H contém o gate XML e deve abrir a PR antes da atividade
+3.37.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -12,17 +12,18 @@ URLs Oracle, endereços internos nem valores do `.env`.
 
 - Repositório: `anderson-sillos/wildfly-migration`.
 - Mudança OpenSpec: `create-java-web-migration-lab`.
-- Branch atual: `main`; o CP-3G está integrado no commit
+- Branch atual: `checkpoint/cp-3h-entry`; o CP-3G está integrado no commit
   `a46c56a0c4a47b1fdcaca78b0ea7bd6d5e3a5bbe`.
 - PR incremental do CP-3G: #25, `feat(CP-3G): replace Reflections with Servlet SCI`,
   encerrada por squash com a mensagem `checkpoint(CP-3G): replace legacy web libraries`.
 - CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
-- Progresso OpenSpec: 90 de 110 tarefas concluídas.
+- Progresso OpenSpec: 91 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
   3.35, fechamento do checkpoint.
-- Próxima atividade OpenSpec: 3.36, início do CP-3H. Ela ainda não foi iniciada.
+- Próxima atividade OpenSpec: 3.37, provisionar o driver Oracle no WildFly 41.
+  Ela ainda não foi iniciada.
 
 ## Decisões permanentes
 
@@ -134,6 +135,15 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Validação: `scripts/validate-cp-3g-closure.sh`; PR #25 com
   `repository-baseline` e `portable-ci` verdes, integrada no squash
   `a46c56a0c4a47b1fdcaca78b0ea7bd6d5e3a5bbe`.
+
+### 3.36 — XML moderno e seguro
+
+- O POM mantém MyBatis `3.5.19`, XMLBeans `5.3.0` e dom4j `2.2.0`.
+- O gate `scripts/validate-cp-3h-xml.sh` recompila o perfil Jakarta/Java 21,
+  regenera `wildflyMigrationPedido1` e valida fixture legítima, XSD,
+  namespace, round-trip, XXE e expansão de entidades.
+- Evidência: `migration/evidence/CP-3H/xml-ci-h2.json`; resultado `passed`,
+  WAR SHA-256 `83c60d4b509b8bfea3c869c6e2f7f4ecf2b49129cd2e61f292d06315251dde81`.
 
 ### 3.9 — descoberta de validadores
 

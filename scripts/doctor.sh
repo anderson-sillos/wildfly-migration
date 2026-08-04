@@ -525,6 +525,14 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-3H; then
+    required+=(
+      "migration/steps/CP-3H-xml-safe.md"
+      "migration/evidence/CP-3H/xml-ci-h2.json"
+      "scripts/validate-cp-3h-xml.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"

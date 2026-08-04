@@ -90,10 +90,12 @@ for path in \
   "$ROOT/contract-tests/fixtures/xml/pedido-invalido-xsd.xml" \
   "$ROOT/contract-tests/fixtures/xml/pedido-xxe.xml" \
   "$ROOT/contract-tests/fixtures/xml/pedido-entidades-expansivas.xml" \
-  "$ROOT/migration/steps/CP-3H-xml-safe.md" \
-  "$RESULT_FILE"; do
+  "$ROOT/migration/steps/CP-3H-xml-safe.md"; do
   [[ -f "$path" ]] || fail "arquivo obrigatório ausente: ${path#"$ROOT/"}"
 done
+if [[ "$EXECUTE" != true ]]; then
+  [[ -f "$RESULT_FILE" ]] || fail "evidência ausente: ${RESULT_FILE#"$ROOT/"}"
+fi
 
 for marker in \
   '<mybatis.version>3.5.19</mybatis.version>' \

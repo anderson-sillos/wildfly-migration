@@ -71,6 +71,8 @@ passos.
     no WildFly 41.
 32. [Evidência CP-3G](evidence/CP-3G.md): contratos web, auditoria de WAR,
     dependências, segurança e rollback do checkpoint.
+33. [CP-3H/3.36 — XML moderno e seguro](../migration/steps/CP-3H-xml-safe.md):
+    versões fixadas, regeneração XMLBeans e testes XMLBeans/dom4j no Java 21.
 
 ## Aplicação e arquitetura
 
@@ -92,6 +94,7 @@ passos.
 - [Namespaces Jakarta do CP-3F](cp-3f-jakarta-namespaces.md);
 - [Substituições web do CP-3G](cp-3g-web-substitutions.md);
 - [Evidência CP-3G](evidence/CP-3G.md);
+- [CP-3H/3.36 — XML moderno e seguro](../migration/steps/CP-3H-xml-safe.md);
 - [Logging final SLF4J/MyBatis do CP-3G](../migration/steps/CP-3G-slf4j-mybatis.md);
 - [multipart nativo do Servlet no CP-3G](../migration/steps/CP-3G-servlet-multipart.md);
 - [descoberta SCI de validadores no CP-3G](../migration/steps/CP-3G-servlet-container-initializer.md);
