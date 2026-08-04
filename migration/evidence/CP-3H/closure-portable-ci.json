@@ -4,7 +4,7 @@
   "activity": "3.40",
   "qualification": "portable-ci",
   "profile": "ci-h2",
-  "sourceCommit": "b55ff7b6702329af0083f189287928bcff7ed55d",
+  "sourceCommit": "30cb9f051046dd9eed2fa096ffc9986b3ec63dfa",
   "workingTree": false,
   "warSha256": "83c60d4b509b8bfea3c869c6e2f7f4ecf2b49129cd2e61f292d06315251dde81",
   "runtime": "java21-wildfly41.0.0",
