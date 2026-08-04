@@ -66,6 +66,11 @@ relative_output="${OUTPUT#"$ROOT/"}"
 working_tree=false
 while IFS= read -r status_line; do
   status_path="${status_line:3}"
+  case "$status_path" in
+    "$relative_output"|migration/evidence/CP-3I/*|app/target/*)
+      continue
+      ;;
+  esac
   if [[ "$status_path" != "$relative_output" ]]; then
     working_tree=true
     break
