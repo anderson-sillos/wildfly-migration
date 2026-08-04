@@ -534,6 +534,11 @@ check_required_files() {
       "migration/evidence/CP-3H/datasource-ci-h2.json"
       "migration/evidence/CP-3H/datasource-oracle.json"
       "scripts/validate-cp-3h-datasource.sh"
+      "migration/steps/CP-3H-oracle-qualification.md"
+      "scripts/qualify-cp-3h-oracle.sh"
+      "scripts/ValidateCp3hOracleVersion.java"
+      "migration/evidence/CP-3H/oracle-qualification.json"
+      "scripts/validate-cp-3h-oracle-qualification.sh"
     )
   fi
 
