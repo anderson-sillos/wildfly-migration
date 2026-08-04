@@ -83,6 +83,14 @@ shell_files=(
   scripts/validate-cp-3h-oracle-qualification.sh
   scripts/audit-cp-3h-final-packaging.sh
   scripts/validate-cp-3h-closure.sh
+  scripts/qualify-cp-3i-persistence.sh
+  scripts/validate-cp-3i-persistence.sh
+  scripts/qualify-cp-3i-contracts.sh
+  scripts/validate-cp-3i-contracts.sh
+  scripts/generate-cp-3i-manifest.sh
+  scripts/validate-cp-3i-manifest.sh
+  scripts/validate-cp-3i-java17-runbook.sh
+  scripts/validate-cp-3i-closure.sh
   scripts/smoke-wildfly41-datasource.sh
   contract-tests/run.sh
 )
@@ -160,5 +168,15 @@ run_step "Auditar empacotamento final do CP-3H" \
   ./scripts/audit-cp-3h-final-packaging.sh --skip-war
 run_step "Validar fechamento do CP-3H" \
   ./scripts/validate-cp-3h-closure.sh --skip-war
+run_step "Validar persistência do CP-3I/3.41" \
+  ./scripts/validate-cp-3i-persistence.sh
+run_step "Validar contratos do CP-3I/3.42" \
+  ./scripts/validate-cp-3i-contracts.sh
+run_step "Validar manifesto do CP-3I/3.43" \
+  ./scripts/validate-cp-3i-manifest.sh
+run_step "Validar roteiro do CP-3I/3.44" \
+  ./scripts/validate-cp-3i-java17-runbook.sh
+run_step "Validar fechamento do CP-3I/3.45" \
+  ./scripts/validate-cp-3i-closure.sh --skip-war
 
 printf '\nOK: repository-baseline local e remoto concluído\n'

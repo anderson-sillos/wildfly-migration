@@ -552,6 +552,35 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-3I; then
+    required+=(
+      "migration/steps/CP-3I-persistence-semantics.md"
+      "docs/evidence/CP-3I.md"
+      "migration/evidence/CP-3I/persistence-ci-h2.json"
+      "migration/evidence/CP-3I/persistence-oracle.json"
+      "scripts/ValidateCp3iPersistence.java"
+      "scripts/qualify-cp-3i-persistence.sh"
+      "scripts/validate-cp-3i-persistence.sh"
+      "migration/steps/CP-3I-contract-comparison.md"
+      "migration/evidence/CP-3I/contract-ci-h2.json"
+      "migration/evidence/CP-3I/contract-oracle.json"
+      "scripts/qualify-cp-3i-contracts.sh"
+      "scripts/validate-cp-3i-contracts.sh"
+      "migration/steps/CP-3I-manifest.md"
+      "migration/evidence/CP-3I/manifest.properties"
+      "scripts/generate-cp-3i-manifest.sh"
+      "scripts/validate-cp-3i-manifest.sh"
+      "docs/cp-3d-reproduction.md"
+      "scripts/validate-cp-3i-java17-runbook.sh"
+      "migration/steps/CP-3I-closure.md"
+      "migration/evidence/CP-3I/closure-portable-ci.json"
+      "migration/evidence/CP-3I/closure-oracle-qualified.json"
+      "migration/evidence/CP-3I/closure.properties"
+      "migration/evidence/CP-3I/rollback.properties"
+      "scripts/validate-cp-3i-closure.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"

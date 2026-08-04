@@ -1,7 +1,7 @@
 {
-  "schema": "wildfly-migration-cp3h-closure/v1",
-  "checkpoint": "CP-3H",
-  "activity": "3.40",
+  "schema": "wildfly-migration-cp3i-persistence/v1",
+  "checkpoint": "CP-3I",
+  "activity": "3.41",
   "qualification": "oracle-qualified",
   "profile": "oracle",
   "sourceCommit": "30cb9f051046dd9eed2fa096ffc9986b3ec63dfa",
@@ -10,12 +10,14 @@
   "runtime": "java21-wildfly41.0.0",
   "databaseVersion": "19.3.0.0.0",
   "jdbcDriver": "ojdbc17-23.26.2.0.0",
-  "contractScenarios": 15,
-  "contractResult": "passed",
-  "xmlAudit": "passed",
-  "dependencyAudit": "passed",
-  "warAudit": "passed",
-  "rollback": "documented",
-  "qualificationEvidence": "oracle-qualification.json",
+  "checks": {
+    "rollback": "passed",
+    "sequence": "passed",
+    "pagination": "passed",
+    "timestampTimezone": "passed",
+    "clob": "passed",
+    "blob": "passed",
+    "cleanup": "passed"
+  },
   "result": "passed"
 }

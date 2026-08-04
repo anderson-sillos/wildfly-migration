@@ -1,8 +1,8 @@
 # Codex handoff
 
-Atualizado em 04/08/2026 após a conclusão da atividade 3.40. O CP-3H foi
-fechado com gates XML, datasource, Oracle, dependências e empacotamento; a PR
-#27 aguarda apenas os checks finais para integração.
+Atualizado em 04/08/2026 após a conclusão da atividade 3.45. O CP-3H foi
+fechado e o CP-3I foi aprovado em H2 e Oracle; o roteiro de reprodução,
+rollback e o fechamento sem tag pública foram consolidados.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -12,17 +12,21 @@ URLs Oracle, endereços internos nem valores do `.env`.
 
 - Repositório: `anderson-sillos/wildfly-migration`.
 - Mudança OpenSpec: `create-java-web-migration-lab`.
-- Branch atual: `checkpoint/cp-3h-entry`; o CP-3G está integrado no commit
+- Branch atual: `checkpoint/cp-3i-entry`; o CP-3H está integrado no commit
+  `30cb9f051046dd9eed2fa096ffc9986b3ec63dfa` e o CP-3G está integrado no commit
   `a46c56a0c4a47b1fdcaca78b0ea7bd6d5e3a5bbe`.
 - PR incremental do CP-3G: #25, `feat(CP-3G): replace Reflections with Servlet SCI`,
   encerrada por squash com a mensagem `checkpoint(CP-3G): replace legacy web libraries`.
+- PR incremental do CP-3I: #28, `feat(CP-3I): qualify persistence semantics`,
+  aberta após a conclusão da atividade 3.41.
 - CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
-- Progresso OpenSpec: 95 de 110 tarefas concluídas.
+- Progresso OpenSpec: 100 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
   3.35, fechamento do checkpoint.
-- Próxima atividade OpenSpec: 3.41, iniciar o gate Java 21 do CP-3I.
+- Próxima atividade OpenSpec: 3.46, verificar atualizações open source e
+  fixar a distribuição OpenJDK 25 do CP-3J.
 
 ## Decisões permanentes
 
@@ -190,6 +194,67 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Commit local de implementação do gate: `b55ff7b`; integração prevista com a
   mensagem `checkpoint(CP-3H): finalize Oracle and packaging`.
 
+### 3.41 — semântica de persistência do CP-3I
+
+- O probe JDBC `scripts/ValidateCp3iPersistence.java` executa sem importar
+  classes do WAR e não cria ou remove objetos do schema.
+- H2 2.4.240 e Oracle 19c/RU 19.3.0.0.0 aprovaram rollback, sequence,
+  paginação, conversão de `TIMESTAMP(6)` em UTC e America/Sao_Paulo, CLOB,
+  BLOB e limpeza dos registros `LAB-CP3I-*`.
+- O Oracle foi qualificado com `ojdbc17-23.26.2.0.0`; as evidências são
+  separadas em `migration/evidence/CP-3I/persistence-{ci-h2,oracle}.json`.
+- Runbook: `migration/steps/CP-3I-persistence-semantics.md`; validador:
+  `scripts/validate-cp-3i-persistence.sh`.
+
+### 3.42 — contratos e comparação do CP-3I
+
+- Os 14 cenários do baseline e o cenário adicional `protectedFragments`
+  passaram no Java 21/WildFly 41, H2 e Oracle, totalizando 15/15 em cada
+  perfil.
+- Os resultados registram o mesmo WAR SHA-256
+  `83c60d4b509b8bfea3c869c6e2f7f4ecf2b49129cd2e61f292d06315251dde81` e
+  removem os dados transitórios da suíte.
+- Evidências: `migration/evidence/CP-3I/contract-{ci-h2,oracle}.json`;
+  validador: `scripts/validate-cp-3i-contracts.sh`.
+
+### 3.43 — manifesto do gate Java 21
+
+- O manifesto `migration/evidence/CP-3I/manifest.properties` registra o
+  commit-fonte integrado `30cb9f051046dd9eed2fa096ffc9986b3ec63dfa`,
+  `workingTree=false`, Temurin 21.0.12+8, WildFly comunitário 41.0.0.Final,
+  Jakarta EE 11, Maven 3.9.16, H2 2.4.240 e Oracle 19.3.0.0.0 com
+  `ojdbc17` 23.26.2.0.0.
+- O arquivo inclui licenças e checksums provenientes de
+  `runtime/phase3/java21-wildfly41/runtime-manifest.tsv`, SHA-256 e contagem
+  de bibliotecas do WAR, dependências finais e caminhos das evidências H2 e
+  Oracle sem incluir segredos.
+- Geração e validação: `scripts/generate-cp-3i-manifest.sh`,
+  `scripts/validate-cp-3i-manifest.sh`; runbook:
+  `migration/steps/CP-3I-manifest.md`.
+
+### 3.44 — reprodução e implantação equivalente do gate Java 17
+
+- `docs/cp-3d-reproduction.md` agora cobre a preparação do runtime Java
+  17/WildFly 26.1.3, a implantação blue/green equivalente em produção, os
+  critérios go/no-go e o retorno seguro ao Blue ou a
+  `migration/02-java8-wildfly26`.
+- O roteiro mantém `java:/jdbc/MigrationDS`, drivers e segredos externos,
+  impede atualização in-place ou alteração destrutiva do Oracle e separa
+  `portable-ci` de `oracle-qualified`.
+- O validador `scripts/validate-cp-3i-java17-runbook.sh` foi integrado ao
+  baseline e ao job portátil; a evidência CP-3I registra a atividade.
+
+### 3.45 — fechamento do CP-3I
+
+- As evidências `closure-portable-ci.json` e `closure-oracle-qualified.json`
+  consolidam 15/15 contratos, persistência, manifesto, runtime e rollback.
+- O resumo registra PR #28, `public.tag=none` e a mensagem obrigatória
+  `checkpoint(CP-3I): approve Java 21 Jakarta gate`; o retorno aponta ao
+  commit integrado do CP-3H sem mutação de banco.
+- O validador `scripts/validate-cp-3i-closure.sh` foi integrado ao baseline e
+  ao portable CI. Após os checks verdes, o PR deve ser squash-mergeado com o
+  assunto exato, sem criar tag pública.
+
 ### 3.9 — descoberta de validadores
 
 - Reflections foi atualizado de 0.9.10 para 0.10.2.
@@ -285,7 +350,7 @@ o build podem executar no sandbox.
 
 ## Próxima ação
 
-Após a integração da PR #27, iniciar a atividade 3.41 sem refazer auditorias
+Após abrir a PR do CP-3I, iniciar a atividade 3.43 sem refazer auditorias
 históricas de CI já aprovadas:
 
 ```bash
