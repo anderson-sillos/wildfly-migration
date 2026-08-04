@@ -64,6 +64,10 @@ passos.
     H2/Oracle, comparação com o baseline e rollback.
 29. [Evidência CP-3D](evidence/CP-3D.md): qualificação final Java 17/WildFly 26,
     manifesto, exceções adiadas e decisão de integração.
+30. [CP-3F — Namespaces Jakarta](cp-3f-jakarta-namespaces.md): migração dos
+    descritores, JSPs e handlers, com o bloqueio histórico de Tiles registrado.
+31. [CP-3G — Substituições web](cp-3g-web-substitutions.md): remoção de Tiles
+    por tag file/includes JSP, multipart nativo e validação no WildFly 41.
 
 ## Aplicação e arquitetura
 
@@ -82,6 +86,9 @@ passos.
 - [Gate Java 17 do CP-3D](cp-3d-java17-gate.md);
 - [Reprodução do gate CP-3D](cp-3d-reproduction.md);
 - [Evidência CP-3D](evidence/CP-3D.md);
+- [Namespaces Jakarta do CP-3F](cp-3f-jakarta-namespaces.md);
+- [Substituições web do CP-3G](cp-3g-web-substitutions.md);
+- [multipart nativo do Servlet no CP-3G](../migration/steps/CP-3G-servlet-multipart.md);
 - [persistência MyBatis](mybatis-persistence.md);
 - [upload legado e metadados comparáveis](legacy-upload.md);
 - [importação XML legada](legacy-xml-import.md);

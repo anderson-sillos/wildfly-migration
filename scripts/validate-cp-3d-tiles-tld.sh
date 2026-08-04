@@ -8,6 +8,7 @@ ALLOWLIST="$REPOSITORY_ROOT/runtime/phase3/java17-wildfly26/war-libraries.txt"
 TLD="$REPOSITORY_ROOT/app/src/main/webapp/WEB-INF/migration.tld"
 WEB_XML="$REPOSITORY_ROOT/app/src/main/webapp/WEB-INF/web.xml"
 TILES_DEFS="$REPOSITORY_ROOT/app/src/main/webapp/WEB-INF/tiles-defs.xml"
+BASE_LAYOUT="$REPOSITORY_ROOT/app/src/main/webapp/WEB-INF/layout/base.jsp"
 HANDLER="$REPOSITORY_ROOT/app/src/main/java/br/com/asillos/migration/web/tag/StatusPedidoTag.java"
 TASKS="$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md"
 DECISION="$REPOSITORY_ROOT/docs/cp-3d-java17-gate.md"
@@ -18,7 +19,7 @@ fail() {
   exit 1
 }
 
-for required in "$POM" "$ALLOWLIST" "$TLD" "$WEB_XML" "$TILES_DEFS" \
+for required in "$POM" "$ALLOWLIST" "$TLD" "$WEB_XML" \
   "$HANDLER" "$TASKS" "$DECISION" "$STEP"; do
   [[ -f "$required" ]] || fail "arquivo obrigatório ausente: ${required#"$REPOSITORY_ROOT/"}"
 done
@@ -34,6 +35,9 @@ grep -Fq -- '- [x] 3.16 Manter Tiles e handlers TLD em `javax`' "$TASKS" ||
 
 grep -Fq '<tiles.version>2.1.4</tiles.version>' "$POM" ||
   fail 'POM não fixa Tiles 2.1.4'
+for legacy_file in "$TILES_DEFS" "$BASE_LAYOUT"; do
+  [[ -f "$legacy_file" ]] || fail "arquivo Tiles legado ausente: ${legacy_file#"$REPOSITORY_ROOT/"}"
+done
 for coordinate in \
   '<artifactId>tiles-api</artifactId>' \
   '<artifactId>tiles-jsp</artifactId>'; do

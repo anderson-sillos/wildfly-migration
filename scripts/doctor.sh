@@ -481,11 +481,34 @@ check_required_files() {
       "migration/evidence/CP-3F/tld-historical.xml"
       "migration/evidence/CP-3F/tld-migration.properties"
       "migration/evidence/CP-3F/deployment-tiles-blocked.txt"
+      "migration/evidence/CP-3F/contract-ci-h2.json"
+      "migration/evidence/CP-3F/contract-oracle.json"
+      "migration/evidence/CP-3F/manifest.properties"
+      "migration/evidence/CP-3F/closure.properties"
+      "migration/evidence/CP-3F/rollback.properties"
+      "migration/steps/CP-3F-fileupload-jakarta-linkage.md"
+      "migration/steps/CP-3F-oracle-jdbc17-module.md"
       "runtime/phase3/java21-wildfly41/h2/module.xml"
       "runtime/phase3/java21-wildfly41/profiles/ci-h2.cli"
       "scripts/build-cp-3f-jakarta.sh"
       "scripts/rebuild-cp-3f-ide.sh"
       "scripts/validate-cp-3f-namespace.sh"
+      "scripts/validate-cp-3f-closure.sh"
+    )
+  fi
+
+  if rank_at_least CP-3G; then
+    required+=(
+      "docs/cp-3g-web-substitutions.md"
+      "migration/steps/CP-3G-tiles-jsp-layout.md"
+      "runtime/phase3/java21-wildfly41/ojdbc17/module.xml.template"
+      "runtime/phase3/java21-wildfly41/profiles/oracle.cli"
+      "scripts/validate-cp-3g-tiles.sh"
+      "scripts/validate-cp-3g-upload.sh"
+      "scripts/smoke-wildfly41-datasource.sh"
+      "migration/steps/CP-3G-servlet-multipart.md"
+      "migration/evidence/CP-3G/upload-ci-h2.json"
+      "migration/evidence/CP-3G/upload-oracle.json"
     )
   fi
 

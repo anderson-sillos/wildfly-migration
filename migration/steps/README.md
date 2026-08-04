@@ -35,3 +35,12 @@ Registros atuais:
   remoção de APIs XML duplicadas e uso do módulo `java.xml`.
 - [`CP-3C-ojdbc17.md`](CP-3C-ojdbc17.md):
   troca controlada do driver Oracle externo no gate Java 17.
+- [`CP-3F-fileupload-jakarta-linkage.md`](CP-3F-fileupload-jakarta-linkage.md):
+  assinatura `javax.servlet` acionada pelo FileUpload 1.x no WildFly 41 e
+  ponte transitória até a atividade 3.32.
+- [`CP-3G-tiles-jsp-layout.md`](CP-3G-tiles-jsp-layout.md):
+  substituição de Tiles por tag file e includes JSP protegidos.
+- [`CP-3G-servlet-multipart.md`](CP-3G-servlet-multipart.md): substituição do
+  Commons FileUpload pelo multipart nativo do Servlet/Jakarta.
+- [`CP-3F-oracle-jdbc17-module.md`](CP-3F-oracle-jdbc17-module.md):
+  módulos Java SE exigidos pelo ojdbc17 no WildFly 41.

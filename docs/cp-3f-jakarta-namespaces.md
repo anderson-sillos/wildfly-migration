@@ -21,25 +21,32 @@ mantendo o mesmo domínio, persistência e contrato HTTP. O perfil de build é
   da normalização. Sua tentativa no WildFly 41 foi rejeitada por depender do
   namespace Servlet/JSP legado, conforme o registro do gate.
 
-O FileUpload 1.6.0 ainda é uma exceção transitória: ele declara sobrecargas
-`javax.servlet` mesmo quando o código da aplicação já usa Jakarta. O adaptador
-`JakartaFileUploadRequestContext` evita que essa assinatura apareça no bytecode
-da aplicação e será removido junto com a biblioteca na atividade 3.32.
+O bloqueio transitório do FileUpload 1.6.0 foi capturado no primeiro contrato
+multipart. A atividade 3.32 removeu a biblioteca e o adaptador, substituindo-os
+por `@MultipartConfig` e `jakarta.servlet.http.Part`; os contratos H2 e Oracle
+continuam preservando limites, normalização e limpeza.
 
 ## Limite do gate
 
-O build Jakarta passa, mas a implantação completa ainda encontra
-`TilesListener` porque Apache Tiles 2.1.4 só implementa
-`javax.servlet.ServletContextListener`. Essa é a incompatibilidade esperada
-que será resolvida na atividade 3.31, sem atualizar Tiles para outra versão
-descontinuada. Por isso, os contratos de listagem/criação/consulta/sessão e o
-encerramento do CP-3F permanecem pendentes até a decisão de sequência entre
-este gate e a substituição do layout.
+O registro em [`deployment-tiles-blocked.txt`](../migration/evidence/CP-3F/deployment-tiles-blocked.txt)
+preserva a falha histórica do primeiro deployment. A atividade 3.31 removeu
+Tiles por meio de um tag file JSP e includes sob `WEB-INF`; a tentativa
+posterior no WildFly 41 deixou de falhar por `TilesListener` e os contratos
+H2 e Oracle passaram na tarefa 3.29. A tarefa 3.30 ainda precisa versionar os
+relatórios sanitizados, consolidar a auditoria e registrar o rollback.
+
+Durante a mesma execução, o Commons FileUpload 1.6.0 revelou a assinatura
+`javax.servlet` somente ao processar o primeiro multipart. O diagnóstico da
+ponte transitória está em [`INC-017`](../migration/steps/CP-3F-fileupload-jakarta-linkage.md);
+a correção definitiva e a evidência estão em
+[`CP-3G-servlet-multipart.md`](../migration/steps/CP-3G-servlet-multipart.md).
 
 ## Validação
 
 ```bash
 ./scripts/validate-cp-3f-namespace.sh
+./scripts/validate-cp-3g-tiles.sh
+./scripts/validate-cp-3f-closure.sh
 ./scripts/build-cp-3f-jakarta.sh --env .env
 ```
 

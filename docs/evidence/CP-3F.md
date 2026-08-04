@@ -14,27 +14,39 @@ conversão para o descritor Jakarta 3.0.
 | JSTL | `jakarta.tags.core` e `jakarta.tags.fmt` |
 | TLD | URI preservado; schema Jakarta JSP 3.0 |
 | Build | Java 21 + Jakarta EE 11: `passed` |
+| Contratos H2 | WildFly 41 + H2 2.4.240: 15/15 `passed` |
+| Contratos Oracle | WildFly 41 + Oracle 19c/ojdbc17: 15/15 `passed` |
 
-## Bloqueio identificado
+## Bloqueio histórico identificado
 
-A tentativa de implantação do WAR compilado no WildFly 41 falha antes dos
-contratos web porque o `TilesListener` ainda referencia
-`javax.servlet.ServletContextListener`. Isso confirma a fronteira já prevista
-no gate Java 17: Tiles não tem uma linha Jakarta mantida e precisa ser
-substituído por includes/tag files na atividade 3.31.
+A primeira tentativa de implantação do WAR compilado no WildFly 41 falhou
+antes dos contratos web porque o `TilesListener` ainda referenciava
+`javax.servlet.ServletContextListener`. Isso confirmou a fronteira prevista no
+gate Java 17 e permanece registrado como evidência negativa reproduzível.
 
-O bloqueio é registrado, não mascarado por uma dependência `javax` adicional no
-WAR. A execução de listagem, criação, consulta e sessão será repetida depois da
-remoção do Tiles, preservando a ordem causal da migração.
+O bloqueio foi registrado, não mascarado por uma dependência `javax` adicional
+no WAR. A atividade 3.31 removeu Tiles por tag file JSP/includes sob `WEB-INF`.
+A execução posterior em H2 e Oracle no WildFly 41 concluiu os contratos de
+listagem, criação, consulta, sessão, upload e importação XML. Os relatórios
+sanitizados ainda serão versionados no fechamento do CP-3F.
 
 ## Evidências versionadas
 
 - [`jakarta-build.json`](../../migration/evidence/CP-3F/jakarta-build.json)
 - [`jakarta-build.txt`](../../migration/evidence/CP-3F/jakarta-build.txt)
+- [`contract-ci-h2.json`](../../migration/evidence/CP-3F/contract-ci-h2.json)
+- [`contract-oracle.json`](../../migration/evidence/CP-3F/contract-oracle.json)
+- [`manifest.properties`](../../migration/evidence/CP-3F/manifest.properties)
+- [`closure.properties`](../../migration/evidence/CP-3F/closure.properties)
+- [`rollback.properties`](../../migration/evidence/CP-3F/rollback.properties)
 - [`tld-historical.xml`](../../migration/evidence/CP-3F/tld-historical.xml)
 - [`tld-migration.properties`](../../migration/evidence/CP-3F/tld-migration.properties)
 - [`validate-cp-3f-namespace.sh`](../../scripts/validate-cp-3f-namespace.sh)
+- [`validate-cp-3g-tiles.sh`](../../scripts/validate-cp-3g-tiles.sh)
+- [`validate-cp-3f-closure.sh`](../../scripts/validate-cp-3f-closure.sh)
 
-O CP-3F ainda não está encerrado. Seu rollback é o estado verde do CP-3E;
-após a decisão de sequência, o checkpoint deverá produzir a evidência de
-contratos e o commit `checkpoint(CP-3F): migrate Jakarta namespaces`.
+O CP-3F ainda não está encerrado. As evidências foram preparadas com
+`workingTree=true` para revisão; o estado `pending-integration-review` será
+alterado para `passed` somente após o commit integrado. Seu rollback é o estado
+verde do CP-3E, e o commit esperado é
+`checkpoint(CP-3F): migrate Jakarta namespaces`.

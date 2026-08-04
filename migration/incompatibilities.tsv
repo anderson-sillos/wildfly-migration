@@ -14,3 +14,8 @@ INC-012	CP-3A	Bytecode-audit-major-51-52	Java17-major-61	verification	verificati
 INC-013	CP-3A	H2-1.4.200-check-IN	H2-2.4.240-multiple-connections	execution	portable-sql-harness	natural	resolved	migration/steps/CP-3A-h2-2-check-constraint.md
 INC-014	CP-3C	ojdbc7-Java17	ojdbc17-23.26.2.0.0	execution	dependency	natural	resolved	migration/steps/CP-3C-ojdbc17.md
 INC-015	CP-3E	CP-3D-WAR-javax	WildFly41-Jakarta-modules	deployment	namespace-classloader	natural	observed	migration/steps/CP-3E-wildfly41-entry.md
+INC-016	CP-3F	Tiles-2.1.4-javax	WildFly41-Jakarta-modules	deployment	namespace-classloader	natural	resolved	migration/steps/CP-3G-tiles-jsp-layout.md
+INC-017	CP-3F	Commons-FileUpload-1.6.0-javax-overloads	Jakarta-Servlet-6.1	execution	dependency	natural	observed	migration/steps/CP-3F-fileupload-jakarta-linkage.md
+INC-018	CP-3F	OJDBC17-java21-module	WildFly41-module-loader	deployment	classloader	natural	resolved	migration/steps/CP-3F-oracle-jdbc17-module.md
+INC-019	CP-3F	OJDBC17-JGSS-module	WildFly41-datasource	execution	classloader	natural	resolved	migration/steps/CP-3F-oracle-jdbc17-module.md
+INC-020	CP-3G	Commons-FileUpload-1.x	Jakarta-Servlet-Part	execution	dependency	natural	resolved	migration/steps/CP-3G-servlet-multipart.md

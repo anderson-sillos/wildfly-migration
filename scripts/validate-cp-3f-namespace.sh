@@ -16,9 +16,10 @@ required=(
   "migration/evidence/CP-3F/tld-historical.xml"
   "migration/evidence/CP-3F/tld-migration.properties"
   "migration/evidence/CP-3F/deployment-tiles-blocked.txt"
+  "migration/steps/CP-3F-fileupload-jakarta-linkage.md"
   "runtime/phase3/java21-wildfly41/h2/module.xml"
   "runtime/phase3/java21-wildfly41/profiles/ci-h2.cli"
-  "app/src/main/java/br/com/asillos/migration/web/JakartaFileUploadRequestContext.java"
+  "app/src/main/java/br/com/asillos/migration/web/MultipartPartSupport.java"
   "scripts/rebuild-cp-3f-ide.sh"
 )
 
@@ -103,5 +104,19 @@ grep -Fq 'expected Tiles javax incompatibility' \
 grep -Fq 'driver-module-name=com.h2database.h2' \
   "$ROOT/runtime/phase3/java21-wildfly41/profiles/ci-h2.cli" ||
   fail "perfil H2 do WildFly 41 não usa o módulo fixado do servidor"
+
+for source in \
+  "$ROOT/app/src/main/java/br/com/asillos/migration/web/UploadServlet.java" \
+  "$ROOT/app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java"; do
+  grep -Fq '@MultipartConfig' "$source" ||
+    fail "servlet multipart não declara @MultipartConfig: ${source##*/}"
+done
+grep -Fq 'request.getParts()' \
+  "$ROOT/app/src/main/java/br/com/asillos/migration/web/MultipartPartSupport.java" ||
+  fail "multipart Jakarta não usa request.getParts()"
+if rg -n 'commons\.fileupload|ServletFileUpload|FileItem|DiskFileItemFactory|JakartaFileUploadRequestContext' \
+    "$ROOT/app/src/main/java" "$ROOT/app/pom.xml"; then
+  fail "Commons FileUpload ainda está referenciado no código ativo"
+fi
 
 printf 'OK: namespaces, descritores, JSTL e TLD do CP-3F validados\n'

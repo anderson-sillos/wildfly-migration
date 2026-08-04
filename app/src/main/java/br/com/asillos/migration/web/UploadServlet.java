@@ -1,29 +1,29 @@
 package br.com.asillos.migration.web;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 
 import br.com.asillos.migration.persistence.AnexoRepository;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadBase;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.log4j.Logger;
 
 /**
- * Upload multipart transitório com a última linha Commons FileUpload 1.x.
+ * Upload multipart usando a API nativa do Servlet/Jakarta.
  */
+@MultipartConfig(
+        fileSizeThreshold = UploadServlet.MEMORY_THRESHOLD_BYTES,
+        maxFileSize = AnexoRepository.MAX_FILE_BYTES,
+        maxRequestSize = UploadServlet.MAX_REQUEST_BYTES)
 public final class UploadServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
@@ -53,7 +53,7 @@ public final class UploadServlet extends HttpServlet {
     protected void doPost(
             HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException {
-        if (!JakartaFileUploadRequestContext.isMultipartContent(request)) {
+        if (!MultipartPartSupport.isMultipartContent(request)) {
             safeError(
                     request,
                     response,
@@ -72,69 +72,43 @@ public final class UploadServlet extends HttpServlet {
             return;
         }
 
-        List<FileItem> parsedItems = new ArrayList<FileItem>();
+        List<Part> parsedParts = new ArrayList<Part>();
         try {
-            File temporaryRepository = (File) getServletContext()
-                    .getAttribute(ServletContext.TEMPDIR);
-            if (temporaryRepository == null
-                    || !temporaryRepository.isDirectory()) {
-                throw new IllegalStateException(
-                        "Diretório temporário do servlet está indisponível");
-            }
-
-            DiskFileItemFactory factory = new DiskFileItemFactory(
-                    MEMORY_THRESHOLD_BYTES, temporaryRepository);
-            ServletFileUpload upload = new ServletFileUpload(factory);
-            upload.setHeaderEncoding("UTF-8");
-            upload.setFileSizeMax(AnexoRepository.MAX_FILE_BYTES);
-            upload.setSizeMax(MAX_REQUEST_BYTES);
-
-            List<?> rawItems = JakartaFileUploadRequestContext.parseRequest(
-                    upload, request);
-            FileItem fileItem = null;
-            for (Object value : rawItems) {
-                if (!(value instanceof FileItem)) {
-                    throw new IllegalArgumentException(
-                            "Parte multipart desconhecida");
-                }
-                FileItem item = (FileItem) value;
-                parsedItems.add(item);
-                if (item.isFormField()
-                        || !FILE_FIELD.equals(item.getFieldName())
-                        || fileItem != null) {
+            Collection<Part> parts = MultipartPartSupport.parse(request);
+            Part filePart = null;
+            for (Part part : parts) {
+                parsedParts.add(part);
+                if (!FILE_FIELD.equals(part.getName())
+                        || part.getSubmittedFileName() == null
+                        || filePart != null) {
                     throw new IllegalArgumentException(
                             "O upload deve conter somente um arquivo");
                 }
-                fileItem = item;
+                filePart = part;
             }
-            if (fileItem == null) {
+            if (filePart == null || filePart.getSize() == 0L) {
                 throw new IllegalArgumentException(
                         "Selecione um arquivo para anexar");
             }
 
             repository().criar(
                     pedidoId,
-                    fileItem.getName(),
-                    fileItem.getContentType(),
-                    fileItem.get());
+                    MultipartPartSupport.submittedFileName(filePart),
+                    filePart.getContentType(),
+                    MultipartPartSupport.read(
+                            filePart, AnexoRepository.MAX_FILE_BYTES));
             response.sendRedirect(response.encodeRedirectURL(
                     request.getContextPath()
                     + "/pedidos/detalhe?id="
                     + pedidoId
                     + "&upload=ok"));
-        } catch (FileUploadBase.FileSizeLimitExceededException exception) {
+        } catch (MultipartPartSupport.SizeLimitException exception) {
             safeError(
                     request,
                     response,
                     STATUS_REQUEST_TOO_LARGE,
                     "O arquivo excede o limite de 512 KiB");
-        } catch (FileUploadBase.SizeLimitExceededException exception) {
-            safeError(
-                    request,
-                    response,
-                    STATUS_REQUEST_TOO_LARGE,
-                    "A requisição excede o limite de 576 KiB");
-        } catch (FileUploadException exception) {
+        } catch (ServletException exception) {
             safeError(
                     request,
                     response,
@@ -154,10 +128,10 @@ public final class UploadServlet extends HttpServlet {
                     HttpServletResponse.SC_SERVICE_UNAVAILABLE,
                     "Não foi possível persistir o anexo");
         } finally {
-            for (FileItem item : parsedItems) {
+            for (Part part : parsedParts) {
                 try {
-                    item.delete();
-                } catch (RuntimeException exception) {
+                    part.delete();
+                } catch (IOException exception) {
                     LOGGER.warn(
                             "legacy_upload temporary_cleanup_failure",
                             exception);

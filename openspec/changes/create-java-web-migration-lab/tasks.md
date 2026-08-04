@@ -137,13 +137,13 @@
 - [x] 3.26 Migrar Servlets, filtros, listeners, sessão, tag handlers e EL de `javax.*` para `jakarta.*`, preservando `javax.sql`, `javax.naming` e `javax.xml`.
 - [x] 3.27 Atualizar `web.xml`, JSPs, JSTL e demais descritores para Jakarta EE 11 e URIs `jakarta.tags.*`.
 - [x] 3.28 Implantar primeiro o TLD histórico, capturar o comportamento e concluir o handler em `jakarta.servlet.jsp.tagext`.
-- [ ] 3.29 Compilar, implantar e executar contratos H2 e Oracle de listagem, criação, consulta e sessão no Java 21/WildFly 41.
+- [x] 3.29 Compilar, implantar e executar contratos H2 e Oracle de listagem, criação, consulta e sessão no Java 21/WildFly 41.
 - [ ] 3.30 Encerrar `CP-3F`: validar ausência dos namespaces EE `javax` proibidos, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-3F): migrate Jakarta namespaces`.
 
 ### Checkpoint CP-3G — Substituições web
 
-- [ ] 3.31 Substituir Tiles por JSP tag files ou includes sob `WEB-INF` e comprovar a equivalência do layout.
-- [ ] 3.32 Substituir Commons FileUpload por `@MultipartConfig` e `jakarta.servlet.http.Part` com limites, normalização, validação e limpeza.
+- [x] 3.31 Substituir Tiles por JSP tag files ou includes sob `WEB-INF` e comprovar a equivalência do layout.
+- [x] 3.32 Substituir Commons FileUpload por `@MultipartConfig` e `jakarta.servlet.http.Part` com limites, normalização, validação e limpeza.
 - [ ] 3.33 Substituir Reflections pelo mecanismo padrão Jakarta Servlet `ServletContainerInitializer` com `@HandlesTypes(Validator.class)`, fornecido em JAR interno de `WEB-INF/lib` com o registro `META-INF/services`, encapsulado por fachada própria e validado quanto a classes elegíveis, conjunto e ordem em `WEB-INF/classes` e `WEB-INF/lib` no Java 21/WildFly 41.
 - [ ] 3.34 Remover a ponte temporária de Log4j, definir explicitamente `logImpl=SLF4J` no MyBatis e integrar os logs ao mecanismo final do WildFly, comprovando no `server.log` as categorias dos mappers e exceções completas sem empacotar backend concorrente no WAR.
 - [ ] 3.35 Encerrar `CP-3G`: executar contratos web, validar descoberta, fachada, conteúdo e registro do JAR interno do SCI, executar auditoria de dependências e segurança, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-3G): replace legacy web libraries`.

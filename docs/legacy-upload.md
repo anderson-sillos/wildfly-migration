@@ -85,6 +85,8 @@ cliente, compara nome normalizado, MIME, tamanho e SHA-256 e confirma HTTP `413`
 para 512 KiB mais um byte. No perfil Oracle, anexos do pedido
 `LAB-SMOKE-*` são removidos antes da limpeza do próprio pedido.
 
-Os contratos HTTP independentes do WAR serão consolidados na tarefa `1.29`.
-No destino Jakarta, a tarefa `3.32` substituirá esta biblioteca por
-`@MultipartConfig` e `jakarta.servlet.http.Part`, preservando o contrato.
+Os contratos HTTP independentes do WAR foram consolidados na tarefa `1.29`.
+No destino Jakarta, a tarefa `3.32` substituiu esta biblioteca por
+`@MultipartConfig` e `jakarta.servlet.http.Part`, preservando o contrato. A
+implementação e as evidências H2/Oracle estão em
+[`CP-3G-servlet-multipart.md`](../migration/steps/CP-3G-servlet-multipart.md).

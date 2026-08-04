@@ -151,6 +151,15 @@ for path in "${required_paths[@]}"; do
     fail "arquivo obrigatório ausente: $path"
 done
 
+# CP-3B continua auditável como evidência histórica mesmo depois que o
+# aplicativo ativo migrou para Jakarta e deixou de empacotar FileUpload.
+if grep -Fq 'xmlns="https://jakarta.ee/xml/ns/jakartaee"' \
+    "$REPOSITORY_ROOT/app/src/main/webapp/WEB-INF/web.xml"; then
+  ACTIVE_JAKARTA=true
+else
+  ACTIVE_JAKARTA=false
+fi
+
 grep -Fq '<mybatis.version>3.5.19</mybatis.version>' \
   "$REPOSITORY_ROOT/app/pom.xml" ||
   fail "POM não fixa MyBatis 3.5.19"
@@ -227,12 +236,14 @@ for source in \
     fail "ponte deixou de ser necessária antes da atividade 3.34: $source"
 done
 
-grep -Fq '<commons.fileupload.version>1.6.0</commons.fileupload.version>' \
-  "$REPOSITORY_ROOT/app/pom.xml" ||
-  fail "POM não fixa Commons FileUpload 1.6.0"
-grep -Fq '<commons.io.version>2.19.0</commons.io.version>' \
-  "$REPOSITORY_ROOT/app/pom.xml" ||
-  fail "POM não fixa Commons IO 2.19.0"
+if [[ "$ACTIVE_JAKARTA" != true ]]; then
+  grep -Fq '<commons.fileupload.version>1.6.0</commons.fileupload.version>' \
+    "$REPOSITORY_ROOT/app/pom.xml" ||
+    fail "POM não fixa Commons FileUpload 1.6.0"
+  grep -Fq '<commons.io.version>2.19.0</commons.io.version>' \
+    "$REPOSITORY_ROOT/app/pom.xml" ||
+    fail "POM não fixa Commons IO 2.19.0"
+fi
 for library in \
   commons-fileupload-1.6.0.jar \
   commons-io-2.19.0.jar; do
@@ -695,16 +706,24 @@ if [[ -n "$WAR_FILE" ]]; then
       "$TEMP_DIRECTORY/war-entries.txt"; then
     fail "WAR ainda contém log4j.properties"
   fi
-  for library in \
-    commons-fileupload-1.6.0.jar \
-    commons-io-2.19.0.jar; do
-    grep -Fxq "WEB-INF/lib/$library" "$TEMP_DIRECTORY/war-entries.txt" ||
-      fail "WAR não contém $library"
-  done
-  if grep -Eq \
-      '^WEB-INF/lib/(commons-fileupload-1\.2\.2|commons-io-1\.3\.2)\.jar$' \
-      "$TEMP_DIRECTORY/war-entries.txt"; then
-    fail "WAR ainda contém FileUpload/Commons IO legados"
+  if [[ "$ACTIVE_JAKARTA" != true ]]; then
+    for library in \
+      commons-fileupload-1.6.0.jar \
+      commons-io-2.19.0.jar; do
+      grep -Fxq "WEB-INF/lib/$library" "$TEMP_DIRECTORY/war-entries.txt" ||
+        fail "WAR não contém $library"
+    done
+    if grep -Eq \
+        '^WEB-INF/lib/(commons-fileupload-1\.2\.2|commons-io-1\.3\.2)\.jar$' \
+        "$TEMP_DIRECTORY/war-entries.txt"; then
+      fail "WAR ainda contém FileUpload/Commons IO legados"
+    fi
+  else
+    if grep -Eiq \
+        '^WEB-INF/lib/(commons-fileupload|commons-io)-' \
+        "$TEMP_DIRECTORY/war-entries.txt"; then
+      fail "WAR Jakarta ainda contém Commons FileUpload/IO"
+    fi
   fi
   for library in \
     reflections-0.10.2.jar \

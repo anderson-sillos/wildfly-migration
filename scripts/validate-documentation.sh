@@ -73,17 +73,44 @@ required_paths=(
   "scripts/validate-cp-3d-tiles-tld.sh"
   "docs/cp-3f-jakarta-namespaces.md"
   "docs/evidence/CP-3F.md"
+  "docs/cp-3g-web-substitutions.md"
   "migration/evidence/CP-3F/tld-historical.xml"
   "migration/evidence/CP-3F/tld-migration.properties"
   "migration/evidence/CP-3F/deployment-tiles-blocked.txt"
+  "migration/evidence/CP-3F/contract-ci-h2.json"
+  "migration/evidence/CP-3F/contract-oracle.json"
+  "migration/evidence/CP-3F/manifest.properties"
+  "migration/evidence/CP-3F/closure.properties"
+  "migration/evidence/CP-3F/rollback.properties"
   "scripts/build-cp-3f-jakarta.sh"
   "scripts/rebuild-cp-3f-ide.sh"
   "scripts/validate-cp-3f-namespace.sh"
+  "scripts/validate-cp-3f-closure.sh"
+  "scripts/validate-cp-3g-tiles.sh"
+  "scripts/validate-cp-3g-upload.sh"
+  "migration/steps/CP-3F-fileupload-jakarta-linkage.md"
+  "migration/steps/CP-3F-oracle-jdbc17-module.md"
+  "migration/steps/CP-3G-tiles-jsp-layout.md"
+  "migration/steps/CP-3G-servlet-multipart.md"
+  "migration/evidence/CP-3G/upload-ci-h2.json"
+  "migration/evidence/CP-3G/upload-oracle.json"
 )
 
 for path in "${required_paths[@]}"; do
   if [[ ! -f "$REPOSITORY_ROOT/$path" ]]; then
     printf 'FALHA: documentação obrigatória ausente: %s\n' "$path" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'workingTree=true' \
+  'pending-integration-review' \
+  'checkpoint(CP-3F): migrate Jakarta namespaces'; do
+  if ! grep -Fqi -- "$marker" \
+      "$REPOSITORY_ROOT/docs/evidence/CP-3F.md" \
+      "$REPOSITORY_ROOT/migration/evidence/CP-3F/closure.properties"; then
+    printf 'FALHA: preparação de fechamento CP-3F não contém: %s\n' "$marker" >&2
     exit 1
   fi
 done
@@ -113,6 +140,19 @@ for marker in \
   'sem criar fase ou tag pública'; do
   if ! grep -Fqi -- "$marker" "$REPOSITORY_ROOT/docs/evidence/CP-3D.md"; then
     printf 'FALHA: fechamento CP-3D não contém: %s\n' "$marker" >&2
+    exit 1
+  fi
+done
+
+for marker in \
+  'atividade 3.31' \
+  'WEB-INF/tags/layout/page.tag' \
+  'validate-cp-3g-tiles.sh' \
+  'WildFly 41'; do
+  if ! grep -Fqi -- "$marker" \
+      "$REPOSITORY_ROOT/docs/cp-3g-web-substitutions.md" \
+      "$REPOSITORY_ROOT/migration/steps/CP-3G-tiles-jsp-layout.md"; then
+    printf 'FALHA: documentação CP-3G não contém: %s\n' "$marker" >&2
     exit 1
   fi
 done

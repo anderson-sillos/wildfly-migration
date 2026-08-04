@@ -1,3 +1,4 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="tiles" uri="http://tiles.apache.org/tags-tiles" %>
-<tiles:insertDefinition name="pedidos.detalhe"/>
+<%@ taglib prefix="layout" tagdir="/WEB-INF/tags/layout" %>
+<layout:page title="Detalhe do pedido — WildFly Migration Lab"
+             contentPage="/WEB-INF/views/pedidos/detalhe-content.jsp"/>

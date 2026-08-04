@@ -1,3 +1,4 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="tiles" uri="http://tiles.apache.org/tags-tiles" %>
-<tiles:insertDefinition name="migration.erro"/>
+<%@ taglib prefix="layout" tagdir="/WEB-INF/tags/layout" %>
+<layout:page title="Falha controlada — WildFly Migration Lab"
+             contentPage="/WEB-INF/views/erro-content.jsp"/>

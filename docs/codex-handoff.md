@@ -77,6 +77,16 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - Rollback isolado da 3.8: retornar ao commit verde
   `e73f3184917984062d9ce8037d75236631399d99`.
 
+### 3.32 — multipart Jakarta
+
+- Commons FileUpload e Commons IO foram removidos do WAR Jakarta.
+- `UploadServlet` e `XmlImportServlet` usam `@MultipartConfig` e `Part`, com
+  limites, basename normalizado, leitura limitada e limpeza explícita.
+- H2 e Oracle no WildFly 41 aprovaram os 15 cenários HTTP; evidências locais
+  estão em `migration/evidence/CP-3G/upload-*.json` e usam `workingTree=true`.
+- A próxima integração deve ocorrer somente após revisão do worktree; não há
+  commit ou push desta atividade.
+
 ### 3.9 — descoberta de validadores
 
 - Reflections foi atualizado de 0.9.10 para 0.10.2.

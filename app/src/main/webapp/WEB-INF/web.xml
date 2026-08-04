@@ -5,11 +5,6 @@
          version="6.1">
   <display-name>WildFly Migration Lab</display-name>
 
-  <context-param>
-    <param-name>org.apache.tiles.impl.BasicTilesContainer.DEFINITIONS_CONFIG</param-name>
-    <param-value>/WEB-INF/tiles-defs.xml</param-value>
-  </context-param>
-
   <filter>
     <filter-name>requestContext</filter-name>
     <filter-class>br.com.asillos.migration.web.RequestContextFilter</filter-class>
@@ -19,9 +14,6 @@
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 
-  <listener>
-    <listener-class>org.apache.tiles.web.startup.TilesListener</listener-class>
-  </listener>
   <listener>
     <listener-class>br.com.asillos.migration.web.MigrationContextListener</listener-class>
   </listener>
