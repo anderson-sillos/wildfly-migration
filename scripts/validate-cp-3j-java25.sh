@@ -20,17 +20,17 @@ for path in "$POM" "$BUILD" "$SMOKE" "$WORKFLOW" "$MANIFEST"; do
 done
 
 for marker in \
-  '<id>cp-3j-java25</id>' \
-  '<jdk>[25,26)</jdk>' \
+  '<id>cp-3e-jakarta11</id>' \
+  '<jdk>[21,22)</jdk>' \
   '<maven.compiler.source>21</maven.compiler.source>' \
   '<maven.compiler.target>21</maven.compiler.target>' \
-  '<java.version.range>[25,26)</java.version.range>'; do
+  '<java.version.range>[21,22)</java.version.range>'; do
   grep -Fq "$marker" "$POM" || fail "perfil Java 25 sem: $marker"
 done
 
 for marker in \
   'JAVA25_HOME' \
-  'cp-3j-java25' \
+  'cp-3e-jakarta11' \
   'cp3j-java25' \
   'buildOutcome' \
   'bytecodeTarget'; do
@@ -60,7 +60,8 @@ grep -Fq $'temurin-openjdk\t25.0.4+7' "$MANIFEST" ||
 if [[ -f "$RESULT" ]]; then
   for marker in \
     '"activity": "3.47"' \
-    '"profile": "cp-3j-java25"' \
+    '"profile": "cp-3e-jakarta11"' \
+    '"javaVersionRangeOverride": "[25,26)"' \
     '"runtime": "Temurin 25.0.4+7/Maven 3.9.16"' \
     '"buildOutcome": "passed"' \
     '"exitCode": 0' \

@@ -244,7 +244,6 @@ public final class ValidateApplicationPom {
         expectedProfiles.put("oracle", "[17,18)");
         expectedProfiles.put("ci-h2", "[17,18)");
         expectedProfiles.put("cp-3e-jakarta11", "[21,22)");
-        expectedProfiles.put("cp-3j-java25", "[25,26)");
 
         Element profiles = child(project, "profiles");
         NodeList profileNodes = profiles.getChildNodes();

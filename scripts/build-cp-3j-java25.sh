@@ -54,7 +54,8 @@ PATH="$JAVA_HOME_VALUE/bin:$PATH" \
 MAVEN_OPTS='-Dhttps.protocols=TLSv1.2' \
   "$MAVEN_HOME_VALUE/bin/mvn" -B -ntp \
   -f "$ROOT/app/pom.xml" \
-  -Pci-h2,cp-3j-java25 \
+  -Pci-h2,cp-3e-jakarta11 \
+  -Djava.version.range='[25,26)' \
   -Dmigration.build.directory="$BUILD_DIRECTORY" \
   clean verify >"$TEMP_DIRECTORY/build.out" 2>&1
 BUILD_STATUS="$?"
@@ -84,7 +85,8 @@ cat >"$RESULT_FILE" <<EOF
   "schema": "wildfly-migration-cp3j-java25-build/v1",
   "checkpoint": "CP-3J",
   "activity": "3.47",
-  "profile": "cp-3j-java25",
+  "profile": "cp-3e-jakarta11",
+  "javaVersionRangeOverride": "[25,26)",
   "runtime": "Temurin 25.0.4+7/Maven 3.9.16",
   "server": "WildFly Community 41.0.0.Final",
   "api": "jakarta.platform:jakarta.jakartaee-web-api:11.0.0",
