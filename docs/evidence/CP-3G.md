@@ -50,6 +50,7 @@ checkout documentado.
 - [`discovery-ci-h2.json`](../../migration/evidence/CP-3G/discovery-ci-h2.json)
 - [`logging-ci-h2.json`](../../migration/evidence/CP-3G/logging-ci-h2.json)
 
-O commit-fonte testado foi `1f7a97b91d4790a7f5621ec9871fa7092b5ba716`, com
-`workingTree=false`. A integração da PR usa a mensagem
+O commit-fonte testado após a integração foi
+`a46c56a0c4a47b1fdcaca78b0ea7bd6d5e3a5bbe`, com `workingTree=false`. A
+integração da PR usa a mensagem
 `checkpoint(CP-3G): replace legacy web libraries`.

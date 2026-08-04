@@ -1,8 +1,8 @@
 # Codex handoff
 
-Atualizado em 04/08/2026 após a conclusão da atividade 3.35. A PR incremental
-do CP-3G está aberta, com checks remotos verdes, aguardando a integração pelo
-commit de fechamento do checkpoint.
+Atualizado em 04/08/2026 após a integração da atividade 3.35. A PR #25 do
+CP-3G foi encerrada com checks remotos verdes pelo squash
+`a46c56a0c4a47b1fdcaca78b0ea7bd6d5e3a5bbe`.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -12,14 +12,17 @@ URLs Oracle, endereços internos nem valores do `.env`.
 
 - Repositório: `anderson-sillos/wildfly-migration`.
 - Mudança OpenSpec: `create-java-web-migration-lab`.
-- Branch atual: `checkpoint/cp-3g-entry`; a implementação da atividade 3.34 está no commit local `68aa97d5702666ff5c76c440acab555af9bb8fb1`.
-- PR incremental do CP-3G: #25, `feat(CP-3G): replace Reflections with Servlet SCI`, aberta contra `main`.
+- Branch atual: `main`; o CP-3G está integrado no commit
+  `a46c56a0c4a47b1fdcaca78b0ea7bd6d5e3a5bbe`.
+- PR incremental do CP-3G: #25, `feat(CP-3G): replace Reflections with Servlet SCI`,
+  encerrada por squash com a mensagem `checkpoint(CP-3G): replace legacy web libraries`.
 - CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
 - Progresso OpenSpec: 90 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
-  3.33, descoberta por `ServletContainerInitializer`.
-- Próxima atividade: integrar e fechar a PR #25; depois iniciar o CP-3H.
+  3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
+  3.35, fechamento do checkpoint.
+- Próxima atividade OpenSpec: 3.36, início do CP-3H. Ela ainda não foi iniciada.
 
 ## Decisões permanentes
 
@@ -102,7 +105,9 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - O smoke H2 no WildFly 41 aprovou os 15 cenários HTTP e registrou
   `validator_sci_discovery` e a ordem
   `numero-formato,valor-monetario,status-inicial`.
-- Evidência: `migration/evidence/CP-3G/discovery-ci-h2.json`.
+- Evidências: `migration/evidence/CP-3G/discovery-ci-h2.json`,
+  `migration/evidence/CP-3G/logging-ci-h2.json` e
+  `docs/evidence/CP-3G.md`.
 - Commit de implementação: `671509d5e4e90f25fe7a1bb8f1ea28cbb8e23c50`.
 
 ### 3.34 — logging final SLF4J/MyBatis
@@ -127,7 +132,8 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - A evidência Oracle existente da atividade 3.32 continua limitada ao upload e
   importação XML; não foi tratada como qualificação Oracle completa do CP-3G.
 - Validação: `scripts/validate-cp-3g-closure.sh`; PR #25 com
-  `repository-baseline` e `portable-ci` verdes.
+  `repository-baseline` e `portable-ci` verdes, integrada no squash
+  `a46c56a0c4a47b1fdcaca78b0ea7bd6d5e3a5bbe`.
 
 ### 3.9 — descoberta de validadores
 
