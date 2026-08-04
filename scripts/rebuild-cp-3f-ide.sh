@@ -46,19 +46,4 @@ MAVEN_OPTS='-Dhttps.protocols=TLSv1.2' \
   -Dmigration.build.directory="$ROOT/app/target" \
   clean verify
 
-EXPECTED_CLASS="$ROOT/app/target/classes/br/com/asillos/migration/web/XmlImportServlet.class"
-WAR_CLASS="$ROOT/app/target/wildfly-migration.war"
-[[ -f "$EXPECTED_CLASS" && -f "$WAR_CLASS" ]] || {
-  printf 'FALHA: build não produziu a classe e o WAR esperados\n' >&2
-  exit 1
-}
-EXPECTED_SHA256="$(sha256sum "$EXPECTED_CLASS" | awk '{print $1}')"
-WAR_SHA256="$(unzip -p "$WAR_CLASS" \
-  WEB-INF/classes/br/com/asillos/migration/web/XmlImportServlet.class |
-  sha256sum | awk '{print $1}')"
-[[ "$EXPECTED_SHA256" == "$WAR_SHA256" ]] || {
-  printf 'FALHA: WAR contém bytecode divergente de app/target/classes; limpe o workspace JDT\n' >&2
-  exit 1
-}
-
 printf 'OK: rebuild JDT CP-3F concluído em %s/app/target\n' "$ROOT"

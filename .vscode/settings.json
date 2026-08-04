@@ -16,7 +16,6 @@
   "java.jdt.ls.java.home": "/opt/migration-lab/tools/jdk-21.0.12+8",
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.autobuild.enabled": true,
-  "java.project.outputPath": "app/target/classes",
   "java.diagnostic.filter": [
     "**/target/**",
     "**/scripts/**"
