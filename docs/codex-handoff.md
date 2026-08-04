@@ -220,7 +220,7 @@ URLs Oracle, endereços internos nem valores do `.env`.
 ### 3.43 — manifesto do gate Java 21
 
 - O manifesto `migration/evidence/CP-3I/manifest.properties` registra o
-  commit-fonte `c9556c775cade8f360707c730ddff3e2e7ec7050`,
+  commit-fonte `a90b1d8ea32d3724b67f8be35d02b6aee3e0c0f4`,
   `workingTree=false`, Temurin 21.0.12+8, WildFly comunitário 41.0.0.Final,
   Jakarta EE 11, Maven 3.9.16, H2 2.4.240 e Oracle 19.3.0.0.0 com
   `ojdbc17` 23.26.2.0.0.
