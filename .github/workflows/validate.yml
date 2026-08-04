@@ -214,6 +214,8 @@ jobs:
             --war app/target/cp3f-jakarta11/wildfly-migration.war \
             --result app/target/contract-results/cp-3f-ci-h2.json \
             --diagnostic-log app/target/contract-results/cp-3f-wildfly41.log
+          ./scripts/validate-cp-3g-discovery.sh \
+            --war app/target/cp3f-jakarta11/wildfly-migration.war
 
       - name: Upload CP-3F portable evidence
         if: steps.portable-selection.outputs.mode == 'cp3f'

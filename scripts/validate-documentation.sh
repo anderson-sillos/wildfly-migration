@@ -94,6 +94,7 @@ required_paths=(
   "migration/steps/CP-3G-tiles-jsp-layout.md"
   "migration/steps/CP-3G-servlet-multipart.md"
   "migration/steps/CP-3G-servlet-container-initializer.md"
+  "migration/evidence/CP-3G/discovery-ci-h2.json"
   "migration/evidence/CP-3G/upload-ci-h2.json"
   "migration/evidence/CP-3G/upload-oracle.json"
 )

@@ -512,6 +512,7 @@ check_required_files() {
       "app/src/main/resources/META-INF/services/jakarta.servlet.ServletContainerInitializer"
       "migration/steps/CP-3G-servlet-multipart.md"
       "migration/steps/CP-3G-servlet-container-initializer.md"
+      "migration/evidence/CP-3G/discovery-ci-h2.json"
       "migration/evidence/CP-3G/upload-ci-h2.json"
       "migration/evidence/CP-3G/upload-oracle.json"
     )

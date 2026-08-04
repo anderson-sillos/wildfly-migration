@@ -40,7 +40,8 @@ for path in \
   "$SCI_SOURCE/ValidatorDiscovery.java" \
   "$SCI_SOURCE/ValidatorServletContainerInitializer.java" \
   "$SERVICE" \
-  "$ROOT/migration/steps/CP-3G-servlet-container-initializer.md"; do
+  "$ROOT/migration/steps/CP-3G-servlet-container-initializer.md" \
+  "$ROOT/migration/evidence/CP-3G/discovery-ci-h2.json"; do
   [[ -f "$path" ]] || fail "arquivo obrigatório ausente: ${path#"$ROOT/"}"
 done
 
@@ -65,6 +66,15 @@ grep -Fq 'Modifier.isAbstract(type.getModifiers())' \
   fail 'fachada não rejeita classes abstratas'
 grep -Fq 'Collections.sort(' "$SCI_SOURCE/ValidatorDiscovery.java" ||
   fail 'fachada não ordena os validadores'
+for marker in \
+  '"activity": "3.33"' \
+  '"mechanism": "ServletContainerInitializer+HandlesTypes"' \
+  '"internalJar": "WEB-INF/lib/wildfly-migration-validator-sci.jar"' \
+  '"sciStartup": "passed"' \
+  '"result": "passed"'; do
+  grep -Fq "$marker" "$ROOT/migration/evidence/CP-3G/discovery-ci-h2.json" ||
+    fail "evidência SCI não contém: $marker"
+done
 if grep -REn 'org\.reflections|LegacyValidatorDiscovery' \
     "$ROOT/app/src/main/java"; then
   fail 'Reflections ou a fachada legada permanecem no código ativo'

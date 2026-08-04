@@ -144,7 +144,7 @@
 
 - [x] 3.31 Substituir Tiles por JSP tag files ou includes sob `WEB-INF` e comprovar a equivalência do layout.
 - [x] 3.32 Substituir Commons FileUpload por `@MultipartConfig` e `jakarta.servlet.http.Part` com limites, normalização, validação e limpeza.
-- [ ] 3.33 Substituir Reflections pelo mecanismo padrão Jakarta Servlet `ServletContainerInitializer` com `@HandlesTypes(Validator.class)`, fornecido em JAR interno de `WEB-INF/lib` com o registro `META-INF/services`, encapsulado por fachada própria e validado quanto a classes elegíveis, conjunto e ordem em `WEB-INF/classes` e `WEB-INF/lib` no Java 21/WildFly 41.
+- [x] 3.33 Substituir Reflections pelo mecanismo padrão Jakarta Servlet `ServletContainerInitializer` com `@HandlesTypes(Validator.class)`, fornecido em JAR interno de `WEB-INF/lib` com o registro `META-INF/services`, encapsulado por fachada própria e validado quanto a classes elegíveis, conjunto e ordem em `WEB-INF/classes` e `WEB-INF/lib` no Java 21/WildFly 41.
 - [ ] 3.34 Remover a ponte temporária de Log4j, definir explicitamente `logImpl=SLF4J` no MyBatis e integrar os logs ao mecanismo final do WildFly, comprovando no `server.log` as categorias dos mappers e exceções completas sem empacotar backend concorrente no WAR.
 - [ ] 3.35 Encerrar `CP-3G`: executar contratos web, validar descoberta, fachada, conteúdo e registro do JAR interno do SCI, executar auditoria de dependências e segurança, registrar evidências e rollback e integrar o PR pelo commit `checkpoint(CP-3G): replace legacy web libraries`.
 
