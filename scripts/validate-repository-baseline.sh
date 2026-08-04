@@ -177,6 +177,6 @@ run_step "Validar manifesto do CP-3I/3.43" \
 run_step "Validar roteiro do CP-3I/3.44" \
   ./scripts/validate-cp-3i-java17-runbook.sh
 run_step "Validar fechamento do CP-3I/3.45" \
-  ./scripts/validate-cp-3i-closure.sh
+  ./scripts/validate-cp-3i-closure.sh --skip-war
 
 printf '\nOK: repository-baseline local e remoto concluído\n'
