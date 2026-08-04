@@ -367,9 +367,25 @@ if ! curl --silent --show-error --fail --location \
   fail "preferência não persistiu na HttpSession"
 fi
 
+for protected_path in \
+  "/WEB-INF/tags/layout/page.tag" \
+  "/WEB-INF/layout/header.jsp"; do
+  PROTECTED_STATUS="$(
+    curl --silent --show-error \
+      --cookie-jar "$COOKIES" \
+      --cookie "$COOKIES" \
+      --output "$BODY" \
+      --write-out '%{http_code}' \
+      "$BASE_URL$protected_path"
+  )" || fail "acesso direto ao fragmento protegido não respondeu"
+  if [[ "$PROTECTED_STATUS" != "403" && "$PROTECTED_STATUS" != "404" ]]; then
+    fail "fragmento sob WEB-INF ficou acessível diretamente: $protected_path"
+  fi
+done
+
 WAR_SHA256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
 RESULT_DIRECTORY="$(dirname "$RESULT_FILE")"
-install -d -m 0755 "$RESULT_DIRECTORY"
+mkdir -p -- "$RESULT_DIRECTORY"
 RESULT_TEMPORARY="$RESULT_FILE.tmp.$$"
 {
   printf '{\n'
@@ -394,6 +410,7 @@ RESULT_TEMPORARY="$RESULT_FILE.tmp.$$"
   printf '    "xmlValidatorRejected": "passed",\n'
   printf '    "xmlXxe": "passed",\n'
   printf '    "xmlEntityExpansion": "passed",\n'
+  printf '    "protectedFragments": "passed",\n'
   printf '    "persistedState": "passed"\n'
   printf '  }\n'
   printf '}\n'

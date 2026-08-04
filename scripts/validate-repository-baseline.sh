@@ -69,6 +69,13 @@ shell_files=(
   scripts/diagnose-cp-3e-unchanged.sh
   scripts/build-cp-3e-jakarta.sh
   scripts/validate-cp-3e-entry.sh
+  scripts/build-cp-3f-jakarta.sh
+  scripts/rebuild-cp-3f-ide.sh
+  scripts/validate-cp-3f-namespace.sh
+  scripts/validate-cp-3f-closure.sh
+  scripts/validate-cp-3g-tiles.sh
+  scripts/validate-cp-3g-upload.sh
+  scripts/smoke-wildfly41-datasource.sh
   contract-tests/run.sh
 )
 
@@ -125,5 +132,9 @@ run_step "Validar gate Java 17 do CP-3D" \
   ./scripts/validate-cp-3d.sh
 run_step "Validar entrada do CP-3E no WildFly 41" \
   ./scripts/validate-cp-3e-entry.sh
+run_step "Validar namespaces e descritores Jakarta do CP-3F" \
+  ./scripts/validate-cp-3f-namespace.sh
+run_step "Validar multipart nativo do CP-3G" \
+  ./scripts/validate-cp-3g-upload.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'

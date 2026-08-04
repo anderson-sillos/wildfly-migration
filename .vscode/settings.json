@@ -5,11 +5,15 @@
   "java.configuration.runtimes": [
     {
       "name": "JavaSE-17",
-      "path": "/opt/migration-lab/tools/jdk-17.0.20+8",
+      "path": "/opt/migration-lab/tools/jdk-17.0.20+8"
+    },
+    {
+      "name": "JavaSE-21",
+      "path": "/opt/migration-lab/tools/jdk-21.0.12+8",
       "default": true
     }
   ],
-  "java.jdt.ls.java.home": "/opt/migration-lab/tools/jdk-17.0.20+8",
+  "java.jdt.ls.java.home": "/opt/migration-lab/tools/jdk-21.0.12+8",
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.autobuild.enabled": true,
   "java.diagnostic.filter": [

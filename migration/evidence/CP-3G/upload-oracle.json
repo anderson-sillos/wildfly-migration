@@ -1,0 +1,21 @@
+{
+  "schema": "wildfly-migration-cp3g-upload/v1",
+  "checkpoint": "CP-3G",
+  "activity": "3.32",
+  "qualification": "oracle-qualified",
+  "profile": "oracle",
+  "sourceCommit": "39b8be79a3e6e80006b3a64090a3a5fd195c1a2e",
+  "workingTree": false,
+  "runtime": "java21-wildfly41.0.0",
+  "database": "Oracle Database 19c 19.3.0.0.0",
+  "api": "jakarta.servlet.http.Part",
+  "fileUploadDependency": "absent",
+  "commonsIoDependency": "absent",
+  "warSha256": "957c9dcc518c0d003103cb6f10dc866f74ad217dd6e09c85eb79e2e56dce28e3",
+  "scenarios": 15,
+  "upload": "passed",
+  "uploadLimit": "passed",
+  "xmlImport": "passed",
+  "temporaryCleanup": "passed",
+  "result": "passed"
+}

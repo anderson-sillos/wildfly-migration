@@ -219,6 +219,26 @@
         "focus": true,
         "clear": true
       }
+    },
+    {
+      "label": "Build: limpar bytecode e reconstruir (Java 21/Jakarta/H2)",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/rebuild-cp-3f-ide.sh",
+      "args": [
+        "--env",
+        "${workspaceFolder}/.env"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true,
+        "clear": true
+      }
     }
   ]
 }

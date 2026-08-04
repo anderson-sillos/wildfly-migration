@@ -1,6 +1,6 @@
 package br.com.asillos.migration.web;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Contrato estável da preferência que vive somente na sessão HTTP.

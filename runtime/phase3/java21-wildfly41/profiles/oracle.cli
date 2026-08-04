@@ -1,0 +1,8 @@
+batch
+/subsystem=logging/pattern-formatter=MIGRATION_PATTERN:add(pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p correlation=%X{correlationId} [%c] (%t) %s%e%n")
+/subsystem=logging/console-handler=CONSOLE:write-attribute(name=named-formatter,value=MIGRATION_PATTERN)
+/subsystem=logging/logger=br.com.asillos.migration:add(level=INFO,use-parent-handlers=true)
+/subsystem=datasources/data-source=ExampleDS:remove
+/subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle.ojdbc17,driver-class-name=oracle.jdbc.OracleDriver)
+/subsystem=datasources/data-source=MigrationDS:add(jndi-name=java:/jdbc/MigrationDS,driver-name=oracle,connection-url="\${env.ORACLE_DB_URL}",user-name="\${env.ORACLE_DB_USER}",password="\${env.ORACLE_DB_PASSWORD}",jta=false,use-java-context=true,min-pool-size=1,max-pool-size=10,pool-prefill=false,validate-on-match=true,background-validation=false,check-valid-connection-sql="SELECT 1 FROM DUAL",enabled=true)
+run-batch

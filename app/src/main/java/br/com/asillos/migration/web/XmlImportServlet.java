@@ -1,17 +1,17 @@
 package br.com.asillos.migration.web;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 
 import br.com.asillos.migration.domain.Pedido;
 import br.com.asillos.migration.integration.validation.PedidoImportValidationException;
@@ -19,15 +19,13 @@ import br.com.asillos.migration.integration.xml.LegacyPedidoXmlParser;
 import br.com.asillos.migration.integration.xml.XmlImportException;
 
 import org.apache.log4j.Logger;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadBase;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-
 /**
  * Endpoint HTTP de importação XML com limite explícito.
  */
+@MultipartConfig(
+        fileSizeThreshold = XmlImportServlet.MEMORY_THRESHOLD_BYTES,
+        maxFileSize = XmlImportServlet.MAX_XML_BYTES,
+        maxRequestSize = XmlImportServlet.MAX_MULTIPART_REQUEST_BYTES)
 public final class XmlImportServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
@@ -46,7 +44,7 @@ public final class XmlImportServlet extends HttpServlet {
     private static final String FORM_VIEW =
             "/WEB-INF/views/pedidos/importacao-xml.jsp";
 
-    private LegacyPedidoXmlParser parser;
+    private transient LegacyPedidoXmlParser parser;
 
     @Override
     public void init() throws ServletException {
@@ -74,7 +72,7 @@ public final class XmlImportServlet extends HttpServlet {
     protected void doPost(
             HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException {
-        boolean multipart = ServletFileUpload.isMultipartContent(request);
+        boolean multipart = MultipartPartSupport.isMultipartContent(request);
         if (!multipart && !isXmlContentType(request.getContentType())) {
             safeError(
                     request,
@@ -114,21 +112,14 @@ public final class XmlImportServlet extends HttpServlet {
                     response,
                     STATUS_REQUEST_TOO_LARGE,
                     "O XML excede o limite de 128 KiB");
-        } catch (FileUploadBase.FileSizeLimitExceededException exception) {
+        } catch (MultipartPartSupport.SizeLimitException exception) {
             LOGGER.warn("legacy_xml_import rejected reason=size");
             safeError(
                     request,
                     response,
                     STATUS_REQUEST_TOO_LARGE,
                     "O XML excede o limite de 128 KiB");
-        } catch (FileUploadBase.SizeLimitExceededException exception) {
-            LOGGER.warn("legacy_xml_import rejected reason=size");
-            safeError(
-                    request,
-                    response,
-                    STATUS_REQUEST_TOO_LARGE,
-                    "A requisição excede o limite de 160 KiB");
-        } catch (FileUploadException exception) {
+        } catch (ServletException exception) {
             LOGGER.warn("legacy_xml_import rejected reason=multipart");
             safeError(
                     request,
@@ -170,51 +161,30 @@ public final class XmlImportServlet extends HttpServlet {
     }
 
     private byte[] readMultipart(HttpServletRequest request)
-            throws FileUploadException {
-        File temporaryRepository = (File) getServletContext()
-                .getAttribute("javax.servlet.context.tempdir");
-        if (temporaryRepository == null
-                || !temporaryRepository.isDirectory()) {
-            throw new IllegalStateException(
-                    "Diretório temporário do servlet está indisponível");
-        }
-
-        DiskFileItemFactory factory = new DiskFileItemFactory(
-                MEMORY_THRESHOLD_BYTES, temporaryRepository);
-        ServletFileUpload upload = new ServletFileUpload(factory);
-        upload.setHeaderEncoding("UTF-8");
-        upload.setFileSizeMax(MAX_XML_BYTES);
-        upload.setSizeMax(MAX_MULTIPART_REQUEST_BYTES);
-
-        List<FileItem> parsedItems = new ArrayList<FileItem>();
+            throws IOException, ServletException,
+            MultipartPartSupport.SizeLimitException {
+        Collection<Part> parsedParts = MultipartPartSupport.parse(request);
         try {
-            List<?> rawItems = upload.parseRequest(request);
-            FileItem xmlItem = null;
-            for (Object value : rawItems) {
-                if (!(value instanceof FileItem)) {
-                    throw new IllegalArgumentException(
-                            "Parte multipart desconhecida");
-                }
-                FileItem item = (FileItem) value;
-                parsedItems.add(item);
-                if (item.isFormField()
-                        || !FILE_FIELD.equals(item.getFieldName())
-                        || xmlItem != null) {
+            Part xmlPart = null;
+            for (Part part : parsedParts) {
+                if (!FILE_FIELD.equals(part.getName())
+                        || part.getSubmittedFileName() == null
+                        || xmlPart != null) {
                     throw new IllegalArgumentException(
                             "Selecione somente um arquivo XML");
                 }
-                xmlItem = item;
+                xmlPart = part;
             }
-            if (xmlItem == null || xmlItem.getSize() == 0L) {
+            if (xmlPart == null || xmlPart.getSize() == 0L) {
                 throw new IllegalArgumentException(
                         "Selecione um arquivo XML não vazio");
             }
-            return xmlItem.get();
+            return MultipartPartSupport.read(xmlPart, MAX_XML_BYTES);
         } finally {
-            for (FileItem item : parsedItems) {
+            for (Part part : parsedParts) {
                 try {
-                    item.delete();
-                } catch (RuntimeException exception) {
+                    part.delete();
+                } catch (IOException exception) {
                     LOGGER.warn(
                             "legacy_xml_import temporary_cleanup_failure",
                             exception);

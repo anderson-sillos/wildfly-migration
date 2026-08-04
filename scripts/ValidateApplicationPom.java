@@ -115,16 +115,8 @@ public final class ValidateApplicationPom {
                 values("1.7.36", "compile"));
         expected.put("org.slf4j:slf4j-api",
                 values("1.7.36", "provided"));
-        expected.put("commons-fileupload:commons-fileupload",
-                values("1.6.0", "compile"));
-        expected.put("commons-io:commons-io",
-                values("2.19.0", "compile"));
         expected.put("org.reflections:reflections",
                 values("0.10.2", "compile"));
-        expected.put("org.apache.tiles:tiles-api",
-                values("2.1.4", "compile"));
-        expected.put("org.apache.tiles:tiles-jsp",
-                values("2.1.4", "compile"));
         expected.put("org.apache.xmlbeans:xmlbeans",
                 values("5.3.0", "compile"));
         expected.put("org.dom4j:dom4j", values("2.2.0", "compile"));
@@ -217,6 +209,34 @@ public final class ValidateApplicationPom {
                 require("${java.version.range}".equals(
                         text(requireJava, "version")),
                         "Enforcer deve usar o range Java ativo");
+            } else if ("maven-compiler-plugin".equals(artifactId)) {
+                Element configuration = child(plugin, "configuration");
+                require("true".equals(text(configuration, "showWarnings")),
+                        "compilador deve exibir warnings do javac");
+                require(optionalText(configuration, "compilerId").length() == 0,
+                        "compilador Maven deve permanecer no javac padrão");
+
+                Element compilerArgs = child(configuration, "compilerArgs");
+                NodeList argumentNodes = compilerArgs.getChildNodes();
+                int argumentCount = 0;
+                boolean hasAllLint = false;
+                boolean hasWarningsAsErrors = false;
+                for (int argumentIndex = 0;
+                        argumentIndex < argumentNodes.getLength();
+                        argumentIndex++) {
+                    Node argumentNode = argumentNodes.item(argumentIndex);
+                    if (!(argumentNode instanceof Element)
+                            || !"arg".equals(argumentNode.getLocalName())) {
+                        continue;
+                    }
+                    argumentCount++;
+                    String argument = argumentNode.getTextContent().trim();
+                    hasAllLint |= "-Xlint:all".equals(argument);
+                    hasWarningsAsErrors |= "-Werror".equals(argument);
+                }
+                require(argumentCount == 2 && hasAllLint
+                                && hasWarningsAsErrors,
+                        "javac deve usar somente -Xlint:all e -Werror");
             }
         }
         require(pluginCount == expectedPlugins.size(),
@@ -256,11 +276,17 @@ public final class ValidateApplicationPom {
         Element webApp = document.getDocumentElement();
         require("web-app".equals(webApp.getLocalName()),
                 "raiz de web.xml inválida");
-        require("http://java.sun.com/xml/ns/j2ee".equals(
-                webApp.getNamespaceURI()),
-                "namespace legado de web.xml divergente");
-        require("2.4".equals(webApp.getAttribute("version")),
-                "web.xml deve declarar Servlet 2.4");
+        String namespace = webApp.getNamespaceURI();
+        String version = webApp.getAttribute("version");
+        if ("http://java.sun.com/xml/ns/j2ee".equals(namespace)) {
+            require("2.4".equals(version),
+                    "web.xml legado deve declarar Servlet 2.4");
+        } else {
+            require("https://jakarta.ee/xml/ns/jakartaee".equals(namespace),
+                    "namespace de web.xml deve ser legado ou Jakarta");
+            require("6.1".equals(version),
+                    "web.xml Jakarta deve declarar Servlet 6.1");
+        }
     }
 
     private static void validateDeploymentStructure(Document document) {

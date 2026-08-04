@@ -1,0 +1,29 @@
+{
+  "schema": "wildfly-migration-cp3f-contract-result/v1",
+  "checkpoint": "CP-3F",
+  "qualification": "portable-ci",
+  "profile": "ci-h2",
+  "sourceCommit": "39b8be79a3e6e80006b3a64090a3a5fd195c1a2e",
+  "workingTree": false,
+  "warSha256": "957c9dcc518c0d003103cb6f10dc866f74ad217dd6e09c85eb79e2e56dce28e3",
+  "runtime": "java21-wildfly41.0.0",
+  "scenarioCount": 15,
+  "scenarios": {
+    "health": "passed",
+    "list": "passed",
+    "create": "passed",
+    "detail": "passed",
+    "session": "passed",
+    "upload": "passed",
+    "uploadLimit": "passed",
+    "xmlForm": "passed",
+    "xmlValid": "passed",
+    "xmlInvalidXsd": "passed",
+    "xmlValidatorRejected": "passed",
+    "xmlXxe": "passed",
+    "xmlEntityExpansion": "passed",
+    "protectedFragments": "passed",
+    "persistedState": "passed"
+  },
+  "result": "passed"
+}

@@ -1,11 +1,13 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="tiles" uri="http://tiles.apache.org/tags-tiles" %>
+<%@ tag pageEncoding="UTF-8" %>
+<%@ attribute name="title" required="true" type="java.lang.String" %>
+<%@ attribute name="contentPage" required="true" type="java.lang.String" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><tiles:getAsString name="title"/></title>
+  <title><c:out value="${title}"/></title>
   <style>
     body { color: #1d2733; font-family: sans-serif; margin: 0; }
     header, main, footer { margin: auto; max-width: 960px; padding: 1rem; }
@@ -24,10 +26,10 @@
   </style>
 </head>
 <body>
-  <tiles:insertAttribute name="header"/>
+  <jsp:include page="/WEB-INF/layout/header.jsp"/>
   <main>
-    <tiles:insertAttribute name="body"/>
+    <jsp:include page="${contentPage}"/>
   </main>
-  <tiles:insertAttribute name="footer"/>
+  <jsp:include page="/WEB-INF/layout/footer.jsp"/>
 </body>
 </html>
