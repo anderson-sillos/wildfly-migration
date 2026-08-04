@@ -75,6 +75,8 @@ shell_files=(
   scripts/validate-cp-3f-closure.sh
   scripts/validate-cp-3g-tiles.sh
   scripts/validate-cp-3g-upload.sh
+  scripts/validate-cp-3g-discovery.sh
+  scripts/validate-cp-3g-logging.sh
   scripts/smoke-wildfly41-datasource.sh
   contract-tests/run.sh
 )
@@ -136,5 +138,11 @@ run_step "Validar namespaces e descritores Jakarta do CP-3F" \
   ./scripts/validate-cp-3f-namespace.sh
 run_step "Validar multipart nativo do CP-3G" \
   ./scripts/validate-cp-3g-upload.sh
+run_step "Validar descoberta SCI do CP-3G" \
+  ./scripts/validate-cp-3g-discovery.sh
+run_step "Validar logging SLF4J/MyBatis do CP-3G" \
+  ./scripts/validate-cp-3g-logging.sh
+run_step "Validar fechamento do CP-3G" \
+  ./scripts/validate-cp-3g-closure.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'

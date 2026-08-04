@@ -2,12 +2,6 @@
 <jboss-deployment-structure
     xmlns="urn:jboss:deployment-structure:1.3">
   <deployment>
-    <!--
-      Força os imports org.apache.log4j a usar a ponte empacotada no WAR,
-      evitando o módulo Log4j 1 depreciado do WildFly 26.
-    -->
-    <exclusions>
-      <module name="org.apache.log4j"/>
-    </exclusions>
+    <!-- O destino Jakarta não precisa de exclusões de logging do contêiner. -->
   </deployment>
 </jboss-deployment-structure>

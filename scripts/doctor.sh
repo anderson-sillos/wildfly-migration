@@ -242,7 +242,7 @@ check_required_files() {
       "app/src/main/java/br/com/asillos/migration/web/UploadServlet.java"
       "app/src/main/java/br/com/asillos/migration/integration/xml/LegacyPedidoXmlParser.java"
       "app/src/main/java/br/com/asillos/migration/web/XmlImportServlet.java"
-      "app/src/main/java/br/com/asillos/migration/integration/validation/LegacyValidatorDiscovery.java"
+      "app/src/main/java/br/com/asillos/migration/integration/validation/ValidatorDiscovery.java"
       "contract-tests/run.sh"
     )
   fi
@@ -505,10 +505,23 @@ check_required_files() {
       "runtime/phase3/java21-wildfly41/profiles/oracle.cli"
       "scripts/validate-cp-3g-tiles.sh"
       "scripts/validate-cp-3g-upload.sh"
+      "scripts/validate-cp-3g-discovery.sh"
+      "scripts/validate-cp-3g-logging.sh"
+      "scripts/validate-cp-3g-closure.sh"
       "scripts/smoke-wildfly41-datasource.sh"
+      "app/src/main/java/br/com/asillos/migration/integration/validation/ValidatorDiscovery.java"
+      "app/src/main/java/br/com/asillos/migration/integration/validation/ValidatorServletContainerInitializer.java"
+      "app/src/main/resources/META-INF/services/jakarta.servlet.ServletContainerInitializer"
       "migration/steps/CP-3G-servlet-multipart.md"
+      "migration/steps/CP-3G-servlet-container-initializer.md"
+      "migration/steps/CP-3G-slf4j-mybatis.md"
+      "docs/evidence/CP-3G.md"
+      "migration/evidence/CP-3G/discovery-ci-h2.json"
+      "migration/evidence/CP-3G/logging-ci-h2.json"
       "migration/evidence/CP-3G/upload-ci-h2.json"
       "migration/evidence/CP-3G/upload-oracle.json"
+      "migration/evidence/CP-3G/closure.properties"
+      "migration/evidence/CP-3G/rollback.properties"
     )
   fi
 

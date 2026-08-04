@@ -23,8 +23,7 @@
 
     <jakarta.ee.web.api.version>8.0.0</jakarta.ee.web.api.version>
     <mybatis.version>3.5.19</mybatis.version>
-    <slf4j.version>1.7.36</slf4j.version>
-    <reflections.version>0.10.2</reflections.version>
+    <slf4j.version>2.0.18</slf4j.version>
     <xmlbeans.version>5.3.0</xmlbeans.version>
     <dom4j.version>2.2.0</dom4j.version>
   </properties>
@@ -48,32 +47,11 @@
       <artifactId>mybatis</artifactId>
       <version>${mybatis.version}</version>
     </dependency>
-    <!--
-      Ponte temporária para os imports org.apache.log4j ainda existentes.
-      O backend e a API SLF4J são fornecidos pelo WildFly 26.
-    -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>log4j-over-slf4j</artifactId>
-      <version>${slf4j.version}</version>
-    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.reflections</groupId>
-      <artifactId>reflections</artifactId>
-      <version>${reflections.version}</version>
-      <exclusions>
-        <!-- A API SLF4J é fornecida pelo WildFly e fixada como provided. -->
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.xmlbeans</groupId>
@@ -168,11 +146,54 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.2</version>
+        <executions>
+          <execution>
+            <id>validator-sci-jar</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classifier>validator-sci</classifier>
+              <archive>
+                <addMavenDescriptor>false</addMavenDescriptor>
+              </archive>
+              <includes>
+                <include>br/com/asillos/migration/integration/validation/Validator.class</include>
+                <include>br/com/asillos/migration/integration/validation/PedidoImportValidator.class</include>
+                <include>br/com/asillos/migration/integration/validation/ValidatorDiscovery*.class</include>
+                <include>br/com/asillos/migration/integration/validation/ValidatorServletContainerInitializer*.class</include>
+                <include>META-INF/services/jakarta.servlet.ServletContainerInitializer</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <version>3.3.2</version>
         <configuration>
           <failOnMissingWebXml>true</failOnMissingWebXml>
           <outputTimestamp>${project.build.outputTimestamp}</outputTimestamp>
+          <packagingExcludes>
+            WEB-INF/classes/br/com/asillos/migration/integration/validation/Validator.class,
+            WEB-INF/classes/br/com/asillos/migration/integration/validation/PedidoImportValidator.class,
+            WEB-INF/classes/br/com/asillos/migration/integration/validation/ValidatorDiscovery*.class,
+            WEB-INF/classes/br/com/asillos/migration/integration/validation/ValidatorServletContainerInitializer*.class,
+            WEB-INF/classes/META-INF/services/jakarta.servlet.ServletContainerInitializer
+          </packagingExcludes>
+          <webResources>
+            <resource>
+              <directory>${project.build.directory}</directory>
+              <includes>
+                <include>${project.build.finalName}-validator-sci.jar</include>
+              </includes>
+              <targetPath>WEB-INF/lib</targetPath>
+            </resource>
+          </webResources>
         </configuration>
       </plugin>
       <plugin>

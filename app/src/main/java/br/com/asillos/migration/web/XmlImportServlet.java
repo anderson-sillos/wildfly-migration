@@ -18,7 +18,8 @@ import br.com.asillos.migration.integration.validation.PedidoImportValidationExc
 import br.com.asillos.migration.integration.xml.LegacyPedidoXmlParser;
 import br.com.asillos.migration.integration.xml.XmlImportException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Endpoint HTTP de importação XML com limite explícito.
  */
@@ -30,7 +31,7 @@ public final class XmlImportServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER =
-            Logger.getLogger(XmlImportServlet.class);
+            LoggerFactory.getLogger(XmlImportServlet.class);
 
     public static final int MAX_XML_BYTES = 128 * 1024;
     public static final long MAX_MULTIPART_REQUEST_BYTES = 160L * 1024L;
@@ -50,7 +51,8 @@ public final class XmlImportServlet extends HttpServlet {
     public void init() throws ServletException {
         try {
             parser = new LegacyPedidoXmlParser(
-                    getServletContext().getResourceAsStream(XSD_RESOURCE));
+                    getServletContext().getResourceAsStream(XSD_RESOURCE),
+                    getServletContext());
         } catch (XmlImportException exception) {
             throw new ServletException(
                     "Falha ao inicializar contrato XML", exception);

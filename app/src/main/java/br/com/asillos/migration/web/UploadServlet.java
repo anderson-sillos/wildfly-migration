@@ -15,7 +15,8 @@ import jakarta.servlet.http.Part;
 
 import br.com.asillos.migration.persistence.AnexoRepository;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Upload multipart usando a API nativa do Servlet/Jakarta.
@@ -28,7 +29,7 @@ public final class UploadServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER =
-            Logger.getLogger(UploadServlet.class);
+            LoggerFactory.getLogger(UploadServlet.class);
 
     public static final long MAX_REQUEST_BYTES = 576L * 1024L;
     public static final int MEMORY_THRESHOLD_BYTES = 32 * 1024;

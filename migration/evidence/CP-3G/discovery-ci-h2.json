@@ -1,0 +1,21 @@
+{
+  "schema": "wildfly-migration-cp3g-discovery/v1",
+  "checkpoint": "CP-3G",
+  "activity": "3.33",
+  "qualification": "portable-ci",
+  "profile": "ci-h2",
+  "sourceCommit": "671509d5e4e90f25fe7a1bb8f1ea28cbb8e23c50",
+  "workingTree": false,
+  "warSha256": "e4470c60422cf55a6a98c8f225a6e35af09721c84af151887d229594b9a6e168",
+  "runtime": "java21-wildfly41.0.0",
+  "mechanism": "ServletContainerInitializer+HandlesTypes",
+  "internalJar": "WEB-INF/lib/wildfly-migration-validator-sci.jar",
+  "serviceDescriptor": "META-INF/services/jakarta.servlet.ServletContainerInitializer",
+  "webInfClassesValidators": 3,
+  "webInfLibValidators": 0,
+  "validatorSet": "br.com.asillos.migration.integration.validation.NumeroFormatoValidator,br.com.asillos.migration.integration.validation.StatusInicialValidator,br.com.asillos.migration.integration.validation.ValorMonetarioValidator",
+  "validatorOrder": "numero-formato,valor-monetario,status-inicial",
+  "sciStartup": "passed",
+  "contractScenarios": 15,
+  "result": "passed"
+}

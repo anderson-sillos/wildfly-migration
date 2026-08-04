@@ -13,7 +13,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.MDC;
+import org.slf4j.MDC;
 
 /**
  * Aplica UTF-8 e um identificador de correlação seguro a cada requisição.

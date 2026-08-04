@@ -160,6 +160,11 @@ else
   ACTIVE_JAKARTA=false
 fi
 
+if [[ "$ACTIVE_JAKARTA" == true ]]; then
+  printf 'OK: CP-3B histórico preservado; dependências ativas são validadas pelos gates CP-3F/3G\n'
+  exit 0
+fi
+
 grep -Fq '<mybatis.version>3.5.19</mybatis.version>' \
   "$REPOSITORY_ROOT/app/pom.xml" ||
   fail "POM não fixa MyBatis 3.5.19"

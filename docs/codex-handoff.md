@@ -1,7 +1,8 @@
 # Codex handoff
 
-Atualizado em 31/07/2026 após a conclusão da atividade 3.12. O trabalho deve
-permanecer pausado antes da atividade 3.13.
+Atualizado em 04/08/2026 após a conclusão da atividade 3.35. A PR incremental
+do CP-3G está aberta, com checks remotos verdes, aguardando a integração pelo
+commit de fechamento do checkpoint.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -11,14 +12,14 @@ URLs Oracle, endereços internos nem valores do `.env`.
 
 - Repositório: `anderson-sillos/wildfly-migration`.
 - Mudança OpenSpec: `create-java-web-migration-lab`.
-- Branch: `checkpoint/cp-3c-xml-jdbc`.
-- PR draft: [#20 — CP-3B: modernizar dependências centrais](https://github.com/anderson-sillos/wildfly-migration/pull/20).
-- Base do checkpoint: `6d94e5fc735575fa2ac644690a2a0635d921199f`, fechamento do CP-3A.
-- Progresso OpenSpec: 66 de 110 tarefas concluídas.
+- Branch atual: `checkpoint/cp-3g-entry`; a implementação da atividade 3.34 está no commit local `68aa97d5702666ff5c76c440acab555af9bb8fb1`.
+- PR incremental do CP-3G: #25, `feat(CP-3G): replace Reflections with Servlet SCI`, aberta contra `main`.
+- CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
+- Progresso OpenSpec: 90 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
-- Atividades CP-3C concluídas: 3.11, XMLBeans 5.3.0; 3.12, dom4j 2.2.0.
-- Próxima atividade: 3.13, remover `xml-apis` e Geronimo StAX.
-- O PR #20 foi encerrado com squash merge pelo commit de checkpoint do CP-3B.
+- Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
+  3.33, descoberta por `ServletContainerInitializer`.
+- Próxima atividade: integrar e fechar a PR #25; depois iniciar o CP-3H.
 
 ## Decisões permanentes
 
@@ -85,8 +86,48 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - H2 e Oracle no WildFly 41 aprovaram os 15 cenários HTTP; evidências
   versionadas estão em `migration/evidence/CP-3G/upload-*.json` e usam
   `workingTree=false`.
-- O CP-3F foi integrado no commit `39b8be7`; a atividade 3.33 ainda não foi
-  iniciada.
+- O CP-3F foi integrado no commit `2e8df53`; a atividade 3.33 está registrada
+  no commit `671509d` e aguarda integração por PR.
+
+### 3.33 — ServletContainerInitializer
+
+- Reflections 0.10.2 foi removido do POM e da árvore ativa.
+- `ValidatorServletContainerInitializer` usa `@HandlesTypes(Validator.class)`;
+  `ValidatorDiscovery` filtra, instancia e ordena os validadores no
+  `ServletContext`.
+- A infraestrutura foi empacotada em
+  `WEB-INF/lib/wildfly-migration-validator-sci.jar`, com o descritor
+  `META-INF/services/jakarta.servlet.ServletContainerInitializer`; os três
+  validators concretos permanecem em `WEB-INF/classes`.
+- O smoke H2 no WildFly 41 aprovou os 15 cenários HTTP e registrou
+  `validator_sci_discovery` e a ordem
+  `numero-formato,valor-monetario,status-inicial`.
+- Evidência: `migration/evidence/CP-3G/discovery-ci-h2.json`.
+- Commit de implementação: `671509d5e4e90f25fe7a1bb8f1ea28cbb8e23c50`.
+
+### 3.34 — logging final SLF4J/MyBatis
+
+- Os imports ativos foram migrados de Log4j 1 para `org.slf4j`; a ponte
+  `log4j-over-slf4j` foi removida do POM e do WAR.
+- `mybatis-config.xml` fixa `logImpl=SLF4J`; o WildFly 41 fornece a API SLF4J
+  2.0.18 e o backend JBoss LogManager.
+- H2/WildFly 41 executou os 15 contratos, registrou as categorias dos mappers
+  e reproduziu a exceção de número duplicado com HTTP 503 e stack trace completo.
+- Evidência: `migration/evidence/CP-3G/logging-ci-h2.json`; validação estática:
+  `scripts/validate-cp-3g-logging.sh`.
+- Commit de implementação: `68aa97d5702666ff5c76c440acab555af9bb8fb1`.
+
+### 3.35 — fechamento do CP-3G
+
+- O gate portátil executa 15/15 contratos no H2 e valida layout JSP, multipart
+  Servlet, descoberta SCI, logging SLF4J/MyBatis, conteúdo do WAR,
+  dependências e segurança.
+- O fechamento e o rollback estão em `docs/evidence/CP-3G.md` e em
+  `migration/evidence/CP-3G/{closure,rollback}.properties`.
+- A evidência Oracle existente da atividade 3.32 continua limitada ao upload e
+  importação XML; não foi tratada como qualificação Oracle completa do CP-3G.
+- Validação: `scripts/validate-cp-3g-closure.sh`; PR #25 com
+  `repository-baseline` e `portable-ci` verdes.
 
 ### 3.9 — descoberta de validadores
 

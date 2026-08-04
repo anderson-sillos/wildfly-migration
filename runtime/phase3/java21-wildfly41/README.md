@@ -12,6 +12,12 @@ permanece somente como infraestrutura de teste, fora do WAR. O WildFly 41 é a
 distribuição comunitária open source do servidor e o Temurin é uma distribuição
 OpenJDK; nenhum runtime proprietário é necessário.
 
+O logging final usa a API SLF4J 2.0.18 fornecida pelo módulo do WildFly 41.
+`log4j-over-slf4j`, Log4j 1, API SLF4J duplicada e backends próprios não entram
+no WAR. O MyBatis fixa `logImpl=SLF4J`; os perfis configuram a categoria de
+persistência para permitir a verificação das categorias dos mappers no
+`server.log`.
+
 A reprodução do primeiro diagnóstico usa:
 
 ```bash

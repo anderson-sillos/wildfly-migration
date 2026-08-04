@@ -9,11 +9,15 @@ import br.com.asillos.migration.domain.StatusPedido;
 
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Operações de pedido com validação mínima e limite transacional explícito.
  */
 public final class PedidoRepository {
+    private static final Logger MAPPER_LOGGER =
+            LoggerFactory.getLogger(PedidoMapper.class);
     private final MyBatisTransactionTemplate transactions;
 
     public PedidoRepository(SqlSessionFactory sessionFactory) {
@@ -24,6 +28,7 @@ public final class PedidoRepository {
         return transactions.execute(new TransactionWork<List<Pedido>>() {
             @Override
             public List<Pedido> execute(SqlSession session) {
+                MAPPER_LOGGER.info("mybatis_mapper=PedidoMapper operation=listar");
                 return session.getMapper(PedidoMapper.class).listar();
             }
         });
@@ -36,6 +41,7 @@ public final class PedidoRepository {
         return transactions.execute(new TransactionWork<Pedido>() {
             @Override
             public Pedido execute(SqlSession session) {
+                MAPPER_LOGGER.info("mybatis_mapper=PedidoMapper operation=buscarPorId");
                 return session.getMapper(PedidoMapper.class).buscarPorId(id);
             }
         });
@@ -65,6 +71,7 @@ public final class PedidoRepository {
             @Override
             public Pedido execute(SqlSession session) {
                 PedidoMapper mapper = session.getMapper(PedidoMapper.class);
+                MAPPER_LOGGER.info("mybatis_mapper=PedidoMapper operation=criar");
                 Date now = new Date();
                 pedido.setId(mapper.proximoId());
                 pedido.setCriadoEm(now);
