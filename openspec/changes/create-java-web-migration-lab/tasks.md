@@ -158,7 +158,7 @@
 
 ### Checkpoint CP-3I — Gate Java 21
 
-- [ ] 3.41 Testar no H2 a semântica portátil e qualificar no Oracle rollback, sequence, paginação, timestamps/timezone, CLOB e BLOB com `ojdbc17`.
+- [x] 3.41 Testar no H2 a semântica portátil e qualificar no Oracle rollback, sequence, paginação, timestamps/timezone, CLOB e BLOB com `ojdbc17`.
 - [ ] 3.42 Executar contratos completos H2 e Oracle no Java 21/WildFly 41 e comparar respostas, estado persistido e limitações com o baseline.
 - [ ] 3.43 Gerar manifesto do gate Java 21 com runtime, licenças, checksums, WAR, dependências e evidências.
 - [ ] 3.44 Documentar reprodução, implantação equivalente em produção e rollback para o gate Java 17.

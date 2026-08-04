@@ -552,6 +552,18 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-3I; then
+    required+=(
+      "migration/steps/CP-3I-persistence-semantics.md"
+      "docs/evidence/CP-3I.md"
+      "migration/evidence/CP-3I/persistence-ci-h2.json"
+      "migration/evidence/CP-3I/persistence-oracle.json"
+      "scripts/ValidateCp3iPersistence.java"
+      "scripts/qualify-cp-3i-persistence.sh"
+      "scripts/validate-cp-3i-persistence.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"

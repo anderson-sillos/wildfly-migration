@@ -242,6 +242,13 @@ jobs:
             --war app/target/cp3f-jakarta11/wildfly-migration.war
           ./scripts/validate-cp-3h-closure.sh \
             --war app/target/cp3f-jakarta11/wildfly-migration.war
+          ./scripts/qualify-cp-3i-persistence.sh \
+            --profile ci-h2 \
+            --env /dev/null \
+            --war app/target/cp3f-jakarta11/wildfly-migration.war \
+            --result migration/evidence/CP-3I/persistence-ci-h2.json
+          ./scripts/validate-cp-3i-persistence.sh \
+            --war app/target/cp3f-jakarta11/wildfly-migration.war
 
       - name: Upload CP-3F portable evidence
         if: steps.portable-selection.outputs.mode == 'cp3f'
@@ -274,6 +281,10 @@ jobs:
             migration/evidence/CP-3H/closure-oracle-qualified.json
             migration/evidence/CP-3H/closure.properties
             migration/evidence/CP-3H/rollback.properties
+            migration/steps/CP-3I-persistence-semantics.md
+            docs/evidence/CP-3I.md
+            migration/evidence/CP-3I/persistence-ci-h2.json
+            migration/evidence/CP-3I/persistence-oracle.json
             runtime/phase3/java21-wildfly41/runtime-manifest.tsv
             app/target/contract-results/cp-3f-ci-h2.json
             app/target/contract-results/cp-3f-wildfly41.log
