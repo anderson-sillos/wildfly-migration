@@ -1,8 +1,8 @@
 # Codex handoff
 
-Atualizado em 04/08/2026 após a conclusão da atividade 3.42. O CP-3H foi
-fechado e os gates de persistência e contratos do CP-3I passaram em H2 e
-Oracle.
+Atualizado em 04/08/2026 após a conclusão da atividade 3.43. O CP-3H foi
+fechado e os gates de persistência, contratos e manifesto do CP-3I passaram em
+H2 e Oracle.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -20,12 +20,13 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - PR incremental do CP-3I: #28, `feat(CP-3I): qualify persistence semantics`,
   aberta após a conclusão da atividade 3.41.
 - CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
-- Progresso OpenSpec: 97 de 110 tarefas concluídas.
+- Progresso OpenSpec: 98 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
   3.35, fechamento do checkpoint.
-- Próxima atividade OpenSpec: 3.43, gerar o manifesto do gate Java 21.
+- Próxima atividade OpenSpec: 3.44, documentar reprodução, implantação
+  equivalente em produção e rollback para o gate Java 17.
 
 ## Decisões permanentes
 
@@ -215,6 +216,21 @@ URLs Oracle, endereços internos nem valores do `.env`.
   removem os dados transitórios da suíte.
 - Evidências: `migration/evidence/CP-3I/contract-{ci-h2,oracle}.json`;
   validador: `scripts/validate-cp-3i-contracts.sh`.
+
+### 3.43 — manifesto do gate Java 21
+
+- O manifesto `migration/evidence/CP-3I/manifest.properties` registra o
+  commit-fonte `c9556c775cade8f360707c730ddff3e2e7ec7050`,
+  `workingTree=false`, Temurin 21.0.12+8, WildFly comunitário 41.0.0.Final,
+  Jakarta EE 11, Maven 3.9.16, H2 2.4.240 e Oracle 19.3.0.0.0 com
+  `ojdbc17` 23.26.2.0.0.
+- O arquivo inclui licenças e checksums provenientes de
+  `runtime/phase3/java21-wildfly41/runtime-manifest.tsv`, SHA-256 e contagem
+  de bibliotecas do WAR, dependências finais e caminhos das evidências H2 e
+  Oracle sem incluir segredos.
+- Geração e validação: `scripts/generate-cp-3i-manifest.sh`,
+  `scripts/validate-cp-3i-manifest.sh`; runbook:
+  `migration/steps/CP-3I-manifest.md`.
 
 ### 3.9 — descoberta de validadores
 

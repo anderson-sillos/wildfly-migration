@@ -22,9 +22,9 @@ específicas.
 
 ## Limites
 
-Esta atividade não é o fechamento do CP-3I. Ainda faltam o manifesto e a
-documentação de reprodução do gate. Os arquivos de evidência são vinculados ao
-WAR e ao commit-fonte; não contêm segredos.
+Esta atividade não é o fechamento do CP-3I. Ainda falta a documentação de
+reprodução do gate e a aprovação final do checkpoint. Os arquivos de evidência
+são vinculados ao WAR e ao commit-fonte; não contêm segredos.
 
 ## Atividade 3.42 — contratos completos
 
