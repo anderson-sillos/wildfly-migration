@@ -1,7 +1,8 @@
 # Codex handoff
 
-Atualizado em 04/08/2026 após a conclusão da atividade 3.33. O próximo passo
-é revisar e abrir a PR incremental do CP-3G antes de iniciar a atividade 3.34.
+Atualizado em 04/08/2026 após a conclusão da atividade 3.34. A PR incremental
+do CP-3G está aberta e o próximo passo é executar a atividade 3.35 somente
+depois da revisão dos checks remotos.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -11,14 +12,14 @@ URLs Oracle, endereços internos nem valores do `.env`.
 
 - Repositório: `anderson-sillos/wildfly-migration`.
 - Mudança OpenSpec: `create-java-web-migration-lab`.
-- Branch atual: `main`; a implementação está no commit local `671509d5e4e90f25fe7a1bb8f1ea28cbb8e23c50`.
-- PR incremental do CP-3G: ainda deve ser aberta após a revisão desta atividade.
+- Branch atual: `checkpoint/cp-3g-entry`; a implementação da atividade 3.34 está no commit local `68aa97d5702666ff5c76c440acab555af9bb8fb1`.
+- PR incremental do CP-3G: #25, `feat(CP-3G): replace Reflections with Servlet SCI`, aberta contra `main`.
 - CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
-- Progresso OpenSpec: 88 de 110 tarefas concluídas.
+- Progresso OpenSpec: 89 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`.
-- Próxima atividade: 3.34, remover a ponte Log4j e fixar `logImpl=SLF4J` no MyBatis.
+- Próxima atividade: 3.35, encerrar o CP-3G após os checks remotos.
 
 ## Decisões permanentes
 
@@ -103,6 +104,18 @@ URLs Oracle, endereços internos nem valores do `.env`.
   `numero-formato,valor-monetario,status-inicial`.
 - Evidência: `migration/evidence/CP-3G/discovery-ci-h2.json`.
 - Commit de implementação: `671509d5e4e90f25fe7a1bb8f1ea28cbb8e23c50`.
+
+### 3.34 — logging final SLF4J/MyBatis
+
+- Os imports ativos foram migrados de Log4j 1 para `org.slf4j`; a ponte
+  `log4j-over-slf4j` foi removida do POM e do WAR.
+- `mybatis-config.xml` fixa `logImpl=SLF4J`; o WildFly 41 fornece a API SLF4J
+  2.0.18 e o backend JBoss LogManager.
+- H2/WildFly 41 executou os 15 contratos, registrou as categorias dos mappers
+  e reproduziu a exceção de número duplicado com HTTP 503 e stack trace completo.
+- Evidência: `migration/evidence/CP-3G/logging-ci-h2.json`; validação estática:
+  `scripts/validate-cp-3g-logging.sh`.
+- Commit de implementação: `68aa97d5702666ff5c76c440acab555af9bb8fb1`.
 
 ### 3.9 — descoberta de validadores
 
