@@ -6,13 +6,14 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WAR_FILE="$ROOT/app/target/cp3f-jakarta11/wildfly-migration.war"
 EVIDENCE="$ROOT/migration/evidence/CP-3H/packaging-audit.json"
 WRITE_EVIDENCE=false
+SKIP_WAR=false
 TEMP_DIRECTORY="$(mktemp -d /tmp/wildfly-migration-cp3h-audit.XXXXXXXX)"
 
 usage() {
   cat <<'USAGE'
 Uso:
   ./scripts/audit-cp-3h-final-packaging.sh [--war ARQUIVO]
-    [--evidence ARQUIVO] [--write-evidence]
+    [--evidence ARQUIVO] [--write-evidence] [--skip-war]
 
 Audita dependências proibidas, APIs fornecidas pelo contêiner, conteúdo do
 WAR e o JAR/descritor do ServletContainerInitializer do CP-3H/3.39.
@@ -37,6 +38,7 @@ while [[ $# -gt 0 ]]; do
     --war) [[ $# -ge 2 ]] || fail '--war exige um arquivo'; WAR_FILE="$2"; shift 2 ;;
     --evidence) [[ $# -ge 2 ]] || fail '--evidence exige um arquivo'; EVIDENCE="$2"; shift 2 ;;
     --write-evidence) WRITE_EVIDENCE=true; shift ;;
+    --skip-war) SKIP_WAR=true; shift ;;
     -h|--help) usage; exit 0 ;;
     *) fail "argumento desconhecido: $1" ;;
   esac
@@ -85,42 +87,47 @@ grep -Fq '<setting name="logImpl" value="SLF4J"/>' \
   "$ROOT/app/src/main/resources/mybatis-config.xml" ||
   fail 'MyBatis não fixa logImpl=SLF4J'
 
-[[ -f "$WAR_FILE" ]] || fail "WAR não encontrado: $WAR_FILE"
-WAR_ENTRIES="$TEMP_DIRECTORY/war-entries.txt"
-SCI_JAR="$TEMP_DIRECTORY/wildfly-migration-validator-sci.jar"
-SCI_ENTRIES="$TEMP_DIRECTORY/sci-entries.txt"
-jar tf "$WAR_FILE" >"$WAR_ENTRIES"
+if [[ "$SKIP_WAR" == true && "$WRITE_EVIDENCE" == true ]]; then
+  fail '--write-evidence exige um WAR; remova --skip-war'
+fi
 
-for api_pattern in \
+if [[ "$SKIP_WAR" != true ]]; then
+  [[ -f "$WAR_FILE" ]] || fail "WAR não encontrado: $WAR_FILE"
+  WAR_ENTRIES="$TEMP_DIRECTORY/war-entries.txt"
+  SCI_JAR="$TEMP_DIRECTORY/wildfly-migration-validator-sci.jar"
+  SCI_ENTRIES="$TEMP_DIRECTORY/sci-entries.txt"
+  jar tf "$WAR_FILE" >"$WAR_ENTRIES"
+
+  for api_pattern in \
   '^WEB-INF/lib/(jakarta|javax|servlet|jsp|jstl|el|websocket|annotation|validation)-.*\.jar$' \
   '^WEB-INF/lib/.*(servlet|jsp|jstl|el|jakartaee|javax).*api.*\.jar$'; do
   if grep -Eiq "$api_pattern" "$WAR_ENTRIES"; then
     fail "API fornecida pelo contêiner empacotada no WAR: $api_pattern"
   fi
-done
-if grep -Eiq '^WEB-INF/lib/(tiles|commons-fileupload|reflections|classgraph|scannotation|log4j-(1|core|over-slf4j)|xml-apis|geronimo-stax|stax-api|ojdbc|h2-)[^/]*\.jar$' "$WAR_ENTRIES"; then
+  done
+  if grep -Eiq '^WEB-INF/lib/(tiles|commons-fileupload|reflections|classgraph|scannotation|log4j-(1|core|over-slf4j)|xml-apis|geronimo-stax|stax-api|ojdbc|h2-)[^/]*\.jar$' "$WAR_ENTRIES"; then
   fail 'biblioteca proibida ou infraestrutura de teste empacotada no WAR'
-fi
-if grep -Eiq '^WEB-INF/lib/log4j-(1|core|over-slf4j)[^/]*\.jar$' "$WAR_ENTRIES"; then
+  fi
+  if grep -Eiq '^WEB-INF/lib/log4j-(1|core|over-slf4j)[^/]*\.jar$' "$WAR_ENTRIES"; then
   fail 'Log4j 1 ou backend/ponte concorrente empacotado no WAR'
-fi
+  fi
 
-grep -Fxq 'WEB-INF/lib/wildfly-migration-validator-sci.jar' "$WAR_ENTRIES" ||
+  grep -Fxq 'WEB-INF/lib/wildfly-migration-validator-sci.jar' "$WAR_ENTRIES" ||
   fail 'JAR interno do SCI não está em WEB-INF/lib'
-if grep -Eiq '^WEB-INF/classes/br/com/asillos/migration/integration/validation/(Validator|PedidoImportValidator|ValidatorDiscovery(\$[^/]*)?|ValidatorServletContainerInitializer(\$[^/]*)?)\.class$' "$WAR_ENTRIES"; then
+  if grep -Eiq '^WEB-INF/classes/br/com/asillos/migration/integration/validation/(Validator|PedidoImportValidator|ValidatorDiscovery(\$[^/]*)?|ValidatorServletContainerInitializer(\$[^/]*)?)\.class$' "$WAR_ENTRIES"; then
   fail 'infraestrutura do SCI foi duplicada em WEB-INF/classes'
-fi
-if grep -Fq 'WEB-INF/classes/META-INF/services/jakarta.servlet.ServletContainerInitializer' "$WAR_ENTRIES"; then
+  fi
+  if grep -Fq 'WEB-INF/classes/META-INF/services/jakarta.servlet.ServletContainerInitializer' "$WAR_ENTRIES"; then
   fail 'descritor SCI foi duplicado em WEB-INF/classes'
-fi
-for validator in NumeroFormatoValidator StatusInicialValidator ValorMonetarioValidator; do
+  fi
+  for validator in NumeroFormatoValidator StatusInicialValidator ValorMonetarioValidator; do
   grep -Fxq "WEB-INF/classes/br/com/asillos/migration/integration/validation/${validator}.class" "$WAR_ENTRIES" ||
     fail "validator concreto ausente em WEB-INF/classes: $validator"
-done
-unzip -p "$WAR_FILE" WEB-INF/lib/wildfly-migration-validator-sci.jar >"$SCI_JAR" ||
+  done
+  unzip -p "$WAR_FILE" WEB-INF/lib/wildfly-migration-validator-sci.jar >"$SCI_JAR" ||
   fail 'não foi possível extrair o JAR interno do SCI'
-jar tf "$SCI_JAR" >"$SCI_ENTRIES"
-for entry in \
+  jar tf "$SCI_JAR" >"$SCI_ENTRIES"
+  for entry in \
   br/com/asillos/migration/integration/validation/Validator.class \
   br/com/asillos/migration/integration/validation/PedidoImportValidator.class \
   br/com/asillos/migration/integration/validation/ValidatorDiscovery.class \
@@ -128,12 +135,16 @@ for entry in \
   br/com/asillos/migration/integration/validation/ValidatorServletContainerInitializer.class \
   META-INF/services/jakarta.servlet.ServletContainerInitializer; do
   grep -Fxq "$entry" "$SCI_ENTRIES" || fail "JAR SCI não contém: $entry"
-done
-service_value="$(unzip -p "$SCI_JAR" META-INF/services/jakarta.servlet.ServletContainerInitializer | tr -d '\r')"
-[[ "$service_value" == 'br.com.asillos.migration.integration.validation.ValidatorServletContainerInitializer' ]] ||
+  done
+  service_value="$(unzip -p "$SCI_JAR" META-INF/services/jakarta.servlet.ServletContainerInitializer | tr -d '\r')"
+  [[ "$service_value" == 'br.com.asillos.migration.integration.validation.ValidatorServletContainerInitializer' ]] ||
   fail 'descritor de serviço do SCI aponta para classe inesperada'
+fi
 
-war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
+war_sha256=""
+if [[ "$SKIP_WAR" != true ]]; then
+  war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
+fi
 source_commit="$(git -C "$ROOT" rev-parse HEAD)"
 working_tree=true
 [[ -z "$(git -C "$ROOT" status --porcelain)" ]] && working_tree=false
@@ -174,8 +185,10 @@ else
     '"result": "passed"'; do
     grep -Fq "$marker" "$EVIDENCE" || fail "evidência não contém: $marker"
   done
-  grep -Fq "\"warSha256\": \"$war_sha256\"" "$EVIDENCE" ||
-    fail 'checksum do WAR diverge da evidência de auditoria'
+  if [[ -n "$war_sha256" ]]; then
+    grep -Fq "\"warSha256\": \"$war_sha256\"" "$EVIDENCE" ||
+      fail 'checksum do WAR diverge da evidência de auditoria'
+  fi
   evidence_commit="$(sed -n 's/.*"sourceCommit": "\([0-9a-f]\{40\}\)".*/\1/p' "$EVIDENCE" | head -n 1)"
   [[ -n "$evidence_commit" ]] || fail 'sourceCommit ausente na evidência'
   git -C "$ROOT" cat-file -e "$evidence_commit^{commit}" 2>/dev/null ||

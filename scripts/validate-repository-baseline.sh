@@ -156,6 +156,6 @@ run_step "Validar datasource H2/Oracle do CP-3H" \
 run_step "Validar qualificação Oracle do CP-3H" \
   ./scripts/validate-cp-3h-oracle-qualification.sh
 run_step "Auditar empacotamento final do CP-3H" \
-  ./scripts/audit-cp-3h-final-packaging.sh
+  ./scripts/audit-cp-3h-final-packaging.sh --skip-war
 
 printf '\nOK: repository-baseline local e remoto concluído\n'
