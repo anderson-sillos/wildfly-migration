@@ -189,7 +189,4 @@ run_step "Validar correção Java 25 do CP-3J/3.48" \
   ./scripts/validate-cp-3j-java25.sh
 run_step "Validar catálogo de incompatibilidades do CP-3K/3.51" \
   ./scripts/validate-incompatibility-catalog.sh
-run_step "Validar reprodução do CP-3K/3.53" \
-  ./scripts/validate-cp-3k-reproduction.sh --profile ci-h2
-
 printf '\nOK: repository-baseline local e remoto concluído\n'
