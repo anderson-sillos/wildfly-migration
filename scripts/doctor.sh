@@ -594,6 +594,18 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-3K; then
+    required+=(
+      "migration/incompatibility-catalog.md"
+      "migration/incompatibility-fixtures.tsv"
+      "scripts/validate-incompatibility-catalog.sh"
+      "docs/cp-3k-reproduction.md"
+      "docs/evidence/CP-3K.md"
+      "scripts/reproduce-cp-3k.sh"
+      "scripts/validate-cp-3k-reproduction.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"
