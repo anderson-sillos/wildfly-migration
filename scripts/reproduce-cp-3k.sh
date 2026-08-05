@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "\${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$ROOT/.env"
 PROFILE=""
 RESULT_FILE="$ROOT/migration/evidence/CP-3K/reproduction-ci-h2.json"
@@ -96,7 +96,7 @@ for report in "$H2_RESULT" "$H2_LOG"; do
 done
 [[ "$PROFILE" != oracle || -f "$ORACLE_RESULT" ]] || fail 'resultado Oracle ausente'
 if grep -Eiq 'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url|senha|0\.0\.0\.0|\[::\]' \
-    "$H2_RESULT" "$H2_LOG" \${ORACLE_RESULT:+"$ORACLE_RESULT"} \${ORACLE_LOG:+"$ORACLE_LOG"}; then
+    "$H2_RESULT" "$H2_LOG" ${ORACLE_RESULT:+"$ORACLE_RESULT"} ${ORACLE_LOG:+"$ORACLE_LOG"}; then
   fail 'resultado ou log contém segredo, URL Oracle ou bind público'
 fi
 

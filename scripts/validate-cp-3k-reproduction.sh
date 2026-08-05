@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "\${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DOCUMENT="$ROOT/docs/cp-3k-reproduction.md"
 REPORT="$ROOT/migration/evidence/CP-3K/reproduction-ci-h2.json"
 PROFILE=ci-h2
@@ -43,7 +43,7 @@ for marker in \
   grep -Fqi "$marker" "$DOCUMENT" || fail "controle ausente: $marker"
 done
 
-[[ -f "$REPORT" ]] || fail "evidência ausente: \${REPORT#"$ROOT/"}"
+[[ -f "$REPORT" ]] || fail "evidência ausente: ${REPORT#"$ROOT/"}"
 for marker in \
   '"schema": "wildfly-migration-cp3k-reproduction/v1"' \
   '"checkpoint": "CP-3K"' \
