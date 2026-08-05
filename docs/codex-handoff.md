@@ -1,6 +1,6 @@
 # Codex handoff
 
-Atualizado em 05/08/2026 após a conclusão da atividade 3.51. O CP-3H foi
+Atualizado em 05/08/2026 após a conclusão da atividade 3.52. O CP-3H foi
 fechado, o CP-3I foi aprovado em H2 e Oracle, o runtime do CP-3J foi fixado, a
 incompatibilidade natural do javac 25 foi capturada e a correção mínima com
 `--release 21` foi aplicada. A qualificação Java 21/25 da 3.49 foi
@@ -27,13 +27,13 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - CP-3J: integrado pela PR #29 no commit `eac264e003a05f475c817eaa1df2adb687ae11bf`,
   com a mensagem `checkpoint(CP-3J): qualify OpenJDK 25`; não foi criada tag
   pública.
-- Progresso OpenSpec: 106 de 110 tarefas concluídas.
+- Progresso OpenSpec: 107 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
   3.35, fechamento do checkpoint.
-- Próxima atividade OpenSpec: 3.52, gerar o relatório consolidado das três
-  fases, checkpoints, gates, versões, estados e limitações.
+- Próxima atividade OpenSpec: 3.53, reproduzir o destino final a partir de
+  checkout limpo com H2 e configuração Oracle externa.
 
 ## Decisões permanentes
 
@@ -345,6 +345,14 @@ URLs Oracle, endereços internos nem valores do `.env`.
   após o XSD e rejeição de XXE; nenhuma fixture é executada por padrão.
 - `scripts/validate-incompatibility-catalog.sh` valida IDs, referências,
   categorias mínimas, arquivos de fixture, opt-in obrigatório e sanitização.
+
+### 3.52 — relatório consolidado
+
+- [`docs/evidence/CP-3K.md`](evidence/CP-3K.md) consolida as três fases
+  públicas, checkpoints, versões, gates, estados `portable-ci` e
+  `oracle-qualified`, exceções resolvidas e limitações.
+- O relatório é intermediário: a fase 3 permanece em validação até as tarefas
+  3.53–3.55, sem antecipar a tag `migration/03-final`.
 
 ### 3.9 — descoberta de validadores
 

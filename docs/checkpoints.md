@@ -28,6 +28,10 @@ entraram na linha evolutiva.
 | 3 | CP-3J | Qualificação OpenJDK 25 |
 | 3 | CP-3K | Destino final e tag da fase 3 |
 
+O relatório consolidado do destino final está em
+[`evidence/CP-3K.md`](evidence/CP-3K.md). Ele é intermediário até a aprovação
+das atividades 3.53 a 3.55.
+
 As tags públicas são:
 
 - `migration/01-legacy-baseline`;
