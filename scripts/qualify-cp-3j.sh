@@ -53,7 +53,7 @@ working_tree=true
 if git -C "$ROOT" diff --quiet && git -C "$ROOT" diff --cached --quiet; then
   unexpected_changes="$({
     git -C "$ROOT" status --porcelain
-  } | grep -Ev '^\?\? migration/evidence/CP-3J/(ci-h2|oracle)-(qualification|java(21|25)-contracts|java(21|25)-wildfly\.log)\.(json|log)$' || true)"
+  } | grep -Ev '^[ MARC?][ MARC?] migration/evidence/' || true)"
   [[ -z "$unexpected_changes" ]] && working_tree=false
 fi
 if [[ "$REUSE_RESULTS" == true ]]; then
