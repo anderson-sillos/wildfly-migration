@@ -107,6 +107,12 @@ portas, proveniência dos dois manifestos e a ausência de segredos. O Oracle fo
 executado no schema descartável configurado externamente e as sondas foram
 limpas ao final.
 
+O fechamento previsto na atividade 3.50 é validado por
+[`validate-cp-3j-closure.sh`](../../scripts/validate-cp-3j-closure.sh), com
+resumo em [`closure.properties`](../../migration/evidence/CP-3J/closure.properties)
+e rollback para o CP-3I em
+[`rollback.properties`](../../migration/evidence/CP-3J/rollback.properties).
+
 ## Fontes oficiais
 
 - [Eclipse Temurin 25.0.4+7](https://github.com/adoptium/temurin25-binaries/releases/tag/jdk-25.0.4%2B7);
