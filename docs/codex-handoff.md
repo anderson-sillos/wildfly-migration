@@ -23,13 +23,13 @@ URLs Oracle, endereços internos nem valores do `.env`.
   integrada por squash com a mensagem `checkpoint(CP-3I): approve Java 21
   Jakarta gate`; não foi criada tag pública.
 - CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
-- Progresso OpenSpec: 104 de 110 tarefas concluídas.
+- Progresso OpenSpec: 105 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
   3.35, fechamento do checkpoint.
-- Próxima atividade OpenSpec: 3.50, encerrar o CP-3J após o check remoto e
-  integrar o commit de fechamento.
+- Próxima atividade OpenSpec: 3.51, completar o catálogo de incompatibilidades
+  naturais e fixtures opt-in.
 
 ## Decisões permanentes
 
@@ -322,6 +322,15 @@ URLs Oracle, endereços internos nem valores do `.env`.
   estão em `migration/evidence/CP-3J/ci-h2-qualification.json` e
   `migration/evidence/CP-3J/oracle-qualification.json`; a validação foi feita
   por `scripts/validate-cp-3j-qualification.sh`.
+
+### 3.50 — fechamento do CP-3J
+
+- O `repository-baseline` e o `portable-ci` remoto passaram no commit
+  `e9d0d63`; o último check durou 2m10s.
+- O fechamento exige o squash merge da PR #29 com o assunto
+  `checkpoint(CP-3J): qualify OpenJDK 25`, sem criar tag pública.
+- `scripts/validate-cp-3j-closure.sh` aprovou evidências, rollback para o
+  CP-3I, ausência de segredos e ausência de operações destrutivas.
 
 ### 3.9 — descoberta de validadores
 

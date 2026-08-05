@@ -170,7 +170,7 @@
 - [x] 3.47 Alterar somente a JVM do WildFly 41 de OpenJDK 21 para OpenJDK 25.
 - [x] 3.48 Capturar diferenças exclusivas do JDK 25 e aplicar o menor conjunto de correções sem alterar o contrato funcional.
 - [x] 3.49 Executar as trilhas H2 e Oracle no OpenJDK 25 e a qualificação adicional no OpenJDK 21, incluindo contratos, empacotamento, segredos, portas e proveniência open source.
-- [ ] 3.50 Encerrar `CP-3J`: validar o destino OpenJDK/WildFly comunitário com evidências `portable-ci` e `oracle-qualified`, registrar rollback e integrar o PR pelo commit `checkpoint(CP-3J): qualify OpenJDK 25`.
+- [x] 3.50 Encerrar `CP-3J`: validar o destino OpenJDK/WildFly comunitário com evidências `portable-ci` e `oracle-qualified`, registrar rollback e integrar o PR pelo commit `checkpoint(CP-3J): qualify OpenJDK 25`.
 
 ### Checkpoint CP-3K — Destino final
 
