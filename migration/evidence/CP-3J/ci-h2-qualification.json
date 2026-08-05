@@ -1,0 +1,29 @@
+{
+  "schema": "wildfly-migration-cp3j-qualification/v1",
+  "checkpoint": "CP-3J",
+  "activity": "3.49",
+  "qualification": "portable-ci",
+  "profile": "ci-h2",
+  "sourceCommit": "abb30f76e90c191e5137432be1375a07d6d5e704",
+  "workingTree": false,
+  "warSha256": {
+    "java21": "61da0aa58b93c4b8e7d719dd5cc6a85686ff1f0a754aeeca446799d63a55ac8f",
+    "java25": "80876fc3ee480cbdda32e948aaf3a8d5151dacf883717254fda943cb5af33270"
+  },
+  "runtime": {
+    "java21": "java21-wildfly41.0.0",
+    "java25": "java25-wildfly41.0.0"
+  },
+  "contracts": {
+    "java21": "ci-h2-java21-contracts.json",
+    "java25": "ci-h2-java25-contracts.json"
+  },
+  "ports": "loopback-only; java21=28121/29121; java25=28125/29125",
+  "secrets": "sanitized-and-not-versioned",
+  "provenance": [
+    "runtime/phase3/java21-wildfly41/runtime-manifest.tsv",
+    "runtime/phase3/java25-wildfly41/runtime-manifest.tsv"
+  ],
+  "packaging": "cp-3h-audit-passed-for-both-wars",
+  "result": "passed"
+}

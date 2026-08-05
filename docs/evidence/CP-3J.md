@@ -95,6 +95,18 @@ Os relatórios gerados são `migration/evidence/CP-3J/<perfil>-qualification.jso
 sanitizados. H2 continua sendo evidência portátil; somente os quatro cenários
 executados contra Oracle podem receber `oracle-qualified`.
 
+Resultado executado em 05/08/2026:
+
+| Perfil | Java 21 | Java 25 | WAR Java 21 | WAR Java 25 |
+| --- | --- | --- | --- | --- |
+| `portable-ci` | 15/15 | 15/15 | `61da0aa58b93c4b8e7d719dd5cc6a85686ff1f0a754aeeca446799d63a55ac8f` | `80876fc3ee480cbdda32e948aaf3a8d5151dacf883717254fda943cb5af33270` |
+| `oracle-qualified` | 15/15 | 15/15 | mesmo checksum | mesmo checksum |
+
+As evidências agregadas registram `workingTree=false`, source commit, runtime,
+portas, proveniência dos dois manifestos e a ausência de segredos. O Oracle foi
+executado no schema descartável configurado externamente e as sondas foram
+limpas ao final.
+
 ## Fontes oficiais
 
 - [Eclipse Temurin 25.0.4+7](https://github.com/adoptium/temurin25-binaries/releases/tag/jdk-25.0.4%2B7);
