@@ -98,10 +98,12 @@ public final class ValidateApplicationPom {
             }
         }
 
-        require("17".equals(properties.get("maven.compiler.source")),
-                "source do compilador deve ser 17 no gate CP-3A");
-        require("17".equals(properties.get("maven.compiler.target")),
-                "target do compilador deve ser 17 no gate CP-3A");
+        require("17".equals(properties.get("maven.compiler.release")),
+                "release do compilador deve ser 17 no gate CP-3A");
+        require(!properties.containsKey("maven.compiler.source"),
+                "source do compilador foi substituído por release");
+        require(!properties.containsKey("maven.compiler.target"),
+                "target do compilador foi substituído por release");
         require("[17,18)".equals(
                 properties.get("java.version.range")),
                 "range Java padrão deve exigir a família Java 17");
@@ -208,6 +210,13 @@ public final class ValidateApplicationPom {
                         "Enforcer deve usar o range Java ativo");
             } else if ("maven-compiler-plugin".equals(artifactId)) {
                 Element configuration = child(plugin, "configuration");
+                require("${maven.compiler.release}".equals(
+                                text(configuration, "release")),
+                        "compilador deve usar --release");
+                require(optionalText(configuration, "source").length() == 0,
+                        "compilador não deve configurar source com release");
+                require(optionalText(configuration, "target").length() == 0,
+                        "compilador não deve configurar target com release");
                 require("true".equals(text(configuration, "showWarnings")),
                         "compilador deve exibir warnings do javac");
                 require(optionalText(configuration, "compilerId").length() == 0,
@@ -264,6 +273,17 @@ public final class ValidateApplicationPom {
             require(expectedRange.equals(
                     text(profileProperties, "java.version.range")),
                     "range Java divergente no perfil " + profileId);
+            if ("cp-3e-jakarta11".equals(profileId)) {
+                require("21".equals(text(
+                                profileProperties, "maven.compiler.release")),
+                        "perfil Jakarta deve compilar com --release 21");
+                require(optionalText(profileProperties, "maven.compiler.source")
+                                .length() == 0,
+                        "perfil Jakarta não deve reintroduzir source");
+                require(optionalText(profileProperties, "maven.compiler.target")
+                                .length() == 0,
+                        "perfil Jakarta não deve reintroduzir target");
+            }
         }
         require(profileCount == expectedProfiles.size(),
                 "quantidade de perfis Maven divergente");

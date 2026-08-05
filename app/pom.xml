@@ -17,8 +17,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.build.outputTimestamp>2026-01-01T00:00:00Z</project.build.outputTimestamp>
     <migration.build.directory>${project.basedir}/target</migration.build.directory>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.release>17</maven.compiler.release>
     <java.version.range>[17,18)</java.version.range>
 
     <jakarta.ee.web.api.version>8.0.0</jakarta.ee.web.api.version>
@@ -134,8 +133,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
         <configuration>
-          <source>${maven.compiler.source}</source>
-          <target>${maven.compiler.target}</target>
+          <release>${maven.compiler.release}</release>
           <encoding>${project.build.sourceEncoding}</encoding>
           <showWarnings>true</showWarnings>
           <compilerArgs>
@@ -257,8 +255,7 @@
       </activation>
       <properties>
         <jakarta.ee.web.api.version>11.0.0</jakarta.ee.web.api.version>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
         <java.version.range>[21,22)</java.version.range>
       </properties>
     </profile>

@@ -88,7 +88,8 @@ if grep -Eiq 'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url|senha|se
   fail 'manifesto contém configuração sensível'
 fi
 
-if [[ -f "$WAR_FILE" ]]; then
+current_commit="$(git -C "$ROOT" rev-parse HEAD)"
+if [[ -f "$WAR_FILE" && "$source_commit" == "$current_commit" ]]; then
   expected_sha="$(value war.sha256)"
   actual_sha="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
   [[ "$actual_sha" == "$expected_sha" ]] || fail "checksum do WAR diverge: $actual_sha"

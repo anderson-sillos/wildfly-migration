@@ -373,13 +373,22 @@ grep -Fq '"$2" != "61"' "$AUDIT" ||
   fail "auditoria não reconhece bytecode Java 17 major 61"
 
 for pom_marker in \
-  '<maven.compiler.source>17</maven.compiler.source>' \
-  '<maven.compiler.target>17</maven.compiler.target>' \
+  '<maven.compiler.release>17</maven.compiler.release>' \
+  '<release>${maven.compiler.release}</release>' \
   '<java.version.range>[17,18)</java.version.range>' \
   '<version>${java.version.range}</version>' \
   '<id>enforce-java17-toolchain</id>'; do
   grep -Fq "$pom_marker" "$REPOSITORY_ROOT/app/pom.xml" ||
     fail "POM ainda não promove Java 17: $pom_marker"
+done
+for obsolete_compiler_marker in \
+  '<maven.compiler.source>' \
+  '<maven.compiler.target>' \
+  '<source>${maven.compiler.source}</source>' \
+  '<target>${maven.compiler.target}</target>'; do
+  if grep -Fq "$obsolete_compiler_marker" "$REPOSITORY_ROOT/app/pom.xml"; then
+    fail "POM ativo ainda usa source/target em vez de release: $obsolete_compiler_marker"
+  fi
 done
 if grep -Fq 'phase2.java.version.range' "$REPOSITORY_ROOT/app/pom.xml"; then
   fail "POM ativo ainda depende da sobrescrita temporária da fase 2"

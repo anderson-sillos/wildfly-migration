@@ -38,8 +38,8 @@ mais recente.
 ## Menor correção
 
 O wrapper `scripts/build-cp-3a.sh` seleciona o JDK 17 e passa ao Maven somente
-as propriedades `phase2.java.version.range=[17,18)`,
-`maven.compiler.source=17` e `maven.compiler.target=17`. Fonte, POM,
+as propriedades `phase2.java.version.range=[17,18)` e
+`maven.compiler.release=17`. Fonte, POM,
 dependências, escopos, plugins e namespace `javax` permanecem inalterados.
 
 Essa sobreposição é deliberadamente transitória. A atividade 3.4 promoverá

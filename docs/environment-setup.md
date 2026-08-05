@@ -15,7 +15,8 @@ em máquina descartável, container ou VM isolada e sem bind em interface públi
 | Java 7 portátil | Zulu 7.56.0.11 CA / OpenJDK 7u352 | Arquivo oficial Azul | OpenJDK, redistribuível, EOL e exclusivo de `portable-ci` |
 | Java 8 | Eclipse Temurin OpenJDK 8u492-b09 | Arquivo oficial fixado no CP-2A | OpenJDK, open source |
 | Java 17 | Eclipse Temurin OpenJDK 17.0.20+8 | Arquivo oficial fixado no CP-3A | OpenJDK, open source |
-| Java 21/25 | Eclipse Temurin/OpenJDK | Pacote ou arquivo oficial a fixar no gate correspondente | OpenJDK, open source |
+| Java 21 | Eclipse Temurin OpenJDK 21.0.12+8 | Arquivo oficial fixado no CP-3E | OpenJDK, open source |
+| Java 25 | Eclipse Temurin OpenJDK 25.0.4+7 | Arquivo oficial fixado no CP-3J | OpenJDK, open source |
 | Maven legado | 3.8.9 | Arquivo histórico oficial Apache | Open source e EOL; última versão disponível compatível com Java 7 |
 | Maven moderno | 3.9.16 | Arquivo oficial Apache | Open source; requer JDK 8+ para executar |
 | WildFly | 9.0.2, 26.1.3 e 41.0.0.Final | Arquivo da comunidade | WildFly comunitário open source |
@@ -74,7 +75,7 @@ combinação abaixo; o `doctor` marca os componentes futuros como `NÃO EXIGIDO`
 | Perfil `ci-h2`, CP-3A em diante | H2 2.4.240 | `h2-2.4.240.jar`, origem e digest fixados no manifesto do gate |
 | CP-3E a CP-3I | Eclipse Temurin/OpenJDK 21 e WildFly 41.0.0.Final | Builds exatas fixadas no CP-3E |
 | CP-3C e seguintes | `com.oracle.database.jdbc:ojdbc17:23.26.2.0.0` | Provisionado no WildFly, fora do WAR |
-| CP-3J e CP-3K | Eclipse Temurin/OpenJDK 25 e WildFly 41.0.0.Final | Destino final exclusivamente open source |
+| CP-3J e CP-3K | Eclipse Temurin OpenJDK 25.0.4+7 e WildFly 41.0.0.Final | Builds, origem, licença e checksums fixados no CP-3J |
 
 Para o checkpoint atual, siga o
 [runtime Java 17/WildFly 26](cp-3a-java17-runtime.md). Para reproduzir fases
@@ -86,7 +87,8 @@ referência flutuante como `latest`.
 | Componente | Fonte oficial |
 | --- | --- |
 | Temurin OpenJDK 17.0.20+8 | <https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20%2B8/OpenJDK17U-jdk_x64_linux_hotspot_17.0.20_8.tar.gz> |
-| Temurin/OpenJDK 21 e 25 | <https://adoptium.net/temurin/releases/> |
+| Temurin OpenJDK 21.0.12+8 | <https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12%2B8/OpenJDK21U-jdk_x64_linux_hotspot_21.0.12_8.tar.gz> |
+| Temurin OpenJDK 25.0.4+7 | <https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4%2B7/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4_7.tar.gz> |
 | WildFly 26.1.3.Final EE 8 | <https://github.com/wildfly/wildfly/releases/download/26.1.3.Final/wildfly-26.1.3.Final.tar.gz> |
 | Maven 3.9.16 | <https://downloads.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz> |
 | H2 2.4.240 | <https://repo.maven.apache.org/maven2/com/h2database/h2/2.4.240/h2-2.4.240.jar> |

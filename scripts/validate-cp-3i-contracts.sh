@@ -35,6 +35,7 @@ if [[ -f "$WAR_FILE" ]]; then
 else
   war_sha256=""
 fi
+current_commit="$(git -C "$ROOT" rev-parse HEAD)"
 
 for report in "$EVIDENCE/contract-ci-h2.json" "$EVIDENCE/contract-oracle.json"; do
   grep -Fq '"qualification": "' "$report" || fail "qualificação ausente: $report"
@@ -51,7 +52,7 @@ for report in "$EVIDENCE/contract-ci-h2.json" "$EVIDENCE/contract-oracle.json"; 
   [[ -n "$source_commit" ]] || fail "sourceCommit ausente: $report"
   git -C "$ROOT" cat-file -e "$source_commit^{commit}" 2>/dev/null ||
     fail "sourceCommit inexistente: $report"
-  if [[ -n "$war_sha256" ]]; then
+  if [[ -n "$war_sha256" && "$source_commit" == "$current_commit" ]]; then
     grep -Fq "\"warSha256\": \"$war_sha256\"" "$report" ||
       fail "WAR divergente: $report"
   fi

@@ -166,6 +166,7 @@ jobs:
 
           tar -xzf OpenJDK17U-jdk_x64_linux_hotspot_17.0.20_8.tar.gz -C "$tools"
           tar -xzf OpenJDK21U-jdk_x64_linux_hotspot_21.0.12_8.tar.gz -C "$tools"
+          tar -xzf OpenJDK25U-jdk_x64_linux_hotspot_25.0.4_7.tar.gz -C "$tools"
           tar -xzf apache-maven-3.9.16-bin.tar.gz -C "$tools"
           tar -xzf wildfly-26.1.3.Final.tar.gz -C "$tools"
           tar -xzf wildfly-41.0.0.Final.tar.gz -C "$tools"
@@ -187,6 +188,9 @@ jobs:
             echo "JAVA21_HOME=$tools/jdk-21.0.12+8"
             echo "JAVA21_ARCHIVE=$archives/OpenJDK21U-jdk_x64_linux_hotspot_21.0.12_8.tar.gz"
             echo "JAVA21_ARCHIVE_SHA256=e4446ff06a276155697597cc0f1b15da004ff083f4964a35271ecee567177370"
+            echo "JAVA25_HOME=$tools/jdk-25.0.4+7"
+            echo "JAVA25_ARCHIVE=$archives/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4_7.tar.gz"
+            echo "JAVA25_ARCHIVE_SHA256=e58fcdcd637b25c03ca84cbbcefc70d11efb8f4b4cbd05decc9f661769d77f94"
             echo "WILDFLY41_HOME=$tools/wildfly-41.0.0.Final"
             echo "WILDFLY41_ARCHIVE=$archives/wildfly-41.0.0.Final.tar.gz"
             echo "WILDFLY41_ARCHIVE_SHA256=d240795958e7d99b638cd4c3e0f9ba4b7d4c53b4f7996dfec1008250c4d48191"
@@ -265,6 +269,30 @@ jobs:
           ./scripts/validate-cp-3i-java17-runbook.sh
           ./scripts/validate-cp-3i-closure.sh \
             --war app/target/cp3f-jakarta11/wildfly-migration.war
+          ./scripts/validate-cp-3j-runtime-selection.sh
+
+      - name: Execute CP-3J Java 25 correction
+        if: steps.portable-selection.outputs.mode == 'cp3f'
+        run: |
+          ./scripts/doctor.sh CP-3J --profile ci-h2 --ci
+          ./scripts/build-cp-3j-java25.sh \
+            --env /dev/null \
+            --result migration/evidence/CP-3J/java25-build.json \
+            --output migration/evidence/CP-3J/java25-build.txt
+          ./scripts/validate-cp-3j-java25.sh
+
+      - name: Execute CP-3J qualification on Java 21 and 25
+        if: steps.portable-selection.outputs.mode == 'cp3f'
+        run: |
+          ./scripts/qualify-cp-3j.sh \
+            --profile ci-h2 \
+            --env /dev/null \
+            --war-java21 app/target/cp3f-jakarta11/wildfly-migration.war \
+            --war-java25 app/target/cp3j-java25/wildfly-migration.war
+          ./scripts/validate-cp-3j-qualification.sh --profile ci-h2
+          ./scripts/validate-cp-3j-closure.sh \
+            --war-java21 app/target/cp3f-jakarta11/wildfly-migration.war \
+            --war-java25 app/target/cp3j-java25/wildfly-migration.war
 
       - name: Upload CP-3F portable evidence
         if: steps.portable-selection.outputs.mode == 'cp3f'
@@ -312,6 +340,21 @@ jobs:
             migration/evidence/CP-3I/closure-oracle-qualified.json
             migration/evidence/CP-3I/closure.properties
             migration/evidence/CP-3I/rollback.properties
+            runtime/phase3/java25-wildfly41/README.md
+            runtime/phase3/java25-wildfly41/runtime-manifest.tsv
+            docs/evidence/CP-3J.md
+            migration/evidence/CP-3J/runtime-selection.properties
+            migration/evidence/CP-3J/java25-build-expected.properties
+            migration/evidence/CP-3J/java25-build.json
+            migration/evidence/CP-3J/java25-build.txt
+            migration/evidence/CP-3J/ci-h2-qualification.json
+            migration/evidence/CP-3J/ci-h2-java21-contracts.json
+            migration/evidence/CP-3J/ci-h2-java25-contracts.json
+            migration/evidence/CP-3J/ci-h2-java21-wildfly.log
+            migration/evidence/CP-3J/ci-h2-java25-wildfly.log
+            migration/evidence/CP-3J/closure.properties
+            migration/evidence/CP-3J/rollback.properties
+            migration/steps/CP-3J-closure.md
             runtime/phase3/java21-wildfly41/runtime-manifest.tsv
             app/target/contract-results/cp-3f-ci-h2.json
             app/target/contract-results/cp-3f-wildfly41.log

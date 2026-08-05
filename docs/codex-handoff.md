@@ -1,8 +1,11 @@
 # Codex handoff
 
-Atualizado em 04/08/2026 após a conclusão da atividade 3.45. O CP-3H foi
-fechado e o CP-3I foi aprovado em H2 e Oracle; o roteiro de reprodução,
-rollback e o fechamento sem tag pública foram consolidados.
+Atualizado em 05/08/2026 após a conclusão da atividade 3.49. O CP-3H foi
+fechado, o CP-3I foi aprovado em H2 e Oracle, o runtime do CP-3J foi fixado, a
+incompatibilidade natural do javac 25 foi capturada e a correção mínima com
+`--release 21` foi aplicada. A qualificação Java 21/25 da 3.49 foi
+automatizada, executada em H2 e qualificada no Oracle 19c; os roteiros de
+reprodução, rollback e os fechamentos sem tag pública foram consolidados.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -12,21 +15,21 @@ URLs Oracle, endereços internos nem valores do `.env`.
 
 - Repositório: `anderson-sillos/wildfly-migration`.
 - Mudança OpenSpec: `create-java-web-migration-lab`.
-- Branch atual: `checkpoint/cp-3i-entry`; o CP-3H está integrado no commit
-  `30cb9f051046dd9eed2fa096ffc9986b3ec63dfa` e o CP-3G está integrado no commit
-  `a46c56a0c4a47b1fdcaca78b0ea7bd6d5e3a5bbe`.
+- Branch atual: `checkpoint/cp-3j-entry`, criada a partir de `origin/main`; o
+  CP-3I está integrado no commit `a3b6b0d94c8381dca8ffa940a4b2dd179b41088d`.
 - PR incremental do CP-3G: #25, `feat(CP-3G): replace Reflections with Servlet SCI`,
   encerrada por squash com a mensagem `checkpoint(CP-3G): replace legacy web libraries`.
 - PR incremental do CP-3I: #28, `feat(CP-3I): qualify persistence semantics`,
-  aberta após a conclusão da atividade 3.41.
+  integrada por squash com a mensagem `checkpoint(CP-3I): approve Java 21
+  Jakarta gate`; não foi criada tag pública.
 - CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
-- Progresso OpenSpec: 100 de 110 tarefas concluídas.
+- Progresso OpenSpec: 105 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
   3.35, fechamento do checkpoint.
-- Próxima atividade OpenSpec: 3.46, verificar atualizações open source e
-  fixar a distribuição OpenJDK 25 do CP-3J.
+- Próxima atividade OpenSpec: 3.51, completar o catálogo de incompatibilidades
+  naturais e fixtures opt-in.
 
 ## Decisões permanentes
 
@@ -252,8 +255,82 @@ URLs Oracle, endereços internos nem valores do `.env`.
   `checkpoint(CP-3I): approve Java 21 Jakarta gate`; o retorno aponta ao
   commit integrado do CP-3H sem mutação de banco.
 - O validador `scripts/validate-cp-3i-closure.sh` foi integrado ao baseline e
-  ao portable CI. Após os checks verdes, o PR deve ser squash-mergeado com o
-  assunto exato, sem criar tag pública.
+  ao portable CI. Os checks ficaram verdes e o PR #28 foi squash-mergeado com
+  o assunto exato, sem criar tag pública.
+
+### 3.46 — seleção do runtime OpenJDK 25 do CP-3J
+
+- A atividade fixou Eclipse Temurin OpenJDK 25.0.4+7, WildFly Community
+  41.0.0.Final e H2 2.4.240, todos com origem, licença e checksum em
+  `runtime/phase3/java25-wildfly41/runtime-manifest.tsv`.
+- A release WildFly 41 recomenda Java SE 25 e informa execução em Java 25,
+  21 e 17; a certificação Jakarta EE 11 publicada cobre SE 17 e 21. A
+  compatibilidade da aplicação em Java 25 permanece uma hipótese a qualificar
+  nas atividades 3.47–3.50.
+- Oracle JDK, JBoss EAP, WildFly Preview e builds nightly foram rejeitados.
+  `ojdbc17` continua fora do runtime open source e do cache portátil, apenas
+  no perfil Oracle.
+- O cache portátil mantém uma única chave para os arquivos de runtime; a nova
+  entrada do JDK 25 em `runtime/portable-runtime-cache.sha256` provoca uma
+  invalidação controlada e depois é reutilizada.
+- Evidências: `docs/evidence/CP-3J.md` e
+  `migration/evidence/CP-3J/runtime-selection.properties`; validador:
+  `scripts/validate-cp-3j-runtime-selection.sh`.
+
+### 3.47 — tentativa do WildFly 41 com OpenJDK 25
+
+- O build usou Temurin 25.0.4+7, manteve o perfil Jakarta 11, bytecode alvo
+  21 e todas as dependências do gate Java 21. Nenhuma classe ou biblioteca da
+  aplicação foi alterada.
+- O `javac` 25 emitiu `location of system modules is not set in conjunction
+  with -source 21`; como o POM mantém `-Werror`, o build terminou com falha
+  esperada antes de produzir um WAR aprovado.
+- O smoke funcional não foi executado nesta atividade. A evidência está em
+  `migration/evidence/CP-3J/java25-build-expected.properties`; a atividade
+  3.48 deverá aplicar a correção mínima e reexecutar o build.
+- O `portable-ci` registra essa incompatibilidade como resultado esperado e
+  permanece verde; a correção não foi mascarada nem antecipada.
+
+### 3.48 — correção mínima do JDK 25
+
+- O `maven-compiler-plugin` passou a usar `--release` em vez de
+  `source/target`: `release 17` no perfil padrão histórico e `release 21` no
+  perfil `cp-3e-jakarta11`.
+- A evidência da 3.47 permanece versionada como falha natural esperada e foi
+  marcada como substituída pela correção da 3.48.
+- `scripts/build-cp-3j-java25.sh` agora representa a atividade 3.48 e deve
+  produzir build aprovado em Java 25, mantendo bytecode/API-alvo em Java 21.
+- O smoke funcional completo da atividade 3.49 passou nos dois JDKs e nos dois
+  perfis; os relatórios estão versionados em `migration/evidence/CP-3J`.
+
+### 3.49 — qualificação Java 21/25
+
+- `scripts/qualify-cp-3j.sh` executa a mesma suíte HTTP nos WARs compilados
+  pelo OpenJDK 21 e pelo OpenJDK 25, separando H2 (`portable-ci`) de Oracle
+  (`oracle-qualified`).
+- As execuções usam portas de loopback distintas (28121/29121 e 28125/29125),
+  auditam o conteúdo dos dois WARs e rejeitam logs/evidências com bind público
+  ou dados de conexão Oracle.
+- `scripts/validate-cp-3j-qualification.sh` valida o agregador, os dois
+  manifestos de runtime, contratos, checksums, portas e sanitização. O CI
+  hospedado executa a trilha H2; a trilha Oracle precisa ser executada com o
+  `.env` externo na rede autorizada.
+- A correção do cleanup em `smoke-wildfly41-datasource.sh` remove diretórios
+  temporários do Java 21/25 somente quando o caminho corresponde ao prefixo
+  esperado.
+- H2 e Oracle aprovaram os 15 cenários nos dois JDKs. As evidências agregadas
+  estão em `migration/evidence/CP-3J/ci-h2-qualification.json` e
+  `migration/evidence/CP-3J/oracle-qualification.json`; a validação foi feita
+  por `scripts/validate-cp-3j-qualification.sh`.
+
+### 3.50 — fechamento do CP-3J
+
+- O `repository-baseline` e o `portable-ci` remoto passaram no commit
+  `e9d0d63`; o último check durou 2m10s.
+- O fechamento exige o squash merge da PR #29 com o assunto
+  `checkpoint(CP-3J): qualify OpenJDK 25`, sem criar tag pública.
+- `scripts/validate-cp-3j-closure.sh` aprovou evidências, rollback para o
+  CP-3I, ausência de segredos e ausência de operações destrutivas.
 
 ### 3.9 — descoberta de validadores
 

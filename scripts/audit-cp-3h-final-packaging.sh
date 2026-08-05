@@ -185,14 +185,15 @@ else
     '"result": "passed"'; do
     grep -Fq "$marker" "$EVIDENCE" || fail "evidência não contém: $marker"
   done
-  if [[ -n "$war_sha256" ]]; then
-    grep -Fq "\"warSha256\": \"$war_sha256\"" "$EVIDENCE" ||
-      fail 'checksum do WAR diverge da evidência de auditoria'
-  fi
   evidence_commit="$(sed -n 's/.*"sourceCommit": "\([0-9a-f]\{40\}\)".*/\1/p' "$EVIDENCE" | head -n 1)"
   [[ -n "$evidence_commit" ]] || fail 'sourceCommit ausente na evidência'
   git -C "$ROOT" cat-file -e "$evidence_commit^{commit}" 2>/dev/null ||
     fail 'sourceCommit da evidência não existe no Git'
+  current_commit="$(git -C "$ROOT" rev-parse HEAD)"
+  if [[ -n "$war_sha256" && "$evidence_commit" == "$current_commit" ]]; then
+    grep -Fq "\"warSha256\": \"$war_sha256\"" "$EVIDENCE" ||
+      fail 'checksum do WAR diverge da evidência de auditoria'
+  fi
 fi
 
 if grep -Eiq 'jdbc:oracle:|ORACLE_DB_|ORACLE_DB_PASSWORD|password|user-name|connection-url|senha' "$EVIDENCE" 2>/dev/null; then

@@ -1,0 +1,26 @@
+{
+  "schema": "wildfly-migration-contract-result/v1",
+  "qualification": "oracle-qualified",
+  "profile": "oracle",
+  "commit": "abb30f76e90c191e5137432be1375a07d6d5e704",
+  "sourceCommit": "abb30f76e90c191e5137432be1375a07d6d5e704",
+  "warSha256": "61da0aa58b93c4b8e7d719dd5cc6a85686ff1f0a754aeeca446799d63a55ac8f",
+  "runtime": "java21-wildfly41.0.0",
+  "scenarios": {
+    "health": "passed",
+    "list": "passed",
+    "create": "passed",
+    "detail": "passed",
+    "session": "passed",
+    "upload": "passed",
+    "uploadLimit": "passed",
+    "xmlForm": "passed",
+    "xmlValid": "passed",
+    "xmlInvalidXsd": "passed",
+    "xmlValidatorRejected": "passed",
+    "xmlXxe": "passed",
+    "xmlEntityExpansion": "passed",
+    "protectedFragments": "passed",
+    "persistedState": "passed"
+  }
+}

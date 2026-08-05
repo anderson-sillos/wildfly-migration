@@ -581,6 +581,19 @@ check_required_files() {
     )
   fi
 
+  if rank_at_least CP-3J; then
+    required+=(
+      "runtime/phase3/java25-wildfly41/README.md"
+      "runtime/phase3/java25-wildfly41/runtime-manifest.tsv"
+      "docs/evidence/CP-3J.md"
+      "migration/evidence/CP-3J/runtime-selection.properties"
+      "migration/evidence/CP-3J/java25-build-expected.properties"
+      "scripts/validate-cp-3j-runtime-selection.sh"
+      "scripts/build-cp-3j-java25.sh"
+      "scripts/validate-cp-3j-java25.sh"
+    )
+  fi
+
   for path in "${required[@]}"; do
     if [[ -f "$path" ]]; then
       pass "arquivo obrigatório presente: $path"
