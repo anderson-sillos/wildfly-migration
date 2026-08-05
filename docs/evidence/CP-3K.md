@@ -113,6 +113,16 @@ As reproduções da atividade 3.53 estão registradas em
 (`oracle-qualified`). Os dois relatórios usam o mesmo WAR Java 25, com SHA-256
 `80876fc3ee480cbdda32e948aaf3a8d5151dacf883717254fda943cb5af33270`.
 
+## Auditoria 3.54
+
+O script `scripts/audit-cp-3k.sh` verificou os 12 commits de fechamento
+anteriores, as duas tags públicas, a rastreabilidade das PRs #18, #20, #21,
+#23, #24, #25, #28, #29 e #30, a ausência antecipada da tag final, segredos,
+licenças, origens HTTPS, SHA-256, dependências proibidas, WAR e rollback. A
+evidência sanitizada está em
+[`audit.properties`](../../migration/evidence/CP-3K/audit.properties) e foi
+validada por `scripts/validate-cp-3k-audit.sh`.
+
 ## Reprodução e rollback
 
 O ponto de entrada operacional é [`environment-setup.md`](../environment-setup.md),

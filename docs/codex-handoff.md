@@ -1,6 +1,6 @@
 # Codex handoff
 
-Atualizado em 05/08/2026 após a conclusão da atividade 3.53. O CP-3H foi
+Atualizado em 05/08/2026 após a conclusão da atividade 3.54. O CP-3H foi
 fechado, o CP-3I foi aprovado em H2 e Oracle, o runtime do CP-3J foi fixado, a
 incompatibilidade natural do javac 25 foi capturada e a correção mínima com
 `--release 21` foi aplicada. A qualificação Java 21/25 da 3.49 foi
@@ -27,13 +27,17 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - CP-3J: integrado pela PR #29 no commit `eac264e003a05f475c817eaa1df2adb687ae11bf`,
   com a mensagem `checkpoint(CP-3J): qualify OpenJDK 25`; não foi criada tag
   pública.
-- Progresso OpenSpec: 108 de 110 tarefas concluídas.
+- CP-3K: PR incremental #30 está aberta a partir da branch
+  `checkpoint/cp-3k-entry`; ela acumula as atividades 3.51–3.54 e só será
+  integrada no fechamento com o assunto `checkpoint(CP-3K): complete final
+  destination`.
+- Progresso OpenSpec: 109 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
   3.35, fechamento do checkpoint.
-- Próxima atividade OpenSpec: 3.54, auditar histórico Git, rastreabilidade,
-  segredos, licenças, checksums, dependências, WAR e rollback.
+- Próxima atividade OpenSpec: 3.55, encerrar o CP-3K, integrar a PR final e
+  criar a tag `migration/03-final`.
 
 ## Decisões permanentes
 
@@ -363,6 +367,13 @@ URLs Oracle, endereços internos nem valores do `.env`.
   `migration/evidence/CP-3K/reproduction-oracle.json`.
 - O WAR Java 25 reproduzido tem SHA-256
   `80876fc3ee480cbdda32e948aaf3a8d5151dacf883717254fda943cb5af33270`.
+
+### 3.54 — auditoria final antes do fechamento
+
+- `scripts/audit-cp-3k.sh` aprovou histórico, PRs, tags, segredos, licenças,
+  checksums, dependências, WAR e rollback.
+- A evidência está em `migration/evidence/CP-3K/audit.properties`; a tag
+  `migration/03-final` permanece ausente até a atividade 3.55.
 
 ### 3.9 — descoberta de validadores
 

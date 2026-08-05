@@ -97,6 +97,8 @@ shell_files=(
   scripts/validate-incompatibility-catalog.sh
   scripts/reproduce-cp-3k.sh
   scripts/validate-cp-3k-reproduction.sh
+  scripts/audit-cp-3k.sh
+  scripts/validate-cp-3k-audit.sh
   contract-tests/run.sh
 )
 

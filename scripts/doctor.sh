@@ -603,6 +603,9 @@ check_required_files() {
       "docs/evidence/CP-3K.md"
       "scripts/reproduce-cp-3k.sh"
       "scripts/validate-cp-3k-reproduction.sh"
+      "scripts/audit-cp-3k.sh"
+      "scripts/validate-cp-3k-audit.sh"
+      "migration/evidence/CP-3K/audit.properties"
     )
   fi
 

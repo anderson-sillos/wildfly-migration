@@ -34,6 +34,9 @@ jobs:
       - name: Validate CP-3K clean reproduction evidence
         run: ./scripts/validate-cp-3k-reproduction.sh --profile ci-h2
 
+      - name: Validate CP-3K audit evidence
+        run: ./scripts/validate-cp-3k-audit.sh
+
   portable-ci:
     name: portable-ci
     runs-on: ubuntu-latest
