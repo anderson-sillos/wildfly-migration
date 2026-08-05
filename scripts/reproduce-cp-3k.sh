@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$ROOT/.env"
 PROFILE=""
-RESULT_FILE="$ROOT/migration/evidence/CP-3K/reproduction-ci-h2.json"
+RESULT_FILE=""
 TEMP_DIRECTORY=""
 
 usage() {
@@ -38,6 +38,13 @@ done
 
 [[ "$PROFILE" == ci-h2 || "$PROFILE" == oracle ]] || fail 'informe --profile ci-h2 ou oracle'
 [[ -f "$ENV_FILE" ]] || fail "configuração externa não encontrada: $ENV_FILE"
+if [[ -z "$RESULT_FILE" ]]; then
+  if [[ "$PROFILE" == oracle ]]; then
+    RESULT_FILE="$ROOT/migration/evidence/CP-3K/reproduction-oracle.json"
+  else
+    RESULT_FILE="$ROOT/migration/evidence/CP-3K/reproduction-ci-h2.json"
+  fi
+fi
 [[ -z "$(git -C "$ROOT" status --porcelain --untracked-files=all)" ]] ||
   fail 'o checkout de origem possui alterações; use um checkout limpo'
 
@@ -95,8 +102,12 @@ for report in "$H2_RESULT" "$H2_LOG"; do
   [[ -f "$report" ]] || fail "resultado H2 ausente: $report"
 done
 [[ "$PROFILE" != oracle || -f "$ORACLE_RESULT" ]] || fail 'resultado Oracle ausente'
+LOG_REPORTS=("$H2_RESULT" "$H2_LOG")
+if [[ "$PROFILE" == oracle ]]; then
+  LOG_REPORTS+=("$ORACLE_RESULT" "$ORACLE_LOG")
+fi
 if grep -Eiq 'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url|senha|0\.0\.0\.0|\[::\]' \
-    "$H2_RESULT" "$H2_LOG" ${ORACLE_RESULT:+"$ORACLE_RESULT"} ${ORACLE_LOG:+"$ORACLE_LOG"}; then
+    "${LOG_REPORTS[@]}"; then
   fail 'resultado ou log contém segredo, URL Oracle ou bind público'
 fi
 

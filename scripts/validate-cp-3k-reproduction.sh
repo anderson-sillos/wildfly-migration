@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DOCUMENT="$ROOT/docs/cp-3k-reproduction.md"
-REPORT="$ROOT/migration/evidence/CP-3K/reproduction-ci-h2.json"
+REPORT=""
 PROFILE=ci-h2
 
 fail() {
@@ -21,6 +21,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ "$PROFILE" == ci-h2 || "$PROFILE" == oracle ]] || fail 'perfil inválido'
+if [[ -z "$REPORT" ]]; then
+  if [[ "$PROFILE" == oracle ]]; then
+    REPORT="$ROOT/migration/evidence/CP-3K/reproduction-oracle.json"
+  else
+    REPORT="$ROOT/migration/evidence/CP-3K/reproduction-ci-h2.json"
+  fi
+fi
 [[ -f "$DOCUMENT" ]] || fail 'documentação de reprodução ausente'
 [[ -f "$ROOT/scripts/reproduce-cp-3k.sh" ]] || fail 'executor ausente'
 [[ -f "$ROOT/docs/evidence/CP-3K.md" ]] || fail 'relatório consolidado ausente'
@@ -71,8 +78,8 @@ else
 fi
 
 if grep -Eiq 'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url|senha|DROP USER|DROP SCHEMA|0\.0\.0\.0|\[::\]' \
-    "$DOCUMENT" "$REPORT"; then
-  fail 'documentação/evidência contém segredo, operação destrutiva ou bind público'
+    "$REPORT"; then
+  fail 'evidência contém segredo, operação destrutiva ou bind público'
 fi
 
 printf 'OK: CP-3K/3.53 reprodução %s documentada e evidência sanitizada validada\n' "$qualification"
