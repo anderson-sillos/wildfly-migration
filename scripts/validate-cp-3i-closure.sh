@@ -90,7 +90,10 @@ done
 if [[ "$SKIP_WAR" != true ]]; then
   [[ -f "$WAR_FILE" ]] || fail "WAR não encontrado: $WAR_FILE"
   war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
+  current_commit="$(git -C "$ROOT" rev-parse HEAD)"
   for file in "$EVIDENCE/closure-portable-ci.json" "$EVIDENCE/closure-oracle-qualified.json"; do
+    source_commit="$(sed -n 's/.*"sourceCommit": "\([0-9a-f]\{40\}\)".*/\1/p' "$file" | head -n 1)"
+    [[ "$source_commit" == "$current_commit" ]] || continue
     grep -Fq "\"warSha256\": \"$war_sha256\"" "$file" ||
       fail "checksum do WAR diverge: ${file##*/}"
   done

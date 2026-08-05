@@ -182,7 +182,7 @@ run_step "Validar fechamento do CP-3I/3.45" \
   ./scripts/validate-cp-3i-closure.sh --skip-war
 run_step "Validar seleção de runtime do CP-3J/3.46" \
   ./scripts/validate-cp-3j-runtime-selection.sh
-run_step "Validar troca de JVM do CP-3J/3.47" \
+run_step "Validar correção Java 25 do CP-3J/3.48" \
   ./scripts/validate-cp-3j-java25.sh
 
 printf '\nOK: repository-baseline local e remoto concluído\n'

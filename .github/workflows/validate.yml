@@ -271,21 +271,14 @@ jobs:
             --war app/target/cp3f-jakarta11/wildfly-migration.war
           ./scripts/validate-cp-3j-runtime-selection.sh
 
-      - name: Execute CP-3J Java 25 JVM switch
+      - name: Execute CP-3J Java 25 correction
         if: steps.portable-selection.outputs.mode == 'cp3f'
         run: |
           ./scripts/doctor.sh CP-3J --profile ci-h2 --ci
-          set +e
           ./scripts/build-cp-3j-java25.sh \
             --env /dev/null \
             --result migration/evidence/CP-3J/java25-build.json \
             --output migration/evidence/CP-3J/java25-build.txt
-          build_status="$?"
-          set -e
-          if [[ "$build_status" -eq 0 ]]; then
-            echo "FALHA: a 3.47 deveria capturar o aviso javac 25/-Werror antes da 3.48" >&2
-            exit 1
-          fi
           ./scripts/validate-cp-3j-java25.sh
 
       - name: Upload CP-3F portable evidence

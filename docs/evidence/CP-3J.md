@@ -41,6 +41,18 @@ aprovado. O diagnóstico sanitizado e o próximo passo estão em
 [`java25-build-expected.properties`](../../migration/evidence/CP-3J/java25-build-expected.properties)
 e a correção mínima será tratada exclusivamente na atividade 3.48.
 
+## Atividade 3.48 — correção mínima do JDK 25
+
+A diferença exclusiva do JDK 25 foi corrigida sem alterar código funcional,
+dependências, Jakarta EE 11 ou o contrato HTTP. O `maven-compiler-plugin`
+passou a usar `--release 21` no perfil Jakarta, em vez de enviar
+`-source 21 -target 21` ao `javac`.
+
+Essa mudança mantém bytecode e APIs-alvo em Java 21, mas também informa ao
+compilador onde estão os módulos de sistema da plataforma alvo. Com isso, o
+warning capturado na 3.47 deixa de existir e o `-Werror` pode continuar ativo
+como proteção contra novos avisos reais de compilação.
+
 ## Fontes oficiais
 
 - [Eclipse Temurin 25.0.4+7](https://github.com/adoptium/temurin25-binaries/releases/tag/jdk-25.0.4%2B7);

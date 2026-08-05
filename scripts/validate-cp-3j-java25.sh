@@ -12,7 +12,7 @@ RESULT="$ROOT/migration/evidence/CP-3J/java25-build.json"
 EXPECTED="$ROOT/migration/evidence/CP-3J/java25-build-expected.properties"
 
 fail() {
-  printf 'FALHA CP-3J/3.47: %s\n' "$1" >&2
+  printf 'FALHA CP-3J/3.48: %s\n' "$1" >&2
   exit 1
 }
 
@@ -23,18 +23,28 @@ done
 for marker in \
   '<id>cp-3e-jakarta11</id>' \
   '<jdk>[21,22)</jdk>' \
-  '<maven.compiler.source>21</maven.compiler.source>' \
-  '<maven.compiler.target>21</maven.compiler.target>' \
+  '<maven.compiler.release>21</maven.compiler.release>' \
   '<java.version.range>[21,22)</java.version.range>'; do
   grep -Fq "$marker" "$POM" || fail "perfil Java 25 sem: $marker"
 done
+for forbidden in \
+  '<source>${maven.compiler.source}</source>' \
+  '<target>${maven.compiler.target}</target>' \
+  '<maven.compiler.source>' \
+  '<maven.compiler.target>'; do
+  if grep -Fq "$forbidden" "$POM"; then
+    fail "POM ainda usa source/target em vez de release: $forbidden"
+  fi
+done
+grep -Fq '<release>${maven.compiler.release}</release>' "$POM" ||
+  fail 'maven-compiler-plugin não usa --release'
 
 for marker in \
   'JAVA25_HOME' \
   'cp-3e-jakarta11' \
   'cp3j-java25' \
   'buildOutcome' \
-  'bytecodeTarget'; do
+  'bytecodeRelease'; do
   grep -Fq "$marker" "$BUILD" || fail "build Java 25 sem: $marker"
 done
 
@@ -62,30 +72,34 @@ for marker in \
   'failure.cause=-Werror-promotes-jdk25-warning-to-error' \
   'functional.smoke=not-executed' \
   'next.activity=3.48' \
-  'result=passed'; do
+  'correction=use-maven-compiler-release-21' \
+  'result=superseded-by-3.48'; do
   grep -Fxq "$marker" "$EXPECTED" || fail "evidência esperada sem: $marker"
 done
 
 if [[ -f "$RESULT" ]]; then
   for marker in \
-    '"activity": "3.47"' \
+    '"activity": "3.48"' \
     '"profile": "cp-3e-jakarta11"' \
     '"javaVersionRangeOverride": "[25,26)"' \
     '"runtime": "Temurin 25.0.4+7/Maven 3.9.16"' \
-    '"buildOutcome": "failed"' \
-    '"exitCode": 1' \
-    '"compilationErrorBlocks": 1'; do
+    '"bytecodeRelease": "21"' \
+    '"buildOutcome": "passed"' \
+    '"exitCode": 0' \
+    '"compilationErrorBlocks": 0'; do
     grep -Fq "$marker" "$RESULT" || fail "resultado Java 25 sem: $marker"
   done
 fi
 
 if [[ -f "$ROOT/migration/evidence/CP-3J/java25-build.txt" ]]; then
-  grep -Fq 'location of system modules is not set in conjunction with -source 21' \
-    "$ROOT/migration/evidence/CP-3J/java25-build.txt" ||
-    fail 'saída Java 25 não registra o aviso de módulos esperado'
-  grep -Fq 'warnings found and -Werror specified' \
-    "$ROOT/migration/evidence/CP-3J/java25-build.txt" ||
-    fail 'saída Java 25 não registra a promoção do aviso por -Werror'
+  if grep -Fq 'location of system modules is not set in conjunction with -source 21' \
+      "$ROOT/migration/evidence/CP-3J/java25-build.txt"; then
+    fail 'saída Java 25 ainda contém o aviso de módulos corrigido na 3.48'
+  fi
+  if grep -Fq 'warnings found and -Werror specified' \
+      "$ROOT/migration/evidence/CP-3J/java25-build.txt"; then
+    fail 'saída Java 25 ainda contém falha por -Werror'
+  fi
 fi
 
-printf 'OK: CP-3J/3.47 registrou a incompatibilidade esperada do javac 25 sem alterar Jakarta/bytecode 21\n'
+printf 'OK: CP-3J/3.48 corrige a incompatibilidade javac 25 com --release 21 sem alterar o contrato funcional\n'

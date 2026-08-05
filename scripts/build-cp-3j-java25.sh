@@ -84,13 +84,13 @@ cat >"$RESULT_FILE" <<EOF
 {
   "schema": "wildfly-migration-cp3j-java25-build/v1",
   "checkpoint": "CP-3J",
-  "activity": "3.47",
+  "activity": "3.48",
   "profile": "cp-3e-jakarta11",
   "javaVersionRangeOverride": "[25,26)",
   "runtime": "Temurin 25.0.4+7/Maven 3.9.16",
   "server": "WildFly Community 41.0.0.Final",
   "api": "jakarta.platform:jakarta.jakartaee-web-api:11.0.0",
-  "bytecodeTarget": "21",
+  "bytecodeRelease": "21",
   "buildDirectory": "app/target/cp3j-java25",
   "buildOutcome": "$BUILD_OUTCOME",
   "exitCode": $BUILD_STATUS,
@@ -102,8 +102,8 @@ EOF
 if [[ "$BUILD_STATUS" -ne 0 ]]; then
   printf '%s\n' '--- últimas linhas do build Java 25 ---' >&2
   tail -n 120 "$OUTPUT_FILE" >&2
-  printf 'FALHA CP-3J/3.47: build Java 25 não passou; saída em %s\n' "$OUTPUT_FILE" >&2
+  printf 'FALHA CP-3J/3.48: build Java 25 não passou; saída em %s\n' "$OUTPUT_FILE" >&2
   exit "$BUILD_STATUS"
 fi
 
-printf 'OK: build CP-3J/3.47 com OpenJDK 25 concluído; WAR em %s\n' "$WAR_FILE"
+printf 'OK: build CP-3J/3.48 com OpenJDK 25 concluído; WAR em %s\n' "$WAR_FILE"

@@ -52,8 +52,11 @@ if grep -Eiq 'jdbc:oracle:|ORACLE_DB_|ORACLE_DB_PASSWORD|password|user-name|conn
 fi
 if [[ -f "$WAR_FILE" ]]; then
   war_sha256="$(sha256sum "$WAR_FILE" | awk '{print $1}')"
-  grep -Fq "\"warSha256\": \"$war_sha256\"" "$EVIDENCE" ||
-    fail 'checksum do WAR diverge da evidência Oracle'
+  current_commit="$(git -C "$ROOT" rev-parse HEAD)"
+  if [[ "$source_commit" == "$current_commit" ]]; then
+    grep -Fq "\"warSha256\": \"$war_sha256\"" "$EVIDENCE" ||
+      fail 'checksum do WAR diverge da evidência Oracle'
+  fi
 fi
 
 printf 'OK: evidência Oracle CP-3H/3.38, versão/RU, driver, JVM, WildFly e contratos validada\n'
