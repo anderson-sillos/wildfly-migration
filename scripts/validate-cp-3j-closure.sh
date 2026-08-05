@@ -76,8 +76,10 @@ for profile in ci-h2 oracle; do
   done
   source_commit="$(sed -n 's/.*"sourceCommit": "\([0-9a-f]\{7,40\}\)".*/\1/p' "$aggregate" | head -n 1)"
   [[ "$source_commit" =~ ^[0-9a-f]{7,40}$ ]] || fail "sourceCommit inválido em $profile"
-  git -C "$ROOT" cat-file -e "$source_commit^{commit}" 2>/dev/null ||
-    fail "sourceCommit inexistente em $profile"
+  if ! git -C "$ROOT" cat-file -e "$source_commit^{commit}" 2>/dev/null; then
+    [[ "$(git -C "$ROOT" rev-parse --is-shallow-repository 2>/dev/null || true)" == true ]] ||
+      fail "sourceCommit inexistente em $profile"
+  fi
   if grep -Eiq 'jdbc:oracle:|ORACLE_DB_|password|user-name|connection-url|senha' "$aggregate"; then
     fail "agregador $profile contém configuração sensível"
   fi
