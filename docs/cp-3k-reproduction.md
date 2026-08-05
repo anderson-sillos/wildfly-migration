@@ -8,7 +8,8 @@ Maven 3.9.16 e WildFly Community 41.0.0.Final. H2 2.4.240 é executado como
 portable-ci; somente a execução explícita no Oracle Database 19c RU 19.3
 recebe oracle-qualified.
 
-O executor cria um clone local temporário, portanto app/target, caches, logs,
+O executor executa `git clone --no-local` para criar um clone local temporário,
+portanto app/target, caches, logs,
 drivers e .env do checkout de origem não são reutilizados. A configuração
 externa é lida sem ser copiada para o clone ou para a evidência.
 
