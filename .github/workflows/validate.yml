@@ -28,6 +28,9 @@ jobs:
       - name: Validate the same repository baseline used locally
         run: ./scripts/validate-repository-baseline.sh
 
+      - name: Validate incompatibility catalog
+        run: ./scripts/validate-incompatibility-catalog.sh
+
   portable-ci:
     name: portable-ci
     runs-on: ubuntu-latest

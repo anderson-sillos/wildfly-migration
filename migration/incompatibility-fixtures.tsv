@@ -1,0 +1,3 @@
+id	catalog_id	fixture	purpose	reason	enabled_by_default	record
+FIX-001	INC-022	contract-tests/fixtures/xml/pedido-invalido-validador.xml	XSD válido rejeitado pela validação de domínio	natural XML de domínio não é determinístico para todos os dados reais	false	migration/steps/CP-1F-validator-after-xsd.md
+FIX-002	INC-023	contract-tests/fixtures/xml/pedido-xxe.xml	Rejeição de DOCTYPE e entidade externa	rede e resolução externa devem permanecer desabilitadas e a falha natural não é segura como teste de produção	false	migration/steps/CP-3H-xml-safe.md

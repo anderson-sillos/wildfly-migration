@@ -14,9 +14,15 @@ INC-012	CP-3A	Bytecode-audit-major-51-52	Java17-major-61	verification	verificati
 INC-013	CP-3A	H2-1.4.200-check-IN	H2-2.4.240-multiple-connections	execution	portable-sql-harness	natural	resolved	migration/steps/CP-3A-h2-2-check-constraint.md
 INC-014	CP-3C	ojdbc7-Java17	ojdbc17-23.26.2.0.0	execution	dependency	natural	resolved	migration/steps/CP-3C-ojdbc17.md
 INC-015	CP-3E	CP-3D-WAR-javax	WildFly41-Jakarta-modules	deployment	namespace-classloader	natural	observed	migration/steps/CP-3E-wildfly41-entry.md
-INC-016	CP-3F	Tiles-2.1.4-javax	WildFly41-Jakarta-modules	deployment	namespace-classloader	natural	resolved	migration/steps/CP-3G-tiles-jsp-layout.md
+INC-016	CP-3F	Tiles-2.1.4-javax/TLD-2.0	WildFly41-Jakarta-modules	deployment	namespace-classloader	natural	resolved	migration/steps/CP-3G-tiles-jsp-layout.md
 INC-017	CP-3F	Commons-FileUpload-1.6.0-javax-overloads	Jakarta-Servlet-6.1	execution	dependency	natural	observed	migration/steps/CP-3F-fileupload-jakarta-linkage.md
 INC-018	CP-3F	OJDBC17-java21-module	WildFly41-module-loader	deployment	classloader	natural	resolved	migration/steps/CP-3F-oracle-jdbc17-module.md
 INC-019	CP-3F	OJDBC17-JGSS-module	WildFly41-datasource	execution	classloader	natural	resolved	migration/steps/CP-3F-oracle-jdbc17-module.md
 INC-020	CP-3G	Commons-FileUpload-1.x	Jakarta-Servlet-Part	execution	dependency	natural	resolved	migration/steps/CP-3G-servlet-multipart.md
 INC-021	CP-3G	Reflections-0.10.2	ServletContainerInitializer-HandlesTypes	startup	class-discovery	natural	resolved	migration/steps/CP-3G-servlet-container-initializer.md
+INC-022	CP-1F	XSD-valid-domain-invalid	XML-validator-rejection	execution	validation	fixture-opt-in	resolved	migration/steps/CP-1F-validator-after-xsd.md
+INC-023	CP-3H	XML-external-entity	secure-XML-parser	execution	security	fixture-opt-in	resolved	migration/steps/CP-3H-xml-safe.md
+INC-024	CP-3J	javac25-source-target	maven-compiler-release21	compilation	toolchain-policy	natural	resolved	migration/steps/CP-3J-java25-toolchain.md
+INC-025	CP-3B	MyBatis-3.4.5	MyBatis-3.5.19	execution	dependency	natural	resolved	migration/steps/CP-3B-mybatis-3.5.19.md
+INC-026	CP-3C	xml-apis-1.3.02/Geronimo-StAX-1.0	java.xml-module	execution	duplicate-api	natural	resolved	migration/steps/CP-3C-java-xml-apis.md
+INC-027	CP-3C	dom4j-1.6.1	dom4j-2.2.0	execution	library	natural	resolved	migration/steps/CP-3C-dom4j-2.2.0.md

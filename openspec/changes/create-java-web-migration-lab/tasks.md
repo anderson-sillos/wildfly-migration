@@ -174,7 +174,7 @@
 
 ### Checkpoint CP-3K — Destino final
 
-- [ ] 3.51 Completar o catálogo de incompatibilidades com falhas naturais e fixtures opt-in somente onde a reprodução natural não for determinística.
+- [x] 3.51 Completar o catálogo de incompatibilidades com falhas naturais e fixtures opt-in somente onde a reprodução natural não for determinística.
 - [ ] 3.52 Gerar relatório consolidado com as três fases, checkpoints parciais, gates, versões, estados `portable-ci` e `oracle-qualified`, exceções resolvidas e limitações.
 - [ ] 3.53 Reproduzir o destino final a partir de checkout limpo usando documentação, `doctor`, OpenJDK, WildFly comunitário, H2 em memória e configuração Oracle externa.
 - [ ] 3.54 Auditar histórico Git, rastreabilidade de PRs e commits, segredos, licenças, checksums, dependências, WAR e instruções de rollback.
