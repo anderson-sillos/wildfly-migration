@@ -56,6 +56,13 @@ if git -C "$ROOT" diff --quiet && git -C "$ROOT" diff --cached --quiet; then
   } | grep -Ev '^\?\? migration/evidence/CP-3J/(ci-h2|oracle)-(qualification|java(21|25)-contracts|java(21|25)-wildfly\.log)\.(json|log)$' || true)"
   [[ -z "$unexpected_changes" ]] && working_tree=false
 fi
+if [[ "$REUSE_RESULTS" == true ]]; then
+  existing_commit="$(sed -n 's/.*"sourceCommit": "\([0-9a-f]\{7,40\}\)".*/\1/p' \
+    "$RESULT_DIR/${PROFILE}-java21-contracts.json" | head -n 1)"
+  [[ "$existing_commit" =~ ^[0-9a-f]{7,40}$ ]] ||
+    fail 'resultado existente sem sourceCommit válido'
+  commit_sha="$existing_commit"
+fi
 
 run_one() {
   local java_version="$1" war_file="$2" http_port="$3" management_port="$4"
