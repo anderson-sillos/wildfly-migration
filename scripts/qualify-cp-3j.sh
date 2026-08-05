@@ -46,7 +46,12 @@ done
 mkdir -p "$RESULT_DIR"
 commit_sha="$(git -C "$ROOT" rev-parse HEAD)"
 working_tree=true
-[[ -z "$(git -C "$ROOT" status --porcelain)" ]] && working_tree=false
+if git -C "$ROOT" diff --quiet && git -C "$ROOT" diff --cached --quiet; then
+  unexpected_changes="$({
+    git -C "$ROOT" status --porcelain
+  } | grep -Ev '^\?\? migration/evidence/CP-3J/(ci-h2|oracle)-(qualification|java(21|25)-contracts|java(21|25)-wildfly\.log)\.(json|log)$' || true)"
+  [[ -z "$unexpected_changes" ]] && working_tree=false
+fi
 
 run_one() {
   local java_version="$1" war_file="$2" http_port="$3" management_port="$4"
