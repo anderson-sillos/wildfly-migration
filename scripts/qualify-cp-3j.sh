@@ -8,17 +8,20 @@ PROFILE=""
 WAR_JAVA21="$ROOT/app/target/cp3f-jakarta11/wildfly-migration.war"
 WAR_JAVA25="$ROOT/app/target/cp3j-java25/wildfly-migration.war"
 RESULT_DIR="$ROOT/migration/evidence/CP-3J"
+REUSE_RESULTS=false
 
 usage() {
   cat <<'USAGE'
 Uso:
   ./scripts/qualify-cp-3j.sh --profile ci-h2|oracle \
     [--env ARQUIVO] [--war-java21 ARQUIVO] [--war-java25 ARQUIVO]
+    [--reuse-results]
 
 Executa os contratos externos do CP-3J/3.49 com os WARs produzidos por
 OpenJDK 21 e 25. H2 é a trilha portable-ci; Oracle exige credenciais externas
 e produz oracle-qualified. O WildFly fica preso a loopback e os relatórios
-não registram segredos.
+não registram segredos. --reuse-results apenas recompõe o agregador a partir
+de resultados já executados e não é usado pelo CI.
 USAGE
 }
 
@@ -33,6 +36,7 @@ while [[ $# -gt 0 ]]; do
     --env) [[ $# -ge 2 ]] || fail '--env exige arquivo'; ENV_FILE="$2"; shift 2 ;;
     --war-java21) [[ $# -ge 2 ]] || fail '--war-java21 exige arquivo'; WAR_JAVA21="$2"; shift 2 ;;
     --war-java25) [[ $# -ge 2 ]] || fail '--war-java25 exige arquivo'; WAR_JAVA25="$2"; shift 2 ;;
+    --reuse-results) REUSE_RESULTS=true; shift ;;
     -h|--help) usage; exit 0 ;;
     *) fail "argumento desconhecido: $1" ;;
   esac
@@ -60,16 +64,21 @@ run_one() {
   local source_manifest="java21-wildfly41"
   [[ "$java_version" == 25 ]] && source_manifest="java25-wildfly41"
 
-  WILDFLY_HTTP_PORT="$http_port" \
-  WILDFLY_MANAGEMENT_PORT="$management_port" \
-  MIGRATION_SOURCE_COMMIT="$commit_sha" \
-    "$ROOT/scripts/smoke-wildfly41-datasource.sh" \
-      --java "$java_version" \
-      --profile "$PROFILE" \
-      --env "$ENV_FILE" \
-      --war "$war_file" \
-      --result "$result_file" \
-      --diagnostic-log "$diagnostic_log"
+  if [[ "$REUSE_RESULTS" == false ]]; then
+    WILDFLY_HTTP_PORT="$http_port" \
+    WILDFLY_MANAGEMENT_PORT="$management_port" \
+    MIGRATION_SOURCE_COMMIT="$commit_sha" \
+      "$ROOT/scripts/smoke-wildfly41-datasource.sh" \
+        --java "$java_version" \
+        --profile "$PROFILE" \
+        --env "$ENV_FILE" \
+        --war "$war_file" \
+        --result "$result_file" \
+        --diagnostic-log "$diagnostic_log"
+  else
+    [[ -f "$result_file" && -f "$diagnostic_log" ]] ||
+      fail "resultado existente ausente para Java $java_version"
+  fi
 
   for marker in \
     '"qualification": "portable-ci"' \
