@@ -50,12 +50,13 @@ done
 mkdir -p "$RESULT_DIR"
 commit_sha="$(git -C "$ROOT" rev-parse HEAD)"
 working_tree=true
-if git -C "$ROOT" diff --quiet && git -C "$ROOT" diff --cached --quiet; then
-  unexpected_changes="$({
-    git -C "$ROOT" status --porcelain
-  } | grep -Ev '^[ MARC?][ MARC?] migration/evidence/' || true)"
-  [[ -z "$unexpected_changes" ]] && working_tree=false
-fi
+tracked_changes="$({
+  git -C "$ROOT" diff --name-only
+  git -C "$ROOT" diff --cached --name-only
+} | sort -u | grep -Ev '^migration/evidence/' || true)"
+untracked_changes="$(git -C "$ROOT" ls-files --others --exclude-standard |
+  grep -Ev '^migration/evidence/' || true)"
+[[ -z "$tracked_changes" && -z "$untracked_changes" ]] && working_tree=false
 if [[ "$REUSE_RESULTS" == true ]]; then
   existing_commit="$(sed -n 's/.*"sourceCommit": "\([0-9a-f]\{7,40\}\)".*/\1/p' \
     "$RESULT_DIR/${PROFILE}-java21-contracts.json" | head -n 1)"
