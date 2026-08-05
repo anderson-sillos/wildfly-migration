@@ -53,6 +53,48 @@ compilador onde estão os módulos de sistema da plataforma alvo. Com isso, o
 warning capturado na 3.47 deixa de existir e o `-Werror` pode continuar ativo
 como proteção contra novos avisos reais de compilação.
 
+## Atividade 3.49 — qualificação Java 25 e comparação Java 21
+
+A qualificação executa a mesma suíte HTTP externa nos WARs gerados pelos dois
+JDKs: o WAR `cp3f-jakarta11` é compilado com OpenJDK 21 e o WAR
+`cp3j-java25` com OpenJDK 25. Cada perfil é executado separadamente no
+WildFly 41:
+
+| Perfil | OpenJDK 21 | OpenJDK 25 | Classificação |
+| --- | --- | --- | --- |
+| H2 2.4.240 em memória | contratos e smoke | contratos e smoke | `portable-ci` |
+| Oracle 19c RU 19.3 | contratos e smoke | contratos e smoke | `oracle-qualified` |
+
+O executor [`qualify-cp-3j.sh`](../../scripts/qualify-cp-3j.sh) usa as portas
+de loopback 28121/29121 para Java 21 e 28125/29125 para Java 25, de modo que
+as duas execuções não compartilham estado de rede. O WildFly recebe sempre
+`-b 127.0.0.1 -bmanagement 127.0.0.1`; resultados e logs são rejeitados se
+contiverem bind público, URL Oracle, usuário, senha ou parâmetros de conexão.
+
+Antes do smoke, os dois WARs passam pela auditoria de empacotamento do CP-3H.
+O agregador registra os checksums dos WARs, os manifestos de
+`runtime/phase3/java21-wildfly41` e `runtime/phase3/java25-wildfly41`, a
+classificação da execução e os caminhos dos relatórios individuais. O
+validador [`validate-cp-3j-qualification.sh`](../../scripts/validate-cp-3j-qualification.sh)
+confirma que contratos, empacotamento, portas, segredos e proveniência estão
+presentes sem copiar credenciais para o repositório.
+
+No CI hospedado, a trilha H2 é executada para os dois JDKs. A trilha Oracle
+continua sendo executada no ambiente autorizado da rede interna, com o mesmo
+comando e um `.env` fora do Git:
+
+```bash
+./scripts/qualify-cp-3j.sh --profile oracle --env .env \
+  --war-java21 app/target/cp3f-jakarta11/wildfly-migration.war \
+  --war-java25 app/target/cp3j-java25/wildfly-migration.war
+./scripts/validate-cp-3j-qualification.sh --profile oracle
+```
+
+Os relatórios gerados são `migration/evidence/CP-3J/<perfil>-qualification.json`,
+`<perfil>-java21-contracts.json` e `<perfil>-java25-contracts.json`, sempre
+sanitizados. H2 continua sendo evidência portátil; somente os quatro cenários
+executados contra Oracle podem receber `oracle-qualified`.
+
 ## Fontes oficiais
 
 - [Eclipse Temurin 25.0.4+7](https://github.com/adoptium/temurin25-binaries/releases/tag/jdk-25.0.4%2B7);

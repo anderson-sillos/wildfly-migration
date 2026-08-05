@@ -1,10 +1,12 @@
 # Codex handoff
 
-Atualizado em 05/08/2026 após a conclusão da atividade 3.48. O CP-3H foi
+Atualizado em 05/08/2026 durante a execução da atividade 3.49. O CP-3H foi
 fechado, o CP-3I foi aprovado em H2 e Oracle, o runtime do CP-3J foi fixado, a
 incompatibilidade natural do javac 25 foi capturada e a correção mínima com
-`--release 21` foi aplicada; os roteiros de reprodução, rollback e os
-fechamentos sem tag pública foram consolidados.
+`--release 21` foi aplicada. A qualificação Java 21/25 da 3.49 foi
+automatizada, mas permanece pendente até o CI confirmar a trilha H2 e o
+ambiente autorizado registrar a trilha Oracle; os roteiros de reprodução,
+rollback e os fechamentos sem tag pública foram consolidados.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -22,13 +24,13 @@ URLs Oracle, endereços internos nem valores do `.env`.
   integrada por squash com a mensagem `checkpoint(CP-3I): approve Java 21
   Jakarta gate`; não foi criada tag pública.
 - CP-3F: integrado pela PR #24 no commit `2e8df53b209db963e9a27026d9aca9124aa0ce37`.
-- Progresso OpenSpec: 103 de 110 tarefas concluídas.
+- Progresso OpenSpec: 103 de 110 tarefas concluídas; 3.49 está em execução.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
   3.35, fechamento do checkpoint.
-- Próxima atividade OpenSpec: 3.49, executar as trilhas H2 e Oracle no
-  OpenJDK 25 e a qualificação adicional no OpenJDK 21.
+- Atividade OpenSpec atual: 3.49, executar as trilhas H2 e Oracle no OpenJDK
+  25 e a qualificação adicional no OpenJDK 21.
 
 ## Decisões permanentes
 
@@ -301,6 +303,25 @@ URLs Oracle, endereços internos nem valores do `.env`.
   produzir build aprovado em Java 25, mantendo bytecode/API-alvo em Java 21.
 - O smoke funcional completo fica para a atividade 3.49, junto com as trilhas
   H2, Oracle e a qualificação adicional Java 21.
+
+### 3.49 — qualificação Java 21/25 (em andamento)
+
+- `scripts/qualify-cp-3j.sh` executa a mesma suíte HTTP nos WARs compilados
+  pelo OpenJDK 21 e pelo OpenJDK 25, separando H2 (`portable-ci`) de Oracle
+  (`oracle-qualified`).
+- As execuções usam portas de loopback distintas (28121/29121 e 28125/29125),
+  auditam o conteúdo dos dois WARs e rejeitam logs/evidências com bind público
+  ou dados de conexão Oracle.
+- `scripts/validate-cp-3j-qualification.sh` valida o agregador, os dois
+  manifestos de runtime, contratos, checksums, portas e sanitização. O CI
+  hospedado executa a trilha H2; a trilha Oracle precisa ser executada com o
+  `.env` externo na rede autorizada.
+- A correção do cleanup em `smoke-wildfly41-datasource.sh` remove diretórios
+  temporários do Java 21/25 somente quando o caminho corresponde ao prefixo
+  esperado.
+- Ainda não marcar a tarefa 3.49 como concluída nem iniciar a 3.50 até que o
+  CI confirme H2 nos dois JDKs e a evidência Oracle correspondente esteja
+  disponível.
 
 ### 3.9 — descoberta de validadores
 

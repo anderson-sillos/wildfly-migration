@@ -113,7 +113,7 @@ cleanup() {
   if [[ -n "$SERVER_PID" ]]; then wait "$SERVER_PID" >/dev/null 2>&1 || true; fi
   if [[ -n "$TEMP_DIRECTORY" ]]; then
     case "$TEMP_DIRECTORY" in
-      "/tmp/wildfly-migration-${TEMP_PREFIX}.*") rm -rf -- "$TEMP_DIRECTORY" ;;
+      /tmp/wildfly-migration-${TEMP_PREFIX}.*) rm -rf -- "$TEMP_DIRECTORY" ;;
       *) printf 'AVISO: diretório temporário inesperado não removido\n' >&2 ;;
     esac
   fi
