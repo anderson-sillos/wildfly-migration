@@ -1,6 +1,6 @@
 # Codex handoff
 
-Atualizado em 05/08/2026 após a conclusão da atividade 3.52. O CP-3H foi
+Atualizado em 05/08/2026 após a conclusão da atividade 3.53. O CP-3H foi
 fechado, o CP-3I foi aprovado em H2 e Oracle, o runtime do CP-3J foi fixado, a
 incompatibilidade natural do javac 25 foi capturada e a correção mínima com
 `--release 21` foi aplicada. A qualificação Java 21/25 da 3.49 foi
@@ -27,13 +27,13 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - CP-3J: integrado pela PR #29 no commit `eac264e003a05f475c817eaa1df2adb687ae11bf`,
   com a mensagem `checkpoint(CP-3J): qualify OpenJDK 25`; não foi criada tag
   pública.
-- Progresso OpenSpec: 107 de 110 tarefas concluídas.
+- Progresso OpenSpec: 108 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
   3.35, fechamento do checkpoint.
-- Próxima atividade OpenSpec: 3.53, reproduzir o destino final a partir de
-  checkout limpo com H2 e configuração Oracle externa.
+- Próxima atividade OpenSpec: 3.54, auditar histórico Git, rastreabilidade,
+  segredos, licenças, checksums, dependências, WAR e rollback.
 
 ## Decisões permanentes
 
@@ -353,6 +353,16 @@ URLs Oracle, endereços internos nem valores do `.env`.
   `oracle-qualified`, exceções resolvidas e limitações.
 - O relatório é intermediário: a fase 3 permanece em validação até as tarefas
   3.53–3.55, sem antecipar a tag `migration/03-final`.
+
+### 3.53 — reprodução do destino final
+
+- `scripts/reproduce-cp-3k.sh` criou um clone local limpo, executou o doctor,
+  recompilou com OpenJDK 25 e validou WildFly 41/H2 em loopback.
+- H2 e Oracle executaram os 15 contratos; os relatórios sanitizados estão em
+  `migration/evidence/CP-3K/reproduction-ci-h2.json` e
+  `migration/evidence/CP-3K/reproduction-oracle.json`.
+- O WAR Java 25 reproduzido tem SHA-256
+  `80876fc3ee480cbdda32e948aaf3a8d5151dacf883717254fda943cb5af33270`.
 
 ### 3.9 — descoberta de validadores
 

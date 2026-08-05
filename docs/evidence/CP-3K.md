@@ -103,15 +103,21 @@ e CP-3J estão em [`migration/evidence/`](../../migration/evidence/).
   não são parte do smoke padrão.
 - Não há teste de carga, failover, disponibilidade de produção ou certificação
   de um banco diferente do Oracle 19c documentado.
-- O relatório ainda não declara a fase 3 encerrada: checkout limpo, auditoria
-  final, aprovação de todas as evidências, squash e tag permanecem nas tarefas
-  3.53–3.55.
+- O relatório ainda não declara a fase 3 encerrada: auditoria final, aprovação
+  de todas as evidências, squash e tag permanecem nas tarefas 3.54–3.55.
+
+As reproduções da atividade 3.53 estão registradas em
+[`reproduction-ci-h2.json`](../../migration/evidence/CP-3K/reproduction-ci-h2.json)
+(`portable-ci`) e
+[`reproduction-oracle.json`](../../migration/evidence/CP-3K/reproduction-oracle.json)
+(`oracle-qualified`). Os dois relatórios usam o mesmo WAR Java 25, com SHA-256
+`80876fc3ee480cbdda32e948aaf3a8d5151dacf883717254fda943cb5af33270`.
 
 ## Reprodução e rollback
 
 O ponto de entrada operacional é [`environment-setup.md`](../environment-setup.md),
 seguido pelo `doctor`, pelos scripts do checkpoint e pelo runbook de cada fase.
-A reprodução final será registrada na atividade 3.53 a partir de checkout limpo,
+A reprodução final foi registrada na atividade 3.53 a partir de checkout limpo,
 sem `.env`, credenciais, JDK, WildFly ou driver proprietário versionados.
 
 Cada checkpoint retorna ao último commit verde documentado, sem `DROP USER`,

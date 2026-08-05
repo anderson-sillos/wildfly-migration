@@ -31,6 +31,9 @@ jobs:
       - name: Validate incompatibility catalog
         run: ./scripts/validate-incompatibility-catalog.sh
 
+      - name: Validate CP-3K clean reproduction evidence
+        run: ./scripts/validate-cp-3k-reproduction.sh --profile ci-h2
+
   portable-ci:
     name: portable-ci
     runs-on: ubuntu-latest

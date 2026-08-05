@@ -1,0 +1,19 @@
+{
+  "schema": "wildfly-migration-cp3k-reproduction/v1",
+  "checkpoint": "CP-3K",
+  "activity": "3.53",
+  "sourceCommit": "c9d8ae135934db96ef1b711907618d7be3291b76",
+  "runtime": "java25-wildfly41.0.0",
+  "warSha256": "80876fc3ee480cbdda32e948aaf3a8d5151dacf883717254fda943cb5af33270",
+  "requestedProfile": "oracle",
+  "executedProfiles": ["ci-h2", "oracle"],
+  "qualification": "oracle-qualified",
+  "contractScenarios": 15,
+  "cleanCheckoutBefore": "passed",
+  "cleanCheckoutAfter": "passed-source-tree",
+  "portableCi": "passed",
+  "oracleQualified": "passed",
+  "externalConfiguration": "used-without-versioning",
+  "wildflyBind": "loopback-only",
+  "result": "passed"
+}
