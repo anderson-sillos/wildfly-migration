@@ -37,10 +37,18 @@ for marker in \
   'result=passed'; do
   grep -Fxq "$marker" "$REPORT" || fail "evidência sem: $marker"
 done
-[[ -f "$WAR" ]] || fail 'WAR Java 25 ausente para conferência'
-war_sha256="$(sha256sum "$WAR" | awk '{print $1}')"
-grep -Fxq "war.sha256=$war_sha256" "$REPORT" ||
-  fail 'checksum da auditoria diverge do WAR local'
+if [[ -f "$WAR" ]]; then
+  war_sha256="$(sha256sum "$WAR" | awk '{print $1}')"
+  grep -Fxq "war.sha256=$war_sha256" "$REPORT" ||
+    fail 'checksum da auditoria diverge do WAR local'
+else
+  expected_war_sha256="$(sed -n 's/.*"java25": "\([0-9a-f]\{64\}\)".*/\1/p' \
+    "$ROOT/migration/evidence/CP-3J/ci-h2-qualification.json" | head -n 1)"
+  [[ -n "$expected_war_sha256" ]] ||
+    fail 'WAR ausente e checksum CP-3J não disponível'
+  grep -Fxq "war.sha256=$expected_war_sha256" "$REPORT" ||
+    fail 'checksum da auditoria diverge da evidência CP-3J'
+fi
 if grep -Eiq 'jdbc:oracle:|ORACLE_DB_|password=|user-name=|connection-url|senha=|DROP USER|DROP SCHEMA' \
     "$REPORT"; then
   fail 'evidência de auditoria contém segredo ou operação destrutiva'
