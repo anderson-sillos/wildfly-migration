@@ -1,11 +1,11 @@
 ## 1. Fontes e estrutura editorial
 
-- [ ] 1.1 Criar `docs/presentation/executive-migration-lab.md` com público, objetivo, duração, estrutura padrão e os 12 títulos aprovados no design.
-- [ ] 1.2 Mapear para cada slide as fontes versionadas que sustentam versões, números, resultados e conclusões.
+- [x] 1.1 Criar `docs/presentation/executive-migration-lab.md` com público, objetivo, duração, estrutura padrão e os 12 títulos aprovados no design.
+- [x] 1.2 Mapear para cada slide as fontes versionadas que sustentam versões, números, resultados e conclusões.
 
 ## 2. Conteúdo básico dos slides
 
-- [ ] 2.1 Redigir os slides 1 a 3: tese executiva, problema do legado e proposta do laboratório.
+- [x] 2.1 Redigir os slides 1 a 3: tese executiva, problema do legado e proposta do laboratório.
 - [ ] 2.2 Redigir os slides 4 e 5: planejamento em três fases e método de checkpoints, evidências e rollback.
 - [ ] 2.3 Redigir os slides 6 a 8: evolução tecnológica, constatações comprovadas e incompatibilidades representativas.
 - [ ] 2.4 Redigir os slides 9 e 10: lições aprendidas, limitações e riscos ainda dependentes da aplicação real.
