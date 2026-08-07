@@ -73,6 +73,11 @@ passos.
     dependências, segurança e rollback do checkpoint.
 33. [CP-3H/3.36 — XML moderno e seguro](../migration/steps/CP-3H-xml-safe.md):
     versões fixadas, regeneração XMLBeans e testes XMLBeans/dom4j no Java 21.
+34. [Relatório consolidado CP-3K](evidence/CP-3K.md): três fases, gates,
+    versões, estados de qualificação, exceções e limitações.
+35. [Conclusão do projeto](project-conclusion.md): propósito, planejamento,
+    lições aprendidas e roteiro recomendado para aplicar a abordagem em uma
+    migração real.
 
 ## Aplicação e arquitetura
 

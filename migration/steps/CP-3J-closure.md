@@ -18,6 +18,13 @@ não cria uma quarta fase nem uma tag pública.
 - `rollback.properties`: retorno documentado ao gate CP-3I sem mutação de
   banco.
 
+Os relatórios foram originalmente produzidos na branch de trabalho do PR #29.
+Após o squash, a proveniência foi normalizada para o commit integrado
+`eac264e003a05f475c817eaa1df2adb687ae11bf`, que preserva exatamente as árvores
+de aplicação, runtime e scripts usadas na qualificação. Assim, a auditoria
+continua reprodutível a partir do histórico público da `main`, mesmo quando a
+branch temporária do PR deixa de estar disponível no checkout do CI.
+
 H2 não qualifica Oracle. O Oracle foi executado no schema descartável externo,
 com credenciais fora do Git; os logs e relatórios não armazenam URL, usuário,
 senha, wallet ou endereço interno.
