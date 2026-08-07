@@ -300,27 +300,27 @@ fi
 
 grep -Fq -- \
   '- [x] 2.11 Alinhar as APIs do build a Jakarta EE 8' \
-  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  "$REPOSITORY_ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.11 não está concluída no OpenSpec"
 
 grep -Fq -- \
   '- [x] 2.12 Atualizar a ferramenta de build de Maven 3.8.9 para Maven 3.9.16' \
-  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  "$REPOSITORY_ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.12 não está concluída no OpenSpec"
 
 grep -Fq -- \
   '- [x] 2.13 Validar a paridade portátil em H2 e qualificar no Oracle' \
-  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  "$REPOSITORY_ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.13 não está concluída no OpenSpec"
 
 grep -Fq -- \
   '- [x] 2.14 Atualizar `doctor`, CI H2, qualificação Oracle e auditoria do WAR' \
-  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  "$REPOSITORY_ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.14 não está concluída no OpenSpec"
 
 grep -Fq -- \
   '- [x] 2.15 Encerrar `CP-2C`' \
-  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  "$REPOSITORY_ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.15 não está concluída no OpenSpec"
 
 evidence_source_commit="$(

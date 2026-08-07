@@ -5,7 +5,7 @@ set -euo pipefail
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WAR_FILE="$REPOSITORY_ROOT/app/target/wildfly-migration.war"
 TREE_FILE="$REPOSITORY_ROOT/app/target/dependency-tree.txt"
-TASKS_FILE="$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md"
+TASKS_FILE="$REPOSITORY_ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md"
 CLOSURE_FILE="$REPOSITORY_ROOT/migration/evidence/CP-3C/closure.properties"
 ROLLBACK_FILE="$REPOSITORY_ROOT/migration/evidence/CP-3C/rollback.properties"
 TEMP_DIRECTORY="$(mktemp -d /tmp/wildfly-migration-cp3c-closure.XXXXXXXX)"

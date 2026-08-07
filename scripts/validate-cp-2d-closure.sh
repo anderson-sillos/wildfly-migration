@@ -4,7 +4,7 @@ set -euo pipefail
 
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORKFLOW="$REPOSITORY_ROOT/.github/workflows/validate.yml"
-TASKS="$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md"
+TASKS="$REPOSITORY_ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md"
 EVIDENCE_DOCUMENT="$REPOSITORY_ROOT/docs/evidence/CP-2D.md"
 CLOSURE="$REPOSITORY_ROOT/migration/evidence/CP-2D/closure.properties"
 MANIFEST="$REPOSITORY_ROOT/migration/baselines/02-java8-wildfly26/manifest.properties"

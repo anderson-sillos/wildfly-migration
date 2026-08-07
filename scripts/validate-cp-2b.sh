@@ -160,19 +160,19 @@ grep -Fq $'INC-010\tCP-2B\t' \
   "$REPOSITORY_ROOT/migration/incompatibilities.tsv" ||
   fail "INC-010 não foi catalogada"
 grep -Fq -- '- [x] 2.6 Tentar implantar no WildFly 26.1.3' \
-  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  "$REPOSITORY_ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.6 não está concluída"
 grep -Fq -- '- [x] 2.7 Capturar incompatibilidades de configuração' \
-  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  "$REPOSITORY_ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.7 não está concluída"
 grep -Fq -- '- [x] 2.8 Provisionar WildFly 26.1.3/Java 8' \
-  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  "$REPOSITORY_ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.8 não está concluída"
 grep -Fq -- '- [x] 2.9 Configurar no WildFly 26 os perfis H2 e Oracle' \
-  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  "$REPOSITORY_ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.9 não está concluída"
 grep -Fq -- '- [x] 2.10 Encerrar `CP-2B`' \
-  "$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  "$REPOSITORY_ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md" ||
   fail "tarefa 2.10 não está concluída"
 
 OBSERVATIONS="$REPOSITORY_ROOT/migration/evidence/CP-2B/compatibility-observations.tsv"

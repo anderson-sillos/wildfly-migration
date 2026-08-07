@@ -10,7 +10,7 @@ WEB_XML="$REPOSITORY_ROOT/app/src/main/webapp/WEB-INF/web.xml"
 TILES_DEFS="$REPOSITORY_ROOT/app/src/main/webapp/WEB-INF/tiles-defs.xml"
 BASE_LAYOUT="$REPOSITORY_ROOT/app/src/main/webapp/WEB-INF/layout/base.jsp"
 HANDLER="$REPOSITORY_ROOT/app/src/main/java/br/com/asillos/migration/web/tag/StatusPedidoTag.java"
-TASKS="$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md"
+TASKS="$REPOSITORY_ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md"
 DECISION="$REPOSITORY_ROOT/docs/cp-3d-java17-gate.md"
 STEP="$REPOSITORY_ROOT/migration/steps/CP-3D-tiles-tld-exception.md"
 

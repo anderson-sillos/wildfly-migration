@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TASKS_FILE="$REPOSITORY_ROOT/openspec/changes/create-java-web-migration-lab/tasks.md"
+TASKS_FILE="$REPOSITORY_ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md"
 WAR_FILE=""
 H2_RESULT_FILE=""
 H2_CONTRACT_FILE=""

@@ -1,10 +1,10 @@
 id	area	component	state	impact	disposition	evidence
-P2-LIM-001	platform	Java-8-and-EE-8-javax	bridge-only	O namespace web ainda não é Jakarta e bibliotecas antigas permanecem	avançar-pelos-gates-CP-3A-a-CP-3F	openspec/changes/create-java-web-migration-lab/design.md
+P2-LIM-001	platform	Java-8-and-EE-8-javax	bridge-only	O namespace web ainda não é Jakarta e bibliotecas antigas permanecem	avançar-pelos-gates-CP-3A-a-CP-3F	openspec/changes/archive/2026-08-07-create-java-web-migration-lab/design.md
 P2-LIM-002	runtime	WildFly-26.1.3.Final	EOL-bridge-runtime	Não é o servidor sustentável definido para o destino final	substituir-no-CP-3E	docs/cp-2b-wildfly26.md
 P2-LIM-003	database	H2-1.4.200	EOL-test-only	Aprova somente a semântica portátil e nunca qualifica Oracle	revisar-no-CP-3A	docs/h2-oracle-differences.md
 P2-LIM-004	jdbc	ojdbc7-12.1.0.2.0	legacy-proprietary-external	Driver antigo restrito ao Java 8 e fornecido fora do WAR	substituir-no-CP-3C	docs/cp-2c-ee8-maven-datasource.md
 P2-LIM-005	logging	Log4j-1.2.14	EOL	A biblioteca permanece empacotada somente para preservar o legado	substituir-no-CP-3B-e-remover-ponte-no-CP-3G	migration/incompatibilities.tsv
-P2-LIM-006	presentation	Apache-Tiles-2.1.4	discontinued	O layout depende de uma biblioteca sem caminho Jakarta mantido	substituir-no-CP-3G	openspec/changes/create-java-web-migration-lab/design.md
+P2-LIM-006	presentation	Apache-Tiles-2.1.4	discontinued	O layout depende de uma biblioteca sem caminho Jakarta mantido	substituir-no-CP-3G	openspec/changes/archive/2026-08-07-create-java-web-migration-lab/design.md
 P2-LIM-007	upload	Commons-FileUpload-1.2.2	legacy	O processamento multipart ainda usa uma API antiga	atualizar-no-CP-3B-e-substituir-no-CP-3G	docs/legacy-upload.md
 P2-LIM-008	discovery	Reflections-0.9.10	legacy	A descoberta dinâmica depende de classpath scanning antigo	atualizar-no-CP-3B-e-substituir-na-tarefa-3.33-do-CP-3G	docs/legacy-validation-logging.md
 P2-LIM-009	xml	XMLBeans-2.3.0-dom4j-1.6.1-and-duplicated-XML-APIs	legacy-and-duplicated	APIs XML antigas duplicam contratos fornecidos pelo JDK	modernizar-no-CP-3C	docs/legacy-xml-import.md

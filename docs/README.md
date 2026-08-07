@@ -134,4 +134,4 @@ As falhas de migração e suas correções ficam em
 valores congelados da fase 1 ficam em
 [`migration/baselines/01-legacy/`](../migration/baselines/01-legacy/). O
 planejamento executável e os critérios normativos permanecem em
-[`openspec/changes/create-java-web-migration-lab/`](../openspec/changes/create-java-web-migration-lab/).
+[`openspec/changes/archive/2026-08-07-create-java-web-migration-lab/`](../openspec/changes/archive/2026-08-07-create-java-web-migration-lab/).
