@@ -84,7 +84,7 @@ schema. Consulte também [CONTRIBUTING.md](CONTRIBUTING.md) e
 - A configuração real fica em `.env` ou no mecanismo de secrets do executor.
 
 O planejamento executável está em
-`openspec/changes/create-java-web-migration-lab/`.
+`openspec/changes/archive/2026-08-07-create-java-web-migration-lab/`.
 
 ## Licença
 

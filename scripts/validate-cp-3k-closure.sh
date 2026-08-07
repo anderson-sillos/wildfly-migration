@@ -25,7 +25,7 @@ done
 for path in \
   "$ROOT/docs/project-conclusion.md" \
   "$ROOT/docs/evidence/CP-3K.md" \
-  "$ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" \
+  "$ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md" \
   "$EVIDENCE_DIR/reproduction-ci-h2.json" \
   "$EVIDENCE_DIR/reproduction-oracle.json" \
   "$EVIDENCE_DIR/audit.properties" \
@@ -84,7 +84,7 @@ audit_sha="$(sed -n 's/^war.sha256=\([0-9a-f]\{64\}\)$/\1/p' \
   fail 'checksum do WAR diverge entre fechamento, reproduções e auditoria'
 
 grep -Fq -- '- [x] 3.55 Encerrar `CP-3K`' \
-  "$ROOT/openspec/changes/create-java-web-migration-lab/tasks.md" ||
+  "$ROOT/openspec/changes/archive/2026-08-07-create-java-web-migration-lab/tasks.md" ||
   fail 'atividade 3.55 não está concluída'
 grep -Fq 'O destino final está aprovado' "$ROOT/docs/evidence/CP-3K.md" ||
   fail 'relatório consolidado não declara a aprovação final'
