@@ -6,10 +6,10 @@
 ## 2. Conteúdo básico dos slides
 
 - [x] 2.1 Redigir os slides 1 a 3: tese executiva, problema do legado e proposta do laboratório.
-- [ ] 2.2 Redigir os slides 4 e 5: planejamento em três fases e método de checkpoints, evidências e rollback.
-- [ ] 2.3 Redigir os slides 6 a 8: evolução tecnológica, constatações comprovadas e incompatibilidades representativas.
-- [ ] 2.4 Redigir os slides 9 e 10: lições aprendidas, limitações e riscos ainda dependentes da aplicação real.
-- [ ] 2.5 Redigir os slides 11 e 12: roteiro de aplicação real, próximos passos e decisões solicitadas à liderança.
+- [x] 2.2 Redigir os slides 4 e 5: planejamento em três fases e método de checkpoints, evidências e rollback.
+- [x] 2.3 Redigir os slides 6 a 8: evolução tecnológica, constatações comprovadas e incompatibilidades representativas.
+- [x] 2.4 Redigir os slides 9 e 10: lições aprendidas, limitações e riscos ainda dependentes da aplicação real.
+- [x] 2.5 Redigir os slides 11 e 12: roteiro de aplicação real, próximos passos e decisões solicitadas à liderança.
 
 ## 3. Revisão e publicação textual
 

@@ -89,11 +89,15 @@ Traduzir “baseline” como o estado inicial conhecido e reproduzível: código
 
 **Mensagem central**
 
-_A redigir na tarefa 2.2._
+`Comprovado no laboratório`: dividir a jornada em três fases públicas permitiu preservar o comportamento, modernizar primeiro com baixo impacto e tratar depois as rupturas arquiteturais do destino final.
 
 **Texto básico**
 
-_A redigir na tarefa 2.2._
+- **Fase 1 — Baseline legado:** tornar Java 7/WildFly 9 observável, reproduzível e testável.
+- **Fase 2 — Baixo impacto:** avançar para Java 8/WildFly 26 preservando o modelo `javax` e os contratos.
+- **Fase 3 — Destino final:** atualizar dependências, migrar para Jakarta e qualificar OpenJDK 25/WildFly 41.
+- Java 17 e Java 21 funcionaram como gates técnicos para separar dependências, Jakarta e JVM final.
+- A evolução ocorreu sobre uma única aplicação; tags preservaram os três estados públicos.
 
 **Evidências**
 
@@ -103,17 +107,21 @@ _A redigir na tarefa 2.2._
 
 **Notas do apresentador**
 
-_A redigir na tarefa 2.2._
+Explicar que os gates são pontos de verificação de engenharia, não necessariamente ambientes que devem entrar em produção. A fase 2 oferece uma ponte de menor ruptura para organizações que precisam reduzir risco antes do salto Jakarta. Em uma aplicação real, versões e quantidade de gates podem mudar depois do inventário; a função de cada fase deve permanecer clara.
 
 ## Slide 5 — Como reduzimos o risco: checkpoints, evidência e rollback
 
 **Mensagem central**
 
-_A redigir na tarefa 2.2._
+`Comprovado no laboratório`: checkpoints pequenos converteram uma migração longa em decisões verificáveis, cada uma com causa diagnosticável, evidência de aprovação e retorno ao último estado verde.
 
 **Texto básico**
 
-_A redigir na tarefa 2.2._
+- Executar o último artefato aprovado no próximo runtime antes de corrigi-lo.
+- Alterar um grupo coerente de riscos e repetir os mesmos contratos.
+- Integrar por commit e PR com critérios objetivos de aprovação.
+- Vincular evidência ao artefato, runtime, banco e resultado realmente testados.
+- Manter o runtime anterior e um procedimento de rollback para cada fechamento.
 
 **Evidências**
 
@@ -124,17 +132,21 @@ _A redigir na tarefa 2.2._
 
 **Notas do apresentador**
 
-_A redigir na tarefa 2.2._
+Destacar que a primeira falha é uma evidência útil: ela identifica a incompatibilidade antes que várias correções escondam sua origem. “Rollback” não significa restaurar banco automaticamente; significa ter artefato, runtime e configuração anteriores disponíveis, além de um procedimento aprovado para proteger e reconciliar dados. Checkpoints menores também reduzem o escopo de revisão e de decisão gerencial.
 
 ## Slide 6 — A evolução alcançada
 
 **Mensagem central**
 
-_A redigir na tarefa 2.3._
+`Comprovado no laboratório`: o destino não foi apenas uma JVM mais nova; runtime, APIs, bibliotecas, empacotamento, logging, upload, XML e acesso ao banco foram modernizados de forma coordenada.
 
 **Texto básico**
 
-_A redigir na tarefa 2.3._
+- **Origem:** Java 7u80, WildFly 9.0.2 e APIs Java EE da geração `javax`.
+- **Destino:** OpenJDK 25, WildFly 41 e Jakarta EE 11, usando somente distribuições open source no runtime final.
+- Bibliotecas abandonadas foram substituídas por padrões do Servlet/Jakarta ou mecanismos encapsulados pela aplicação.
+- MyBatis, XML e JDBC foram atualizados preservando a fronteira de datasource JNDI.
+- APIs do servidor e driver Oracle ficaram fora do WAR, reduzindo conflitos de classloader e empacotamento.
 
 **Evidências**
 
@@ -144,17 +156,21 @@ _A redigir na tarefa 2.3._
 
 **Notas do apresentador**
 
-_A redigir na tarefa 2.3._
+Evitar transformar este slide em inventário de bibliotecas. O ponto gerencial é que modernizar a plataforma exigiu tratar também componentes invisíveis ao usuário: descritores, módulos do servidor, pool de conexão, logging e conteúdo do WAR. O runtime final usa OpenJDK e WildFly Community; o Oracle continua sendo o banco oficial e seu driver é provisionado externamente.
 
 ## Slide 7 — O que foi efetivamente comprovado
 
 **Mensagem central**
 
-_A redigir na tarefa 2.3._
+`Comprovado no laboratório`: o mesmo comportamento essencial foi preservado até o destino final e validado tanto no ambiente portátil quanto no Oracle oficial do laboratório.
 
 **Texto básico**
 
-_A redigir na tarefa 2.3._
+- Os 14 contratos funcionais do baseline permaneceram válidos durante a evolução.
+- O destino Jakarta acrescentou segurança de fragmentos web e encerrou com 15/15 cenários aprovados.
+- O mesmo WAR final foi executado em OpenJDK 21 e 25, com H2 e Oracle 19c RU 19.3.
+- A reprodução partiu de checkout limpo, sem credenciais ou binários restritos versionados.
+- Auditorias verificaram dependências, conteúdo do WAR, versões, origens, checksums e rollback.
 
 **Evidências**
 
@@ -165,17 +181,21 @@ _A redigir na tarefa 2.3._
 
 **Notas do apresentador**
 
-_A redigir na tarefa 2.3._
+Explicar que H2 e Oracle têm papéis diferentes: H2 oferece feedback remoto rápido; Oracle qualifica o comportamento oficial de persistência. “15/15” não significa cobertura total da aplicação, e sim aprovação de todos os cenários definidos para o laboratório. O resultado comprova o escopo modelado — fluxo web, sessão, upload, XML, persistência e aspectos de segurança — e não requisitos externos que não foram representados.
 
 ## Slide 8 — Incompatibilidades: não foi apenas trocar versões
 
 **Mensagem central**
 
-_A redigir na tarefa 2.3._
+`Comprovado no laboratório`: 27 incompatibilidades foram catalogadas; as causas alcançaram código, build, servidor, empacotamento, configuração e banco, confirmando que uma atualização direta ocultaria riscos diferentes sob uma única falha.
 
 **Texto básico**
 
-_A redigir na tarefa 2.3._
+- JVM e build: versões de bytecode, plugins e opções removidas precisaram ser alinhados.
+- Java EE → Jakarta: imports, descritores, JSP/JSTL, TLD e bibliotecas web atravessaram a fronteira de namespace.
+- Bibliotecas abandonadas: Tiles, Commons FileUpload, Reflections e Log4j 1 foram substituídos pelo contrato que cumpriam.
+- Runtime: datasource, driver, logging e APIs fornecidas pelo servidor exigiram configuração e auditoria do WAR.
+- Banco e XML: compatibilidade portátil não substituiu qualificação Oracle nem testes de parsing seguro.
 
 **Evidências**
 
@@ -185,17 +205,21 @@ _A redigir na tarefa 2.3._
 
 **Notas do apresentador**
 
-_A redigir na tarefa 2.3._
+Usar poucos exemplos para mostrar amplitude, não para explicar implementação. A troca do Reflections por um mecanismo padrão do Servlet preservou a descoberta automática; o upload passou a usar a API nativa; Tiles foi substituído por recursos JSP protegidos. Cada correção foi associada à falha anterior e a uma prova posterior, formando um catálogo reutilizável na investigação de uma aplicação real.
 
 ## Slide 9 — Lições que reduzem risco em uma migração real
 
 **Mensagem central**
 
-_A redigir na tarefa 2.4._
+`Recomendação para aplicação real`: o ativo mais reutilizável do laboratório é a disciplina de produzir estados conhecidos e aprovados; versões específicas podem mudar, mas os controles de evidência e decisão devem permanecer.
 
 **Texto básico**
 
-_A redigir na tarefa 2.4._
+- Tratar o baseline como a primeira entrega, não como preparação informal.
+- Mudar poucas dimensões por gate para preservar a capacidade de diagnóstico.
+- Validar contratos externos e o WAR efetivo, não apenas compilação e `pom.xml`.
+- Usar CI portátil para velocidade e o banco oficial para qualificação.
+- Vincular cada aprovação a artefato, runtime, evidência, limitações e rollback.
 
 **Evidências**
 
@@ -204,17 +228,21 @@ _A redigir na tarefa 2.4._
 
 **Notas do apresentador**
 
-_A redigir na tarefa 2.4._
+Reforçar que a organização não precisa copiar exatamente Java 8, 17 ou 21 como gates. Ela precisa escolher pontos que isolem riscos relevantes da sua aplicação. O baseline reduz discussão subjetiva sobre regressões; a inspeção do artefato encontra dependências que a compilação não revela; e a evidência durável permite auditoria mesmo depois de squash, limpeza de branches ou mudança de ambiente.
 
 ## Slide 10 — O que o laboratório não prova
 
 **Mensagem central**
 
-_A redigir na tarefa 2.4._
+`Limitação`: o laboratório comprova o método e o escopo representado, mas não certifica automaticamente uma aplicação real nem fornece estimativa de prazo, custo ou risco residual sem inventário e testes próprios.
 
 **Texto básico**
 
-_A redigir na tarefa 2.4._
+- Não foram exercitados carga, cluster, failover, alta disponibilidade ou disaster recovery.
+- Integrações, segurança, jobs, filas, EAR/EJB e regras de domínio não representadas exigem gates próprios.
+- H2 não cobre integralmente SQL, locks, planos, tipos, permissões ou comportamento do driver Oracle.
+- A qualificação oficial observou Oracle 19c RU 19.3; patches adicionais do ambiente não foram inventariados.
+- Prazo, orçamento, equipe e janela de implantação dependem do diagnóstico da aplicação selecionada.
 
 **Evidências**
 
@@ -223,17 +251,21 @@ _A redigir na tarefa 2.4._
 
 **Notas do apresentador**
 
-_A redigir na tarefa 2.4._
+Apresentar limites como controle de decisão, não como enfraquecimento do resultado. O laboratório evita prometer compatibilidade universal: ele oferece um método para descobrir o que é específico de cada sistema antes da produção. Uma aplicação com EAR, EJB, JMS, integrações externas, SQL proprietário ou requisitos intensivos de disponibilidade terá atividades adicionais e possivelmente mais gates.
 
 ## Slide 11 — Como aplicar o método em uma aplicação real
 
 **Mensagem central**
 
-_A redigir na tarefa 2.5._
+`Recomendação para aplicação real`: iniciar por uma aplicação piloto e financiar primeiro conhecimento verificável — inventário e baseline — antes de assumir destino, cronograma ou janela de produção.
 
 **Texto básico**
 
-_A redigir na tarefa 2.5._
+- Selecionar o piloto e formar responsáveis de negócio, aplicação, plataforma, DBA e segurança.
+- Inventariar artefato, runtime, dependências, configurações, dados e integrações reais.
+- Reconstruir o legado e congelar contratos dos fluxos críticos no banco oficial.
+- Planejar gates para JVM, servidor, dependências e Jakarta conforme os riscos encontrados.
+- Ensaiar implantação paralela, critérios de go/no-go, observabilidade e rollback antes do corte.
 
 **Evidências**
 
@@ -243,17 +275,21 @@ _A redigir na tarefa 2.5._
 
 **Notas do apresentador**
 
-_A redigir na tarefa 2.5._
+O primeiro compromisso não é migrar tudo: é produzir um diagnóstico confiável. O baseline deve associar fonte, artefato, checksum, configuração e comportamentos críticos. Só então a equipe consegue propor versões, quantidade de gates, esforço e riscos residuais. A implantação recomendada mantém ambiente anterior e novo em paralelo, com corte controlado e proteção explícita dos dados.
 
 ## Slide 12 — Decisão proposta e próximos passos
 
 **Mensagem central**
 
-_A redigir na tarefa 2.5._
+`Recomendação para aplicação real`: autorizar uma etapa limitada de enquadramento e baseline para converter incerteza em evidência antes de decidir pela execução completa da migração.
 
 **Texto básico**
 
-_A redigir na tarefa 2.5._
+- Selecionar uma aplicação piloto com relevância e escopo administrável.
+- Nomear patrocinador e responsáveis multidisciplinares pela decisão técnica e de negócio.
+- Autorizar inventário, ambiente isolado, acesso controlado ao banco e construção do baseline.
+- Definir critérios de sucesso, riscos que exigem escalonamento e formato das evidências.
+- Retornar à liderança com diagnóstico, alternativas, roadmap, estimativa e recomendação de continuidade.
 
 **Evidências**
 
@@ -263,4 +299,4 @@ _A redigir na tarefa 2.5._
 
 **Notas do apresentador**
 
-_A redigir na tarefa 2.5._
+Fechar com uma decisão objetiva: aprovar a descoberta e o baseline do piloto, não uma migração cega nem um corte em produção. A primeira entrega deve permitir responder o que existe, o que precisa ser preservado, quais bloqueios são reais e quais caminhos são viáveis. Prazo, custo e plano final serão apresentados depois dessa evidência, com opções e critérios de go/no-go para a liderança.
