@@ -37,6 +37,9 @@ jobs:
       - name: Validate CP-3K audit evidence
         run: ./scripts/validate-cp-3k-audit.sh
 
+      - name: Validate CP-3K closure evidence
+        run: ./scripts/validate-cp-3k-closure.sh
+
   portable-ci:
     name: portable-ci
     runs-on: ubuntu-latest

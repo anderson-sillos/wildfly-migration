@@ -29,8 +29,9 @@ entraram na linha evolutiva.
 | 3 | CP-3K | Destino final e tag da fase 3 |
 
 O relatório consolidado do destino final está em
-[`evidence/CP-3K.md`](evidence/CP-3K.md). Ele é intermediário até a aprovação
-das atividades 3.53 a 3.55.
+[`evidence/CP-3K.md`](evidence/CP-3K.md), e as lições aprendidas estão na
+[conclusão do projeto](project-conclusion.md). O CP-3K encerra a fase 3 depois
+da aprovação das atividades 3.53 a 3.55.
 
 As tags públicas são:
 

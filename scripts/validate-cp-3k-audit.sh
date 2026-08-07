@@ -14,6 +14,7 @@ fail() {
 for path in \
   "$ROOT/scripts/audit-cp-3k.sh" \
   "$ROOT/docs/evidence/CP-3K.md" \
+  "$ROOT/docs/project-conclusion.md" \
   "$ROOT/docs/cp-3k-reproduction.md" \
   "$REPORT"; do
   [[ -f "$path" ]] || fail "arquivo obrigatório ausente: ${path#"$ROOT/"}"
@@ -57,5 +58,15 @@ grep -Fq 'PR incremental #30' "$ROOT/docs/codex-handoff.md" ||
   fail 'PR #30 não está no handoff'
 grep -Fq 'Reprodução e rollback' "$ROOT/docs/evidence/CP-3K.md" ||
   fail 'rollback não está no relatório consolidado'
+for marker in \
+  '# Conclusão do projeto' \
+  '## Propósito' \
+  '## Planejamento executado' \
+  '## Lições aprendidas' \
+  '## Como aplicar o método em uma aplicação real' \
+  '## Conclusão'; do
+  grep -Fq "$marker" "$ROOT/docs/project-conclusion.md" ||
+    fail "conclusão do projeto sem: $marker"
+done
 
 printf 'OK: CP-3K/3.54 auditoria de histórico, segurança, proveniência, WAR e rollback validada\n'

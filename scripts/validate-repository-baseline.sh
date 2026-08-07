@@ -99,6 +99,7 @@ shell_files=(
   scripts/validate-cp-3k-reproduction.sh
   scripts/audit-cp-3k.sh
   scripts/validate-cp-3k-audit.sh
+  scripts/validate-cp-3k-closure.sh
   contract-tests/run.sh
 )
 
@@ -191,4 +192,6 @@ run_step "Validar correção Java 25 do CP-3J/3.48" \
   ./scripts/validate-cp-3j-java25.sh
 run_step "Validar catálogo de incompatibilidades do CP-3K/3.51" \
   ./scripts/validate-incompatibility-catalog.sh
+run_step "Validar fechamento do CP-3K/3.55" \
+  ./scripts/validate-cp-3k-closure.sh
 printf '\nOK: repository-baseline local e remoto concluído\n'

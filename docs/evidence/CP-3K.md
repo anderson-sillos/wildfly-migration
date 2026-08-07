@@ -4,14 +4,15 @@
 
 Este relatório consolida a evolução da mesma aplicação nas três fases públicas
 do laboratório, os gates intermediários, as versões fixadas, as evidências e os
-limites conhecidos. Ele foi gerado na atividade 3.52, antes do fechamento da
-atividade 3.55.
+limites conhecidos. Ele foi iniciado na atividade 3.52 e concluído no
+fechamento 3.55.
 
-Portanto, os resultados anteriores permanecem aprovados, mas o estado do
-destino final ainda é `em validação`: a criação da tag
-`migration/03-final` e a integração final dependem das atividades 3.53 a 3.55.
-H2 e Oracle são sempre apresentados em estados separados; H2 nunca é usado
-como substituto da qualificação Oracle.
+O destino final está aprovado pelas trilhas `portable-ci` e
+`oracle-qualified`, pela reprodução a partir de checkout limpo e pela auditoria
+final. A PR #30 é integrada pelo assunto obrigatório
+`checkpoint(CP-3K): complete final destination`, e o mesmo commit recebe a tag
+`migration/03-final`. H2 e Oracle permanecem apresentados em estados
+separados; H2 nunca substitui a qualificação Oracle.
 
 ## Três fases públicas
 
@@ -19,7 +20,7 @@ como substituto da qualificação Oracle.
 | --- | --- | --- | --- |
 | 1 — Baseline legado | Preservar o comportamento Java EE 7 antes da modernização | Oracle JDK 7u80, Maven 3.8.9, WildFly 9.0.2.Final, H2 1.4.200 para `portable-ci`, Oracle 19c/`ojdbc7` para `oracle-qualified` | `CP-1G`, tag `migration/01-legacy-baseline`, 14/14 contratos |
 | 2 — Java 8 e WildFly compatível | Modernizar o runtime com o menor impacto no código `javax` | Temurin 8u492, Maven 3.9.16, WildFly 26.1.3.Final, H2 1.4.200, Oracle 19c/`ojdbc7` | `CP-2D`, tag `migration/02-java8-wildfly26`, 14/14 contratos |
-| 3 — Destino Jakarta/OpenJDK | Atualizar dependências, namespace e servidor mantendo gates reproduzíveis | Temurin OpenJDK 25.0.4+7, WildFly Community 41.0.0.Final, Jakarta EE 11, H2 2.4.240, Oracle 19c/`ojdbc17` 23.26.2.0.0 | `CP-3J` aprovado; `CP-3K` em validação antes da tag final |
+| 3 — Destino Jakarta/OpenJDK | Atualizar dependências, namespace e servidor mantendo gates reproduzíveis | Temurin OpenJDK 25.0.4+7, WildFly Community 41.0.0.Final, Jakarta EE 11, H2 2.4.240, Oracle 19c/`ojdbc17` 23.26.2.0.0 | `CP-3K`, tag `migration/03-final`, 15/15 contratos em Java 21 e 25 |
 
 As origens, licenças e SHA-256 dos arquivos estão nos manifestos de runtime:
 [`legacy`](../../runtime/legacy/runtime-manifest.tsv),
@@ -43,7 +44,7 @@ As origens, licenças e SHA-256 dos arquivos estão nos manifestos de runtime:
 | CP-3H | XML seguro, datasource e auditoria do WAR | aprovado, 15/15 | aprovado, 15/15 | [`CP-3H`](CP-3H.md) |
 | CP-3I | Gate Java 21 e semântica de persistência | aprovado, 15/15 | aprovado, 15/15 | [`CP-3I`](CP-3I.md) |
 | CP-3J | OpenJDK 25 no WildFly 41 | 15/15 em Java 21 e 25 | 15/15 em Java 21 e 25 | [`CP-3J`](CP-3J.md) |
-| CP-3K | Consolidação, reprodução, auditoria e tag final | em validação | em validação até 3.55 | este relatório e evidências 3.53–3.55 |
+| CP-3K | Consolidação, reprodução, auditoria e tag final | aprovado, 15/15 | aprovado, 15/15 | este relatório e evidências 3.53–3.55 |
 
 O cenário `protectedFragments` foi acrescentado ao conjunto de 14 cenários do
 baseline a partir dos gates Jakarta; por isso os gates CP-3F em diante registram
@@ -103,8 +104,8 @@ e CP-3J estão em [`migration/evidence/`](../../migration/evidence/).
   não são parte do smoke padrão.
 - Não há teste de carga, failover, disponibilidade de produção ou certificação
   de um banco diferente do Oracle 19c documentado.
-- O relatório ainda não declara a fase 3 encerrada: auditoria final, aprovação
-  de todas as evidências, squash e tag permanecem nas tarefas 3.54–3.55.
+- A qualificação Oracle representa a instância 19c RU 19.3 observada; o
+  inventário de patches `one-off` do Oracle Home não foi fornecido.
 
 As reproduções da atividade 3.53 estão registradas em
 [`reproduction-ci-h2.json`](../../migration/evidence/CP-3K/reproduction-ci-h2.json)
@@ -132,12 +133,23 @@ sem `.env`, credenciais, JDK, WildFly ou driver proprietário versionados.
 
 Cada checkpoint retorna ao último commit verde documentado, sem `DROP USER`,
 remoção de schema ou alteração destrutiva no Oracle. As evidências de rollback
-estão nos diretórios `migration/evidence/CP-*/` correspondentes; o rollback do
-CP-3K será aprovado somente no fechamento 3.55.
+estão nos diretórios `migration/evidence/CP-*/` correspondentes. O CP-3K retorna
+ao CP-3J pelo runtime e WAR já aprovados, sem mutação de banco.
+
+As lições aprendidas e a aplicação recomendada deste método em um sistema real
+estão consolidadas na [conclusão do projeto](../project-conclusion.md).
+
+## Fechamento 3.55
+
+O fechamento aprovou as evidências H2 e Oracle, a reprodução limpa, a auditoria
+de histórico/segurança/proveniência, o WAR e o rollback. O resumo verificável
+está em
+[`closure.properties`](../../migration/evidence/CP-3K/closure.properties) e
+[`rollback.properties`](../../migration/evidence/CP-3K/rollback.properties).
 
 ## Conclusão desta atividade
 
 As três fases, os gates, as versões e a distinção entre `portable-ci` e
-`oracle-qualified` estão consolidados e rastreáveis. A conclusão final do
-destino depende das validações incrementais restantes do CP-3K e não é
-antecipada por este relatório.
+`oracle-qualified` estão consolidados e rastreáveis. O destino final está
+aprovado em OpenJDK 25/WildFly 41/Jakarta EE 11 e preservado pela tag
+`migration/03-final`.

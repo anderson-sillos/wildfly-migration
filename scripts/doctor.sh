@@ -601,11 +601,15 @@ check_required_files() {
       "scripts/validate-incompatibility-catalog.sh"
       "docs/cp-3k-reproduction.md"
       "docs/evidence/CP-3K.md"
+      "docs/project-conclusion.md"
       "scripts/reproduce-cp-3k.sh"
       "scripts/validate-cp-3k-reproduction.sh"
       "scripts/audit-cp-3k.sh"
       "scripts/validate-cp-3k-audit.sh"
       "migration/evidence/CP-3K/audit.properties"
+      "scripts/validate-cp-3k-closure.sh"
+      "migration/evidence/CP-3K/closure.properties"
+      "migration/evidence/CP-3K/rollback.properties"
     )
   fi
 

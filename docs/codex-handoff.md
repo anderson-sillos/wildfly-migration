@@ -1,12 +1,13 @@
 # Codex handoff
 
-Atualizado em 05/08/2026 após a conclusão da atividade 3.54. O CP-3H foi
+Atualizado em 07/08/2026 após o fechamento da atividade 3.55. O CP-3H foi
 fechado, o CP-3I foi aprovado em H2 e Oracle, o runtime do CP-3J foi fixado, a
 incompatibilidade natural do javac 25 foi capturada e a correção mínima com
 `--release 21` foi aplicada. A qualificação Java 21/25 da 3.49 foi
 automatizada, executada em H2 e qualificada no Oracle 19c; os roteiros de
 reprodução, rollback e os fechamentos sem tag pública foram consolidados. O
-CP-3J foi integrado por squash e o CP-3K iniciou o catálogo final.
+CP-3J foi integrado por squash, e o CP-3K consolidou catálogo, relatório,
+reprodução limpa, auditoria e conclusão do projeto.
 
 Este documento preserva o contexto operacional para a próxima sessão. Ele não
 substitui o OpenSpec, os runbooks ou as evidências e não contém credenciais,
@@ -27,17 +28,16 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - CP-3J: integrado pela PR #29 no commit `eac264e003a05f475c817eaa1df2adb687ae11bf`,
   com a mensagem `checkpoint(CP-3J): qualify OpenJDK 25`; não foi criada tag
   pública.
-- CP-3K: PR incremental #30 está aberta a partir da branch
-  `checkpoint/cp-3k-entry`; ela acumula as atividades 3.51–3.54 e só será
-  integrada no fechamento com o assunto `checkpoint(CP-3K): complete final
-  destination`.
-- Progresso OpenSpec: 109 de 110 tarefas concluídas.
+- CP-3K: PR incremental #30 integrada a partir da branch
+  `checkpoint/cp-3k-entry` com o assunto `checkpoint(CP-3K): complete final
+  destination`; o commit recebe a tag pública `migration/03-final`.
+- Progresso OpenSpec: 110 de 110 tarefas concluídas.
 - Atividades CP-3B concluídas: 3.6, 3.7, 3.8, 3.9 e 3.10.
 - Atividades CP-3G concluídas: 3.31, remoção do Tiles; 3.32, multipart Servlet;
   3.33, descoberta por `ServletContainerInitializer`; 3.34, logging final;
   3.35, fechamento do checkpoint.
-- Próxima atividade OpenSpec: 3.55, encerrar o CP-3K, integrar a PR final e
-  criar a tag `migration/03-final`.
+- Próxima ação opcional: sincronizar as specs principais e arquivar a change
+  OpenSpec; nenhuma nova atividade de implementação permanece.
 
 ## Decisões permanentes
 
@@ -355,8 +355,8 @@ URLs Oracle, endereços internos nem valores do `.env`.
 - [`docs/evidence/CP-3K.md`](evidence/CP-3K.md) consolida as três fases
   públicas, checkpoints, versões, gates, estados `portable-ci` e
   `oracle-qualified`, exceções resolvidas e limitações.
-- O relatório é intermediário: a fase 3 permanece em validação até as tarefas
-  3.53–3.55, sem antecipar a tag `migration/03-final`.
+- O relatório foi concluído na atividade 3.55 e referencia a tag pública
+  `migration/03-final`.
 
 ### 3.53 — reprodução do destino final
 
@@ -374,6 +374,17 @@ URLs Oracle, endereços internos nem valores do `.env`.
   checksums, dependências, WAR e rollback.
 - A evidência está em `migration/evidence/CP-3K/audit.properties`; a tag
   `migration/03-final` permanece ausente até a atividade 3.55.
+
+### 3.55 — fechamento do CP-3K
+
+- As evidências H2 e Oracle, a reprodução limpa, o WAR, a proveniência, a
+  segurança e o rollback foram aprovados.
+- `docs/project-conclusion.md` resume propósito, planejamento, lições
+  aprendidas e aplicação do método em uma migração real.
+- A PR #30 é integrada por squash com o assunto
+  `checkpoint(CP-3K): complete final destination`.
+- A tag pública `migration/03-final` identifica o destino OpenJDK 25/WildFly
+  41/Jakarta EE 11.
 
 ### 3.9 — descoberta de validadores
 
