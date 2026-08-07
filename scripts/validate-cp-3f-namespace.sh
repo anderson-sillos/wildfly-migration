@@ -27,12 +27,14 @@ for path in "${required[@]}"; do
   [[ -f "$ROOT/$path" ]] || fail "arquivo obrigatório ausente: $path"
 done
 
-if rg -n '^import javax\.(servlet|el)(\.|;)' \
+if grep -R -n -E --binary-files=without-match \
+    '^import javax\.(servlet|el)(\.|;)' \
     "$ROOT/app/src/main/java"; then
   fail "a árvore web ainda importa APIs EE javax"
 fi
 
-if rg -n 'javax\.servlet\.context\.tempdir|http://java\.sun\.com/jsp/jstl' \
+if grep -R -n -E --binary-files=without-match \
+    'javax\.servlet\.context\.tempdir|http://java\.sun\.com/jsp/jstl' \
     "$ROOT/app/src/main/java" "$ROOT/app/src/main/webapp"; then
   fail "referência de namespace Servlet/JSTL legado permaneceu na aplicação"
 fi
@@ -45,7 +47,8 @@ grep -Fq 'web-app_6_1.xsd' "$ROOT/app/src/main/webapp/WEB-INF/web.xml" ||
 grep -Fq 'version="6.1"' "$ROOT/app/src/main/webapp/WEB-INF/web.xml" ||
   fail "web.xml não declara Servlet 6.1"
 
-if rg -n 'java\.sun\.com/xml/ns/j2ee|web-app_2_4\.xsd' \
+if grep -n -E \
+    'java\.sun\.com/xml/ns/j2ee|web-app_2_4\.xsd' \
     "$ROOT/app/src/main/webapp/WEB-INF/web.xml"; then
   fail "web.xml histórico foi mantido na aplicação moderna"
 fi
@@ -84,7 +87,8 @@ for uri in jakarta.tags.core jakarta.tags.fmt; do
   grep -R -Fq "uri=\"$uri\"" "$ROOT/app/src/main/webapp" ||
     fail "URI JSTL ausente: $uri"
 done
-if rg -n 'java\.sun\.com/jsp/jstl' "$ROOT/app/src/main/webapp"; then
+if grep -R -n -E --binary-files=without-match \
+    'java\.sun\.com/jsp/jstl' "$ROOT/app/src/main/webapp"; then
   fail "URI JSTL legado permaneceu nas JSPs"
 fi
 
@@ -114,7 +118,8 @@ done
 grep -Fq 'request.getParts()' \
   "$ROOT/app/src/main/java/br/com/asillos/migration/web/MultipartPartSupport.java" ||
   fail "multipart Jakarta não usa request.getParts()"
-if rg -n 'commons\.fileupload|ServletFileUpload|FileItem|DiskFileItemFactory|JakartaFileUploadRequestContext' \
+if grep -R -n -E --binary-files=without-match \
+    'commons\.fileupload|ServletFileUpload|FileItem|DiskFileItemFactory|JakartaFileUploadRequestContext' \
     "$ROOT/app/src/main/java" "$ROOT/app/pom.xml"; then
   fail "Commons FileUpload ainda está referenciado no código ativo"
 fi
