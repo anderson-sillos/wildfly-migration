@@ -11,7 +11,7 @@ A apresentação será criada primeiro como conteúdo estruturado em Markdown. O
 **Goals:**
 
 - organizar a apresentação em três grandes partes com duração total máxima de 20 minutos;
-- fornecer título, tempo-alvo, mensagem central, texto básico, evidências e notas breves para cada slide;
+- fornecer título, tempo-alvo, mensagem central, texto básico e notas breves para cada slide;
 - incluir o quadro WildFly × Java e associá-lo ao risco de ciclo de vida e compatibilidade;
 - explicar como Codex, SDD e OpenSpec estruturaram a construção do laboratório;
 - justificar as três fases como mecanismo de separação de riscos;
@@ -58,7 +58,7 @@ O Markdown terá títulos `Parte 1`, `Parte 2` e `Parte 3` envolvendo os slides 
 
 ### 3. Manter uma estrutura textual uniforme por slide
 
-Cada slide terá os campos `Tempo-alvo`, `Mensagem central`, `Texto básico`, `Evidências` e `Notas do apresentador`. Tabelas serão usadas quando a relação entre versões, componentes e decisões for mais clara que uma lista. Detalhes técnicos e explicações ficarão nas notas.
+Cada slide terá os campos `Tempo-alvo`, `Mensagem central`, `Texto básico` e `Notas do apresentador`. Tabelas serão usadas quando a relação entre versões, componentes e decisões for mais clara que uma lista. Detalhes técnicos e explicações ficarão nas notas.
 
 A alternativa de redigir apenas títulos e bullets foi rejeitada porque deixaria a interpretação dependente demais do apresentador. Um roteiro integral, palavra por palavra, também foi rejeitado por dificultar adaptação à reunião.
 
@@ -95,7 +95,7 @@ Essa separação evita apresentar o sucesso do laboratório, ou o uso de IA, com
 
 ### 8. Usar o repositório como fonte de verdade
 
-Números, versões e resultados devem apontar para fontes como `docs/project-conclusion.md`, `docs/evidence/CP-3K.md`, `docs/wildfly-java-compatibility.md`, `docs/codex-handoff.md`, os artefatos OpenSpec e `migration/incompatibility-catalog.md`. Links ficarão no campo de evidências de cada slide.
+Números, versões e resultados devem apontar para fontes como `docs/project-conclusion.md`, `docs/evidence/CP-3K.md`, `docs/wildfly-java-compatibility.md`, `docs/codex-handoff.md`, os artefatos OpenSpec e `migration/incompatibility-catalog.md`. Para preservar a fluidez dos slides, os links ficarão em um mapa de referências editoriais separado, organizado por slide e explicitamente fora da apresentação.
 
 ## Risks / Trade-offs
 

@@ -13,7 +13,8 @@ O laboratório produziu evidências técnicas extensas, mas ainda não existe um
 - Explicar resumidamente SDD (*Specification-Driven Development*) e o papel do OpenSpec na transformação de proposta, design, requisitos e tarefas em execução rastreável.
 - Destacar que código, automações, documentação, evidências e planejamento foram construídos com Codex, sob direção, revisão e validação humana.
 - Listar os principais componentes e bibliotecas do legado, apresentando a decisão tomada para cada um no destino.
-- Definir para cada slide título, tempo-alvo, mensagem principal, texto básico, evidências e orientação breve para o apresentador.
+- Definir para cada slide título, tempo-alvo, mensagem principal, texto básico e orientação breve para o apresentador.
+- Manter as fontes que sustentam os slides em uma seção editorial separada, fora do conteúdo da apresentação.
 - Distinguir claramente fatos comprovados pelo laboratório, recomendações derivadas e limitações do escopo.
 - Encerrar com próximos passos e decisões esperadas da liderança.
 - Manter fora do escopo o arquivo visual final, identidade visual, imagens, gráficos definitivos, animações e escolha da ferramenta de apresentação.

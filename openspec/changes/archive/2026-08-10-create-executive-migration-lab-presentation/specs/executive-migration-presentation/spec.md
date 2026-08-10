@@ -23,11 +23,11 @@ O material SHALL separar explicitamente a apresentação em problema/proposta/pl
 - **THEN** o total não excede 20 minutos
 
 ### Requirement: Estrutura mínima por slide
-Cada slide SHALL conter título, tempo-alvo, mensagem central, texto básico, evidências de apoio e notas breves do apresentador. O texto básico SHOULD privilegiar pontos curtos e não duplicar integralmente as notas.
+Cada slide SHALL conter título, tempo-alvo, mensagem central, texto básico e notas breves do apresentador. O texto básico SHOULD privilegiar pontos curtos e não duplicar integralmente as notas. As fontes de apoio MUST permanecer fora dos slides, em uma seção editorial separada e organizada por slide.
 
 #### Scenario: Slide completo
 - **WHEN** qualquer slide de conteúdo é inspecionado
-- **THEN** os seis elementos obrigatórios estão presentes e a mensagem principal pode ser entendida isoladamente
+- **THEN** os cinco elementos obrigatórios estão presentes e a mensagem principal pode ser entendida isoladamente
 
 ### Requirement: Quadro de compatibilidade WildFly e Java
 A Parte 1 SHALL incluir o quadro WildFly × Java versionado no projeto e MUST explicar as legendas necessárias para interpretar ciclo de vida, compatibilidade e preferência de runtime.
@@ -52,7 +52,7 @@ Toda afirmação quantitativa, versão de plataforma, resultado de teste ou conc
 
 #### Scenario: Resultado comprovado
 - **WHEN** um slide declara que um comportamento, runtime ou contrato foi validado
-- **THEN** o campo de evidências referencia o documento, catálogo ou artefato que sustenta a declaração
+- **THEN** o mapa de referências editoriais associa o slide ao documento, catálogo ou artefato que sustenta a declaração
 
 #### Scenario: Afirmação sem evidência suficiente
 - **WHEN** uma afirmação relevante não pode ser ligada a uma evidência existente
@@ -110,4 +110,4 @@ A fonte textual SHALL ser utilizável antes da escolha de identidade visual ou f
 
 #### Scenario: Revisão editorial anterior ao design
 - **WHEN** o conteúdo é revisado sem um arquivo visual
-- **THEN** organização, mensagens, evidências, tempos e notas podem ser aprovados integralmente em Markdown
+- **THEN** organização, mensagens, referências editoriais, tempos e notas podem ser aprovados integralmente em Markdown

@@ -24,7 +24,6 @@
 - **Tempo-alvo:** limite editorial para manter a apresentação em 20 minutos.
 - **Mensagem central:** a conclusão que deve permanecer para o público.
 - **Texto básico:** conteúdo que poderá ser exibido no slide.
-- **Evidências:** fontes versionadas que sustentam afirmações e números.
 - **Notas do apresentador:** contexto oral que não precisa aparecer no slide.
 
 ## Slide 1 — Modernizar com controle: do legado ao destino atual
@@ -40,11 +39,6 @@
 - Uma aplicação, três fases e uma sequência de estados aprovados.
 - O resultado mais reutilizável é o método de migração com evidências.
 - A decisão proposta é aplicar esse método primeiro a um piloto controlado.
-
-**Evidências**
-
-- [Conclusão do projeto — propósito e conclusão](../project-conclusion.md): objetivo, plataforma inicial/final e tese dos estados verdes.
-- [Relatório consolidado CP-3K](../evidence/CP-3K.md): aprovação do destino final e das três fases públicas.
 
 **Notas do apresentador**
 
@@ -86,11 +80,6 @@ Abrir com a tese e antecipar as três partes: por que o legado exige ação, o q
 
 **Legenda resumida:** `Sim` = combinação qualificada/documentada; `Rec.` = JDK preferido naquela linha; `Aval.` = funciona, mas ainda estava em avaliação; `N/Q` = não qualificada ou não documentada; `Não` = removida ou abaixo do mínimo; `LTS` = suporte de longo prazo da distribuição Java; `EOL` = fim do ciclo regular de manutenção.
 
-**Evidências**
-
-- [Evolução WildFly × Java SE](../wildfly-java-compatibility.md): matriz completa, notas, ciclos de manutenção e fontes primárias.
-- [Conclusão do projeto — lições 1 e 2](../project-conclusion.md): risco de modernizar sem baseline e de misturar variáveis.
-
 **Notas do apresentador**
 
 Não ler a tabela inteira. Destacar três linhas: WildFly 8–9 como legado, 25–26.1 como ponte compatível com Java 8/11/17 e APIs `javax`, e 40–41 como destino Jakarta EE 11 com Java 25 preferido. Explicar que `Rec.` descreve preferência de runtime, não certificação TCK no mesmo JDK. A matriz é uma fotografia histórica; antes de uma decisão real, versões e suporte devem ser verificados novamente.
@@ -110,12 +99,6 @@ Não ler a tabela inteira. Destacar três linhas: WildFly 8–9 como legado, 25�
 - Separar JVM, servidor, dependências, Jakarta e banco em gates controlados.
 - Repetir os mesmos contratos com CI portátil e qualificação no Oracle.
 - Encerrar checkpoints com PR, evidência, limitações e rollback.
-
-**Evidências**
-
-- [Conclusão do projeto — propósito e planejamento](../project-conclusion.md): princípios incrementais e gates utilizados.
-- [Spec do laboratório de compatibilidade](../../openspec/specs/migration-compatibility-lab/spec.md): checkpoints, evidência antes/depois e dupla qualificação.
-- [Checkpoints do laboratório](../checkpoints.md): entregas mínimas e tags públicas.
 
 **Notas do apresentador**
 
@@ -141,13 +124,6 @@ Não ler a tabela inteira. Destacar três linhas: WildFly 8–9 como legado, 25�
 
 `proposta (por quê) → design (como) → specs (o que deve ser verdade) → tarefas (execução) → evidências/checkpoints`
 
-**Evidências**
-
-- [Codex handoff](../codex-handoff.md): registro versionado das decisões e do trabalho conduzido com o agente.
-- [Change arquivada do laboratório](../../openspec/changes/archive/2026-08-07-create-java-web-migration-lab/): proposal, design, specs e 110 tarefas concluídas.
-- [Specs principais](../../openspec/specs/): contratos normativos sincronizados após o fechamento.
-- [Fluxo GitHub](../github-workflow.md): revisão, CI, PRs e checkpoints usados nas aprovações.
-
 **Notas do apresentador**
 
 SDD significa *Specification-Driven Development*: a especificação guia a implementação e fornece critérios verificáveis. OpenSpec é a estrutura usada para organizar esse ciclo; não substitui Git, CI ou testes. “Integralmente construído com IA” significa que os artefatos foram produzidos na interação com o Codex, não que a IA decidiu sozinha: direção, credenciais, testes manuais, aceites e responsabilidade permaneceram humanos.
@@ -169,12 +145,6 @@ SDD significa *Specification-Driven Development*: a especificação guia a imple
 | **3 — Destino final** | Dependências modernas, Jakarta EE 11, WildFly 41 e OpenJDK 25 | Concentra as mudanças arquiteturais depois que comportamento e infraestrutura já são conhecidos |
 
 Java 17 e Java 21 foram gates técnicos da fase final: isolaram dependências, Jakarta/WildFly 41 e JVM final sem criar fases públicas adicionais.
-
-**Evidências**
-
-- [Conclusão do projeto — planejamento executado](../project-conclusion.md): objetivos e plataformas aprovadas nas três fases.
-- [Relatório CP-3K — três fases públicas](../evidence/CP-3K.md): entradas, runtimes e saídas aprovadas.
-- [Checkpoints do laboratório](../checkpoints.md): decomposição das fases em entregas incrementais.
 
 **Notas do apresentador**
 
@@ -202,13 +172,6 @@ A fase 1 compra conhecimento; a fase 2 reduz risco operacional sem reescrever na
 
 `Limitação`: 15/15 comprova todos os cenários definidos para o laboratório, não cobertura total de uma aplicação real. H2 acelera feedback, mas não substitui Oracle. Carga, cluster, failover, integrações não modeladas e requisitos próprios de produção exigem gates adicionais.
 
-**Evidências**
-
-- [Relatório CP-3K — checkpoints, ambientes e limitações](../evidence/CP-3K.md): resultados `portable-ci` e `oracle-qualified`.
-- [Reprodução final em H2](../../migration/evidence/CP-3K/reproduction-ci-h2.json): execução portátil a partir de checkout limpo.
-- [Reprodução final em Oracle](../../migration/evidence/CP-3K/reproduction-oracle.json): qualificação oficial no Oracle 19c.
-- [Fechamento CP-3K](../../migration/evidence/CP-3K/closure.properties): contratos, WAR, auditoria e resultado final.
-
 **Notas do apresentador**
 
 Separar claramente velocidade de feedback e qualificação oficial. O valor da prova está em saber exatamente qual comportamento foi exercitado, em qual runtime, com qual artefato e qual banco — e também o que permaneceu fora do escopo.
@@ -228,12 +191,6 @@ Separar claramente velocidade de feedback e qualificação oficial. O valor da p
 - **Corrigir:** preservar o contrato da aplicação, não necessariamente a biblioteca antiga.
 - **Provar:** repetir contratos e auditar o artefato realmente implantado.
 - **Documentar:** registrar causa, decisão, evidência, limitação e rollback.
-
-**Evidências**
-
-- [Catálogo de incompatibilidades](../../migration/incompatibility-catalog.md): visão humana das 27 falhas, causas, correções e provas.
-- [Índice estruturado](../../migration/incompatibilities.tsv): fonte canônica validada pelo CI.
-- [Conclusão do projeto — lições 3, 6, 7 e 8](../project-conclusion.md): falha antes da correção, WAR, contratos e Jakarta.
 
 **Notas do apresentador**
 
@@ -258,13 +215,6 @@ A quantidade é menos importante que a variedade. Um salto direto poderia aprese
 | H2 | 1.4.200 | Manter apenas como feedback portátil e atualizar conforme o gate | H2 2.4.240 em memória; nunca substitui qualificação Oracle |
 | Oracle | Database 19c | Manter como banco oficial e usar schema descartável autorizado | Oracle 19c RU 19.3 observado na qualificação; segredos e driver permanecem externos |
 | Datasource/JNDI | Pool do WildFly e `java:/jdbc/MigrationDS` | Preservar a fronteira da aplicação e reprovisionar por runtime | Mesmo JNDI, pool controlado pelo servidor e teste de conexão em cada gate |
-
-**Evidências**
-
-- [Relatório CP-3K — três fases e ambientes](../evidence/CP-3K.md): versões e papéis dos runtimes.
-- [Preparação do ambiente](../environment-setup.md): origens, licenças e versões fixadas.
-- [Spec WildFly/Oracle](../../openspec/specs/wildfly-oracle-runtime/spec.md): runtime, JNDI, driver e dupla qualificação.
-- [Evolução WildFly × Java](../wildfly-java-compatibility.md): compatibilidade e manutenção comunitária.
 
 **Notas do apresentador**
 
@@ -295,13 +245,6 @@ Destacar Java, WildFly e Oracle; as demais linhas ficam para consulta. A decisã
 | Servlet/JSP/JSTL `javax` | Migrar somente no gate Jakarta | APIs Jakarta fornecidas pelo WildFly; JSTL Jakarta compatível |
 | TLD/taglib 2.0 | Preservar evidência histórica e migrar schema/handler | TLD 3.0 e tag handler Jakarta |
 
-**Evidências**
-
-- [Conclusão do projeto — resultado e substituições](../project-conclusion.md): versões finais e contratos preservados.
-- [Relatório CP-3K — incompatibilidades resolvidas](../evidence/CP-3K.md): transições aprovadas.
-- [Catálogo de incompatibilidades](../../migration/incompatibility-catalog.md): registros detalhados de falha/correção.
-- [Spec da aplicação Jakarta](../../openspec/specs/modern-jakarta-webapp/spec.md): dependências proibidas e mecanismos finais.
-
 **Notas do apresentador**
 
 Não ler as doze linhas. Destacar quatro padrões de decisão: atualizar componente mantido; remover API já fornecida; substituir biblioteca abandonada pelo contrato; manter driver e APIs do servidor fora do WAR. Usar FileUpload, Reflections e Log4j como exemplos representativos.
@@ -321,11 +264,6 @@ Não ler as doze linhas. Destacar quatro padrões de decisão: atualizar compone
 - **Provar o executável:** contratos externos e auditoria do WAR valem mais que “compilou”.
 - **Feedback não é qualificação:** H2 acelera; Oracle decide persistência oficial.
 - **Evidência e rollback duráveis:** aprovação deve sobreviver a branches, squash e mudança de ambiente.
-
-**Evidências**
-
-- [Conclusão do projeto — doze lições aprendidas](../project-conclusion.md): fundamento completo dos cinco controles resumidos.
-- [Spec do laboratório de compatibilidade](../../openspec/specs/migration-compatibility-lab/spec.md): contratos, auditoria, fixtures, evidência e dupla qualificação.
 
 **Notas do apresentador**
 
@@ -348,12 +286,6 @@ O valor do laboratório não é recomendar versões históricas. É demonstrar u
 3. **Construir o baseline:** reproduzir o legado e congelar contratos dos fluxos críticos no banco oficial.
 4. **Desenhar gates:** separar JVM, servidor, dependências, Jakarta e riscos específicos encontrados.
 5. **Qualificar e implantar:** executar trilha portátil, banco oficial, segurança, observabilidade, ensaio de corte e rollback.
-
-**Evidências**
-
-- [Conclusão do projeto — aplicação em sistema real](../project-conclusion.md): etapas de inventário até implantação.
-- [Roteiro de migração para aplicação real](../phase2-real-application-migration-runbook.md): papéis, janela, go/no-go e rollback.
-- [Spec do laboratório de compatibilidade](../../openspec/specs/migration-compatibility-lab/spec.md): critérios reutilizáveis de gates e evidência.
 
 **Notas do apresentador**
 
@@ -380,12 +312,6 @@ O primeiro compromisso não é migrar tudo: é produzir um diagnóstico confiáv
 
 `Limitação`: carga, cluster, failover, segurança específica, EAR/EJB/JMS, integrações externas, SQL proprietário e requisitos não modelados precisam de gates próprios. O laboratório não fornece automaticamente prazo, orçamento ou certificação de produção.
 
-**Evidências**
-
-- [Conclusão do projeto — critérios por gate](../project-conclusion.md): condições recomendadas de aprovação.
-- [Roteiro para aplicação real](../phase2-real-application-migration-runbook.md): implantação paralela, janela e rollback.
-- [Relatório CP-3K — limitações](../evidence/CP-3K.md): itens não qualificados pelo laboratório.
-
 **Notas do apresentador**
 
 Mostrar que gate é uma decisão, não apenas uma etapa técnica. Se a aplicação real usa recursos ausentes no laboratório, o roteiro ganha novos gates; não se força a aplicação a caber no exemplo.
@@ -410,12 +336,89 @@ Mostrar que gate é uma decisão, não apenas uma etapa técnica. Se a aplicaç�
 
 Inventário revisado + baseline reproduzível + mapa de riscos e incompatibilidades + opções de destino e gates, sem compromisso prematuro com corte em produção.
 
-**Evidências**
+**Notas do apresentador**
+
+Fechar com uma decisão objetiva: aprovar descoberta e baseline do piloto, não uma migração cega. Prazo, custo e plano final serão apresentados depois dessa evidência, com alternativas e critérios de go/no-go.
+
+# Referências editoriais — fora dos slides
+
+Esta seção preserva a rastreabilidade das afirmações e não faz parte do conteúdo a ser exibido na apresentação.
+
+## Slide 1
+
+- [Conclusão do projeto — propósito e conclusão](../project-conclusion.md): objetivo, plataforma inicial/final e tese dos estados verdes.
+- [Relatório consolidado CP-3K](../evidence/CP-3K.md): aprovação do destino final e das três fases públicas.
+
+## Slide 2
+
+- [Evolução WildFly × Java SE](../wildfly-java-compatibility.md): matriz completa, notas, ciclos de manutenção e fontes primárias.
+- [Conclusão do projeto — lições 1 e 2](../project-conclusion.md): risco de modernizar sem baseline e de misturar variáveis.
+
+## Slide 3
+
+- [Conclusão do projeto — propósito e planejamento](../project-conclusion.md): princípios incrementais e gates utilizados.
+- [Spec do laboratório de compatibilidade](../../openspec/specs/migration-compatibility-lab/spec.md): checkpoints, evidência antes/depois e dupla qualificação.
+- [Checkpoints do laboratório](../checkpoints.md): entregas mínimas e tags públicas.
+
+## Slide 4
+
+- [Codex handoff](../codex-handoff.md): registro versionado das decisões e do trabalho conduzido com o agente.
+- [Change arquivada do laboratório](../../openspec/changes/archive/2026-08-07-create-java-web-migration-lab/): proposal, design, specs e 110 tarefas concluídas.
+- [Specs principais](../../openspec/specs/): contratos normativos sincronizados após o fechamento.
+- [Fluxo GitHub](../github-workflow.md): revisão, CI, PRs e checkpoints usados nas aprovações.
+
+## Slide 5
+
+- [Conclusão do projeto — planejamento executado](../project-conclusion.md): objetivos e plataformas aprovadas nas três fases.
+- [Relatório CP-3K — três fases públicas](../evidence/CP-3K.md): entradas, runtimes e saídas aprovadas.
+- [Checkpoints do laboratório](../checkpoints.md): decomposição das fases em entregas incrementais.
+
+## Slide 6
+
+- [Relatório CP-3K — checkpoints, ambientes e limitações](../evidence/CP-3K.md): resultados `portable-ci` e `oracle-qualified`.
+- [Reprodução final em H2](../../migration/evidence/CP-3K/reproduction-ci-h2.json): execução portátil a partir de checkout limpo.
+- [Reprodução final em Oracle](../../migration/evidence/CP-3K/reproduction-oracle.json): qualificação oficial no Oracle 19c.
+- [Fechamento CP-3K](../../migration/evidence/CP-3K/closure.properties): contratos, WAR, auditoria e resultado final.
+
+## Slide 7
+
+- [Catálogo de incompatibilidades](../../migration/incompatibility-catalog.md): visão humana das 27 falhas, causas, correções e provas.
+- [Índice estruturado](../../migration/incompatibilities.tsv): fonte canônica validada pelo CI.
+- [Conclusão do projeto — lições 3, 6, 7 e 8](../project-conclusion.md): falha antes da correção, WAR, contratos e Jakarta.
+
+## Slide 8
+
+- [Relatório CP-3K — três fases e ambientes](../evidence/CP-3K.md): versões e papéis dos runtimes.
+- [Preparação do ambiente](../environment-setup.md): origens, licenças e versões fixadas.
+- [Spec WildFly/Oracle](../../openspec/specs/wildfly-oracle-runtime/spec.md): runtime, JNDI, driver e dupla qualificação.
+- [Evolução WildFly × Java](../wildfly-java-compatibility.md): compatibilidade e manutenção comunitária.
+
+## Slide 9
+
+- [Conclusão do projeto — resultado e substituições](../project-conclusion.md): versões finais e contratos preservados.
+- [Relatório CP-3K — incompatibilidades resolvidas](../evidence/CP-3K.md): transições aprovadas.
+- [Catálogo de incompatibilidades](../../migration/incompatibility-catalog.md): registros detalhados de falha/correção.
+- [Spec da aplicação Jakarta](../../openspec/specs/modern-jakarta-webapp/spec.md): dependências proibidas e mecanismos finais.
+
+## Slide 10
+
+- [Conclusão do projeto — doze lições aprendidas](../project-conclusion.md): fundamento completo dos cinco controles resumidos.
+- [Spec do laboratório de compatibilidade](../../openspec/specs/migration-compatibility-lab/spec.md): contratos, auditoria, fixtures, evidência e dupla qualificação.
+
+## Slide 11
+
+- [Conclusão do projeto — aplicação em sistema real](../project-conclusion.md): etapas de inventário até implantação.
+- [Roteiro de migração para aplicação real](../phase2-real-application-migration-runbook.md): papéis, janela, go/no-go e rollback.
+- [Spec do laboratório de compatibilidade](../../openspec/specs/migration-compatibility-lab/spec.md): critérios reutilizáveis de gates e evidência.
+
+## Slide 12
+
+- [Conclusão do projeto — critérios por gate](../project-conclusion.md): condições recomendadas de aprovação.
+- [Roteiro para aplicação real](../phase2-real-application-migration-runbook.md): implantação paralela, janela e rollback.
+- [Relatório CP-3K — limitações](../evidence/CP-3K.md): itens não qualificados pelo laboratório.
+
+## Slide 13
 
 - [Conclusão do projeto — critérios recomendados e aplicação real](../project-conclusion.md): primeira entrega e condições mínimas.
 - [Roteiro de migração para aplicação real](../phase2-real-application-migration-runbook.md): responsabilidades e preparação.
 - [Checkpoints do laboratório](../checkpoints.md): referência para entregas pequenas e rastreáveis.
-
-**Notas do apresentador**
-
-Fechar com uma decisão objetiva: aprovar descoberta e baseline do piloto, não uma migração cega. Prazo, custo e plano final serão apresentados depois dessa evidência, com alternativas e critérios de go/no-go.

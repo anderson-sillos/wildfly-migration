@@ -22,10 +22,11 @@
 - [x] 3.7 Criar a tabela de bibliotecas/APIs com origem, decisão, destino e contrato preservado.
 - [x] 3.8 Consolidar as lições aprendidas em linguagem executiva e vinculá-las aos controles reutilizáveis.
 - [x] 3.9 Reorganizar a Parte 3 com aplicação real, roadmap/gates/limites e decisão objetiva da liderança.
+- [x] 3.10 Remover o campo de evidências dos slides e consolidar suas fontes em um mapa de referências editoriais separado.
 
 ## 4. Revisão e publicação textual
 
-- [ ] 4.1 Revisar todas as afirmações quantitativas, versões e comprovações contra as evidências referenciadas.
-- [ ] 4.2 Revisar linguagem executiva, explicar termos técnicos necessários e confirmar duração total máxima de 20 minutos.
-- [ ] 4.3 Confirmar que prova, recomendação, limitação e uso de IA estão apresentados sem promessas não sustentadas.
-- [ ] 4.4 Adicionar a apresentação textual ao índice `docs/README.md` e executar a validação de links e o baseline documental do repositório.
+- [x] 4.1 Revisar todas as afirmações quantitativas, versões e comprovações contra as evidências referenciadas.
+- [x] 4.2 Revisar linguagem executiva, explicar termos técnicos necessários e confirmar duração total máxima de 20 minutos.
+- [x] 4.3 Confirmar que prova, recomendação, limitação e uso de IA estão apresentados sem promessas não sustentadas.
+- [x] 4.4 Adicionar a apresentação textual ao índice `docs/README.md` e executar a validação de links e o baseline documental do repositório.
