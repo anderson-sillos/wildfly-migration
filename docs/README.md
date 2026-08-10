@@ -78,6 +78,9 @@ passos.
 35. [Conclusão do projeto](project-conclusion.md): propósito, planejamento,
     lições aprendidas e roteiro recomendado para aplicar a abordagem em uma
     migração real.
+36. [Apresentação executiva do laboratório](presentation/executive-migration-lab.md):
+    narrativa em três partes para gerentes e diretores, com conteúdo dos slides,
+    notas do apresentador e referências editoriais separadas.
 
 ## Aplicação e arquitetura
 

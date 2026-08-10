@@ -32,6 +32,7 @@ required_paths=(
   "docs/legacy-xml-import.md"
   "docs/legacy-validation-logging.md"
   "docs/oracle-lab-schema.md"
+  "docs/presentation/executive-migration-lab.md"
   "docs/cp-2a-java8-wildfly9.md"
   "docs/wildfly-java-compatibility.md"
   "docs/evidence/CP-2A.md"
