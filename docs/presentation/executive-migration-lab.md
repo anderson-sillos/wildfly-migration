@@ -6,8 +6,15 @@
 - **Objetivo:** apresentar o risco do legado, a proposta e a construção do laboratório, as constatações comprovadas, as lições aprendidas e um caminho para aplicar o método a uma migração real.
 - **Duração total:** 20 minutos.
 - **Organização:** três grandes partes, além da abertura.
-- **Escopo desta versão:** organização e conteúdo textual; layout, identidade visual, imagens, animações e ferramenta de apresentação serão definidos posteriormente.
+- **Escopo desta versão:** conteúdo textual canônico, apresentação PowerPoint executiva e gerador versionado do artefato visual.
 - **Princípio de comunicação:** diferenciar `Comprovado no laboratório`, `Recomendação para aplicação real` e `Limitação`.
+
+## Artefatos disponíveis
+
+- [Apresentação PowerPoint](executive-migration-lab.pptx): deck executivo final com 13 slides e notas do apresentador.
+- [Gerador da apresentação](generate-executive-migration-lab.mjs): script específico deste deck, mantido para permitir revisão e regeneração do artefato visual.
+
+O Markdown permanece como fonte editorial independente de ferramenta. O gerador requer um ambiente Node.js com `@oai/artifact-tool`; os arquivos intermediários de renderização são gravados em `target/presentation/executive-migration-lab`, enquanto o `.pptx` final substitui o arquivo versionado ao lado desta fonte.
 
 ## Distribuição do tempo
 

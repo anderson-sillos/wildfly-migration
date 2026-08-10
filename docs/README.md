@@ -80,7 +80,9 @@ passos.
     migração real.
 36. [Apresentação executiva do laboratório](presentation/executive-migration-lab.md):
     narrativa em três partes para gerentes e diretores, com conteúdo dos slides,
-    notas do apresentador e referências editoriais separadas.
+    notas do apresentador e referências editoriais separadas; inclui o
+    [PowerPoint final](presentation/executive-migration-lab.pptx) e o
+    [gerador versionado](presentation/generate-executive-migration-lab.mjs).
 
 ## Aplicação e arquitetura
 
