@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Apresentação orientada ao público executivo
-O material SHALL comunicar a proposta e os resultados do laboratório a gerentes e diretores em linguagem de decisão, com duração planejada entre 15 e 20 minutos e sem pressupor conhecimento técnico detalhado de Java ou WildFly.
+O material SHALL comunicar a proposta e os resultados do laboratório a gerentes e diretores em linguagem de decisão, com duração total máxima de 20 minutos e sem pressupor conhecimento técnico detalhado de Java ou WildFly.
 
 #### Scenario: Leitura por gestor não técnico
 - **WHEN** um gestor lê somente títulos, mensagens centrais e textos básicos
@@ -11,23 +11,41 @@ O material SHALL comunicar a proposta e os resultados do laboratório a gerentes
 - **WHEN** um termo técnico é essencial para sustentar uma conclusão
 - **THEN** o material relaciona o termo a impacto de negócio, risco ou controle operacional
 
-### Requirement: Narrativa executiva completa e resumida
-O material SHALL conter entre 10 e 12 slides e MUST cobrir, em ordem lógica, contexto do legado, proposta do laboratório, planejamento, método de evidência, resultado, incompatibilidades, lições, limitações, aplicação real e próximos passos.
+### Requirement: Narrativa organizada em três partes
+O material SHALL separar explicitamente a apresentação em problema/proposta/planejamento, provas/incompatibilidades/lições e aplicação real/decisões, sem impor uma quantidade máxima de slides além do limite temporal.
 
 #### Scenario: Revisão da sequência
 - **WHEN** a organização dos slides é revisada
-- **THEN** a narrativa progride de problema para proposta, prova, aplicação e decisão sem exigir consulta a outro documento
+- **THEN** as três partes estão identificadas e a narrativa progride de problema para proposta, prova, aplicação e decisão
 
-#### Scenario: Controle de extensão
-- **WHEN** a versão textual é concluída
-- **THEN** ela possui no máximo 12 slides de conteúdo principal, excluindo eventual seção de fontes
+#### Scenario: Controle de duração
+- **WHEN** os tempos-alvo de todos os slides são somados
+- **THEN** o total não excede 20 minutos
 
 ### Requirement: Estrutura mínima por slide
-Cada slide SHALL conter um título, uma mensagem central, texto básico, evidências de apoio e notas breves do apresentador. O texto básico SHOULD privilegiar de três a cinco pontos curtos e não duplicar integralmente as notas.
+Cada slide SHALL conter título, tempo-alvo, mensagem central, texto básico, evidências de apoio e notas breves do apresentador. O texto básico SHOULD privilegiar pontos curtos e não duplicar integralmente as notas.
 
 #### Scenario: Slide completo
 - **WHEN** qualquer slide de conteúdo é inspecionado
-- **THEN** os cinco elementos obrigatórios estão presentes e a mensagem principal pode ser entendida isoladamente
+- **THEN** os seis elementos obrigatórios estão presentes e a mensagem principal pode ser entendida isoladamente
+
+### Requirement: Quadro de compatibilidade WildFly e Java
+A Parte 1 SHALL incluir o quadro WildFly × Java versionado no projeto e MUST explicar as legendas necessárias para interpretar ciclo de vida, compatibilidade e preferência de runtime.
+
+#### Scenario: Leitura executiva do quadro
+- **WHEN** o quadro é apresentado
+- **THEN** as combinações do legado, da ponte e do destino são destacadas sem transformar compatibilidade técnica em recomendação automática de produção
+
+### Requirement: Construção com Codex, SDD e OpenSpec
+A Parte 1 SHALL registrar que o laboratório foi integralmente construído com uso de IA por meio do Codex, sob direção, revisão, testes e aprovação humana, e SHALL resumir SDD e OpenSpec como mecanismos de especificação e rastreabilidade.
+
+#### Scenario: Explicação resumida do OpenSpec
+- **WHEN** o slide de processo é lido
+- **THEN** ele apresenta proposta, design, specs, tarefas e evidências/checkpoints em sequência compreensível para o público executivo
+
+#### Scenario: Responsabilidade humana
+- **WHEN** o uso de IA é descrito
+- **THEN** o material não sugere autonomia irrestrita nem substituição da responsabilidade humana por decisões e aprovações
 
 ### Requirement: Rastreabilidade das afirmações
 Toda afirmação quantitativa, versão de plataforma, resultado de teste ou conclusão apresentada como comprovada SHALL apontar para uma fonte versionada do repositório.
@@ -41,7 +59,7 @@ Toda afirmação quantitativa, versão de plataforma, resultado de teste ou conc
 - **THEN** ela é removida, apresentada como hipótese ou identificada como recomendação a validar
 
 ### Requirement: Separação entre prova, recomendação e limitação
-O material MUST distinguir resultados comprovados no laboratório, recomendações para uma aplicação real e limitações do escopo, sem apresentar o laboratório como garantia automática de compatibilidade, prazo ou custo.
+O material MUST distinguir resultados comprovados no laboratório, recomendações para uma aplicação real e limitações do escopo, sem apresentar o laboratório ou o uso de IA como garantia automática de compatibilidade, prazo ou custo.
 
 #### Scenario: Generalização para aplicação real
 - **WHEN** uma lição do laboratório é aplicada a outro sistema
@@ -52,18 +70,29 @@ O material MUST distinguir resultados comprovados no laboratório, recomendaçõ
 - **THEN** esses itens aparecem como limitações ou atividades futuras, não como resultados aprovados
 
 ### Requirement: Planejamento e comprovações do laboratório
-O material SHALL representar as três fases públicas e os gates intermediários de forma coerente com o histórico do projeto, incluindo a evolução de Java 7/WildFly 9 até OpenJDK 25/WildFly 41/Jakarta EE 11 e os contratos executados em H2 e Oracle.
+O material SHALL justificar as três fases públicas e representar os gates intermediários de forma coerente com o histórico do projeto, incluindo a evolução de Java 7/WildFly 9 até OpenJDK 25/WildFly 41/Jakarta EE 11 e os contratos executados em H2 e Oracle.
 
-#### Scenario: Resumo das fases
+#### Scenario: Razão das três fases
 - **WHEN** o slide de planejamento é lido
-- **THEN** ele diferencia baseline legado, modernização de baixo impacto e destino final
+- **THEN** ele explica baseline, modernização de baixo impacto e destino final como separação deliberada de riscos
 
 #### Scenario: Resumo das comprovações
 - **WHEN** o slide de resultados é lido
 - **THEN** ele apresenta somente números, versões e qualificações confirmados pelas evidências finais
 
+### Requirement: Decisões por componente e biblioteca
+A Parte 2 SHALL listar os principais componentes e bibliotecas do legado e SHALL informar para cada um a decisão tomada, o destino e a justificativa resumida.
+
+#### Scenario: Consulta das decisões
+- **WHEN** as tabelas de componentes são revisadas
+- **THEN** Java, Maven, WildFly, Java/Jakarta EE, H2, Oracle/JDBC, MyBatis, Log4j, Commons FileUpload, Reflections, Tiles, XMLBeans, dom4j, APIs XML e APIs web/TLD possuem decisão explícita
+
+#### Scenario: Biblioteca removida
+- **WHEN** uma biblioteca não permanece no destino
+- **THEN** o material identifica o contrato preservado e o mecanismo substituto ou a API fornecida pela plataforma
+
 ### Requirement: Aplicação do método em migração real
-O material SHALL propor um roteiro adaptável para uma aplicação real que cubra inventário, baseline, modernização incremental, dependências, Jakarta, qualificação oficial, corte e rollback.
+A Parte 3 SHALL propor um roteiro adaptável para uma aplicação real que cubra inventário, baseline, modernização incremental, dependências, Jakarta, qualificação oficial, limites, corte e rollback.
 
 #### Scenario: Uso como ponto de partida
 - **WHEN** a liderança seleciona uma aplicação piloto
@@ -81,4 +110,4 @@ A fonte textual SHALL ser utilizável antes da escolha de identidade visual ou f
 
 #### Scenario: Revisão editorial anterior ao design
 - **WHEN** o conteúdo é revisado sem um arquivo visual
-- **THEN** organização, mensagens, evidências e notas podem ser aprovadas integralmente em Markdown
+- **THEN** organização, mensagens, evidências, tempos e notas podem ser aprovados integralmente em Markdown

@@ -1,19 +1,31 @@
-## 1. Fontes e estrutura editorial
+## 1. Fontes e estrutura editorial inicial
 
-- [x] 1.1 Criar `docs/presentation/executive-migration-lab.md` com público, objetivo, duração, estrutura padrão e os 12 títulos aprovados no design.
-- [x] 1.2 Mapear para cada slide as fontes versionadas que sustentam versões, números, resultados e conclusões.
+- [x] 1.1 Criar `docs/presentation/executive-migration-lab.md` com público, objetivo, duração e estrutura editorial.
+- [x] 1.2 Mapear para cada slide inicial as fontes versionadas que sustentam versões, números, resultados e conclusões.
 
-## 2. Conteúdo básico dos slides
+## 2. Primeira versão do conteúdo
 
-- [x] 2.1 Redigir os slides 1 a 3: tese executiva, problema do legado e proposta do laboratório.
-- [x] 2.2 Redigir os slides 4 e 5: planejamento em três fases e método de checkpoints, evidências e rollback.
-- [x] 2.3 Redigir os slides 6 a 8: evolução tecnológica, constatações comprovadas e incompatibilidades representativas.
-- [x] 2.4 Redigir os slides 9 e 10: lições aprendidas, limitações e riscos ainda dependentes da aplicação real.
-- [x] 2.5 Redigir os slides 11 e 12: roteiro de aplicação real, próximos passos e decisões solicitadas à liderança.
+- [x] 2.1 Redigir a abertura, o problema do legado e a proposta incremental.
+- [x] 2.2 Redigir o planejamento em três fases e o método de checkpoints, evidências e rollback.
+- [x] 2.3 Redigir evolução tecnológica, constatações comprovadas e incompatibilidades representativas.
+- [x] 2.4 Redigir lições aprendidas, limitações e riscos dependentes da aplicação real.
+- [x] 2.5 Redigir roteiro de aplicação real, próximos passos e decisões solicitadas à liderança.
 
-## 3. Revisão e publicação textual
+## 3. Reorganização em três partes
 
-- [ ] 3.1 Revisar todas as afirmações quantitativas, versões e comprovações contra as evidências referenciadas.
-- [ ] 3.2 Revisar linguagem executiva, explicar termos técnicos necessários e confirmar leitura estimada de 15 a 20 minutos.
-- [ ] 3.3 Confirmar que prova, recomendação e limitação estão claramente separadas e que não há estimativa não sustentada para uma aplicação real.
-- [ ] 3.4 Adicionar a apresentação textual ao índice `docs/README.md` e executar a validação de links e o baseline documental do repositório.
+- [x] 3.1 Reorganizar a apresentação em 13 slides e três partes, atribuir tempo-alvo por slide e limitar o total a 20 minutos.
+- [x] 3.2 Incluir na Parte 1 o quadro WildFly × Java e uma leitura executiva das combinações do legado, ponte e destino.
+- [x] 3.3 Explicar na Parte 1 a construção integral com Codex, o conceito de SDD e o fluxo resumido do OpenSpec, preservando a responsabilidade humana.
+- [x] 3.4 Reescrever o planejamento para explicar por que baseline, modernização de baixo impacto e destino final formam três fases distintas.
+- [x] 3.5 Consolidar na Parte 2 as constatações comprovadas, ambientes de validação e limites do que os contratos demonstram.
+- [x] 3.6 Apresentar as incompatibilidades e criar a tabela de decisões de plataforma e infraestrutura.
+- [x] 3.7 Criar a tabela de bibliotecas/APIs com origem, decisão, destino e contrato preservado.
+- [x] 3.8 Consolidar as lições aprendidas em linguagem executiva e vinculá-las aos controles reutilizáveis.
+- [x] 3.9 Reorganizar a Parte 3 com aplicação real, roadmap/gates/limites e decisão objetiva da liderança.
+
+## 4. Revisão e publicação textual
+
+- [ ] 4.1 Revisar todas as afirmações quantitativas, versões e comprovações contra as evidências referenciadas.
+- [ ] 4.2 Revisar linguagem executiva, explicar termos técnicos necessários e confirmar duração total máxima de 20 minutos.
+- [ ] 4.3 Confirmar que prova, recomendação, limitação e uso de IA estão apresentados sem promessas não sustentadas.
+- [ ] 4.4 Adicionar a apresentação textual ao índice `docs/README.md` e executar a validação de links e o baseline documental do repositório.
